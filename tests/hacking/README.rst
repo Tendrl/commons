@@ -1,4 +1,4 @@
-Style Commandments
+Tendrl Style Commandments
 ---------------------------
 * [N30x] - Reserved for rules related to ``mock`` library
  * [N301] - Ensure that ``assert_*`` methods from ``mock`` library is used correctly
@@ -15,9 +15,10 @@ Style Commandments
  * [N323] - Ensure that ``assertTrue/assertFalse(A in/not in B)`` are not used with collection contents
  * [N324] - Ensure that ``assertEqual(A in/not in B, True/False)`` and ``assertEqual(True/False, A in/not in B)`` are not used with collection contents
  * [N325] - Ensure that ``assertNotEqual(A, None)`` and ``assertNotEqual(None, A)`` are not used
+* [N340] - Ensure that we are importing always ``from tendrl import objects``
 * [N341] - Ensure that we are importing oslo_xyz packages instead of deprecated oslo.xyz ones
 * [N350] - Ensure that single quotes are not used
-* [N351] - Ensure that data structs (i.e Lists and Dicts) are declared literally rather than using constructors
+* [N351] - Ensure that data structs (i.e Lists and Dicts) are declared litetendrl rather than using constructors
 * [N352] - Ensure that string formatting only uses a mapping if multiple mapping keys are used.
 * [N353] - Ensure that unicode() function is not uset because of absence in py3
 * [N354] - Ensure that ``:raises: Exception`` is not used

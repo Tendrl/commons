@@ -114,8 +114,6 @@ def check_assert_methods_from_mock(logical_line, physical_line, filename):
                                   "'assertTrue(%s.called)' instead." %
                                   obj_name)
                 elif method_name == "assert_called_once":
-                    # For more details, see a bug in Tendrl:
-                    #    https://bugs.launchpad.net/tendrl/+bug/1305991
                     error_number = "N303"
                     custom_msg = ("Maybe, you should try to use "
                                   "'assertEqual(1, %s.call_count)' "
@@ -294,6 +292,9 @@ def check_no_direct_tendrl_objects_import(logical_line, physical_line,
     N340
     """
     if filename == "./tendrl/common/objects/__init__.py":
+        return
+
+    if filename == "./tendrl/common/objects/endpoint.py":
         return
 
     if (logical_line.startswith("from tendrl.common.objects")
