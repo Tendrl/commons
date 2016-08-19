@@ -1,8 +1,8 @@
 """
 Guidelines for writing new hacking checks
 
- - Use only for Tendrl specific tests. OpenStack general tests
-   should be submitted to the common 'hacking' module.
+ - Use only for Tendrl specific tests. General tests
+   should be submitted to the bridge_common 'hacking' module.
  - Pick numbers in the range N3xx. Find the current test with
    the highest allocated number and then pick the next value.
  - Keep the test method code in the source file ordered based
@@ -180,7 +180,7 @@ def no_use_conf_debug_check(logical_line, physical_line, filename):
     """Check for "cfg.CONF.debug"
 
     Tendrl has two DEBUG level:
-     - Full DEBUG, which include all debug-messages from all OpenStack services
+     - Full DEBUG, which include all debug-messages from all Tendrl services
      - Tendrl DEBUG, which include only Tendrl debug-messages
     so we should use custom check to know debug-mode, instead of CONF.debug
 

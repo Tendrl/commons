@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = bridge_common
+
+[report]
+ignore_errors = True
