@@ -1,1 +1,1 @@
-bash tox -epep8
+tox -epep8
