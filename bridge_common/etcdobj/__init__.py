@@ -4,10 +4,8 @@ A simplistic etcd orm.
 
 import json
 
-from etcdobj.fields import Field
-
-import bridge_common.etcdobj.log
-from bridge_common.etcdobj.log import log
+from bridge_common.etcdobj.fields import Field
+from bridge_common.logging import LOG
 
 __version__ = '0.0.1'
 
@@ -61,7 +59,7 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            log.debug("Writing %s to %s" % (item['key'], item['value']))
+            LOG.debug("Writing %s to %s" % (item['key'], item['value']))
             self.client.write(item['key'], item['value'], quorum=True)
         return obj
 
@@ -75,7 +73,7 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            log.debug("Reading %s" % item['key'])
+            LOG.debug("Reading %s" % item['key'])
             etcd_resp = self.client.read(item['key'], quorum=True)
             value = etcd_resp.value
 
