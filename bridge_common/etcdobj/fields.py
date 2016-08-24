@@ -7,13 +7,12 @@ import json
 
 
 class Field(object):
-    """
-    Base class for all fields.
+    """Base class for all fields.
+
     """
 
     def __init__(self, name):
-        """
-        Initializes a new Field instance.
+        """Initializes a new Field instance.
 
         :param name: The name of the field
         :type name: str
@@ -23,8 +22,7 @@ class Field(object):
 
     @property
     def json(self):
-        """
-        Returns a json version of the field.
+        """Returns a json version of the field.
 
         :returns: JSON representation.
         :rtype: str
@@ -33,8 +31,7 @@ class Field(object):
 
     @property
     def value(self):
-        """
-        Returns the value of the field.
+        """Returns the value of the field.
 
         :returns: The value of the field
         :rtype: mixed
@@ -43,8 +40,7 @@ class Field(object):
 
     @value.setter
     def value(self, value):
-        """
-        Sets the field value.
+        """Sets the field value.
 
         :param value: The value to use.
         :type value: mixed
@@ -52,8 +48,7 @@ class Field(object):
         self._set_value(value)
 
     def _set_value(self, value):
-        """
-        Internal method that sets the field value.
+        """Internal method that sets the field value.
 
         :param value: The value to use.
         :type value: mixed
@@ -61,8 +56,7 @@ class Field(object):
         self._value = value
 
     def render(self):
-        """
-        Renders the field into a structure that can be persisted to etcd.
+        """Renders the field into a structure that can be persisted to etcd.
 
         :returns: A structure to be used with etcd
         :rtype: dict
@@ -76,14 +70,13 @@ class Field(object):
 
 
 class _CastField(Field):  # pragma: no cover
-    """
-    Base class for all Fields which force specific types.
+    """Base class for all Fields which force specific types.
+
     """
     _caster = None
 
     def _set_value(self, value):
-        """
-        Internal method that sets the field value.
+        """Internal method that sets the field value.
 
         :param value: The value to use.
         :type value: mixed
@@ -92,27 +85,26 @@ class _CastField(Field):  # pragma: no cover
 
 
 class IntField(_CastField):
-    """
-    A Field that forces a cast to an int.
+    """A Field that forces a cast to an int.
+
     """
     _caster = int
 
 
 class StrField(_CastField):
-    """
-    A Field that forces a cast to a str.
+    """A Field that forces a cast to a str.
+
     """
     _caster = str
 
 
 class DateTimeField(Field):
-    """
-    A Field that forces a cast to a datetime.datetime instance.
+    """A Field that forces a cast to a datetime.datetime instance.
+
     """
 
     def __init__(self, name, datefmt, *args, **kwargs):
-        """
-        Initializes an instance of DateTimeField.
+        """Initializes an instance of DateTimeField.
 
         :param name: The name of the field
         :type name: str
@@ -127,8 +119,7 @@ class DateTimeField(Field):
         self._datefmt = datefmt
 
     def _set_value(self, value):
-        """
-        Internal method that sets the field value.
+        """Internal method that sets the field value.
 
         :param value: The value to use.
         :type value: str or datetime.datetime
@@ -141,8 +132,7 @@ class DateTimeField(Field):
 
     @property
     def json(self):
-        """
-        Returns a json version of the field.
+        """Returns a json version of the field.
 
         :returns: JSON representation.
         :rtype: str
@@ -152,8 +142,7 @@ class DateTimeField(Field):
         })
 
     def render(self):
-        """
-        Renders the field into a structure that can be persisted to etcd.
+        """Renders the field into a structure that can be persisted to etcd.
 
         :returns: A structure to be used with etcd
         :rtype: dict
@@ -167,13 +156,12 @@ class DateTimeField(Field):
 
 
 class DictField(Field):
-    """
-    A Field that only accepts dicts.
+    """A Field that only accepts dicts.
+
     """
 
     def __init__(self, name, caster={}, *args, **kwargs):
-        """
-        Initializes an instance of DictField.
+        """Initializes an instance of DictField.
 
         :param args: All non-keyword arguments.
         :type args: list
@@ -188,8 +176,7 @@ class DictField(Field):
 
     @property
     def json(self):
-        """
-        Returns a json version of the field.
+        """Returns a json version of the field.
 
         .. note::
 
@@ -201,8 +188,7 @@ class DictField(Field):
         return json.dumps(self._value)
 
     def _set_value(self, value):
-        """
-        Internal method that sets the field value.
+        """Internal method that sets the field value.
 
         :param value: The value to use.
         :type value: dict
@@ -221,8 +207,7 @@ class DictField(Field):
         super(DictField, self)._set_value(value)
 
     def render(self):
-        """
-        Renders the field into a structure that can be persisted to etcd.
+        """Renders the field into a structure that can be persisted to etcd.
 
         :returns: A list of structures to be used with etcd
         :rtype: list
