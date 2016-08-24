@@ -15,3 +15,16 @@ Features
 --------
 
 * TODO
+
+Builds
+------
+
+.. image:: https://travis-ci.org/Tendrl/bridge_common.svg?branch=master
+    :target: https://travis-ci.org/Tendrl/bridge_common
+
+Code Coverage
+-------------
+
+.. image:: https://coveralls.io/repos/github/Tendrl/bridge_common/badge.svg?branch=master
+    :target: https://coveralls.io/github/Tendrl/bridge_common?branch=master
+
