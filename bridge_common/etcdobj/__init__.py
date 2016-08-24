@@ -11,13 +11,12 @@ __version__ = '0.0.1'
 
 
 class _Server(object):
-    """
-    Parent class for all Server implementations.
+    """Parent class for all Server implementations.
+
     """
 
     def __init__(self, client, *args, **kwargs):
-        """
-        Creates a new instance of a Server implementation.
+        """Creates a new instance of a Server implementation.
 
         :param client: The etcd client to use.
         :type client: object
@@ -31,8 +30,7 @@ class _Server(object):
         self._verify_client(client)
 
     def _verify_client(self, client):
-        """
-        Does basic validation that the client can be used.
+        """Does basic validation that the client can be used.
 
         :param client: The client to check.
         :type client: object
@@ -50,8 +48,7 @@ class _Server(object):
         self.client = client
 
     def save(self, obj):
-        """
-        Save an object.
+        """Save an object.
 
         :param obj: An instance that subclasses EtcdObj
         :type obj: EtcdObj
@@ -64,8 +61,7 @@ class _Server(object):
         return obj
 
     def read(self, obj):
-        """
-        Retrieve an object.
+        """Retrieve an object.
 
         :param obj: An instance that subclasses EtcdObj
         :type obj: EtcdObj
@@ -87,14 +83,12 @@ class _Server(object):
 
 
 class Server(_Server):
-    """
-    Server implementation which creates an etcd.Client instance
-    as its client.
+    """Server implementation which creates an etcd.Client instance as its client.
+
     """
 
     def __init__(self, etcd_kwargs={}, *args, **kwargs):
-        """
-        Creates a new instance of Server.
+        """Creates a new instance of Server.
 
         :param etcd_kwargs: The keyword arguments used to create an etcd.Client
         :type client: dict
@@ -110,13 +104,12 @@ class Server(_Server):
 
 
 class EtcdObj(object):
-    """
-    Class all objects which want to persist to etcd must subclass.
+    """Class all objects which want to persist to etcd must subclass.
+
     """
 
     def __init__(self, **kwargs):  # pragma: no cover
-        """
-        Initializes a new instance. Required for __new__.
+        """Initializes a new instance. Required for __new__.
 
         :param kwargs: All keyword arguments.
         :type kwargs: dict
@@ -132,8 +125,7 @@ class EtcdObj(object):
                         attr.value = kwargs[key]
 
     def __setattr__(self, name, value):
-        """
-        Overridden setattr to catch fields or pass along if not a field.
+        """Overridden setattr to catch fields or pass along if not a field.
 
         :param name: The name of the field.
         :type name: str
@@ -150,8 +142,7 @@ class EtcdObj(object):
             object.__setattr__(self, name, value)
 
     def __getattribute__(self, name):
-        """
-        Overridden  getattribute to catch fields or pass along if not a field.
+        """Overridden  getattribute to catch fields or pass along if not a field.
 
         :param name: The name of the field.
         :type name: str
@@ -167,8 +158,7 @@ class EtcdObj(object):
             return object.__getattribute__(self, name)
 
     def render(self):
-        """
-        Renders the instance into a structure for settings in etcd.
+        """Renders the instance into a structure for settings in etcd.
 
         :returns: The structure to use for setting.
         :rtype: list(dict{key=str,value=any})
@@ -185,8 +175,8 @@ class EtcdObj(object):
 
     @property
     def json(self):
-        """
-        Dumps the entire object as a json structure.
+        """Dumps the entire object as a json structure.
+
         """
         data = {}
         for field in self._fields:
