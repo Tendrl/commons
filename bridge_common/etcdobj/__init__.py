@@ -131,7 +131,6 @@ class EtcdObj(object):
                     if key in kwargs.keys():
                         attr.value = kwargs[key]
 
-
     def __setattr__(self, name, value):
         """
         Overridden setattr to catch fields or pass along if not a field.
