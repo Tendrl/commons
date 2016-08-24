@@ -283,7 +283,7 @@ def assert_not_equal_none(logical_line, physical_line, filename):
 
 @skip_ignored_lines
 def check_no_direct_tendrl_objects_import(logical_line, physical_line,
-                                         filename):
+                                          filename):
     """Check if tendrl.common.objects are properly imported.
 
     If you import "from tendrl.common import objects" you are able to use
