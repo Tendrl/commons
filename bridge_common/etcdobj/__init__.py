@@ -7,8 +7,6 @@ import json
 from bridge_common.etcdobj.fields import Field
 from bridge_common.logging import LOG
 
-__version__ = '0.0.1'
-
 
 class _Server(object):
     """Parent class for all Server implementations.
