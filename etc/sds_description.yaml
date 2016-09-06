@@ -3,34 +3,25 @@ sds_version: nvr
 valid_objects:
 - obj1
 - obj2
-obj1_atoms: #An atom/action is the smallest unit, An atom is expected to name desired input values (requirements) and name outputs (provided values). 
-- atom1
-- atom2
-atom1:
-  conditions: 
-    pre_condition : ["obj1.attr_is_<condition>"]
-    post_condition: ["obj1.attr_is_<condition>", "obj2.attr_is_<condition>"]
-  name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
-  provides:
-  - A set, string or list of items that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all.
 
-  inject:
-  - An immutable input_name => value dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
-
-  rebind:
-  - A dict of key/value pairs used to define argument name conversions for inputs to this atom’s execute method
-  revert_rebind:
-  - The same as rebind but for the revert method. If unpassed, rebind will be used instead
-  requires:
-  - A set or list of required inputs for this atom’s execute method
-  revert_requires:
-  - A set or list of required inputs for this atom’s revert method. If unpassed, `requires will be used
-  version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
-  save_as: An immutable output resource name OrderedDict this atom produces that other atoms may depend on this atom providing. The format is output index (or key when a dictionary is returned from the execute method) to stored argument name
-  rebind : An immutable input resource OrderedDict that can be used to alter the inputs given to this atom. It is typically used for mapping a prior atoms output into the names that this atom expects (in a way this is like remapping a namespace of another atom into the namespace of this atom).
-  revert_rebind : The same as rebind but for the revert method. This should only differ from rebind if the revert method has a different signature from execute or a different revert_rebind value was received.
-optional : A OrderedSet of inputs that are optional for this atom to execute.
-revert_optional : The revert version of optional.
+object_details:
+  obj1:
+    attrs: ["attr1", "attr2"]
+    atoms: ["atom1", "atom2"] #An atom/action is the smallest unit, An atom is expected to name desired input values (requirements) and name outputs (provided values).
+    attr1:
+      datatype: String
+      value: "/etcd/key or value can be obtained by running a pre defined flow in sds_operations.yaml"
+      help: "Help attr1"
+    atom1:
+      help: "Atom help"
+      pre_run: []
+      post_run: []
+      provides: "A set, string or list of items that this will be providing
+      (or could provide) to others, used to correlate and associate the things this atom produces, if it produces anything at all."
+      name: "Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes"
+      inject: "An immutable input_name => value dictionary which specifies
+      any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents)."
+      requires: "A set or list of required inputs for this atom’s execute method"
 
 flow: #A flow/operation is a structure that defines relationships between atoms. You can add atoms and other flows (as subflows) to the flow, and the flow provides a way to implicitly or explicitly define how they are interdependent, flows can be linear, unordered, graph based
   name: A non-unique name for this flow
