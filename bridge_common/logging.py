@@ -1,7 +1,6 @@
-from oslo_config import cfg
+from bridge_common.config import CONF
 from oslo_log import log as logging
 
-CONF = cfg.CONF
 DOMAIN = "Tendrl"
 logging.register_options(CONF)
 logging_format = "%(asctime)s.%(msecs)03d %(process)d %(levelname)s" \
