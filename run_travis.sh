@@ -1,6 +1,7 @@
 #!/bin/bash
 
 tox -epep8
-retval=$?
+retval1=$?
 tox -ecover
-exit $retval
+retval2=$?
+exit $retval1 && $retval2
