@@ -28,3 +28,14 @@ Code Coverage
 .. image:: https://coveralls.io/repos/github/Tendrl/bridge_common/badge.svg?branch=master
     :target: https://coveralls.io/github/Tendrl/bridge_common?branch=master
 
+Developer/Install documentation
+-----------------------
+
+We also have sphinx documentation in ``docs/source``.
+
+*To build it, run:*
+
+::
+
+    $ python setup.py build_sphinx
+

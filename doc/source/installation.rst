@@ -2,9 +2,9 @@
 Installation
 ============
 
-At the command line::
+At the command line ::
 
-    $ pip install bridge_common
+    $ python setup.py install
 
 Or, if you have virtualenvwrapper installed::
 
