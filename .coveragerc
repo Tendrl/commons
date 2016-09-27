@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = bridge_common
+omit = tendrl/bridge_common/tests/*
 
 [report]
 ignore_errors = True
