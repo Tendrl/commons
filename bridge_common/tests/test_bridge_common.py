@@ -11,4 +11,4 @@ from bridge_common.tests import base
 class TestBridge_common(base.TestCase):
 
     def test_something(self):
-        pass
+        assert True
