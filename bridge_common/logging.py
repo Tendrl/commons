@@ -1,16 +1,12 @@
-from bridge_common.config import CONF
-from oslo_log import log as logging
+import logging
 
-DOMAIN = "Tendrl"
-logging.register_options(CONF)
-logging_format = "%(asctime)s.%(msecs)03d %(process)d %(levelname)s" \
-                 "%(pathname)s.%(name)s [-] %(instance)s%(message)s"
-
-CONF.set_default("log_dir", default="/var/log/tendrl/")
-CONF.set_default("log_file", default="tendrl_bridge_common.log")
-CONF.set_default("logging_default_format_string",
-                 default=logging_format)
+from bridge_common.config import TendrlConfig
+config = TendrlConfig()
 
 
-logging.setup(CONF, DOMAIN)
-LOG = logging.getLogger(__name__)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+root = logging.getLogger()
+handler = logging.FileHandler(config.get('bridge_common', 'log_path'))
+handler.setFormatter(logging.Formatter(FORMAT))
+root.addHandler(handler)
+root.setLevel(logging.getLevelName(config.get('bridge_common', 'log_level')))
