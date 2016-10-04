@@ -5,7 +5,8 @@ config = TendrlConfig()
 
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+root = logging.getLogger()
 handler = logging.FileHandler(config.get('bridge_common', 'log_path'))
 handler.setFormatter(logging.Formatter(FORMAT))
-log.addHandler(handler)
-log.setLevel(logging.getLevelName(config.get('bridge_common', 'log_level')))
+root.addHandler(handler)
+root.setLevel(logging.getLevelName(config.get('bridge_common', 'log_level')))
