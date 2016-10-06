@@ -130,19 +130,15 @@ class DateTimeField(Field):
 
     """
 
-    def __init__(self, name, datefmt, *args, **kwargs):
+    def __init__(self, name, datefmt):
         """Initializes an instance of DateTimeField.
 
         :param name: The name of the field
         :type name: str
         :param datefmt: The datetime format to parse to/from.
         :type datefmt: str
-        :param args: All non-keyword arguments.
-        :type args: list
-        :param kwargs: All keyword arguments.
-        :type kwargs: dict
         """
-        super(DateTimeField, self).__init__(name, *args, **kwargs)
+        super(DateTimeField, self).__init__(name)
         self._datefmt = datefmt
 
     def _set_value(self, value):
@@ -187,17 +183,13 @@ class DictField(Field):
 
     """
 
-    def __init__(self, name, caster={}, *args, **kwargs):
+    def __init__(self, name, caster):
         """Initializes an instance of DictField.
 
-        :param args: All non-keyword arguments.
-        :type args: list
         :param caster: A caster structure for casting dictionary items.
         :type caster: dict
-        :param kwargs: All keyword arguments.
-        :type kwargs: dict
         """
-        super(DictField, self).__init__(name, *args, **kwargs)
+        super(DictField, self).__init__(name)
         self._caster = caster
         self._value = {}
 

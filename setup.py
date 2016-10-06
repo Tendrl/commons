@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
 
 def extract_requirements(filename):
@@ -8,9 +9,11 @@ def extract_requirements(filename):
 install_requires = extract_requirements('requirements.txt')
 
 setup(
-    name="bridge_common",
+    name="tendrl_bridge_common",
     version="0.1",
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*",
+                                    "tests"]),
+    namespace_packages=['tendrl'],
     url="http://www.redhat.com",
     author="Rohan Kanade.",
     author_email="rkanade@redhat.com",

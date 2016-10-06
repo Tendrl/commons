@@ -1,6 +1,6 @@
 import logging
 
-from bridge_common.config import TendrlConfig
+from tendrl.bridge_common.config import TendrlConfig
 config = TendrlConfig()
 
 
