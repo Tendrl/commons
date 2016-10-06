@@ -110,15 +110,11 @@ class Server(_Server):
 
     """
 
-    def __init__(self, etcd_kwargs, *args, **kwargs):
+    def __init__(self, etcd_kwargs):
         """Creates a new instance of Server.
 
         :param etcd_kwargs: The keyword arguments used to create an etcd.Client
-        :type client: dict
-        :param args: All other non-keyword arguments.
-        :type args: list
-        :param kwargs: All other keyword arguments.
-        :type kwargs: dict
+        :type etcd_kwargs: dict
         :raises: ValueError
         """
         import etcd
