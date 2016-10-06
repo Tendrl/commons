@@ -36,20 +36,17 @@ from tendrl.bridge_common.etcdobj.fields import Field
 
 LOG = logging.getLogger(__name__)
 
+
 class _Server(object):
     """Parent class for all Server implementations.
 
     """
 
-    def __init__(self, client, *args, **kwargs):
+    def __init__(self, client):
         """Creates a new instance of a Server implementation.
 
         :param client: The etcd client to use.
         :type client: object
-        :param args: All other non-keyword arguments.
-        :type args: list
-        :param kwargs: All other keyword arguments.
-        :type kwargs: dict
         :raises: ValueError
         """
         self.client = None
@@ -113,7 +110,7 @@ class Server(_Server):
 
     """
 
-    def __init__(self, etcd_kwargs={}, *args, **kwargs):
+    def __init__(self, etcd_kwargs, *args, **kwargs):
         """Creates a new instance of Server.
 
         :param etcd_kwargs: The keyword arguments used to create an etcd.Client
@@ -125,8 +122,10 @@ class Server(_Server):
         :raises: ValueError
         """
         import etcd
+        if not etcd_kwargs:
+            etcd_kwargs = dict()
         super(Server, self).__init__(
-            etcd.Client(**etcd_kwargs), *args, **kwargs)
+            etcd.Client(**etcd_kwargs))
 
 
 class EtcdObj(object):

@@ -142,7 +142,7 @@ class DateTimeField(Field):
         :param kwargs: All keyword arguments.
         :type kwargs: dict
         """
-        super(DateTimeField, self).__init__(name, *args, **kwargs)
+        super(DateTimeField, self).__init__(name)
         self._datefmt = datefmt
 
     def _set_value(self, value):
@@ -187,7 +187,7 @@ class DictField(Field):
 
     """
 
-    def __init__(self, name, caster={}, *args, **kwargs):
+    def __init__(self, name, caster, *args, **kwargs):
         """Initializes an instance of DictField.
 
         :param args: All non-keyword arguments.
@@ -197,7 +197,7 @@ class DictField(Field):
         :param kwargs: All keyword arguments.
         :type kwargs: dict
         """
-        super(DictField, self).__init__(name, *args, **kwargs)
+        super(DictField, self).__init__(name)
         self._caster = caster
         self._value = {}
 

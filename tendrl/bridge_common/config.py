@@ -4,6 +4,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class ConfigNotFound(Exception):
     pass
 
@@ -24,7 +25,7 @@ class TendrlConfig(ConfigParser.SafeConfigParser):
         if not os.path.exists(self.path):
             err = ConfigNotFound("Bridge_Common Configuration not found at "
                                  "%s" % self.path)
-            LOG.error(err, exc_info = True)
+            LOG.error(err, exc_info=True)
             raise err
 
         self.read(self.path)
