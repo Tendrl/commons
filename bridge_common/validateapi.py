@@ -120,9 +120,9 @@ def validateApiWithYamlConf(apiJob, yamlConf):
                 "Missing input argument(s) %s" % (list(missingInputParm)))
 
     # check whether all the given arguments are defined in the yaml file.
-    missingConfigParm = set(flow['local_inputs']).difference(
-        set(apiJob['attributes'].keys()))
-    if missingInputParm != set():
+    missingConfigParm = set(apiJob['attributes'].keys()).difference(
+        set(flow['local_inputs']))
+    if missingConfigParm != set():
         return (False, "Input argument(s) not defined in yaml file: %s" % (
             list(missingConfigParm)))
 
@@ -140,8 +140,8 @@ def validateApiWithYamlConf(apiJob, yamlConf):
                 attrs[inputParm]['type']))
         # Check the given value type and the required type is matching
         if not PRIMITIVE_TYPES[attrs[inputParm]['type']](inputVal):
-            return (False, "Invalid parameter type: %s. "
-                    + "Expected value type is: %s" % (
+            return (False, "Invalid parameter type: "
+                    + "%s. Expected value type is: %s" % (
                         inputParm, attrs[inputParm]['type']))
     return(True, "")
 
