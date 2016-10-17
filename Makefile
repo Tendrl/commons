@@ -2,7 +2,7 @@
 CWD := $(shell pwd)
 BASEDIR := $(CWD)
 PRINT_STATUS = export EC=$$?; cd $(CWD); if [ "$$EC" -eq "0" ]; then printf "SUCCESS!\n"; else exit $$EC; fi
-VERSION=1
+VERSION=0.0.2
 
 BUILDS    := .build
 DEPLOY    := $(BUILDS)/deploy
@@ -27,13 +27,13 @@ rpm:
 	rm -fr $(BUILDS)
 	mkdir -p $(DEPLOY)/latest
 	mkdir -p $(RPMBUILD)/SPECS
-	sed -e "s/@VERSION@/$(VERSION)/" bridge.spec \
-	        > $(RPMBUILD)/SPECS/bridge.spec
-	rpmbuild -ba $(RPMBUILD)/SPECS/bridge.spec
+	sed -e "s/@VERSION@/$(VERSION)/" bridge_common.spec \
+	        > $(RPMBUILD)/SPECS/bridge_common.spec
+	rpmbuild -ba $(RPMBUILD)/SPECS/bridge_common.spec
 	$(PRINT_STATUS); \
 	if [ "$$EC" -eq "0" ]; then \
 		FILE=$$(readlink -f $$(find $(RPMBUILD)/RPMS -name bridge_common-$(VERSION)*.rpm)); \
 		cp -f $$FILE $(DEPLOY)/latest/; \
-		printf "\nThe Skyring RPMs are located at:\n\n"; \
+		printf "\nThe bridge common RPMs are located at:\n\n"; \
 		printf "   $(DEPLOY)/latest\n\n\n\n"; \
 	fi
