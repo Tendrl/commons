@@ -10,15 +10,12 @@ Summary: Common Module for All Bridges
 Source0: %{pkg_name}-%{pkg_version}.tar.gz
 Group:   Applications/System
 License: GPLv2+
-#Url: https://github.com/Tendrl/bridge_common
-
-#BuildRoot: %{_tmppath}/%{pkg_name}-%{pkg_version}-%{pkg_release}-buildroot
+Url: https://github.com/Tendrl/bridge_common
 
 BuildRequires: python-devel
 BuildRequires: python-setuptools
-BuildRequires: gcc, git
 
-Requires: python-pip, gcc, git
+Requires: python-pip, gcc
 
 %description
 Common python module usable by all Tendrl SDS Bridges
@@ -37,13 +34,15 @@ install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/etc/tendrl/tendrl.
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre
+pip install 'pbr'
+
 %post
 source /usr/local/bin/virtualenvwrapper.sh
 mkvirtualenv bridge_common
 pip install 'virtualenv'
 pip install 'virtualenvwrapper'
 pip install 'python-etcd'
-pip install 'pbr'
 pip install 'python-dateutil==2.2'
 pip install 'gevent>=1.0'
 pip install 'greenlet>=0.3.2'
