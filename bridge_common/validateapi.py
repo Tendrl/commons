@@ -110,18 +110,27 @@ def validateApiWithYamlConf(apiJob, yamlConf):
     if 'local_inputs' not in flow or 'attributes' not in apiJob:
         return (True, "")
 
+    # fetch the list of optional and required defined list from yaml
+    defReqLst = [d for d in flow['local_inputs'] if not isinstance(d, list)]
+    defOptLst = [d[0] for d in flow['local_inputs'] if isinstance(d, list)]
+
+    # optain the given optional and remaining input param
+    # from the given api job struct
+    gvnLst = [i for i in
+              apiJob['attributes'].keys() if i not in defOptLst]
+
     # check whether any required argument is missing.
     # check the list of arguments given by api-job with the
     # list of required argument mentioned under flow tag in the yaml config.
-    missingInputParm = set(flow['local_inputs']).difference(
-        set(apiJob['attributes'].keys()))
+    missingInputParm = set(defReqLst).difference(
+        set(gvnLst))
     if missingInputParm != set():
         return (False,
                 "Missing input argument(s) %s" % (list(missingInputParm)))
 
     # check whether all the given arguments are defined in the yaml file.
-    missingConfigParm = set(apiJob['attributes'].keys()).difference(
-        set(flow['local_inputs']))
+    missingConfigParm = set(gvnLst).difference(
+        set(defReqLst))
     if missingConfigParm != set():
         return (False, "Input argument(s) not defined in yaml file: %s" % (
             list(missingConfigParm)))

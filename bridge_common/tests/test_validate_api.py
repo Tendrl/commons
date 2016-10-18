@@ -94,7 +94,7 @@ class TestValidateApi(unittest.TestCase):
 
         glusterApiJob['attributes'].pop('stripe_count')
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Missing input argument(s) ['volname', 'stripe_count']")
+        self.assertEqual(error, "Missing input argument(s) ['volname']")
         self.assertEqual(status, False)
 
     def test_apijob_with_wrong_argument_name(self):

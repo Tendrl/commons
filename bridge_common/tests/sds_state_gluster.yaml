@@ -51,7 +51,8 @@ object_details:
           - An immutable input_name => value dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
           local_inputs:
                 - "volname"
-                - "stripe_count"
+                - ["stripe_count"]
+                - ["replica_count"]
                 - "brickdetails"
           version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
         delete:
