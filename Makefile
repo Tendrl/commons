@@ -2,11 +2,11 @@
 CWD := $(shell pwd)
 BASEDIR := $(CWD)
 PRINT_STATUS = export EC=$$?; cd $(CWD); if [ "$$EC" -eq "0" ]; then printf "SUCCESS!\n"; else exit $$EC; fi
-VERSION=0.0.2
+VERSION=0.0.1
 
 BUILDS    := .build
 DEPLOY    := $(BUILDS)/deploy
-TARDIR    := bridge_common-$(VERSION)
+TARDIR    := tendrl-bridge-common-$(VERSION)
 RPMBUILD  := $(HOME)/rpmbuild
 
 
@@ -15,8 +15,8 @@ dist:
 	mkdir -p $(HOME)/$(BUILDS) $(RPMBUILD)/SOURCES
 	cp -fr $(BASEDIR) $(HOME)/$(BUILDS)/$(TARDIR)
 	cd $(HOME)/$(BUILDS); \
-	tar --exclude-vcs --exclude=.* -zcf bridge_common-$(VERSION).tar.gz $(TARDIR); \
-	cp bridge_common-$(VERSION).tar.gz $(RPMBUILD)/SOURCES
+	tar --exclude-vcs --exclude=.* -zcf tendrl-bridge-common-$(VERSION).tar.gz $(TARDIR); \
+	cp tendrl-bridge-common-$(VERSION).tar.gz $(RPMBUILD)/SOURCES
 	# Cleaning the work directory
 	rm -fr $(HOME)/$(BUILDS)
 
@@ -32,7 +32,7 @@ rpm:
 	rpmbuild -ba $(RPMBUILD)/SPECS/bridge_common.spec
 	$(PRINT_STATUS); \
 	if [ "$$EC" -eq "0" ]; then \
-		FILE=$$(readlink -f $$(find $(RPMBUILD)/RPMS -name bridge_common-$(VERSION)*.rpm)); \
+		FILE=$$(readlink -f $$(find $(RPMBUILD)/RPMS -name tendrl-bridge-common-$(VERSION)*.rpm)); \
 		cp -f $$FILE $(DEPLOY)/latest/; \
 		printf "\nThe bridge common RPMs are located at:\n\n"; \
 		printf "   $(DEPLOY)/latest\n\n\n\n"; \
