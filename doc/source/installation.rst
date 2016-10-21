@@ -2,31 +2,35 @@
 Installation
 ============
 
-Installation of latest dev version from the source code::
+1. Clone latest dev version from the source code and install virtualenvwrapper_::
 
     $ git clone https://github.com/Tendrl/bridge_common.git
     $ cd bridge_common
-    $ yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/p/python-pip-7.1.0-1.el7.noarch.rpm
     $ pip install virtualenv virtualenvwrapper
 
-Modify $HOME/.bashrc and add below content at the last
+2. Modify $HOME/.bashrc::
 
--------------------------------------
-export WORKON_HOME=$HOME/.virtualenvs
-source /usr/bin/virtualenvwrapper.sh
--------------------------------------
+    -------------------------------------
+    export WORKON_HOME=$HOME/.virtualenvs
+    source /usr/bin/virtualenvwrapper.sh
+    -------------------------------------
+
+3. Install bridge_common from source::
 
     $ mkvirtualenv bridge_common
     $ pip install .
+
+4. Create config file::
+
     $ cp etc/tendrl/tendrl.conf.sample /etc/tendrl/tendrl.conf
 
-Edit /etc/tendrl/tendrl.conf and update the correct IP of the etcd server node as below
+5. Edit config file ``/etc/tendrl/tendrl.conf`` as required
 
----------------------------------------------------------------
-# Central store etcd host/ip
-etcd_connection = <IP of the node where etcd server is running>
----------------------------------------------------------------
+    ---------------------------------------------------------------
+    # Central store etcd host/ip
+    etcd_connection = <IP of the node where etcd server is running>
+    ---------------------------------------------------------------
 
-Create the required log directory
+6. Create log dir::
 
-    $ mkdir -p /var/log/tendrl
+    $ mkdir /var/log/tendrl
