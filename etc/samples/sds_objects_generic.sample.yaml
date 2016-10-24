@@ -15,7 +15,7 @@ object_details:
         help: "NVR of the Tendrl managed sds, eg: 'gluster-3.2.0'"
   volume:
     enabled: True
-    value: "/clusters/gluster/$cluster.id/volumes/$volume.id
+    value: "/clusters/$cluster.id/volumes/$volume.id
     attrs:
       volname:
         type: String
