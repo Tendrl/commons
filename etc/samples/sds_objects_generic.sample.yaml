@@ -3,8 +3,16 @@
 ---
 valid_objects:
 - volume
+- tendrl_context
 
 object_details:
+  tendrl_context:
+    enabled: True
+    value: /clusters/$cluster.id/tendrl_context
+    attrs:
+      sds_type:
+        type: String
+        help: "NVR of the Tendrl managed sds, eg: 'gluster-3.2.0'"
   volume:
     enabled: True
     value: "/clusters/gluster/$cluster.id/volumes/$volume.id

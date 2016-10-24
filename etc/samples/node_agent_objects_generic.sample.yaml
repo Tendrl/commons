@@ -3,8 +3,16 @@
 ---
 valid_objects:
 - cpu
+- tendrl_context
 
 object_details:
+  tendrl_context:
+    enabled: True
+    value: /nodes/$node.id/tendrl_context
+    attrs:
+      clusters:
+        type: String[]
+        help: "UUIDs of Tendrl managed clusters of which this node is a member"
   cpu:
     enabled: True
     value: "/nodes/$node.id/cpus/$cpu.id
