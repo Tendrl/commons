@@ -1,0 +1,37 @@
+# This schema is not used stand-alone, it is a sub-section of "tendrl_definitions_<sds_nvr>.yaml" | "tendrl_definitions_generic.sample.yaml
+
+---
+valid_objects:
+- volume
+
+object_details:
+  volume:
+    enabled: True
+    value: "/clusters/gluster/$cluster.id/volumes/$volume.id
+    attrs:
+      volname:
+        type: String
+        help: "Name of the gluster volume"
+      stripe_count:
+        type: Integer
+        help: "Volume Stripe count"
+      replica_count:
+        type: Integer
+      disperse_count:
+        type: Integer
+      redundancy_count:
+        type: Integer
+      transport:
+        type: String
+      brickdetails:
+        type: Brick[]
+      force:
+        type: Boolean
+      directory:
+        type: String
+      bitrot:
+        type: Boolean
+      scrub-frequency:
+        type: Integer
+      scrub-throttle:
+        type: Integer
