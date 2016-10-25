@@ -73,9 +73,13 @@ def loadSchema(schemaFile):
 
 
 class ApiJobValidator(object):
-    def __init__(self, schemaFilePath):
+    def __init__(self, schemaFilePath, chkMissingYaml=False):
         self.yamlObj = None
-        _, yamlConf = loadSchema(schemaFilePath)
+        self.chkMissingYaml = chkMissingYaml
+        status = loadSchema(schemaFilePath)
+        if not status[0]:
+            raise ex.FailedLoadingSchemaException(1, status[1])
+        yamlConf = status[1]
 
         # validate yaml schema file
         if not yamlConf.get('valid_objects'):
@@ -83,6 +87,9 @@ class ApiJobValidator(object):
 
         if not yamlConf.get('object_details'):
             raise ex.ObjectDetailsNotFoundException()
+
+        if not yamlConf.get('object_details', {}).get("flows"):
+            raise ex.FlowDetailsNotFoundException()
 
         # load the schema object into memory
         self.yamlObj = yamlConf.get('object_details')
@@ -124,6 +131,12 @@ class ApiJobValidator(object):
             # Its a non-array custom type
             return _check([inputVal])
 
+    def _getTag(self, dotPath):
+        path = self.yamlObj
+        for p in dotPath.split('.'):
+            path = path.get(p, {})
+        return path
+
     def validateApi(self, apiJob):
         if not self.yamlObj:
             return (False, "Validating schema not loaded!")
@@ -138,73 +151,93 @@ class ApiJobValidator(object):
                 apiJob['object_type']))
 
         # Check flow exists
-        atom = self.yamlObj[apiJob['object_type']]['atoms']
-        if apiJob['flow'] not in atom:
-            return (False, "Invalid flow type or flow not supported!")
+        flow = self.yamlObj['flows'].get(apiJob.get('flow'))
+        if not flow:
+            return (False, "Flow: %s not defined in the yaml flows" % (
+                apiJob['flow']))
 
-        # check whether given api-job has any arguments to check
-        # or any arguments defined for this purticular job in the yaml.
-        flow = atom[apiJob['flow']]
-        if 'inputs' not in flow or 'attributes' not in apiJob:
-            return (True, "")
+        # A flow can have multiple automs defined
+        # Validate list of atoms assigned for the flow
+        for fatms in flow['atoms']:
+            # check whether specified atom in the flows are found in atoms
+            atom = self._getTag(fatms)
+            if not atom:
+                return (False, "Atom: %s not found for the flow: %s" % (
+                    fatms, apiJob.get('flow')))
 
-        # fetch the list of optional and required defined list from yaml
-        defReqLst = []
-        defOptLst = []
-        for inputs in flow['inputs']:
-            defReqLst += [k.split(".")[-1] for k, v in
-                          inputs.items() if v['required']]
-            defOptLst += [k.split(".")[-1] for k, v in
-                          inputs.items() if not v['required']]
+            # check whether given flow is defined in the atoms
+            # atom = self.yamlObj[apiJob['object_type']]['atoms']
+            if apiJob['flow'] not in atom.get('flows'):
+                return (False, "Flow: %s not defined in atoms" % (
+                    apiJob['flow']))
 
-        # optain the given optional and remaining input param
-        # from the given api job struct
-        gvnLst = [i for i in
-                  apiJob['attributes'].keys() if i not in defOptLst]
+            # check whether given api-job has any arguments to check
+            # or any arguments defined for this purticular job in the yaml.
+            if 'inputs' not in atom or 'attributes' not in apiJob:
+                return (True, "")
 
-        # check whether any required argument is missing.
-        # check the list of arguments given by api-job with the
-        # list of required argument mentioned under flow tag in the yaml.
-        missingInputParm = set(defReqLst).difference(set(gvnLst))
-        if missingInputParm != set():
-            return (False,
-                    "Missing input argument(s) %s" % (list(missingInputParm)))
+            # fetch the list of optional and required defined list from yaml
+            defReqLst = []
+            defOptLst = []
+            for inputs in atom['inputs']:
+                defReqLst += [k.split(".")[-1] for k, v in
+                              inputs.items() if v['required']]
+                defOptLst += [k.split(".")[-1] for k, v in
+                              inputs.items() if not v['required']]
 
-        # check whether all the given arguments are defined in the yaml file.
-        missingConfigParm = set(gvnLst).difference(set(defReqLst))
-        if missingConfigParm != set():
-            return (False, "Input argument(s) not defined in yaml file: %s" % (
-                list(missingConfigParm)))
+            # optain the given optional and remaining input param
+            # from the given api job struct
+            gvnLst = [i for i in
+                      apiJob['attributes'].keys() if i not in defOptLst]
 
-        if not self.yamlObj[apiJob['object_type']].get('attrs'):
-            return (False, "Attributes not defined for this object: %s" % (
-                apiJob['object_type']))
-        # verify whether argument value align with required type.
-        # collect the attribute name and its type and check with the
-        # type mentioned in the yaml file for the variable name.
-        attrs = self.yamlObj[apiJob['object_type']]['attrs']
-        for inputParm, inputVal in apiJob['attributes'].items():
-            # Some arguments does not required any purticular type.
-            # Contine validating next parm if the type of the
-            # inputparm not defined in yaml.
-            if inputParm not in attrs:
-                continue
-            expectedType = attrs[inputParm]['type']
-            # A) Check whether given value type is custom type
-            if expectedType not in PRIMITIVE_TYPES.keys():
-                status = self._checkCustomType(expectedType,
-                                               inputParm,
-                                               inputVal)
-                if not status[0]:
-                    return status
-                else:
-                    # contiue to validate remaining given attributes
+            # check whether any required argument is missing.
+            # check the list of arguments given by api-job with the
+            # list of required argument mentioned under flow tag in the yaml.
+            missingInputParm = set(defReqLst).difference(set(gvnLst))
+            if missingInputParm != set():
+                return (False,
+                        "Missing input argument(s) %s" % (list(
+                            missingInputParm)))
+
+            # checking whether given arguments are defined in the yaml file
+            # is not required if multiple validation comes into picture.
+            # Because one operaton might required some argument where as
+            # another operation (atom) of the flow might not use it.
+            missingConfigParm = set(gvnLst).difference(set(defReqLst))
+            if self.chkMissingYaml and missingConfigParm != set():
+                return (
+                    False, "Input argument(s) not defined in yaml file: %s" % (
+                        list(missingConfigParm)))
+
+            if not self.yamlObj[apiJob['object_type']].get('attrs'):
+                return (False, "Attributes not defined for this object: %s" % (
+                    apiJob['object_type']))
+            # verify whether argument value align with required type.
+            # collect the attribute name and its type and check with the
+            # type mentioned in the yaml file for the variable name.
+            attrs = self.yamlObj[apiJob['object_type']]['attrs']
+            for inputParm, inputVal in apiJob['attributes'].items():
+                # Some arguments does not required any purticular type.
+                # Contine validating next parm if the type of the
+                # inputparm not defined in yaml.
+                if inputParm not in attrs:
                     continue
-            # B) General type attributes
-            # Check the given value type is valid and
-            # its matched with the required type defined in yaml
-            if not PRIMITIVE_TYPES[expectedType](inputVal):
-                return (False, "Invalid parameter type: "
-                        + "%s. Expected value type is: %s" % (
-                            inputParm, expectedType))
+                expectedType = attrs[inputParm]['type']
+                # A) Check whether given value type is custom type
+                if expectedType not in PRIMITIVE_TYPES.keys():
+                    status = self._checkCustomType(expectedType,
+                                                   inputParm,
+                                                   inputVal)
+                    if not status[0]:
+                        return status
+                    else:
+                        # contiue to validate remaining given attributes
+                        continue
+                # B) General type attributes
+                # Check the given value type is valid and
+                # its matched with the required type defined in yaml
+                if not PRIMITIVE_TYPES[expectedType](inputVal):
+                    return (False, "Invalid parameter type: "
+                            + "%s. Expected value type is: %s" % (
+                                inputParm, expectedType))
         return(True, "")

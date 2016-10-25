@@ -22,6 +22,7 @@ object_details:
             dnf:
               uuid: "874dd5ad-3138-4e8a-86d3-ec39787a9020"
               name: "dnf"
+              flows: ["PackageInstall"]
               description: "Manages packages with the dnf package manager"
               run: "atoms.dnf.run.run(*args, **kwargs)"
               type: "action"
@@ -37,3 +38,20 @@ object_details:
                 - {disablerepo: {required: False}, enablerepo: {required: True}}
                 - {name: {required: True}, state: {required: False}}
               version: 0.1.0
+  flows:
+      PackageInstall:
+        enabled: True
+        tendrl_context: "A map of Tendrl flow level context items like cluster id,tendrl id etc"
+        uuid: "413253657083949503803450"
+        description: "Install packages"
+        atoms: ["general.atoms.dnf"]
+        pre_run : ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
+                  #boolean returning pre/post conditions function list
+        post_run: ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
+        run: "tendrl.node_bridge.flows.dnf_install"
+        type: Create
+        outputs:
+          - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}"
+        inputs:
+          - "An immutable {object1.attr1 : {value: cluster1}, object.attr2:{value: 123}}"
+        version: "0.0.1"

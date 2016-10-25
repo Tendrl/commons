@@ -24,7 +24,7 @@
 #
 ########################################################
 
-#from tendrl.exception import tendrlException
+# from tendrl.exception import tendrlException
 
 
 class ApiJobValidateException(Exception):
@@ -42,11 +42,21 @@ class ApiJobValidateException(Exception):
         return {'status': {'code': self.code, 'message': str(self)}}
 
 
-class ValidObjectsNotFoundException(ApiJobValidateException):
+class FailedLoadingSchemaException(ApiJobValidateException):
     code = 1001
+    message = "Unable to load the schema file"
+
+
+class ValidObjectsNotFoundException(ApiJobValidateException):
+    code = 1002
     message = "Valid objects not found in the yaml file"
 
 
 class ObjectDetailsNotFoundException(ApiJobValidateException):
-    code = 1001
+    code = 1003
     message = "Object details not found in the yaml file"
+
+
+class FlowDetailsNotFoundException(ApiJobValidateException):
+    code = 1004
+    message = "Flow details not found in the yaml file"

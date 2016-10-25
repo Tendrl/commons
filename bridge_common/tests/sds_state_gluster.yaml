@@ -53,6 +53,21 @@ object_details:
             - {transport: {required: False}, brickdetails: {required: True}}
             - {stripe_count: {required: True}}
           version: 0.0.1
+
+         start:
+          enabled: True
+          uuid: "45948920503203209532485032480543"
+          flows: ["CreateGlusterVolume", "StartGlusterVolume"]
+          run: "tendrl.gluster_bridge.atoms.volume.create.Start"
+          type: "start"
+          pre_run : ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
+          post_run: ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
+          name: Start-Gluster-Volume
+          outputs:
+             - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}}"
+          inputs:
+            - {volname: {required: True}, force: {required: False}}
+          version: 0.0.1
  
   brick:
     attrs:
@@ -64,3 +79,23 @@ object_details:
         type: String
         value: etcd
         help: Gluster volume name
+
+  flows:
+      CreateGluster:
+        enabled: False
+      CreateGlusterVolume:
+        enabled: True
+        tendrl_context: "A map of Tendrl flow level context items like cluster id,tendrl id etc"
+        uuid: "12350340593049503803450"
+        description: "Create Gluster Volume with given context/params"
+        atoms: ["volume.atoms.create", "volume.atoms.start"]
+        pre_run : ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
+                  #boolean returning pre/post conditions function list
+        post_run: ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
+        run: "tendrl.gluster_bridge.flows.create_gluster_volume.CreateGlusterVolume"
+        type: Create
+        outputs:
+          - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}"
+        inputs:
+          - "An immutable {object1.attr1 : {value: cluster1}, object.attr2:{value: 123}}"
+        version: "0.0.1"
