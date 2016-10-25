@@ -1,4 +1,6 @@
 ---
+tendrl_schema_version: 0.1
+
 valid_objects:
 - volume
 - tendrl_context
