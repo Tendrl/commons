@@ -1,305 +1,39 @@
+---
+sds_version: gluster-3.8.3
+valid_objects:
+- general
+
 object_details:
   general:
+      enabled: True
       attrs:
          list:
-           type: list
+           type: List
          name:
             type: String
          disable_gpg_check:
             type: Boolean
          enablerepo:
-            type: list
+            type: List
+         disablerepo:
+            type: List
 
       atoms:
-          command:
-            uuid: "e2d1179b-c4da-4221-88f2-b2fbf6ebaed2"
-            name: "command"
-            description: "Executes a command on the node"
-            run: "atoms.command.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "end"
-                - "start"
-                - "delta"
-                - "changed"
-                - "stdout"
-                - "stderr"
-                - "rc"
-                - "warnings"
-            global_inputs: None
-            local_inputs:
-                - "chdir"
-                - "creates"
-                - "executable"
-                - "free_form"
-                - "removes"
-                - "warn"
-            version: "0.1.0"
-          dnf:
-            uuid: "874dd5ad-3138-4e8a-86d3-ec39787a9020"
-            name: "dnf"
-            description: "Manages packages with the dnf package manager"
-            run: "atoms.dnf.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
+            dnf:
+              uuid: "874dd5ad-3138-4e8a-86d3-ec39787a9020"
+              name: "dnf"
+              description: "Manages packages with the dnf package manager"
+              run: "atoms.dnf.run.run(*args, **kwargs)"
+              type: "action"
+              conditions:
+                pre_condition: None
+                post_condition: None
+              outputs:
                 - "msg"
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "conf_file"
-                - "disable_gpg_check"
-                - "disablerepo"
-                - "enablerepo"
-                - "list"
-                - "name"
-                - "state"
-            version: "0.1.0"
-          file:
-            uuid: "f749a920-c0e7-427a-ac19-d40a30d947b6"
-            name: "file"
-            description: "Sets attributes of files"
-            run: "atoms.file.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "changed"
-                - "group"
-                - "uid"
-                - "gid"
-                - "state"
-                - "secontext"
-                - "mode"
-                - "diff"
-                - "owner"
-                - "path"
-                - "size"
-            global_inputs: None
-            local_inputs:
-                - "follow"
-                - "force"
-                - "group"
-                - "mode"
-                - "owner"
-                - "path"
-                - "recurse"
-                - "selevel"
-                - "serole"
-                - "setype"
-                - "seuser"
-                - "src"
-                - "state"
-                - "unsafe_writes"
-            version: "0.1.0"
-          filesystem:
-            uuid: "928eaf55-43e4-45df-b0cc-4579d6b27b40"
-            name: "filesystem"
-            description: "Makes file system on block device"
-            run: "atoms.filesystem.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "dev"
-                - "force"
-                - "fstype"
-                - "opts"
-                - "resizefs"
-            version: "0.1.0"
-          firewalld:
-            uuid: "04dc5fcf-6d1f-408a-a955-f25ceda8eb29"
-            name: "firewalld"
-            description: "Manage arbitrary ports/services with firewalld"
-            run: "atoms.firewalld.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "message"
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "immediate"
-                - "interface"
-                - "masqerade"
-                - "permanet"
-                - "port"
-                - "rich_rule"
-                - "service"
-                - "source"
-                - "state"
-                - "timeout"
-                - "zone"
-            version: "0.1.0"
-          mount:
-            uuid: "efd4eed9-ff85-4a73-9862-deb2ada5c652"
-            name: "mount"
-            description: "Control active and configured mount points"
-            run: "atoms.mount.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "src"
-                - "changed"
-                - "fstab"
-                - "fstype"
-                - "name"
-            global_inputs: None
-            local_inputs:
-                - "boot"
-                - "dump"
-                - "fstab"
-                - "fstype"
-                - "name"
-                - "opts"
-                - "passno"
-                - "src"
-                - "state"
-            version: "0.1.0"
-          script:
-            uuid: "23fb3bd1-83ea-46dc-901e-4d8f716bf1c9"
-            name: "script"
-            description: "Runs a local script on the node"
-            run: "atoms.script.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "stdout"
-                - "rc"
-                - "stderr"
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "creates"
-                - "free_form"
-            version: "0.1.0"
-          selinux:
-            uuid: "4628a95a-537c-45e0-b2c3-e6282e7eb9a8"
-            name: "selinux"
-            description: "Change policy and state of SELinux"
-            run: "atoms.selinux.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "changed"
-                - "configfile"
-                - "state"
-                - "policy"
-                - "msg"
-            global_inputs: None
-            local_inputs:
-                - "conf"
-                - "policy"
-                - "state"
-            version: "0.1.0"
-          service:
-            uuid: "2cc4eb59-f1ff-4a56-a6d5-774f73f19d5d"
-            name: "service"
-            description: "Manage services"
-            run: "atoms.service.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "state"
-                - "changed"
-                - "name"
-            global_inputs: None
-            local_inputs:
-                - "arguments"
-                - "enabled"
-                - "name"
-                - "pattern"
-                - "runleval"
-                - "sleep"
-                - "state"
-            version: "0.1.0"
-          supervisorctl:
-            uuid: "3e9ec442-b77b-412b-b371-4751e470e226"
-            name: "supervisorctl"
-            description: "Manage the state of a program or group of programs running via supervisord"
-            run: "atoms.supervisorctl.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "state"
-                - "name"
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "config"
-                - "name"
-                - "password"
-                - "server_url"
-                - "state"
-                - "supervisorctl_path"
-                - "username"
-            version: "0.1.0"
-          systemd:
-            uuid: "0836aea9-d8b7-457f-82a5-55d41477de48"
-            name: "systemd"
-            description: "Manage services"
-            run: "atoms.systemd.run.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "state"
-                - "changed"
-                - "name"
-            global_inputs: None
-            local_inputs:
-                - "daemon_reload"
-                - "enabled"
-                - "masked"
-                - "name"
-                - "state"
-                - "user"
-            version: "0.1.0"
-          yum:
-            uuid: "61dd6d68-a281-4dcd-b56b-4c0044764ab5"
-            name: "yum"
-            description: "Manages packages with the yum package manager"
-            run: "atoms.yum.run(*args, **kwargs)"
-            type: "action"
-            conditions:
-              pre_condition: None
-              post_condition: None
-            outputs:
-                - "msg"
-                - "changed"
-            global_inputs: None
-            local_inputs:
-                - "conf_file"
-                - "disable_gpg_check"
-                - "disablerepo"
-                - "enablerepo"
-                - "exclude"
-                - "list"
-                - "name"
-                - "state"
-                - "update_cache"
-                - "validate_certs"
-            version: "0.1.0"
+              global_inputs: None
+              inputs:
+                - {dnf.list: {required: True}, dnf.conf_file: {required: False}}
+                - {dnf.disable_gpg_check: {required: True}}
+                - {disablerepo: {required: False}, enablerepo: {required: True}}
+                - {name: {required: True}, state: {required: False}}
+              version: 0.1.0

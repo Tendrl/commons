@@ -8,6 +8,8 @@ valid_objects:
 
 object_details:
   volume:
+    enabled: True
+    value: "/clusters/gluster/$cluster.id/volumes/$volume.id"
     attrs:
       volname:
         type: String
@@ -22,7 +24,7 @@ object_details:
       transport:
         type: String
       brickdetails:
-        type: list
+        type: Brick[]
       force:
         type: Boolean
       directory:
@@ -35,62 +37,23 @@ object_details:
         type: Integer
 
     atoms:
-        info:
-          type: "get"
-        create:
-          run: "gluster_bridge.atoms.volume.create"
+         create:
+          enabled: True
+          uuid: "3948920503203209532485032480543"
+          flows: ["CreateGlusterVolume"]
+          run: "tendrl.gluster_bridge.atoms.volume.create.Create"
           type: "create"
-          conditions:
-            pre_condition : ["atoms.<atom_name>.<condition_function>1"]
-            post_condition: ["atoms.<atom_name>.<condition_function>1"]
-          name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
+          pre_run : ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
+          post_run: ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
+          name: Create-Gluster-Volume
           outputs:
-          - A set, string or list of items that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all.
-
-          global_inputs:
-          - An immutable input_name => value dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
-          local_inputs:
-                - "volname"
-                - ["stripe_count"]
-                - ["replica_count"]
-                - "brickdetails"
-          version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
-        delete:
-          type: "delete"
-        start:
-          type: "action"
-        stop:
-          type: "action"
-        set:
-          type: "update"
-        get:
-          type: "get"
-        add_brick:
-          type: "action"
-        remove-brick:
-          type: "action"
-        replace-brick:
-          type: "action"
-        rebalance_start:
-          type: "action"
-        rebalance_stop:
-          type: "action"
-        rebalance_status:
-          type: "get"
-        log:
-          type: "update"
-        log_locate:
-          type: "get"
-        log_rotate:
-          type: "action"
-        bitrot:
-          type: "update"
-        bitrot_scrub_throttle:
-          type: "update"
-        bitrot_scrub_frequency:
-          type: "update"
-        bitrot_scrub:
-          type: "update"
+             - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}}"
+          inputs:
+            - {volname: {required: True}, type: {required: False}, status: {required: False}}
+            - {transport: {required: False}, brickdetails: {required: True}}
+            - {stripe_count: {required: True}}
+          version: 0.0.1
+ 
   brick:
     attrs:
       brickdetails:
@@ -101,61 +64,3 @@ object_details:
         type: String
         value: etcd
         help: Gluster volume name
-
-  peer:
-    attrs:
-    - hostname
-    atoms:
-      probe:
-        type: "action"
-      detach:
-        type: "action"
-      status:
-        type: "get"
-  snapshot:
-    attrs:
-    - snapname
-    - volname
-    - description
-    - force
-    - clonename
-    - snap-max-hard-limit
-    - snap-max-soft-limit
-    - auto-delete
-    - activate-on-create
-    atoms:
-      create:
-        type: "create"
-      restore:
-        type: "action"
-      clone:
-        type: "create"
-      delete:
-        type: "delete"
-      list:
-        type: "get"
-      info:
-        type: "get"
-      status:
-        type: "get"
-      config:
-        type: "update"
-      activate:
-        type: "action"
-      deactivate:
-        type: "action"
-
-
-
-  flows:
-    CreateVolume:
-      uuid: "1951e821-7aa9-4a91-8183-e73bc8275b8e"
-      description: "Create Volume with pre-existing bricks"
-      atoms: ["volume.create"]
-      conditions:
-                pre_condition : ["atoms.<atom_name>.<condition_function>1"]
-                #boolean returning pre/post conditions function list
-                post_condition: ["atoms.<atom_name>.<condition_function>1"]
-      run: "gluster_bridge.flows.create_volume"
-      type: Create
-

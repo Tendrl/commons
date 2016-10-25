@@ -6,22 +6,20 @@ Tests for `validate_api` module.
 """
 
 import os
-import unittest
+import pytest
 import sys
 import mock
-
+ 
 sys.path.insert(0, '../../')
-import bridge_common.validateapi as apivalidate
-from bridge_common.validateapi import SdsOperations
+from bridge_common.validate_job_api import ApiJobValidator
 
-def getSchemaPath(schemaName):
+def getSchemaFile(schemaName):
     localpath = os.path.dirname(__file__)
     path = os.path.join(localpath, "sds_state_" + schemaName + '.yaml')
     return path
 
 
-@mock.patch('bridge_common.validateapi.locateSchema', getSchemaPath)
-class TestValidateApi(unittest.TestCase):
+class TestValidateJobApi(object):
 
     def test_validate(self):
         # Success test
@@ -38,9 +36,9 @@ class TestValidateApi(unittest.TestCase):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(status, True)
+        assert status == True
 
     def test_apijob_with_wrong_datatype(self):
         glusterApiJob = {
@@ -56,22 +54,22 @@ class TestValidateApi(unittest.TestCase):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         # Testing with invalid data type for strip_count
         glusterApiJob['attributes']['stripe_count'] = '10'
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Invalid parameter type: stripe_count. Expected value type is: Integer")
-        self.assertEqual(status, False)
+        assert error == "Invalid parameter type: stripe_count. Expected value type is: Integer"
+        assert status == False
 
         glusterApiJob['attributes']['stripe_count'] = []
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Invalid parameter type: stripe_count. Expected value type is: Integer")
-        self.assertEqual(status, False)
+        assert error == "Invalid parameter type: stripe_count. Expected value type is: Integer"
+        assert status == False
 
         glusterApiJob['attributes']['stripe_count'] = "RAID"
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Invalid parameter type: stripe_count. Expected value type is: Integer")
-        self.assertEqual(status, False)
+        assert error == "Invalid parameter type: stripe_count. Expected value type is: Integer"
+        assert status == False
 
     def test_apijob_without_required_arguments(self):
         # Volume name not provided
@@ -87,15 +85,15 @@ class TestValidateApi(unittest.TestCase):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Missing input argument(s) ['volname']")
-        self.assertEqual(status, False)
+        assert error == "Missing input argument(s) ['volname']"
+        assert status == False
 
         glusterApiJob['attributes'].pop('stripe_count')
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Missing input argument(s) ['volname']")
-        self.assertEqual(status, False)
+        assert error == "Missing input argument(s) ['volname', 'stripe_count']"
+        assert status == False
 
     def test_apijob_with_wrong_argument_name(self):
         # Invalid argument names passed which are not defined
@@ -114,10 +112,10 @@ class TestValidateApi(unittest.TestCase):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
-        self.assertEqual(error, "Input argument(s) not defined in yaml file: ['myvolumename', 'blabla']")
-        self.assertEqual(status, False)
+        assert error == "Input argument(s) not defined in yaml file: ['myvolumename', 'blabla']"
+        assert status == False
 
     def test_apijob_with_other_operational_yaml(self):
         # success test
@@ -138,9 +136,9 @@ class TestValidateApi(unittest.TestCase):
                 'disablerepo': []},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("node"))
         status, error = sdsoper.validateApi(nodeApiJob)
-        self.assertEqual(status, True)
+        assert status == True
 
     def test_apijob_missing_arguments(self):
         nodeApiJob = {
@@ -158,10 +156,10 @@ class TestValidateApi(unittest.TestCase):
                 'disablerepo': []},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("node"))
         status, error = sdsoper.validateApi(nodeApiJob)
-        self.assertEqual(status, False)
-        self.assertEqual(error, "Missing input argument(s) ['list', 'disable_gpg_check']")
+        assert status == False
+        assert error == "Missing input argument(s) ['list', 'disable_gpg_check']"
 
     def test_apijob__arguments_not_defined(self):
         nodeApiJob = {
@@ -182,7 +180,7 @@ class TestValidateApi(unittest.TestCase):
                 'newvalue': None},
             'errors': {}
         }
-        sdsoper = SdsOperations()
+        sdsoper = ApiJobValidator(getSchemaFile("node"))
         status, error = sdsoper.validateApi(nodeApiJob)
-        self.assertEqual(status, False)
-        self.assertEqual(error, "Input argument(s) not defined in yaml file: ['newvalue']")
+        assert status == False
+        assert error == "Input argument(s) not defined in yaml file: ['newvalue']"
