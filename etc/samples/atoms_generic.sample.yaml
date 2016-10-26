@@ -1,0 +1,25 @@
+# This schema is not used stand-alone, it is a sub-section of "tendrl_definitions_<sds_nvr>.yaml" | "tendrl_definitions_generic.sample.yaml
+
+---
+object_details:
+  generic_object:
+    atoms:
+        create:
+          enabled: True
+          uuid: statically generated per atom
+          name: "Name"
+          # List of flows this of which this atom can be part of
+          flows: ["TendrlFlow1"]
+          run: "tendrl.node_agent.atoms.cpu.create.Create"
+          type: "get"
+          pre_run : ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1"...]
+          post_run: ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1"...]
+          name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
+          outputs:
+          - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}} that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all."
+
+          # Required input object.attribute list
+          inputs:
+          - An immutable {object1.attr1 : {value: "cluster1"}, object.attr2:{value: "123?"}}}} dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
+          version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
+

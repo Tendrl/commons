@@ -1,0 +1,44 @@
+# This schema is not used stand-alone, it is a sub-section of "tendrl_definitions_<sds_nvr>.yaml" | "tendrl_definitions_generic.sample.yaml
+
+---
+valid_objects:
+- cpu
+- tendrl_context
+
+object_details:
+  tendrl_context:
+    enabled: True
+    value: /nodes/$node.id/tendrl_context
+    attrs:
+      clusters:
+        type: String[]
+        help: "UUIDs of Tendrl managed clusters of which this node is a member"
+      node_agent_nvr:
+        type: String
+        help: "NVR of the node_agent"
+  cpu:
+    enabled: True
+    value: "/nodes/$node.id/cpus/$cpu.id
+    attrs:
+      user:
+        type: String
+        help: "Amount of time the CPU was busy executing code in user space"
+      system:
+        type: String
+        help: "Amount of time the CPU was busy executing code in kernel space"
+      wait:
+        type: String
+      nice:
+        type: String
+      swap:
+        type: String
+      interrupt:
+        type: String
+      softirq:
+        type: String
+      steal:
+        type: String
+      idle:
+        type: String
+      active:
+        type: String

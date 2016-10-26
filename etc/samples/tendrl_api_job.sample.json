@@ -1,0 +1,31 @@
+# Each nvr of sds/node_agent rpm have their own unique tendrl definitions yaml,
+# "sds_nvr"|"node_agent_nvr" used in tendrl api job body is the nvr of
+# the sds/node_agent
+
+
+
+# sds api job sample
+
+{
+	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
+	"sds_nvr": "gluster-3.2",
+	"action": "create",
+	"object_type": "volume",
+	"status": "processing",
+	"attributes": {
+		"volname": "Volume One"
+	}
+}
+
+# node agent api job sample
+
+{
+	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
+	"node_agent_nvr": "tendrl-node-agent-3.2",
+	"action": "create",
+	"object_type": "volume",
+	"status": "processing",
+	"attributes": {
+		"volname": "Volume One"
+	}
+}
