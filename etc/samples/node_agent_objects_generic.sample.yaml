@@ -13,6 +13,9 @@ object_details:
       clusters:
         type: String[]
         help: "UUIDs of Tendrl managed clusters of which this node is a member"
+      node_agent_nvr:
+        type: String
+        help: "NVR of the node_agent"
   cpu:
     enabled: True
     value: "/nodes/$node.id/cpus/$cpu.id
