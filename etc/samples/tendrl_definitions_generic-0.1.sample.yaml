@@ -10,7 +10,7 @@ object_details:
     enabled: True
     value: /clusters/$cluster.id/tendrl_context
     attrs:
-      sds_type:
+      sds_nvr:
         type: String
         help: "NVR of the Tendrl managed sds, eg: 'gluster-3.2.0'"
   volume:
