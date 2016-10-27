@@ -57,8 +57,10 @@ object_details:
           outputs:
           - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}} that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all."
           inputs:
-          - "A unique set/list of attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job
-
+            mandatory:
+              - "A unique set/list of mandatory attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job"
+            optional:
+              - "A unique set/list of optional attribute names [object1.attribute1...]. If the values are passed they would be validated for types and valid values."
 
 flows:
   CreateGlusterVolume:
@@ -73,10 +75,10 @@ flows:
     run: "tendrl.gluster_bridge.flows.create_gluster_volume.CreateGlusterVolume"
     type: Create
     outputs:
-    - "A map of type {object.attr1 : {required: True}, object
-   .attr2:{required: False}}}} that this will be providing (or could
-   provide) to others, used to correlate and associate the thing/s this flow
-    produces, if it produces anything at all."
+      - "A map of type {object.attr1 : {required: True}, object .attr2:{required: False}}}} that this will be providing (or could provide) to others, used to correlate and associate the thing/s this flow produces, if it produces anything at all."
     inputs:
-    - "A unique set/list of attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job
+      mandatory:
+        - "A unique set/list of mandatory attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job"
+      optional:
+        - "A unique set/list of optional attribute names [object1.attribute1...]. If the values are passed they would be validated for types and valid values."
     version: An immutable version that associates version information with this flow. It can be useful in resuming older versions of flow. Standard major, minor versioning concepts should apply
