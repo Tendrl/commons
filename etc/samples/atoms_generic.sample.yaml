@@ -20,6 +20,5 @@ object_details:
 
           # Required input object.attribute list
           inputs:
-          - An immutable {object1.attr1 : {value: "cluster1"}, object.attr2:{value: "123?"}}}} dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
-          version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
+          - "A unique set/list of attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job
 
