@@ -1,44 +1,43 @@
 # This schema is not used stand-alone, it is a sub-section of "tendrl_definitions_<sds_nvr>.yaml" | "tendrl_definitions_generic.sample.yaml
 
----
-valid_objects:
-- cpu
-- tendrl_context
-
-object_details:
-  tendrl_context:
-    enabled: True
-    value: /nodes/$node.id/tendrl_context
-    attrs:
-      clusters:
-        type: String[]
-        help: "UUIDs of Tendrl managed clusters of which this node is a member"
-      node_agent_nvr:
+--- 
+object_details: 
+  cpu: 
+    attrs: 
+      active: 
         type: String
-        help: "NVR of the node_agent"
-  cpu:
-    enabled: True
-    value: "/nodes/$node.id/cpus/$cpu.id
-    attrs:
-      user:
+      idle: 
         type: String
-        help: "Amount of time the CPU was busy executing code in user space"
-      system:
+      interrupt: 
         type: String
+      nice: 
+        type: String
+      softirq: 
+        type: String
+      steal: 
+        type: String
+      swap: 
+        type: String
+      system: 
         help: "Amount of time the CPU was busy executing code in kernel space"
-      wait:
         type: String
-      nice:
+      user: 
+        help: "Amount of time the CPU was busy executing code in user space"
         type: String
-      swap:
+      wait: 
         type: String
-      interrupt:
+    enabled: true
+    value: /nodes/$node.id/cpus/$cpu.id
+  tendrl_context: 
+    attrs: 
+      clusters: 
+        help: "UUIDs of Tendrl managed clusters of which this node is a member"
+        type: "String[]"
+      node_agent_nvr: 
+        help: "NVR of the node_agent"
         type: String
-      softirq:
-        type: String
-      steal:
-        type: String
-      idle:
-        type: String
-      active:
-        type: String
+    enabled: true
+    value: /nodes/$node.id/tendrl_context
+valid_objects: 
+  - cpu
+  - tendrl_context
