@@ -1,45 +1,44 @@
 # This schema is not used stand-alone, it is a sub-section of "tendrl_definitions_<sds_nvr>.yaml" | "tendrl_definitions_generic.sample.yaml
 
----
-valid_objects:
-- volume
-- tendrl_context
-
-object_details:
-  tendrl_context:
-    enabled: True
-    value: /clusters/$cluster.id/tendrl_context
-    attrs:
-      sds_nvr:
-        type: String
+--- 
+object_details: 
+  tendrl_context: 
+    attrs: 
+      sds_nvr: 
         help: "NVR of the Tendrl managed sds, eg: 'gluster-3.2.0'"
-  volume:
-    enabled: True
-    value: "/clusters/$cluster.id/volumes/$volume.id
-    attrs:
-      volname:
         type: String
-        help: "Name of the gluster volume"
-      stripe_count:
+    enabled: true
+    value: /clusters/$cluster.id/tendrl_context
+  volume: 
+    attrs: 
+      bitrot: 
+        type: Boolean
+      brickdetails: 
+        type: "Brick[]"
+      directory: 
+        type: String
+      disperse_count: 
         type: Integer
+      force: 
+        type: Boolean
+      redundancy_count: 
+        type: Integer
+      replica_count: 
+        type: Integer
+      scrub-frequency: 
+        type: Integer
+      scrub-throttle: 
+        type: Integer
+      stripe_count: 
         help: "Volume Stripe count"
-      replica_count:
         type: Integer
-      disperse_count:
-        type: Integer
-      redundancy_count:
-        type: Integer
-      transport:
+      transport: 
         type: String
-      brickdetails:
-        type: Brick[]
-      force:
-        type: Boolean
-      directory:
+      volname: 
+        help: "Name of the gluster volume"
         type: String
-      bitrot:
-        type: Boolean
-      scrub-frequency:
-        type: Integer
-      scrub-throttle:
-        type: Integer
+    enabled: true
+    value: /clusters/$cluster.id/volumes/$volume.id
+valid_objects: 
+  - volume
+  - tendrl_context
