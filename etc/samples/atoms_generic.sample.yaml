@@ -9,16 +9,18 @@ object_details:
           uuid: statically generated per atom
           name: "Name"
           # List of flows this of which this atom can be part of
-          flows: ["TendrlFlow1"]
+          flow: "TendrlFlow1"
           run: "tendrl.node_agent.atoms.cpu.create.Create"
           type: "get"
           pre_run : ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1"...]
           post_run: ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1"...]
-          name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
           outputs:
           - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}} that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all."
 
           # Required input object.attribute list
           inputs:
-          - "A unique set/list of attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job
+            mandatory:
+              - "A unique set/list of mandatory attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job"
+            optional:
+              - "A unique set/list of optional attribute names [object1.attribute1...]. If the values are passed they would be validated for types and valid values."
 
