@@ -1,9 +1,16 @@
 ---
-sds_version: gluster-3.8.3
+tendrl_schema_version: 0.1
 valid_objects:
 - general
 
 object_details:
+  tendrl_context:
+    enabled: True
+    value: ~
+    attrs:
+      sds_nvr:
+        type: String
+        help: "tendrl-node-agent-3.2"
   general:
       enabled: True
       attrs:
@@ -33,12 +40,16 @@ object_details:
                 - "msg"
               global_inputs: None
               inputs:
-                - {dnf.list: {required: True}, dnf.conf_file: {required: False}}
-                - {dnf.disable_gpg_check: {required: True}}
-                - {disablerepo: {required: False}, enablerepo: {required: True}}
-                - {name: {required: True}, state: {required: False}}
+                mandatory:
+                   - list
+                   - enablerepo
+                   - name
+                optional:
+                   - disablerepo
+                   - conf_file
+                   - status
               version: 0.1.0
-  flows:
+flows:
       PackageInstall:
         enabled: True
         tendrl_context: "A map of Tendrl flow level context items like cluster id,tendrl id etc"
@@ -53,5 +64,12 @@ object_details:
         outputs:
           - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}"
         inputs:
-          - "An immutable {object1.attr1 : {value: cluster1}, object.attr2:{value: 123}}"
+           mandatory:
+              - list
+              - enablerepo
+              - name
+           optional:
+              - disablerepo
+              - conf_file
+              - status
         version: "0.0.1"

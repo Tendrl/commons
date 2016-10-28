@@ -1,101 +1,152 @@
 ---
-sds_version: gluster-3.8.3
+tendrl_schema_version: 0.1
 valid_objects:
+- tendrl_context
 - volume
 - brick
 - peer
-- snapshot
 
 object_details:
+  tendrl_context:
+    enabled: True
+    value: /clusters/$cluster.id/tendrl_context
+    attrs:
+      sds_nvr:
+        type: String
+        help: "gluster-3.8.3"
   volume:
     enabled: True
-    value: "/clusters/gluster/$cluster.id/volumes/$volume.id"
+    value: "/clusters/$cluster.id/volumes/$volume.id"
     attrs:
       volname:
         type: String
+        help: "Name of gluster volume"
       stripe_count:
         type: Integer
+        help: "Stripe count of volume"
       replica_count:
         type: Integer
+        help: "Replica count of volume"
+      arbiter_count:
+        type: Integer
+        help: "Arbiter count of volume"
       disperse_count:
         type: Integer
+        help: "Disperse count of volume"
+      disperse_data_count:
+        type: Integer
+        help: "Disperse data count of volume"
       redundancy_count:
         type: Integer
+        help: "Redundancy count of volume"
       transport:
         type: String
+        help: "Transport type for volume"
       brickdetails:
-        type: Brick[]
+        type: brick[]
+        help: "List of bricks for volume"
       force:
         type: Boolean
-      directory:
-        type: String
-      bitrot:
-        type: Boolean
-      scrub-frequency:
-        type: Integer
-      scrub-throttle:
-        type: Integer
+        help: "If force execute the action"
 
     atoms:
-         create:
+        create:
           enabled: True
-          uuid: "3948920503203209532485032480543"
-          flows: ["CreateGlusterVolume"]
+          uuid: "242f6190-9b37-11e6-950d-a24fc0d9649c"
+          flows: ["CreateVolume"]
           run: "tendrl.gluster_bridge.atoms.volume.create.Create"
           type: "create"
-          pre_run : ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
-          post_run: ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
-          name: Create-Gluster-Volume
+          pre_run:
+            - "tendrl.gluster_bridge.atoms.volume.validations.volume_not_exists"
+            - "tendrl.gluster_bridge.atoms.volume.validations.valid_create_data"
+          post_run:
+            - "tendrl.gluster_bridge.flows.start_volume.StartVolume.start"
+          name: "create_volume"
           outputs:
-             - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}}"
+            -
+              volname:
+                required: True
           inputs:
-            - {volname: {required: True}, type: {required: False}, status: {required: False}}
-            - {transport: {required: False}, brickdetails: {required: True}}
-            - {stripe_count: {required: True}}
-          version: 0.0.1
-
-         start:
+            mandatory:
+              - volname
+              - brickdetails
+            optional:
+              - stripe_count
+              - replica_count
+              - arbiter_count
+              - disperse_count
+              - disperse_data_count
+              - redundancy_count
+              - transport
+              - brickdetails
+              - force
+          version: "0.1.0"
+        delete:
           enabled: True
-          uuid: "45948920503203209532485032480543"
-          flows: ["CreateGlusterVolume", "StartGlusterVolume"]
-          run: "tendrl.gluster_bridge.atoms.volume.create.Start"
-          type: "start"
-          pre_run : ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
-          post_run: ["tendrl.gluster_bridge.atoms.<atom_name>.<boolean_function>1", ...]
-          name: Start-Gluster-Volume
-          outputs:
-             - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}}}"
-          inputs:
-            - {volname: {required: True}, force: {required: False}}
-          version: 0.0.1
- 
+          uuid: "242f6190-9b37-11e6-950d-a24fc0d9649c"
+          flows: ["DeleteVolume"]
+          run: "tendrl.gluster_bridge.atoms.volume.create.Create"
+          type: "create"
+        stop:
+          enabled: True
+          uuid: "242f6190-9b37-11e6-950d-a24fc0d9649c"
+          run: "tendrl.gluster_bridge.atoms.volume.create.Create"
+          type: "create"
   brick:
+    enabled: True
+    value: "/clusters/$cluster.id/volumes/$volume.id/bricks/$brick.id"
     attrs:
       brickdetails:
         type: String
-        value: etcd
-        help: Details of the brick
+        help: "Details of the brick"
       volname:
         type: String
-        value: etcd
-        help: Gluster volume name
-
-  flows:
-      CreateGluster:
-        enabled: False
-      CreateGlusterVolume:
-        enabled: True
-        tendrl_context: "A map of Tendrl flow level context items like cluster id,tendrl id etc"
-        uuid: "12350340593049503803450"
-        description: "Create Gluster Volume with given context/params"
-        atoms: ["volume.atoms.create", "volume.atoms.start"]
-        pre_run : ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
-                  #boolean returning pre/post conditions function list
-        post_run: ["tendrl.node_agent.atoms.<atom_name>.<boolean_function>1", ...]
-        run: "tendrl.gluster_bridge.flows.create_gluster_volume.CreateGlusterVolume"
-        type: Create
-        outputs:
-          - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}"
-        inputs:
-          - "An immutable {object1.attr1 : {value: cluster1}, object.attr2:{value: 123}}"
-        version: "0.0.1"
+        help: "Gluster volume name"
+flows:
+  CreateVolume:
+    enabled: True
+    tendrl_context: "$cluster.id"
+    uuid: "1951e821-7aa9-4a91-8183-e73bc8275b8e"
+    description: "Create Volume with pre-existing bricks"
+    atoms: ["volume.create"]
+    pre_run : []
+    post_run: []
+    run: "tendrl.gluster_bridge.flows.create_volume.CreateVolume"
+    type: Create
+    outputs:
+      -
+        volname:
+          required: True
+    inputs:
+      mandatory:
+        - volname
+        - brickdetails
+      optional:
+        - stripe_count
+        - replica_count
+        - arbiter_count
+        - disperse_count
+        - disperse_data_count
+        - redundancy_count
+        - transport
+        - force
+    version: "0.1.0"
+  StartVolume:
+    enabled: True
+    tendrl_context: "$volume.id"
+    uuid: "e5429376-903c-11e6-ae22-56b6b6499611"
+    description: "Start a volume"
+    atoms: ["volume.start"]
+    pre_run: []
+    post_run: []
+    run: "tendrl.gluster_bridge.flows.start_volume.StartVolume"
+    type: Start
+    outputs:
+      -
+        success:
+          required: True
+    inputs:
+      mandatory:
+        - volname
+      optional: ~
+    version: "0.1.0"
