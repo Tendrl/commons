@@ -24,7 +24,7 @@
 #
 ########################################################
 
-# from tendrl.exception import tendrlException
+#from tendrl.exception import tendrlException
 
 
 class ApiJobValidateException(Exception):
