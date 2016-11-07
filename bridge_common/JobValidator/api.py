@@ -26,7 +26,7 @@
 import os
 import six
 import yaml
-import exception as ex
+
 
 PRIMITIVE_TYPES = {'Boolean': lambda value: isinstance(value, bool),
                    'Float': lambda value: isinstance(value, float),
@@ -36,6 +36,41 @@ PRIMITIVE_TYPES = {'Boolean': lambda value: isinstance(value, bool),
                    'String': lambda value: isinstance(value, six.string_types),
                    'Uint': lambda value: isinstance(value, int) and value >= 0,
                    'List': lambda value: isinstance(value, list)}
+
+
+class ApiJobValidateException(Exception):
+    code = 0
+    message = "Api Job Validate Exception"
+
+    def __init__(self, code=0, message='Api Job Validate Exception'):
+        self.code = code
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+    def response(self):
+        return {'status': {'code': self.code, 'message': str(self)}}
+
+
+class FailedLoadingSchemaException(ApiJobValidateException):
+    code = 1001
+    message = "Unable to load the schema file"
+
+
+class ValidObjectsNotFoundException(ApiJobValidateException):
+    code = 1002
+    message = "Valid objects not found in the yaml file"
+
+
+class ObjectDetailsNotFoundException(ApiJobValidateException):
+    code = 1003
+    message = "Object details not found in the yaml file"
+
+
+class FlowDetailsNotFoundException(ApiJobValidateException):
+    code = 1004
+    message = "Flow details not found in the yaml file"
 
 
 def loadSchema(schemaFile):
@@ -48,24 +83,24 @@ def loadSchema(schemaFile):
         # load api operation schema file and return
         try:
             code = open(schemaFile)
-        except IOError, exc:
+        except IOError as exc:
             return (False,
                     "Error loading schema file '" + schemaFile + "': " + exc)
 
         # Parse schema file
         try:
             config = yaml.load(code)
-        except yaml.YAMLError, exc:
+        except yaml.YAMLError as exc:
             error_pos = ""
             if hasattr(exc, 'problem_mark'):
                 error_pos = " at position: (%s:%s)" % (
-                    exc.problem_mark.line+1,
-                    exc.problem_mark.column+1)
+                    exc.problem_mark.line + 1,
+                    exc.problem_mark.column + 1)
             msg = "Error loading schema file '" + schemaFile + "'" + error_pos \
                 + ": content format error: Failed to parse yaml format"
             return False, msg
 
-    except Exception, e:
+    except Exception as e:
         return (False, "Error loading api operation schema file '%s': %s" % (
             schemaFile, str(e)))
 
@@ -78,14 +113,14 @@ class ApiJobValidator(object):
         status = loadSchema(schemaFilePath)
         # load schema into memory only on success
         if not status[0]:
-            raise ex.FailedLoadingSchemaException(1, status[1])
+            raise FailedLoadingSchemaException(1, status[1])
         # validate yaml schema file
         if not status[1].get('valid_objects'):
-            raise ex.ValidObjectsNotFoundException()
+            raise ValidObjectsNotFoundException()
         if not status[1].get('object_details'):
-            raise ex.ObjectDetailsNotFoundException()
+            raise ObjectDetailsNotFoundException()
         if not status[1].get('flows'):
-            raise ex.FlowDetailsNotFoundException()
+            raise FlowDetailsNotFoundException()
         self.yamlObj = status[1]
 
     def checkFlow(self, flowName):
