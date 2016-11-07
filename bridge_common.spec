@@ -9,21 +9,18 @@ BuildArch: noarch
 Summary: Common Module for All Bridges
 Source0: %{pkg_name}-%{pkg_version}.tar.gz
 Group:   Applications/System
-License: GPLv2+
+License: LGPL2.1
 Url: https://github.com/Tendrl/bridge_common
 
-BuildRequires: python-devel
-BuildRequires: python-setuptools
-BuildRequires: python-pbr
-
-Requires: python-pip
-Requires: python-pbr
 Requires: python-etcd
 Requires: python-dateutil
-Requires: python-gevent
-Requires: python-greenlet
-Requires: pytz
-Requires: python-oslo-log
+Requires: python-hacking
+Requires: pytest
+Requires: python-pytest-cov
+Requires: python-mock
+Requires: python-sphinx
+Requires: python-reno
+Requires: python-coveralls
 
 %description
 Common python module usable by all Tendrl SDS Bridges
@@ -41,7 +38,7 @@ rm -rf %{pkg_name}.egg-info
 %{__python} setup.py build
 
 # generate html docs
-%if 0%{?rhel}==6
+%if 0%{?rhel}==7
 sphinx-1.0-build doc/source html
 %else
 sphinx-build doc/source html
@@ -52,23 +49,17 @@ rm -rf html/.{doctrees,buildinfo}
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/etc/tendrl/tendrl.conf
+install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/usr/share/tendrl/commons/tendrl.conf
+install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/etc/tendrl.conf.sample
 
 %post
 mkdir /var/log/tendrl >/dev/null 2>&1 || :
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%if 0%{?do_test}
-%check
-%{__python} setup.py test
-%endif
-
 %files -f INSTALLED_FILES
-%defattr(-,root,root)
-%doc html README.rst LICENSE
-%{_sysconfdir}/tendrl/tendrl.conf
+%doc html README.rst
+%license LICENSE
+%{_datarootdir}/tendrl/commons/tendrl.conf
+%{_sysconfdir}/tendrl.conf.sample
 
 
 %changelog
