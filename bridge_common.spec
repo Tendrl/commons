@@ -1,16 +1,16 @@
-%define pkg_name tendrl-bridge-common
-%define pkg_version 0.0.1
-%define pkg_release 1
-
-Name: %{pkg_name}
-Version: %{pkg_version}
-Release: %{pkg_release}%{?dist}
+Name: tendrl-bridge-common
+Version: 0.0.1
+Release: 1%{?dist}
 BuildArch: noarch
-Summary: Common Module for All Bridges
-Source0: %{pkg_name}-%{pkg_version}.tar.gz
+Summary: Common Module for all Bridges
+Source0: %{name}-%{version}.tar.gz
 Group:   Applications/System
-License: LGPL2.1
-Url: https://github.com/Tendrl/bridge_common
+License: LGPLv2+
+URL: https://github.com/Tendrl/bridge_common
+
+BuildRequires: systemd
+BuildRequires: python2-devel
+BuildRequires: pytest
 
 Requires: python-etcd
 Requires: python-dateutil
@@ -26,41 +26,32 @@ Requires: python-coveralls
 Common python module usable by all Tendrl SDS Bridges
 
 %prep
-%setup -n %{pkg_name}-%{pkg_version}
+%setup %{name}-%{version}
 # Remove the requirements file to avoid adding into
 # distutils requiers_dist config
 rm -rf {test-,}requirements.txt
 
 # Remove bundled egg-info
-rm -rf %{pkg_name}.egg-info
+rm -rf %{name}.egg-info
 
 %build
 %{__python} setup.py build
 
-# generate html docs
-%if 0%{?rhel}==7
-sphinx-1.0-build doc/source html
-%else
-sphinx-build doc/source html
-%endif
-# remove the sphinx-build leftovers
-rm -rf html/.{doctrees,buildinfo}
-
 %install
-rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/usr/share/tendrl/commons/tendrl.conf
-install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT/etc/tendrl.conf.sample
+install -m 755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/common
+install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/commons/tendrl.conf
+install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl.conf.sample
 
-%post
-mkdir /var/log/tendrl >/dev/null 2>&1 || :
+%check
+py.test -v bridge_common/tests
 
 %files -f INSTALLED_FILES
-%doc html README.rst
+%dir %{_var}/log/tendrl/common
+%doc README.rst
 %license LICENSE
 %{_datarootdir}/tendrl/commons/tendrl.conf
 %{_sysconfdir}/tendrl.conf.sample
-
 
 %changelog
 * Mon Oct 17 2016 Timothy Asir Jeyasingh <tjeyasin@redhat.com> - 0.0.1-1
