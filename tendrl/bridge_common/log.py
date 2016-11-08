@@ -1,12 +1,18 @@
 import logging
+import os
+import yaml
 
-from tendrl.bridge_common.config import TendrlConfig
-config = TendrlConfig()
 
+def setup_logging(
+    log_cfg_path='/etc/tendrl/logging.yaml',
+    default_log_level=logging.INFO
+):
+    """Setup logging configuration
 
-FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-root = logging.getLogger()
-handler = logging.FileHandler(config.get('bridge_common', 'log_path'))
-handler.setFormatter(logging.Formatter(FORMAT))
-root.addHandler(handler)
-root.setLevel(logging.getLevelName(config.get('bridge_common', 'log_level')))
+    """
+    if os.path.exists(log_cfg_path):
+        with open(log_cfg_path, 'rt') as f:
+            log_config = yaml.safe_load(f.read())
+        logging.config.dictConfig(log_config)
+    else:
+        logging.basicConfig(level=logging.INFO)

@@ -5,3 +5,4 @@
 
 python-etcd
 python-dateutil==2.2
+PyYAML
