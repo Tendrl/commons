@@ -8,11 +8,11 @@
 
 {
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
-	"sds_nvr": "gluster-3.2",
-	"action": "create",
-	"object_type": "volume",
+	"sds_name": "gluster",
+	"sds_version": "3.2.0",
+	"flow": "CreateGlusterVolume",
 	"status": "processing",
-	"attributes": {
+	"parameters": {
 		"volname": "Volume One"
 	}
 }
@@ -21,11 +21,11 @@
 
 {
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
-	"node_agent_nvr": "tendrl-node-agent-3.2",
-	"action": "create",
-	"object_type": "volume",
+	"node_name": "fqdn",
+	"node_version": "3.2.0",
+	"flow": "ImportGlusterCluster",
 	"status": "processing",
-	"attributes": {
+	"parameters": {
 		"volname": "Volume One"
 	}
 }
