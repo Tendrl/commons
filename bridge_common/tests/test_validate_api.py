@@ -24,11 +24,11 @@ class TestValidateJobApi(object):
         # Success test
         glusterApiJob = {
             'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-            "sds_nvr": "gluster-3.2",
-            "action": "create",
-            'object_type': 'volume',
-            'status': 'new',
-            'attributes': {
+            "sds_name": "gluster",
+            "sds_version": "3.2.0",
+            "flow": "CreateGlusterVolume",
+            "status": "processing",
+            "parameters": {
                 'volname': 'Volume1',
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
@@ -39,12 +39,8 @@ class TestValidateJobApi(object):
 
     def test_atom(self):
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
-        status, error = sdsoper.checkAtom("start", "volume")
-        assert error == "atom:start details not found in the object:volume"
-        assert not status
-
-        status, error = sdsoper.checkAtom("stop", "volume")
-        assert error == "atom:volume.stop does not have any flow"
+        status, error = sdsoper.checkAtom("volume.atoms.start")
+        assert error == "atom:start details not found for:volume"
         assert not status
 
     def test_flow(self):
@@ -53,40 +49,40 @@ class TestValidateJobApi(object):
         assert error == "Flow: StopVolume not defined"
         assert not status
 
-    def test_getFlowFromAtom(self):
+    def test_getAtomsFromAtom(self):
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
-        flow = sdsoper.getFlowFromAtom("create", "volume")
-        assert flow['flows'][0] == "CreateVolume"
+        flow = sdsoper.getAtomNamesFromFlow("CreateGlusterVolume")
+        assert flow[0] == "volume.atoms.create"
 
     def test_flowAttrs(self):
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
-        assert type(sdsoper.getFlowAttrs(
-            "CreateVolume")) == type(tuple(""))
+        assert type(sdsoper.getFlowParms(
+            "CreateGlusterVolume")) == type(tuple(""))
 
     def test_checkJobRequiredAttr(self):
         glusterApiJob = {
             'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-            "sds_nvr": "gluster-3.2",
-            "action": "create",
-            'object_type': 'volume',
-            'status': 'new',
-            'attributes': {
+            "sds_name": "gluster",
+            "sds_version": "3.2.0",
+            "flow": "CreateGlusterVolume",
+            "status": "processing",
+            "parameters": {
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
         }
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
-        status, error = sdsoper.checkJobRequiredAttr(
-            glusterApiJob['attributes'], ['volname', 'brickdetails'])
+        status, error = sdsoper.checkJobRequiredParm(
+            glusterApiJob['parameters'], ['volname', 'brickdetails'])
         assert error == "Missing input argument(s) ['volname']"
 
     def test_apijob_with_wrong_datatype(self):
         glusterApiJob = {
             'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-            "sds_nvr": "gluster-3.2",
-            "action": "create",
-            'object_type': 'volume',
-            'status': 'processing',
-            'attributes': {
+            "sds_name": "gluster",
+            "sds_version": "3.2.0",
+            "flow": "CreateGlusterVolume",
+            "status": "processing",
+            "parameters": {
                 'volname': 'Volume1',
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
@@ -94,42 +90,42 @@ class TestValidateJobApi(object):
         }
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         # Testing with invalid data type for strip_count
-        glusterApiJob['attributes']['stripe_count'] = '10'
+        glusterApiJob['parameters']['stripe_count'] = '10'
         status, error = sdsoper.validateApi(glusterApiJob)
         msg = "Invalid parameter type: stripe_count. "\
               "Expected value type is: Integer"
         assert error == msg
         assert not status
 
-        glusterApiJob['attributes']['stripe_count'] = []
+        glusterApiJob['parameters']['stripe_count'] = []
         status, error = sdsoper.validateApi(glusterApiJob)
         msg = "Invalid parameter type: stripe_count. "\
               "Expected value type is: Integer"
         assert error == msg
         assert not status
 
-        glusterApiJob['attributes']['stripe_count'] = "RAID"
+        glusterApiJob['parameters']['stripe_count'] = "RAID"
         status, error = sdsoper.validateApi(glusterApiJob)
         msg = "Invalid parameter type: stripe_count. "\
               "Expected value type is: Integer"
         assert error == msg
         assert not status
 
-        # test with an unknown action which is not defined
-        glusterApiJob['action'] = 'blabla'
+        # test with an unknown flow which is not defined
+        glusterApiJob['flow'] = 'blabla'
         status, error = sdsoper.validateApi(glusterApiJob)
-        assert error == "atom:blabla details not found in the object:volume"
+        assert error == "Flow: blabla not defined"
         assert not status
 
     def test_apijob_without_required_arguments(self):
         # Volume name not provided
         glusterApiJob = {
             'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-            "sds_nvr": "gluster-3.2",
-            "action": "create",
-            'object_type': 'volume',
-            'status': 'processing',
-            'attributes': {
+            "sds_name": "gluster",
+            "sds_version": "3.2.0",
+            "flow": "CreateGlusterVolume",
+            "status": "processing",
+            "parameters": {
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
         }
@@ -138,13 +134,13 @@ class TestValidateJobApi(object):
         assert error == "Missing input argument(s) ['volname']"
         assert not status
 
-        glusterApiJob['attributes'].pop('stripe_count')
+        glusterApiJob['parameters'].pop('stripe_count')
         status, error = sdsoper.validateApi(glusterApiJob)
         # stripe_count is an optional param
         assert error == "Missing input argument(s) ['volname']"
         assert not status
 
-        glusterApiJob['attributes'].pop('brickdetails')
+        glusterApiJob['parameters'].pop('brickdetails')
         status, error = sdsoper.validateApi(glusterApiJob)
         # stripe_count is an optional param
         assert error == "Missing input argument(s) ['volname', 'brickdetails']"
@@ -154,10 +150,11 @@ class TestValidateJobApi(object):
         # Invalid argument names passed which are not defined
         glusterApiJob = {
             'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-            "sds_nvr": "gluster-3.2",
-            'object_type': 'volume',
-            'status': 'processing',
-            'attributes': {
+            "sds_name": "gluster",
+            "sds_version": "3.2.0",
+            "flow": "CreateGlusterVolume",
+            "status": "processing",
+            "parameters": {
                 'myvolumename': 'testing',
                 'volname': "test",
                 'blabla': 100,
@@ -167,49 +164,32 @@ class TestValidateJobApi(object):
         }
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
-        assert error == "action not found in the api job"
+        assert error == "Input argument(s) not defined in "\
+            "yaml file: ['myvolumename', 'blabla']"
 
-        status, error = sdsoper.validateApi(glusterApiJob)
-        assert error == "action not found in the api job"
-
-        glusterApiJob["action"] = "create"
-        glusterApiJob["attributes"]["testvar"] = "blabla"
+        glusterApiJob["parameters"]["testvar"] = "blabla"
         status, error = sdsoper.validateApi(glusterApiJob)
         assert error == "Input argument(s) not defined in yaml file: "\
             "['testvar', 'myvolumename', 'blabla']"
         assert not status
 
-        def test_apijob_missing_argument(self):
-            nodeApiJob = {
-                'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-                "node_agent_nvr": "tendrl-node-agent-3.2",
-                'action': 'dnf',
-                'object_type': 'general',
-                'status': 'processing',
-                'attributes': {
-                    'name': 'abc',
-                    'list': ["wget", "rpm-build"],
+    def test_apijob_missing_argument(self):
+        nodeApiJob = {
+            'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
+            "node_name": "fqdn",
+            "node_version": "3.2.0",
+            "flow": "PackageInstall",
+            "status": "processing",
+            "parameters": {
+                'name': 'abc',
+            'list': ["wget", "rpm-build"],
                     'conf_file': "/etc/abc.conf",
-                    'state': True,
-                    'enablerepo': ["a1", "a2", "a3"],
-                    'disablerepo': []},
-            }
-            sdsoper = ApiJobValidator(getSchemaFile("node"))
-            status, error = sdsoper.validateApi(nodeApiJob)
-            assert error == "Input argument(s) not defined "
-            + "in yaml file: ['state']"
-            assert not status
-
-        def test_apijob_attribute_not_found(self):
-            nodeApiJob = {
-                'cluster_id': "49fa2adde8a6e98591f0f5cb4bc5f44d",
-                "node_agent_nvr": "tendrl-node-agent-3.2",
-                'action': 'dnf',
-                'object_type': 'general',
-                'status': 'processing',
-            }
-            sdsoper = ApiJobValidator(getSchemaFile("node"))
-            status, error = sdsoper.validateApi(nodeApiJob)
-            assert error == "Input argument(s) not defined "
-            + "in yaml file: ['state']"
-            assert not status
+                'state': True,
+            'enablerepo': ["a1", "a2", "a3"],
+                'disablerepo': []},
+        }
+        sdsoper = ApiJobValidator(getSchemaFile("node"))
+        status, error = sdsoper.validateApi(nodeApiJob)
+        assert error == "Input argument(s) not defined "\
+        + "in yaml file: ['state']"
+        assert not status

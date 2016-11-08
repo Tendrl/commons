@@ -139,91 +139,114 @@ class ApiJobValidator(object):
             return (False, "atoms not found for the flow: %s" % (flowName))
         return (True, '')
 
-    def checkAtom(self, atom, objType=None):
-        if not objType:
-            if atom.find('.') < -1:
-                return (False, "object name not specified"
-                        + "for the atom: %s" % (atom))
-            else:
-                objType, atom = atom.split('.')
+    def checkAtom(self, atom):
         # Check object defined in yaml
-        obj = self.yamlObj.get('object_details', {})
-        if not obj.get(objType):
+        objName, con, oper = atom.split('.')
+        obj = self.yamlObj.get('object_details', {}).get(objName, {})
+        if not obj:
             return (False,
-                    "object details not found for the object type: %s" % (
-                        objType))
+                    "object atom details not found for:%s" % (objName))
+        obj = obj.get(con, {}).get(oper, {})
         # Check whether atoms defined
-        if not obj.get(objType, {}).get('atoms', {}).get(atom):
+        if not obj:
             return (False,
-                    "atom:%s details not found in the object:%s" % (
-                        atom, objType))
-        if 'uuid' not in obj.get(objType).get('atoms').get(atom):
+                    "atom:%s details not found for:%s" % (oper, objName))
+        if 'uuid' not in obj:
             return (False,
-                    "uuid not found for the atom:%s.%s" % (objType, atom))
-        if 'flows' not in obj.get(objType).get('atoms').get(atom):
-            return (False,
-                    "atom:%s.%s does not have any flow" % (objType, atom))
-        if 'uuid' not in obj.get(objType).get('atoms').get(atom):
-            return (False,
-                    "uuid not found for the atom:%s" % (atom))
+                    "uuid not found for the atom:%s.%s" % (objName, atom))
         return (True, '')
 
-    def getFlowFromAtom(self, atom, objType):
-        return self.yamlObj.get('object_details', {}).get(
-            objType, {}).get('atoms', {}).get(atom)
+    def getAtomNamesFromFlow(self, flow):
+        return self.yamlObj.get('flows', {}).get(
+            flow, {}).get('atoms', {})
 
-    def checkJobRequiredAttr(self, gvnAttr, reqAttr):
-        # gvnAttr is the list of given attribute for a job request
-        # reqAttr is the required attribute for the job mentioned in yaml
-        missingInputParm = set(reqAttr).difference(set(gvnAttr))
+    def checkJobRequiredParm(self, gvnParm, reqParm):
+        # gvnParm is the list of given parameters for a job request
+        # reqParm is the required parms for the job mentioned in yaml
+        reqParm = [p.split(".")[-1] for p in reqParm]
+        missingInputParm = set(reqParm).difference(set(gvnParm))
         if missingInputParm != set():
             return (False,
                     "Missing input argument(s) %s" % (list(missingInputParm)))
         return(True, '')
 
-    def checkJobAttrDefined(self, gvnAttr, docAttr):
+    def checkJobParmDefined(self, gvnParm, docParm):
         # checking whether given arguments are defined in the yaml file
-        missingConfigParm = set(gvnAttr).difference(set(docAttr))
+        docParm = [p.split(".")[-1] for p in docParm]
+        missingConfigParm = set(gvnParm).difference(set(docParm))
         if missingConfigParm != set():
             return (False, "Input argument(s) not defined in yaml file: %s" % (
                 list(missingConfigParm)))
         return (True, '')
 
-    def checkInputType(self, objTypeName, gvnAttr):
+    def getParmPath(self, gvnParm, docParm):
+        iParmAndObj = {}
+        for p in docParm:
+            if p.split('.')[-1] in gvnParm:
+                iParmAndObj[p] = gvnParm[p.split('.')[-1]]
+        return iParmAndObj
+
+    def checkParmType(self, gvnParm, parmRequired=True):
         # Check the given input parameter's type using
-        # the attributes of the object type.
-        attrs = self.yamlObj['object_details'][objTypeName]['attrs']
-        for inputParm, inputVal in gvnAttr.items():
+        # the parameters of the object type.
+        objTypeName, parmName = gvnParm.split(".")
+        parms = self.yamlObj['object_details'][objTypeName]['attrs']
+        if gvnParm not in parms:
+            if parmRequired:
+                return (False, "Given input parameters" +
+                        ":%s not defined" % (gvnParm))
+            # else (pass) Its an optional parameter
+
+    def checkInputType(self, gvnParm):
+        # Check the given input parameter's type using
+        # the parameters of the object type.
+        for parm, val in gvnParm.items():
             # Some arguments does not required any purticular type.
             # Contine validating next parm if the type of the
             # inputparm not defined in yaml.
-            if inputParm not in attrs:
+            iObjType, iParm = parm.split(".")
+            
+            parms = self.yamlObj['object_details'][iObjType]['attrs']
+            if iParm not in parms:
                 continue
-            expectedType = attrs[inputParm].get('type')
+            expectedType = parms[iParm].get('type')
             # A) Check whether given value type is custom type
             if expectedType not in PRIMITIVE_TYPES.keys():
                 status = self._checkCustomType(expectedType,
-                                               inputParm,
-                                               inputVal)
+                                               iParm,
+                                               val)
                 if status[0]:
-                    # continue to validate remaining attr
+                    # continue to validate remaining parm
                     continue
                 else:
                     return status
-            # B) General type attributes
+            # B) General type parameters
             # Check the given value type is valid and
             # its matched with the required type defined in yaml
-            if not PRIMITIVE_TYPES[expectedType](inputVal):
+            if not PRIMITIVE_TYPES[expectedType](val):
                 return (False, "Invalid parameter type: "
                         + "%s. Expected value type is: %s" % (
-                            inputParm, expectedType))
+                            iParm, expectedType))
         return(True, "")
 
-    def getFlowAttrs(self, flowName):
+    def getFlowParms(self, flowName):
+        """ This function will return mandatory and
+        optional parameters of the given flow from the loaded yaml"""
         return (self.yamlObj.get("flows", {}).get(
             flowName, {}).get("inputs", {}).get("mandatory"),
             self.yamlObj.get("flows", {}).get(
                 flowName, {}).get("inputs", {}).get("optional"))
+
+    def getAtomParms(self, atom):
+        """ This function will return mandatory and
+        optional parameters of the given atom from the loaded yaml"""
+        objType, con, atomName = atom.split(".")
+        return (self.yamlObj.get("object_details", {}).get(
+            objType, {}).get(con, {}).get(atomName, {}).get(
+                "inputs",{}).get("mandatory"),
+                self.yamlObj.get("object_details", {}).get(
+                    objType, {}).get(con, {}).get(atomName, {}).get(
+                        "inputs", {}).get("optional"))
 
     def _checkCustomType(self, customType, inputParm, inputVal):
         def _check(inputVal, cType=customType):
@@ -259,44 +282,59 @@ class ApiJobValidator(object):
 
         if "cluster_id" not in apiJob:
             return (False, "Cluster id not found in the api job")
-        if "action" not in apiJob:
-            return (False, "action not found in the api job")
-        if "object_type" not in apiJob:
-            return (False, "object type not found in the api job")
-        if "attributes" not in apiJob:
-            return (False, "attributes not found in the api job")
+        if "flow" not in apiJob:
+            return (False, "flow not found in the api job")
+        if "parameters" not in apiJob:
+            return (False, "parameters not found in the api job")
 
-        status = self.checkAtom(apiJob["action"], apiJob["object_type"])
+        # Checking flow details!
+        status = self.checkFlow(apiJob["flow"])
         if not status[0]:
             return status
-
-        atom = self.getFlowFromAtom(apiJob["action"], apiJob["object_type"])
-        flows = atom['flows']
-
-        for flowName in flows:
-            status = self.checkFlow(flowName)
+        reqParm, optParm = self.getFlowParms(apiJob["flow"])
+        # no need to check anything if no parameters are required
+        if reqParm:
+            # check whether all the required parameters are given
+            status = self.checkJobRequiredParm(apiJob["parameters"], reqParm)
+            if not status[0]:
+                return status
+            # check whether all the parameters are defined in yaml
+            status = self.checkJobParmDefined(apiJob["parameters"],
+                                              reqParm + optParm)
+            if not status[0]:
+                return status
+            # check given parameters type
+            inputParmWithObj = self.getParmPath(apiJob["parameters"],
+                                                reqParm + optParm)
+            status = self.checkInputType(inputParmWithObj)
             if not status[0]:
                 return status
 
-            reqAttr, optAttr = self.getFlowAttrs(flowName)
-            # no need to check anything if no parameters are required
-            if not reqAttr:
-                continue  # for next flow
-
-            # check whether all the required attributes are given
-            status = self.checkJobRequiredAttr(apiJob["attributes"], reqAttr)
+        # Checking atoms of the flow
+        atoms = self.getAtomNamesFromFlow(apiJob["flow"])
+        if not atoms:
+            return (False,
+                    "flow:%d does not have any atom defined" % apiJob["flow"])
+        for atom in atoms:
+            status = self.checkAtom(atom)
             if not status[0]:
                 return status
-
-            # check whether all the attributes are defined in yaml
-            status = self.checkJobAttrDefined(apiJob["attributes"],
-                                              reqAttr + optAttr)
+            reqParm, optParm =  self.getAtomParms(atom)
+            if not reqParm:
+                return (True, '')
+            # check whether all the required parameters are given
+            status = self.checkJobRequiredParm(apiJob["parameters"], reqParm)
             if not status[0]:
                 return status
-
-            # check the given attributes type
-            status = self.checkInputType(apiJob["object_type"],
-                                         apiJob["attributes"])
+            # check whether all the parameters are defined in yaml
+            status = self.checkJobParmDefined(apiJob["parameters"],
+                                              reqParm + optParm)
+            if not status[0]:
+                return status
+            # check given parameters type
+            inputParmWithObj = self.getParmPath(apiJob["parameters"],
+                                                reqParm + optParm)
+            status = self.checkInputType(inputParmWithObj)
             if not status[0]:
                 return status
         # all check passed successfully!

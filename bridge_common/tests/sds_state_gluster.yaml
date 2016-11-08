@@ -68,23 +68,21 @@ object_details:
                 required: True
           inputs:
             mandatory:
-              - volname
-              - brickdetails
+              - volume.volname
+              - volume.brickdetails
             optional:
-              - stripe_count
-              - replica_count
-              - arbiter_count
-              - disperse_count
-              - disperse_data_count
-              - redundancy_count
-              - transport
-              - brickdetails
-              - force
+              - volume.stripe_count
+              - volume.replica_count
+              - volume.arbiter_count
+              - volume.disperse_count
+              - volume.disperse_data_count
+              - volume.redundancy_count
+              - volume.transport
+              - volume.force
           version: "0.1.0"
         delete:
           enabled: True
           uuid: "242f6190-9b37-11e6-950d-a24fc0d9649c"
-          flows: ["DeleteVolume"]
           run: "tendrl.gluster_bridge.atoms.volume.create.Create"
           type: "create"
         stop:
@@ -103,12 +101,13 @@ object_details:
         type: String
         help: "Gluster volume name"
 flows:
-  CreateVolume:
+  CreateGlusterVolume:
     enabled: True
     tendrl_context: "$cluster.id"
     uuid: "1951e821-7aa9-4a91-8183-e73bc8275b8e"
     description: "Create Volume with pre-existing bricks"
-    atoms: ["volume.create"]
+    atoms:
+      - volume.atoms.create
     pre_run : []
     post_run: []
     run: "tendrl.gluster_bridge.flows.create_volume.CreateVolume"
@@ -119,17 +118,17 @@ flows:
           required: True
     inputs:
       mandatory:
-        - volname
-        - brickdetails
+        - volume.volname
+        - volume.brickdetails
       optional:
-        - stripe_count
-        - replica_count
-        - arbiter_count
-        - disperse_count
-        - disperse_data_count
-        - redundancy_count
-        - transport
-        - force
+        - volume.stripe_count
+        - volume.replica_count
+        - volume.arbiter_count
+        - volume.disperse_count
+        - volume.disperse_data_count
+        - volume.redundancy_count
+        - volume.transport
+        - volume.force
     version: "0.1.0"
   StartVolume:
     enabled: True
@@ -147,6 +146,6 @@ flows:
           required: True
     inputs:
       mandatory:
-        - volname
+        - volume.volname
       optional: ~
     version: "0.1.0"

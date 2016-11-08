@@ -29,7 +29,6 @@ object_details:
             dnf:
               uuid: "874dd5ad-3138-4e8a-86d3-ec39787a9020"
               name: "dnf"
-              flows: ["PackageInstall"]
               description: "Manages packages with the dnf package manager"
               run: "atoms.dnf.run.run(*args, **kwargs)"
               type: "action"
@@ -41,13 +40,13 @@ object_details:
               global_inputs: None
               inputs:
                 mandatory:
-                   - list
-                   - enablerepo
-                   - name
+                   - general.list
+                   - general.enablerepo
+                   - general.name
                 optional:
-                   - disablerepo
-                   - conf_file
-                   - status
+                   - general.disablerepo
+                   - general.conf_file
+                   - general.status
               version: 0.1.0
 flows:
       PackageInstall:
@@ -65,11 +64,11 @@ flows:
           - "A map of type {object.attr1 : {required: True}, object.attr2:{required: False}}"
         inputs:
            mandatory:
-              - list
-              - enablerepo
-              - name
+              - general.list
+              - general.enablerepo
+              - general.name
            optional:
-              - disablerepo
-              - conf_file
-              - status
+              - general.disablerepo
+              - general.conf_file
+              - general.status
         version: "0.0.1"
