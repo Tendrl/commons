@@ -15,4 +15,4 @@ def setup_logging(
             log_config = yaml.safe_load(f.read())
         logging.config.dictConfig(log_config)
     else:
-        logging.basicConfig(level=logging.INFO)
+        raise Exception("logging configuration not found")
