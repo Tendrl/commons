@@ -9,13 +9,15 @@ import os
 import sys
 
 sys.path.insert(0, '../../')
-from bridge_common.JobValidator.api import ApiJobValidator
+from tendrl.bridge_common.JobValidator.api import ApiJobValidator
+from tendrl.bridge_common import util
 
 
 def getSchemaFile(schemaName):
     localpath = os.path.dirname(__file__)
     path = os.path.join(localpath, "sds_state_" + schemaName + '.yaml')
-    return path
+    # return yaml.load(open(path))
+    return util.loadSchema(path)[1]
 
 
 class TestValidateJobApi(object):
@@ -140,12 +142,6 @@ class TestValidateJobApi(object):
         assert error == "Missing input argument(s) ['volname']"
         assert not status
 
-        glusterApiJob['parameters'].pop('brickdetails')
-        status, error = sdsoper.validateApi(glusterApiJob)
-        # stripe_count is an optional param
-        assert error == "Missing input argument(s) ['volname', 'brickdetails']"
-        assert not status
-
     def test_apijob_with_wrong_argument_name(self):
         # Invalid argument names passed which are not defined
         glusterApiJob = {
@@ -164,13 +160,9 @@ class TestValidateJobApi(object):
         }
         sdsoper = ApiJobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
-        assert error == "Input argument(s) not defined in "\
-            "yaml file: ['myvolumename', 'blabla']"
-
-        glusterApiJob["parameters"]["testvar"] = "blabla"
-        status, error = sdsoper.validateApi(glusterApiJob)
-        assert error == "Input argument(s) not defined in yaml file: "\
-            "['testvar', 'myvolumename', 'blabla']"
+        assert error.find("argument(s) not defined") > 0
+        assert error.find('myvolumename') > 0
+        assert error.find('blabla') > 0
         assert not status
 
     def test_apijob_missing_argument(self):
@@ -180,16 +172,15 @@ class TestValidateJobApi(object):
             "node_version": "3.2.0",
             "flow": "PackageInstall",
             "status": "processing",
-            "parameters": {
-                'name': 'abc',
-            'list': ["wget", "rpm-build"],
-                    'conf_file': "/etc/abc.conf",
-                'state': True,
-            'enablerepo': ["a1", "a2", "a3"],
-                'disablerepo': []},
+            "parameters": {'name': 'abc',
+                           'list': ["wget", "rpm-build"],
+                           'conf_file': "/etc/abc.conf",
+                           'state': True,
+                           'enablerepo': ["a1", "a2", "a3"],
+                           'disablerepo': []},
         }
         sdsoper = ApiJobValidator(getSchemaFile("node"))
         status, error = sdsoper.validateApi(nodeApiJob)
-        assert error == "Input argument(s) not defined "\
-        + "in yaml file: ['state']"
+        assert error == "Input argument(s) not defined " + "\
+in yaml file: ['state']"
         assert not status

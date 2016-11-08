@@ -8,15 +8,19 @@ valid_objects:
 
 object_details:
   tendrl_context:
-    enabled: True
-    value: /clusters/$cluster.id/tendrl_context
+    enabled: true
     attrs:
-      sds_nvr:
+      cluster_id: 
+        help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
         type: String
-        help: "gluster-3.8.3"
+      sds_name: 
+        help: "Name of the Tendrl managed sds, eg: 'gluster'"
+        type: String
+      sds_version: 
+        help: "Version of the Tendrl managed sds, eg: '3.2.1'"
+        type: String
   volume:
-    enabled: True
-    value: "/clusters/$cluster.id/volumes/$volume.id"
+    enabled: true
     attrs:
       volname:
         type: String
@@ -92,7 +96,6 @@ object_details:
           type: "create"
   brick:
     enabled: True
-    value: "/clusters/$cluster.id/volumes/$volume.id/bricks/$brick.id"
     attrs:
       brickdetails:
         type: String

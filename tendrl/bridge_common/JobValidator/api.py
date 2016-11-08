@@ -23,9 +23,7 @@
 # perdefined sds_operation_schema in the yaml file.
 
 
-import os
 import six
-import yaml
 
 
 PRIMITIVE_TYPES = {'Boolean': lambda value: isinstance(value, bool),
@@ -39,121 +37,176 @@ PRIMITIVE_TYPES = {'Boolean': lambda value: isinstance(value, bool),
 
 
 class ApiJobValidateException(Exception):
-    code = 0
     message = "Api Job Validate Exception"
 
-    def __init__(self, code=0, message='Api Job Validate Exception'):
-        self.code = code
+    def __init__(self, message='Api Job Validate Exception'):
         self.message = message
 
     def __str__(self):
         return self.message
 
     def response(self):
-        return {'status': {'code': self.code, 'message': str(self)}}
-
-
-class FailedLoadingSchemaException(ApiJobValidateException):
-    code = 1001
-    message = "Unable to load the schema file"
+        return {'status': {'message': str(self)}}
 
 
 class ValidObjectsNotFoundException(ApiJobValidateException):
-    code = 1002
     message = "Valid objects not found in the yaml file"
 
 
 class ObjectDetailsNotFoundException(ApiJobValidateException):
-    code = 1003
     message = "Object details not found in the yaml file"
 
 
 class FlowDetailsNotFoundException(ApiJobValidateException):
-    code = 1004
     message = "Flow details not found in the yaml file"
 
 
-def loadSchema(schemaFile):
-    try:
-        # Check api operation schema file exists
-        if not os.path.isfile(schemaFile):
-            return (False,
-                    "Error: Schema file '" + schemaFile + "' does not exists.")
-
-        # load api operation schema file and return
-        try:
-            code = open(schemaFile)
-        except IOError as exc:
-            return (False,
-                    "Error loading schema file '" + schemaFile + "': " + exc)
-
-        # Parse schema file
-        try:
-            config = yaml.load(code)
-        except yaml.YAMLError as exc:
-            error_pos = ""
-            if hasattr(exc, 'problem_mark'):
-                error_pos = " at position: (%s:%s)" % (
-                    exc.problem_mark.line + 1,
-                    exc.problem_mark.column + 1)
-            msg = "Error loading schema file '" + schemaFile + "'" + error_pos \
-                + ": content format error: Failed to parse yaml format"
-            return False, msg
-
-    except Exception as e:
-        return (False, "Error loading api operation schema file '%s': %s" % (
-            schemaFile, str(e)))
-
-    return (True, config)
-
-
 class ApiJobValidator(object):
-    def __init__(self, schemaFilePath):
+    def __init__(self, schemaFile):
         self.yamlObj = None
-        status = loadSchema(schemaFilePath)
-        # load schema into memory only on success
-        if not status[0]:
-            raise FailedLoadingSchemaException(1, status[1])
         # validate yaml schema file
-        if not status[1].get('valid_objects'):
+        if not schemaFile.get('valid_objects'):
             raise ValidObjectsNotFoundException()
-        if not status[1].get('object_details'):
+        if not schemaFile.get('object_details'):
             raise ObjectDetailsNotFoundException()
-        if not status[1].get('flows'):
+        if not schemaFile.get('flows'):
             raise FlowDetailsNotFoundException()
-        self.yamlObj = status[1]
+        self.yamlObj = schemaFile
 
     def checkFlow(self, flowName):
+        if self.yamlObj['tendrl_schema_version'] == 0.1:
+            return self.checkFlowV1(flowName)
+
+    def checkAtom(self, atom):
+        if self.yamlObj['tendrl_schema_version'] == 0.1:
+            return self.checkAtomV1(atom)
+
+    def validateApi(self, apiJob):
+        if self.yamlObj['tendrl_schema_version'] == 0.1:
+            return self.validateApiV1(apiJob)
+
+    def checkFlowV1(self, flowName):
         # Check flow exists
         flow = self.yamlObj['flows'].get(flowName)
         if not flow:
-            return (False, "Flow: %s not defined" % (flowName))
+            return (False,
+                    "Flow: %s not defined" %
+                    (flowName))
         # Check flow enabled
         if flow.get('enabled') is not True:
-            return (False, "Flow: %s not enabled" % (flowName))
+            return (False,
+                    "Flow: %s not enabled" %
+                    (flowName))
         # Check uuid exists
         if 'uuid' not in flow:
-            return (False, "uuid not found for the flow: %s" % (flowName))
+            return (False,
+                    "uuid not found for the flow: %s" %
+                    (flowName))
         # Check atoms exists
         if 'atoms' not in flow:
-            return (False, "atoms not found for the flow: %s" % (flowName))
+            return (False,
+                    "atoms not found for the flow: %s" %
+                    (flowName))
+        return (True, '')
+        if 'inputs' not in flow:
+            return (False,
+                    "inputs not found for the flow: %s" %
+                    (flowName))
+        if 'mandatory' not in flow['inputs']:
+            return (False,
+                    "mandatory field not found in inputs of a flow: %s" %
+                    (flowName))
+        if 'outputs' not in flow:
+            return (False,
+                    "outputs not found for the flow: %s" %
+                    (flowName))
+        if 'run' not in flow:
+            return (False,
+                    "run not found for the flow: %s" %
+                    (flowName))
+        elif flow['run'] == "":
+            return (False,
+                    "no value set for attribute run for the flow: %s" %
+                    (flowName))
+        if 'version' not in flow:
+            return (False,
+                    "version not found for the flow: %s" %
+                    (flowName))
+        elif flow['version'] == "":
+            return (False,
+                    "no value set for attribute version for the flow: %s" %
+                    (flowName))
+        if 'type' not in flow:
+            return (False,
+                    "type not found for the flow: %s" %
+                    (flowName))
+        elif flow['type'] == "":
+            return (False,
+                    "no value set for attribute type for the flow: %s" %
+                    (flowName))
         return (True, '')
 
-    def checkAtom(self, atom):
+    def checkAtomV1(self, atom):
         # Check object defined in yaml
         objName, con, oper = atom.split('.')
         obj = self.yamlObj.get('object_details', {}).get(objName, {})
         if not obj:
             return (False,
-                    "object atom details not found for:%s" % (objName))
+                    "object atom details not found for:%s" %
+                    (objName))
         obj = obj.get(con, {}).get(oper, {})
         # Check whether atoms defined
         if not obj:
             return (False,
-                    "atom:%s details not found for:%s" % (oper, objName))
+                    "atom:%s details not found for:%s" %
+                    (oper, objName))
         if 'uuid' not in obj:
             return (False,
-                    "uuid not found for the atom:%s.%s" % (objName, atom))
+                    "uuid not found for the atom:%s.%s" %
+                    (objName, atom))
+        elif obj['uuid'] == "":
+            return (False,
+                    "no value set for attribute uuid for the atom:%s.%s" %
+                    (objName, atom))
+        if 'enabled' not in obj:
+            return (False,
+                    "enabled not found for the atom:%s.%s" % (objName, atom))
+        if 'name' not in obj:
+            return (False,
+                    "name not found for the atom:%s.%s" %
+                    (objName, atom))
+        elif obj['name'] == "":
+            return (False,
+                    "no value set for attribute name for the atom:%s.%s" %
+                    (objName, atom))
+        if 'outputs' not in obj:
+            return (False,
+                    "uuid not found for the atom:%s.%s" %
+                    (objName, atom))
+        if 'inputs' not in obj:
+            return (False,
+                    "inputs not found for the atom:%s.%s" %
+                    (objName, atom))
+        if 'mandatory' not in obj['inputs']:
+            return (False,
+                    "mandatory field not found in inputs of the atom: %s" %
+                    (objName, atom))
+        if 'run' not in obj:
+            return (False,
+                    "run not found for the atom:%s.%s" %
+                    (objName, atom))
+        elif obj['run'] == "":
+            return (False,
+                    "no value set for attribute run for the atom:%s.%s" %
+                    (objName, atom))
+        if 'type' not in obj:
+            return (False,
+                    "type not found for the atom:%s.%s" %
+                    (objName, atom))
+        elif obj['type'] == "":
+            return (False,
+                    "no value set for attribute type for the atom:%s.%s" %
+                    (objName, atom))
         return (True, '')
 
     def getAtomNamesFromFlow(self, flow):
@@ -205,7 +258,7 @@ class ApiJobValidator(object):
             # Contine validating next parm if the type of the
             # inputparm not defined in yaml.
             iObjType, iParm = parm.split(".")
-            
+
             parms = self.yamlObj['object_details'][iObjType]['attrs']
             if iParm not in parms:
                 continue
@@ -230,23 +283,27 @@ class ApiJobValidator(object):
         return(True, "")
 
     def getFlowParms(self, flowName):
-        """ This function will return mandatory and
-        optional parameters of the given flow from the loaded yaml"""
+        """This function will return mandatory and
+
+        optional parameters of the given flow from the loaded yaml
+        """
         return (self.yamlObj.get("flows", {}).get(
             flowName, {}).get("inputs", {}).get("mandatory"),
             self.yamlObj.get("flows", {}).get(
                 flowName, {}).get("inputs", {}).get("optional"))
 
     def getAtomParms(self, atom):
-        """ This function will return mandatory and
-        optional parameters of the given atom from the loaded yaml"""
+        """This function will return mandatory and
+
+        optional parameters of the given atom from the loaded yaml
+        """
         objType, con, atomName = atom.split(".")
         return (self.yamlObj.get("object_details", {}).get(
             objType, {}).get(con, {}).get(atomName, {}).get(
-                "inputs",{}).get("mandatory"),
-                self.yamlObj.get("object_details", {}).get(
-                    objType, {}).get(con, {}).get(atomName, {}).get(
-                        "inputs", {}).get("optional"))
+                "inputs", {}).get("mandatory"),
+            self.yamlObj.get("object_details", {}).get(
+                objType, {}).get(con, {}).get(atomName, {}).get(
+                    "inputs", {}).get("optional"))
 
     def _checkCustomType(self, customType, inputParm, inputVal):
         def _check(inputVal, cType=customType):
@@ -276,7 +333,7 @@ class ApiJobValidator(object):
             # Its a non-array custom type
             return _check([inputVal])
 
-    def validateApi(self, apiJob):
+    def validateApiV1(self, apiJob):
         if not self.yamlObj:
             return (False, "Validating schema not loaded!")
 
@@ -319,7 +376,7 @@ class ApiJobValidator(object):
             status = self.checkAtom(atom)
             if not status[0]:
                 return status
-            reqParm, optParm =  self.getAtomParms(atom)
+            reqParm, optParm = self.getAtomParms(atom)
             if not reqParm:
                 return (True, '')
             # check whether all the required parameters are given
