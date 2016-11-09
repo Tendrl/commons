@@ -6,8 +6,7 @@ object_details:
     atoms: 
       create: 
         enabled: true
-        flow: TendrlFlow1
-        inputs: 
+        inputs:
           mandatory: 
             - "A unique set/list of mandatory attribute names [object1.attribute1...] for ensuring valid input attributes are provided in the incoming tendrl api job"
           optional: 

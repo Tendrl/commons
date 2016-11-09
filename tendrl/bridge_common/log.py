@@ -3,6 +3,10 @@ import os
 import yaml
 
 
+from tendrl.bridge_common.config import TendrlConfig
+config = TendrlConfig()
+
+
 def setup_logging(
     log_cfg_path='/etc/tendrl/logging.yaml',
     default_log_level=logging.INFO
@@ -16,3 +20,9 @@ def setup_logging(
         logging.config.dictConfig(log_config)
     else:
         raise Exception("logging configuration not found")
+
+
+setup_logging(
+    config.get('bridge_common', 'log_cfg_path'),
+    config.get('bridge_common', 'log_level')
+)
