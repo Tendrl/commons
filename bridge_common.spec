@@ -12,8 +12,9 @@ BuildRequires: python2-devel
 BuildRequires: pytest
 BuildRequires: systemd
 
-Requires: python-etcd
 Requires: python-dateutil
+Requires: python-etcd
+Requires: python-systemd
 
 %description
 Common python module usable by all Tendrl SDS Bridges
