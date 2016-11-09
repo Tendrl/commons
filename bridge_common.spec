@@ -8,9 +8,10 @@ Group:   Applications/System
 License: LGPLv2+
 URL: https://github.com/Tendrl/bridge_common
 
+BuildRequires: python-mock
+BuildRequires: systemd
 BuildRequires: python2-devel
 BuildRequires: pytest
-BuildRequires: systemd
 
 Requires: python-dateutil
 Requires: python-etcd
@@ -37,7 +38,7 @@ install -m 755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/common
 install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/commons/tendrl.conf.sample
 
 %check
-py.test -v bridge_common/tests
+py.test -v tendrl/bridge_common/tests
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/common
