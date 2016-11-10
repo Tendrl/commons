@@ -33,4 +33,4 @@ def loadSchema(schemaFile):
         return (False, "Error loading api operation schema file '%s': %s" % (
             schemaFile, str(e)))
 
-    return (True, config)
+    return config
