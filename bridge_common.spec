@@ -4,14 +4,15 @@ Release: 1%{?dist}
 BuildArch: noarch
 Summary: Common Module for all Bridges
 Source0: %{name}-%{version}.tar.gz
-Group:   Applications/System
 License: LGPLv2+
 URL: https://github.com/Tendrl/bridge_common
 
-BuildRequires: python-mock
-BuildRequires: systemd
-BuildRequires: python2-devel
 BuildRequires: pytest
+BuildRequires: python2-devel
+BuildRequires: python-mock
+BuildRequires: python-six
+BuildRequires: systemd
+BuildRequires: python-yaml
 
 Requires: python-dateutil
 Requires: python-etcd
@@ -22,9 +23,6 @@ Common python module usable by all Tendrl SDS Bridges
 
 %prep
 %setup
-# Remove the requirements file to avoid adding into
-# distutils requiers_dist config
-rm -rf {test-,}requirements.txt
 
 # Remove bundled egg-info
 rm -rf %{name}.egg-info
@@ -34,8 +32,8 @@ rm -rf %{name}.egg-info
 
 %install
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-install -m 755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/common
-install -Dm 755 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/commons/tendrl.conf.sample
+install -m 644 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/common
+install -Dm 644 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/commons/tendrl.conf.sample
 
 %check
 py.test -v tendrl/bridge_common/tests

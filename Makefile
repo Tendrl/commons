@@ -1,40 +1,21 @@
-# store the current working directory
-CWD := $(shell pwd)
-BASEDIR := $(CWD)
-PRINT_STATUS = export EC=$$?; cd $(CWD); if [ "$$EC" -eq "0" ]; then printf "SUCCESS!\n"; else exit $$EC; fi
+NAME=tendrl-bridge-common
 VERSION=0.0.1
 
-BUILDS    := .build
-DEPLOY    := $(BUILDS)/deploy
-TARDIR    := tendrl-bridge-common-$(VERSION)
-RPMBUILD  := $(HOME)/rpmbuild
+all: srpm
 
+clean:
+	rm -rf dist/
+	rm -rf $(NAME)-$(VERSION).tar.gz
+	rm -rf $(NAME)-$(VERSION)-1.el7.src.rpm
 
 dist:
-	rm -fr $(HOME)/$(BUILDS)
-	mkdir -p $(HOME)/$(BUILDS) $(RPMBUILD)/SOURCES
-	cp -fr $(BASEDIR) $(HOME)/$(BUILDS)/$(TARDIR)
-	rm -rf $(HOME)/$(BUILDS)/$(TARDIR)/*.egg-info
-	cd $(HOME)/$(BUILDS); \
-	tar --exclude-vcs --exclude=.* -zcf tendrl-bridge-common-$(VERSION).tar.gz $(TARDIR); \
-	cp tendrl-bridge-common-$(VERSION).tar.gz $(RPMBUILD)/SOURCES
-	# Cleaning the work directory
-	rm -fr $(HOME)/$(BUILDS)
+	python setup.py sdist \
+	  && mv dist/$(NAME)-$(VERSION).tar.gz .
 
+srpm: dist
+	fedpkg --dist epel7 srpm
 
-rpm:
-	@echo "target: rpm"
-	@echo  "  ...building rpm $(V_ARCH)..."
-	rm -fr $(BUILDS)
-	mkdir -p $(DEPLOY)/latest
-	mkdir -p $(RPMBUILD)/SPECS
-	sed -e "s/@VERSION@/$(VERSION)/" bridge_common.spec \
-	        > $(RPMBUILD)/SPECS/bridge_common.spec
-	rpmbuild -ba $(RPMBUILD)/SPECS/bridge_common.spec
-	$(PRINT_STATUS); \
-	if [ "$$EC" -eq "0" ]; then \
-		FILE=$$(readlink -f $$(find $(RPMBUILD)/RPMS -name tendrl-bridge-common-$(VERSION)*.rpm)); \
-		cp -f $$FILE $(DEPLOY)/latest/; \
-		printf "\nThe bridge common RPMs are located at:\n\n"; \
-		printf "   $(DEPLOY)/latest\n\n\n\n"; \
-	fi
+rpm: dist
+	mock -r epel-7-x86_64 rebuild $(NAME)-$(VERSION)-1.el7.src.rpm --resultdir=.
+
+.PHONY: dist rpm srpm
