@@ -138,14 +138,14 @@ class JobValidator(object):
         if not obj:
             return (False,
                     "object atom details not found for:%s" %
-                    (obj))
+                    (obj_name))
         # get the atom
         atom = obj.get(con, {}).get(atom_name, {})
         # Check whether atoms defined
         if not atom:
             return (False,
                     "atom:%s details not found for:%s" %
-                    (obj_name, atom_name))
+                    (atom_name, obj_name))
         if 'uuid' not in atom:
             return (False,
                     "uuid not found for the atom:%s.%s" %
@@ -170,7 +170,7 @@ class JobValidator(object):
             return (False,
                     "inputs not found for the atom:%s.%s" %
                     (obj_name, atom_name))
-        # TODO(rohan) fix this mandatory check for flow injected params
+        # TODO(rohan) fix this mandatory check for flow injected inputs
  #       if 'mandatory' not in atom['inputs']:
  #           return (False,
  #                   "mandatory field not found in inputs of the atom: %s.%s" %
@@ -218,17 +218,6 @@ class JobValidator(object):
             if p.split('.')[-1] in gvnParm:
                 iParmAndObj[p] = gvnParm[p.split('.')[-1]]
         return iParmAndObj
-
-    def checkParmType(self, gvnParm, parmRequired=True):
-        # Check the given input parameter's type using
-        # the parameters of the object type.
-        objTypeName, parmName = gvnParm.split(".")
-        parms = self.yamlObj['object_details'][objTypeName]['attrs']
-        if gvnParm not in parms:
-            if parmRequired:
-                return (False, "Given input parameters" +
-                        ":%s not defined" % (gvnParm))
-            # else (pass) Its an optional parameter
 
     def checkInputType(self, gvnParm, objects):
         # Check the given input parameter's type using
