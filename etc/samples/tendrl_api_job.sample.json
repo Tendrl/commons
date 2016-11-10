@@ -18,11 +18,12 @@
 }
 
 # node agent api job sample
+# if job is intended for a specific node_agent, use "node_uuid"
+
 
 {
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
-	"node_name": "fqdn",
-	"node_version": "3.2.0",
+	"node_uuid": "node_uuid", 
 	"flow": "ImportGlusterCluster",
 	"status": "processing",
 	"parameters": {
