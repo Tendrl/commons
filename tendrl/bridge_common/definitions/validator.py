@@ -27,7 +27,9 @@ class JobValidateException(Exception):
 class DefinitionsSchemaValidatorException(Exception):
     message = "Tendrl Definitions Schema validation exception"
 
-    def __init__(self, message='Tendrl Definitions Schema validation exception'):
+    def __init__(self, message):
+        if not message:
+            message = 'Tendrl Definitions Schema validation exception'
         self.message = message
 
     def __str__(self):
@@ -40,8 +42,10 @@ class DefinitionsSchemaValidatorException(Exception):
 class NoNameSpaceFound(DefinitionsSchemaValidatorException):
     message = "No Tendrl Namespace found in the yaml file"
 
+
 class FlowDetailsNotFoundException(JobValidateException):
     message = "Flow details not found in the yaml file"
+
 
 class DefinitionsSchemaValidator(object):
     def __init__(self, definition_yaml):
@@ -57,11 +61,13 @@ class DefinitionsSchemaValidator(object):
                     msg = "No objects found in namespace %s" % namespace
                     raise DefinitionsSchemaValidatorException(msg)
                 definitions[".".join(namespace.split(".")[1:])] = defs
-        if bool(definitions) == False:
+        if definitions:
+            definitions['tendrl_schema_version'] = self.definitions_yaml[
+                'tendrl_schema_version']
+            return definitions
+        else:
             raise NoNameSpaceFound()
-        definitions['tendrl_schema_version'] = self.definitions_yaml[
-            'tendrl_schema_version']
-        return definitions
+
 
 class JobValidator(object):
     def __init__(self, definitions_dict):
@@ -171,10 +177,6 @@ class JobValidator(object):
                     "inputs not found for the atom:%s.%s" %
                     (obj_name, atom_name))
         # TODO(rohan) fix this mandatory check for flow injected inputs
- #       if 'mandatory' not in atom['inputs']:
- #           return (False,
- #                   "mandatory field not found in inputs of the atom: %s.%s" %
- #                   (obj_name, atom_name))
         if 'run' not in atom:
             return (False,
                     "run not found for the atom:%s.%s" %
