@@ -20,9 +20,10 @@ Installation
     $ mkvirtualenv bridge_common
     $ pip install .
 
-4. Create config file::
+4. Create config files::
 
     $ cp etc/tendrl/tendrl.conf.sample /etc/tendrl/tendrl.conf
+    $ cp etc/sample/logging.yaml.timedrotation.sample /etc/tendrl/bridge_common_logging.conf
 
 5. Edit config file ``/etc/tendrl/tendrl.conf`` as required
 

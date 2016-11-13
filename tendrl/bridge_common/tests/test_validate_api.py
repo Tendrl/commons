@@ -9,7 +9,7 @@ import os
 import sys
 
 sys.path.insert(0, '../../')
-from tendrl.bridge_common.JobValidator.api import ApiJobValidator
+from tendrl.bridge_common.definitions.validator import JobValidator
 from tendrl.bridge_common import util
 
 
@@ -35,29 +35,29 @@ class TestValidateJobApi(object):
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
         }
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
         assert status
 
     def test_atom(self):
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.checkAtom("volume.atoms.start")
         assert error == "atom:start details not found for:volume"
         assert not status
 
     def test_flow(self):
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.checkFlow("StopVolume")
         assert error == "Flow: StopVolume not defined"
         assert not status
 
     def test_getAtomsFromAtom(self):
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         flow = sdsoper.getAtomNamesFromFlow("CreateGlusterVolume")
         assert flow[0] == "volume.atoms.create"
 
     def test_flowAttrs(self):
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         assert type(sdsoper.getFlowParms(
             "CreateGlusterVolume")) == type(tuple(""))
 
@@ -72,7 +72,7 @@ class TestValidateJobApi(object):
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
         }
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.checkJobRequiredParm(
             glusterApiJob['parameters'], ['volname', 'brickdetails'])
         assert error == "Missing input argument(s) ['volname']"
@@ -90,7 +90,7 @@ class TestValidateJobApi(object):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         # Testing with invalid data type for strip_count
         glusterApiJob['parameters']['stripe_count'] = '10'
         status, error = sdsoper.validateApi(glusterApiJob)
@@ -131,7 +131,7 @@ class TestValidateJobApi(object):
                 'stripe_count': 10,
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
         }
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
         assert error == "Missing input argument(s) ['volname']"
         assert not status
@@ -158,7 +158,7 @@ class TestValidateJobApi(object):
                 'brickdetails': ['/mnt/brick1', '/mnt/brick2']},
             'errors': {}
         }
-        sdsoper = ApiJobValidator(getSchemaFile("gluster"))
+        sdsoper = JobValidator(getSchemaFile("gluster"))
         status, error = sdsoper.validateApi(glusterApiJob)
         assert error.find("argument(s) not defined") > 0
         assert error.find('myvolumename') > 0
@@ -179,7 +179,7 @@ class TestValidateJobApi(object):
                            'enablerepo': ["a1", "a2", "a3"],
                            'disablerepo': []},
         }
-        sdsoper = ApiJobValidator(getSchemaFile("node"))
+        sdsoper = JobValidator(getSchemaFile("node"))
         status, error = sdsoper.validateApi(nodeApiJob)
         assert error == "Input argument(s) not defined " + "\
 in yaml file: ['state']"
