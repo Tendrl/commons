@@ -3,7 +3,7 @@ import os
 import yaml
 
 
-from tendrl.bridge_common.config import TendrlConfig
+from tendrl.common.config import TendrlConfig
 config = TendrlConfig()
 
 
@@ -23,6 +23,6 @@ def setup_logging(
 
 
 setup_logging(
-    config.get('bridge_common', 'log_cfg_path'),
-    config.get('bridge_common', 'log_level')
+    config.get('common', 'log_cfg_path'),
+    config.get('common', 'log_level')
 )

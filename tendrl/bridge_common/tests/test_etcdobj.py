@@ -1,8 +1,8 @@
 import json
 from mock import MagicMock
 import pytest
-from tendrl.bridge_common.tests.test_bridge_common import PytestEtcdObj
-from tendrl.bridge_common.tests.test_bridge_common import TestBridge_common
+from tendrl.common.tests.test_common import PytestEtcdObj
+from tendrl.common.tests.test_common import TestBridge_common
 
 
 class TestEtcdobj(TestBridge_common):

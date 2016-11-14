@@ -41,7 +41,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'bridge_common Release Notes'
+project = u'common Release Notes'
 copyright = u'2016, Tendrl Project'
 
 # The version info for the project you're documenting, acts as replacement for
