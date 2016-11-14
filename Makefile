@@ -1,4 +1,4 @@
-NAME=tendrl-bridge-common
+NAME=tendrl-common
 VERSION=0.0.1
 
 all: srpm

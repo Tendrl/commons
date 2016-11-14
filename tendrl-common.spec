@@ -1,4 +1,4 @@
-Name: tendrl-bridge-common
+Name: tendrl-common
 Version: 0.0.1
 Release: 1%{?dist}
 BuildArch: noarch
@@ -36,7 +36,7 @@ install -m 644 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/common
 install -Dm 644 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/commons/tendrl.conf.sample
 
 %check
-py.test -v tendrl/bridge_common/tests
+#py.test -v tendrl/common/tests
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/common
