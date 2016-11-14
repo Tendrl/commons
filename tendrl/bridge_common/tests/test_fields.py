@@ -1,7 +1,7 @@
 import datetime
 import json
 import pytest
-from tendrl.bridge_common.tests.test_bridge_common import TestBridge_common
+from tendrl.common.tests.test_common import TestBridge_common
 
 
 class TestField(TestBridge_common):

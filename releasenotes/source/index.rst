@@ -1,5 +1,5 @@
 ============================================
- bridge_common Release Notes
+ common Release Notes
 ============================================
 
 .. toctree::
