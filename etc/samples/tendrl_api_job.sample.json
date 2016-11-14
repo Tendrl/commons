@@ -10,7 +10,7 @@
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
 	"sds_name": "gluster",
 	"sds_version": "3.2.0",
-	"flow": "CreateGlusterVolume",
+	"run": "tendrl.gluster_integration.flows.create_volume.CreateVolume",
 	"status": "processing",
 	"parameters": {
 		"volname": "Volume One"
@@ -18,13 +18,13 @@
 }
 
 # node agent api job sample
-# if job is intended for a specific node_agent, use "node_uuid"
+# if job is intended for a specific node_agent, use "node_id", else "node_id" is optional
 
 
 {
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
-	"node_uuid": "node_uuid", 
-	"flow": "ImportGlusterCluster",
+	"node_id": "node_id", 
+	"run": "tendrl.node_agent.gluster_integration.flows.import_cluster.ImportCluster",
 	"status": "processing",
 	"parameters": {
 		"volname": "Volume One"
