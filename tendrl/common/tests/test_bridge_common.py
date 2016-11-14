@@ -1,14 +1,14 @@
 """
-test_bridge_common
+test_common
 ----------------------------------
 
-Tests for `bridge_common` module.
+Tests for `common` module.
 """
 from mock import MagicMock
 import sys
 sys.modules['logging'] = MagicMock()
-from tendrl.bridge_common.etcdobj import etcdobj
-from tendrl.bridge_common.etcdobj import fields
+from tendrl.common.etcdobj import etcdobj
+from tendrl.common.etcdobj import fields
 
 
 class PytestEtcdObj(etcdobj.EtcdObj):

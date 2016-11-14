@@ -4,8 +4,8 @@ Installation
 
 1. Clone latest dev version from the source code and install virtualenvwrapper_::
 
-    $ git clone https://github.com/Tendrl/bridge_common.git
-    $ cd bridge_common
+    $ git clone https://github.com/Tendrl/common.git
+    $ cd common
     $ pip install virtualenv virtualenvwrapper
 
 2. Modify $HOME/.bashrc::
@@ -15,15 +15,15 @@ Installation
     source /usr/bin/virtualenvwrapper.sh
     -------------------------------------
 
-3. Install bridge_common from source::
+3. Install common from source::
 
-    $ mkvirtualenv bridge_common
+    $ mkvirtualenv common
     $ pip install .
 
 4. Create config files::
 
     $ cp etc/tendrl/tendrl.conf.sample /etc/tendrl/tendrl.conf
-    $ cp etc/sample/logging.yaml.timedrotation.sample /etc/tendrl/bridge_common_logging.conf
+    $ cp etc/sample/logging.yaml.timedrotation.sample /etc/tendrl/common_logging.conf
 
 5. Edit config file ``/etc/tendrl/tendrl.conf`` as required
 

@@ -9,8 +9,8 @@ import os
 import sys
 
 sys.path.insert(0, '../../')
-from tendrl.bridge_common.definitions.validator import JobValidator
-from tendrl.bridge_common import util
+from tendrl.common.definitions.validator import JobValidator
+from tendrl.common import util
 
 
 def getSchemaFile(schemaName):

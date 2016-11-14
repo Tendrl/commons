@@ -2,7 +2,7 @@
 Guidelines for writing new hacking checks
 
  - Use only for Tendrl specific tests. General tests
-   should be submitted to the bridge_common 'hacking' module.
+   should be submitted to the common 'hacking' module.
  - Pick numbers in the range N3xx. Find the current test with
    the highest allocated number and then pick the next value.
  - Keep the test method code in the source file ordered based
