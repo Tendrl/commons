@@ -2,19 +2,19 @@
 common
 ===============================
 
-Common code usable by all Tendrl SDS Bridges
+Common code usable by all Tendrl sds side components
 
-Long Description TODO (rk).
-
-* Free software: LGPL2
-* Documentation: TODO (rk)
+* Free software: LGPL2.1
+* Documentation: https://github.com/Tendrl/common/tree/master/doc/source
 * Source: https://github.com/Tendrl/common
 * Bugs: https://github.com/Tendrl/common/issues
 
 Features
 --------
 
-* TODO
+* Provide python object mapping for writing/reading  the central store (etcd)
+* Provide validation mechanism for flows (operations on an sds cluster) and atoms (smallest task on an sds cluster) to be defined and validated as per the Tendrl Definitions (sds definitions) schema 0.3
+
 
 Builds
 ------
