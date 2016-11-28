@@ -35,6 +35,7 @@ if tendrl_bug_id:
         raise Exception("Tendrl Bug specified in git commit msg not "
                         "found!!\n"
                         "%s" % issue)
+    print("Tendrl Bug specified in git commit msg found!!\n%s" % issue)
 
 if tendrl_spec:
     spec = "%s/%s.adoc" % ("https://github.com/Tendrl/specifications/tree"
@@ -42,3 +43,4 @@ if tendrl_spec:
     if requests.get(spec).status_code != 200:
         raise Exception("Tendrl Spec specified in git commit msg not found\n"
                         "%s" % spec)
+    print("Tendrl Spec specified in git commit msg found!!\n%s" % spec)
