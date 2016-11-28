@@ -10,6 +10,6 @@ python:
   - "2.7"
 script:
   - "tox -e pep8"
-  - "bash check_commit_msg.py"
+  - "python check_commit_msg.py"
   - "tox -e cover"
 sudo: true
