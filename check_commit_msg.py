@@ -16,13 +16,13 @@ for line in commit_msg.split("\n"):
         try:
             tendrl_bug_id = line.split("tendrl-bug-id:")[-1].strip()
         except Exception as ex:
-            print ex
+            print(ex)
 
     if "tendrl-spec" in line:
         try:
             tendrl_spec = line.split("tendrl-spec:")[-1].strip()
         except Exception as ex:
-            print ex
+            print(ex)
 
 if tendrl_bug_id is None:
     raise Exception("Please add 'tendrl-bug-id:<tendrl_repo>/issue_id' to "
@@ -38,7 +38,7 @@ if tendrl_bug_id:
 
 if tendrl_spec:
     spec = "%s/%s.adoc" % ("https://github.com/Tendrl/specifications/tree"
-                          "/master/specs", tendrl_spec)
+                           "/master/specs", tendrl_spec)
     if requests.get(spec).status_code != 200:
         raise Exception("Tendrl Spec specified in git commit msg not found\n"
                         "%s" % spec)
