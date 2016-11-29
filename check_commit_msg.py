@@ -30,7 +30,7 @@ if tendrl_bug_id is None:
 
 if tendrl_bug_id:
     issue = "%s/%s/issues/%s" % (github_base_url, tendrl_bug_id.split(
-        "/")[0], tendrl_bug_id.split("/")[-1]..strip("#"))
+        "/")[0], tendrl_bug_id.split("/")[-1].strip("#"))
     if requests.get(issue).status_code != 200:
         raise Exception("Tendrl Bug specified in git commit msg not "
                         "found!!\n"
