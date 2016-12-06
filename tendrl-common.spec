@@ -1,6 +1,6 @@
 Name: tendrl-common
 Version: 0.0.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 BuildArch: noarch
 Summary: Common module for Tendrl bridges and node_agent
 Source0: %{name}-%{version}.tar.gz
@@ -51,8 +51,11 @@ py.test -v tendrl/common/tests || :
 %license LICENSE
 %{_datadir}/tendrl/commons/
 %{_datarootdir}/tendrl/commons/tendrl.conf.sample
-%{_sysconfdir}/tendrl/common_logging.yaml
+%config(noreplace) %{_sysconfdir}/tendrl/common_logging.yaml
 
 %changelog
+* Tue Dec 06 2016 Martin Bukatovič <mbukatov@redhat.com> - 0.0.1-2
+- Fixed https://github.com/Tendrl/common/issues/72
+
 * Mon Oct 17 2016 Timothy Asir Jeyasingh <tjeyasin@redhat.com> - 0.0.1-1
 - Initial build.
