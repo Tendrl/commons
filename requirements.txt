@@ -6,3 +6,5 @@
 python-etcd
 python-dateutil
 PyYAML
+ansible
+setuptools>=11.3
