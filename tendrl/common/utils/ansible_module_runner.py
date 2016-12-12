@@ -6,7 +6,7 @@ import subprocess
 import uuid
 
 LOG = logging.getLogger(__name__)
-MODULE_EXECUTION_PATH = "~/.tendrl_runner"
+MODULE_EXECUTION_PATH = os.path.expanduser('~') + "/.tendrl_runner_"
 
 try:
     import json
