@@ -7,23 +7,22 @@ import uuid
 import yaml
 
 from tendrl.common.definitions.validator import DefinitionsSchemaValidator
-from tendrl.common.flows.flow_execution_exception import \
-    FlowExecutionFailedError
+from tendrl.common.flows.exceptions import FlowExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
 
 class EtcdRPC(object):
 
-    def __init__(self, Etcdthread):
-        self.config = Etcdthread._manager._config
+    def __init__(self, syncJobThread):
+        self.config = syncJobThread._manager._config
         etcd_kwargs = {
             'port': int(self.config.get("common", "etcd_port")),
             'host': self.config.get("common", "etcd_connection")
         }
 
         self.client = etcd.Client(**etcd_kwargs)
-        self.Etcdthread = Etcdthread
+        self.syncJobThread = syncJobThread
 
     def _process_job(self, raw_job, job_key, job_type):
         # Pick up the "new" job that is not locked by any other integration
@@ -33,9 +32,8 @@ class EtcdRPC(object):
             # further by tendrl-api
             req_id = str(uuid.uuid4())
             raw_job['request_id'] = "%s/flow_%s" % (
-                self.Etcdthread._manager.integration_id, req_id)
+                self.syncJobThread._manager.integration_id, req_id)
             self.client.write(job_key, json.dumps(raw_job))
-            LOG.info("Processing JOB %s" % raw_job['request_id'])
             try:
                 definitions = self.validate_flow(raw_job)
                 if definitions:
@@ -51,30 +49,30 @@ class EtcdRPC(object):
             return raw_job, False
 
     def _acceptor(self, job_type):
-        while not self.Etcdthread._complete.is_set():
+        while not self.syncJobThread._complete.is_set():
             jobs = self.client.read("/queue")
             for job in jobs.children:
                 executed = False
                 if job.value is None:
-                    LOG.info("JOB /queue is empty!!")
                     continue
                 raw_job = json.loads(job.value.decode('utf-8'))
                 try:
-                    raw_job, executed = self._process_job(raw_job, job.key, job_type)
+                    raw_job, executed = self._process_job(
+                        raw_job,
+                        job.key,
+                        job_type
+                    )
                     if "etcd_client" in raw_job['parameters']:
                         del raw_job['parameters']['etcd_client']
                 except FlowExecutionFailedError as e:
-                    LOG.error(
-                        "Failed to execute job: %s. Error: %s" %
-                        (str(job), str(e))
-                    )
+                    LOG.error(e)
                 if executed:
                     self.client.write(job.key, json.dumps(raw_job))
                     break
             gevent.sleep(2)
 
     def run(self):
-        self._acceptor(self.Etcdthread._manager.name)
+        self._acceptor(self.syncJobThread._manager.name)
 
     def stop(self):
         pass
@@ -82,7 +80,7 @@ class EtcdRPC(object):
     def validate_flow(self, raw_job):
         definitions = yaml.load(
             self.client.read(
-                self.Etcdthread._manager.defs_dir
+                self.syncJobThread._manager.defs_dir
             ).value.decode("utf-8")
         )
         definitions = DefinitionsSchemaValidator(
@@ -101,10 +99,8 @@ class EtcdRPC(object):
         #    return False
 
     def invoke_flow(self, flow_name, job, definitions):
-        atoms, pre_run, post_run, uuid = self.extract_flow_details(
-            flow_name,
-            definitions
-        )
+        atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
+            self.extract_flow_details(flow_name, definitions)
         the_flow = None
         flow_path = flow_name.split('.')
         flow_module = ".".join([a.encode("ascii", "ignore") for a in
@@ -113,34 +109,29 @@ class EtcdRPC(object):
                              flow_path[-1:]])
         if "tendrl" in flow_path and "flows" in flow_path:
             exec("from %s import %s as the_flow" % (flow_module, kls_name))
-            return the_flow(self.config, flow_name, job, atoms, pre_run,
-                            post_run, uuid).run()
+            return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
+                            post_run, type, uuid, job['parameters'],
+                            job, self.config, definitions).run()
 
     def extract_flow_details(self, flow_name, definitions):
         namespace = flow_name.split(".flows.")[0]
         flow = definitions[namespace]['flows'][flow_name.split(".")[-1]]
-        return flow['atoms'], flow['pre_run'], flow['post_run'], flow['uuid']
+        return flow['atoms'], flow['help'], flow['enabled'], flow['inputs'], \
+            flow['pre_run'], flow['post_run'], flow['type'], flow['uuid']
 
 
-class EtcdThread(gevent.greenlet.Greenlet):
-    """Present a ZeroRPC API for users
-
-    to request state changes.
-
-    """
-
+class SyncJobThread(gevent.greenlet.Greenlet):
     # In case server.run throws an exception, prevent
     # really aggressive spinning
     EXCEPTION_BACKOFF = 5
 
     def __init__(self, manager):
-        super(EtcdThread, self).__init__()
+        super(SyncJobThread, self).__init__()
         self._manager = manager
         self._complete = gevent.event.Event()
         self._server = EtcdRPC(self)
 
     def stop(self):
-        LOG.info("%s stopping" % self.__class__.__name__)
         self._complete.set()
         if self._server:
             self._server.stop()
@@ -148,10 +139,7 @@ class EtcdThread(gevent.greenlet.Greenlet):
     def _run(self):
         while not self._complete.is_set():
             try:
-                LOG.info("%s run..." % self.__class__.__name__)
                 self._server.run()
             except Exception:
                 LOG.error(traceback.format_exc())
                 self._complete.wait(self.EXCEPTION_BACKOFF)
-
-        LOG.info("%s complete..." % self.__class__.__name__)

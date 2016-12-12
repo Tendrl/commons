@@ -1,11 +1,29 @@
 import abc
+import six
+
+from tendrl.common.atoms.exceptions import AtomNotImplementedError
 
 
+@six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
-    __metaclass__ = abc.ABCMeta
+    def __init__(
+        self,
+        name,
+        enabled,
+        help,
+        inputs,
+        outputs,
+        uuid
+    ):
+        self.name = name
+        self.enabled = enabled
+        self.inputs = inputs
+        self.help = help
+        self.outputs = outputs
+        uuid = uuid
 
     @abc.abstractmethod
     def run(self, parameters):
-        raise NotImplementedError(
+        raise AtomNotImplementedError(
             'define the function run to use this class'
         )

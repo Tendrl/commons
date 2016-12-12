@@ -1,17 +1,18 @@
 import abc
-import greenlet
 import gevent.event
 import gevent.greenlet
+import logging
+import six
 
-from tendrl.common.manager.rpc import EtcdThread
-from tendrl.gluster_integration.persistence.persister import Persister
+from tendrl.common.manager.job_sync import SyncJobThread
+
+LOG = logging.getLogger(__name__)
 
 
-class TopLevelEvents(gevent.greenlet.Greenlet):
-    __metaclass__ = abc.ABCMeta
-
+@six.add_metaclass(abc.ABCMeta)
+class SyncStateThread(gevent.greenlet.Greenlet):
     def __init__(self, manager):
-        super(TopLevelEvents, self).__init__()
+        super(SyncStateThread, self).__init__()
 
         self._manager = manager
         self._complete = gevent.event.Event()
@@ -26,15 +27,22 @@ class TopLevelEvents(gevent.greenlet.Greenlet):
         )
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Manager(object):
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, name, integration_id, config, events, persister, defs_dir):
+    def __init__(
+        self,
+        name,
+        integration_id,
+        config,
+        events,
+        persister,
+        defs_dir
+    ):
         self.name = name
         self._config = config
         self.integration_id = integration_id
         self._complete = gevent.event.Event()
-        self._user_request_thread = EtcdThread(self)
+        self._user_request_thread = SyncJobThread(self)
         self._discovery_thread = events
         self.persister = persister
         self.defs_dir = defs_dir
