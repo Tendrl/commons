@@ -15,7 +15,7 @@
 	"parameters": {
 		"volname": "Volume One"
 	},
-	type: "sds"
+	"type": "sds"
 }
 
 # node agent api job sample
@@ -30,5 +30,5 @@
 	"parameters": {
 		"volname": "Volume One"
 	},
-	type: "node"
+	"type": "node"
 }
