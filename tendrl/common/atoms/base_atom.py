@@ -20,7 +20,7 @@ class BaseAtom(object):
         self.inputs = inputs
         self.help = help
         self.outputs = outputs
-        uuid = uuid
+        self.uuid = uuid
 
     @abc.abstractmethod
     def run(self, parameters):

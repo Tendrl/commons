@@ -120,13 +120,13 @@ class EtcdRPC(object):
             flow['pre_run'], flow['post_run'], flow['type'], flow['uuid']
 
 
-class SyncJobThread(gevent.greenlet.Greenlet):
+class RpcJobProcessThread(gevent.greenlet.Greenlet):
     # In case server.run throws an exception, prevent
     # really aggressive spinning
     EXCEPTION_BACKOFF = 5
 
     def __init__(self, manager):
-        super(SyncJobThread, self).__init__()
+        super(RpcJobProcessThread, self).__init__()
         self._manager = manager
         self._complete = gevent.event.Event()
         self._server = EtcdRPC(self)

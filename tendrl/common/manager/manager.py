@@ -4,7 +4,7 @@ import gevent.greenlet
 import logging
 import six
 
-from tendrl.common.manager.job_sync import SyncJobThread
+from tendrl.common.manager.rpc_job_process import RpcJobProcessThread
 
 LOG = logging.getLogger(__name__)
 
@@ -35,21 +35,21 @@ class Manager(object):
         integration_id,
         config,
         events,
-        persister,
+        persister_thread,
         defs_dir
     ):
         self.name = name
         self._config = config
         self.integration_id = integration_id
         self._complete = gevent.event.Event()
-        self._user_request_thread = SyncJobThread(self)
+        self._rpc_job_process_thread = RpcJobProcessThread(self)
         self._discovery_thread = events
-        self.persister = persister
+        self.persister_thread = persister_thread
         self.defs_dir = defs_dir
 
     def stop(self):
         LOG.info("%s stopping" % self.__class__.__name__)
-        self._user_request_thread.stop()
+        self._rpc_job_process_thread.stop()
         self._discovery_thread.stop()
 
     def _recover(self):
@@ -58,15 +58,15 @@ class Manager(object):
 
     def start(self):
         LOG.info("%s starting" % self.__class__.__name__)
-        self._user_request_thread.start()
+        self._rpc_job_process_thread.start()
         self._discovery_thread.start()
-        self.persister.start()
+        self.persister_thread.start()
 
     def join(self):
         LOG.info("%s joining" % self.__class__.__name__)
-        self._user_request_thread.join()
+        self._rpc_job_process_thread.join()
         self._discovery_thread.join()
-        self.persister.join()
+        self.persister_thread.join()
 
     @abc.abstractmethod
     def on_pull(self, raw_data, cluster_id):
