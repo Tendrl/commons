@@ -3,11 +3,11 @@ from tendrl.common.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
 from tendrl.common.utils.ansible_module_runner \
     import AnsibleRunner
-from tendrl.common.utils.install \
+from tendrl.common.utils.package_installer \
     import Installer
 
 
-class Test_installer(object):
+class TestInstaller(object):
     def test_installer_constructor(self, monkeypatch):
         installer = Installer("emacs", "yum", "2.3.3")
         expected_attr = {"name": "emacs",

@@ -8,7 +8,7 @@ from tendrl.common.utils.ansible_module_runner \
     import AnsibleRunner
 
 
-class Test_ansible_runner_constructor(object):
+class TestAnsibleRunnerConstructor(object):
     def test_invalid_module_path(self, monkeypatch):
         pytest.raises(
             ValueError,
@@ -37,7 +37,7 @@ class Test_ansible_runner_constructor(object):
                                         "key2": "value2"}
 
 
-class Test_ansible_runner(object):
+class TestAnsibleRunner(object):
     def test_module_executable_generation_failed(self, monkeypatch):
         def mockreturn(path):
             return True

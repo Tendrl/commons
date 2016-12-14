@@ -6,7 +6,7 @@ from tendrl.common.utils.command \
     import Command
 
 
-class Test_command(object):
+class TestCommand(object):
     def test_command_run(self, monkeypatch):
 
         def mock_runner_run(obj):
