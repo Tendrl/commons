@@ -6,8 +6,8 @@ all: srpm
 
 clean:
 	rm -rf dist/
-	rm -rf $(NAME)-$(VERSION).tar.gz
-	rm -rf $(NAME)-$(VERSION)-1.el7.src.rpm
+	rm -f $(NAME)-$(VERSION).tar.gz
+	rm -f $(NAME)-$(VERSION)-1.el7.src.rpm
 
 dist:
 	python setup.py sdist \
