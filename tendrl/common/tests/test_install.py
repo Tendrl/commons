@@ -9,9 +9,8 @@ from tendrl.common.utils.package_installer \
 
 class TestInstaller(object):
     def test_installer_constructor(self, monkeypatch):
-        installer = Installer("emacs", "yum", "2.3.3")
-        expected_attr = {"name": "emacs",
-                         "version": "2.3.3"}
+        installer = Installer("emacs", "rpm", "2.3.3")
+        expected_attr = {"name": "emacs-2.3.3"}
         expecter_module_path = "core/packaging/os/yum.py"
 
         assert expected_attr == installer.attributes
@@ -42,21 +41,44 @@ class TestInstaller(object):
             )
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        installer = Installer("emacs", "yum", "3.4.5")
-        result, err = installer.install()
+        installer = Installer("emacs", "rpm", "3.4.5")
+        message, success = installer.install()
 
-        assert result == {}
-        assert err == "Executabe could not be generated for module" \
+        assert not success
+        assert message == "Executabe could not be generated for module" \
             " module_path , with arguments arg. Error: err message"
 
     def test_installer(self, monkeypatch):
 
         def mock_runner_run(obj):
-            return {"message": "installed package successfully"}, ""
+            result = {
+                u'msg': u'',
+                u'invocation': {
+                    u'module_args': {
+                        u'name': [u'elinks'],
+                        u'list': None,
+                        u'disable_gpg_check': False,
+                        u'conf_file': None,
+                        u'install_repoquery': True,
+                        u'state': u'installed',
+                        u'disablerepo': None,
+                        u'update_cache': False,
+                        u'enablerepo': None,
+                        u'exclude': None,
+                        u'validate_certs': True
+                    }
+                },
+                u'changed': False,
+                u'results': [
+                    u'elinks-0.12-0.36.pre6.el7.x86_64 providing '
+                    'elinks is already installed'],
+                u'rc': 0
+            }
+            return result, ""
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        installer = Installer("emacs", "yum", "3.4.5")
-        result, err = installer.install()
+        installer = Installer("emacs", "rpm", "3.4.5")
+        message, success = installer.install()
 
-        assert result == {"message": "installed package successfully"}
-        assert err == ""
+        assert message == ""
+        assert success

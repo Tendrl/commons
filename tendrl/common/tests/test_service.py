@@ -23,13 +23,27 @@ class TestService(object):
                             mock_AnsibleRunner_constructor)
 
         def mock_runner_run(obj):
-            return {"message": "started service successfully"}, ""
+            result = {
+                u'state': u'started',
+                u'msg': u'',
+                u'invocation': {
+                    u'module_args': {
+                        u'name': u'collectddd',
+                        u'enabled': None,
+                        u'daemon_reload': False,
+                        u'state': u'started',
+                        u'user': False,
+                        u'masked': None
+                    }
+                }
+            }
+            return result, ""
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
-        result, err = service.start()
-        assert result == {"message": "started service successfully"}
-        assert err == ""
+        message, success = service.start()
+        assert message == ""
+        assert success
 
     def test_service_stop(self, monkeypatch):
         def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
@@ -40,13 +54,27 @@ class TestService(object):
                             mock_AnsibleRunner_constructor)
 
         def mock_runner_run(obj):
-            return {"message": "stopped service successfully"}, ""
+            result = {
+                u'state': u'stopped',
+                u'msg': u'',
+                u'invocation': {
+                    u'module_args': {
+                        u'name': u'collectddd',
+                        u'enabled': None,
+                        u'daemon_reload': False,
+                        u'state': u'stopped',
+                        u'user': False,
+                        u'masked': None
+                    }
+                }
+            }
+            return result, ""
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
-        result, err = service.stop()
-        assert result == {"message": "stopped service successfully"}
-        assert err == ""
+        message, success = service.stop()
+        assert message == ""
+        assert success
 
     def test_service_reload(self, monkeypatch):
         def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
@@ -57,13 +85,27 @@ class TestService(object):
                             mock_AnsibleRunner_constructor)
 
         def mock_runner_run(obj):
-            return {"message": "reloaded service successfully"}, ""
+            result = {
+                u'state': u'started',
+                u'msg': u'',
+                u'invocation': {
+                    u'module_args': {
+                        u'name': u'collectddd',
+                        u'enabled': None,
+                        u'daemon_reload': False,
+                        u'state': u'reloaded',
+                        u'user': False,
+                        u'masked': None
+                    }
+                }
+            }
+            return result, ""
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
-        result, err = service.reload()
-        assert result == {"message": "reloaded service successfully"}
-        assert err == ""
+        message, success = service.reload()
+        assert message == ""
+        assert success
 
     def test_service_restart(self, monkeypatch):
         def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
@@ -74,13 +116,27 @@ class TestService(object):
                             mock_AnsibleRunner_constructor)
 
         def mock_runner_run(obj):
-            return {"message": "restarted service successfully"}, ""
+            result = {
+                u'state': u'started',
+                u'msg': u'',
+                u'invocation': {
+                    u'module_args': {
+                        u'name': u'collectddd',
+                        u'enabled': None,
+                        u'daemon_reload': False,
+                        u'state': u'restarted',
+                        u'user': False,
+                        u'masked': None
+                    }
+                }
+            }
+            return result, ""
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
-        result, err = service.restart()
-        assert result == {"message": "restarted service successfully"}
-        assert err == ""
+        message, success = service.restart()
+        assert message == ""
+        assert success
 
     def test_service_error(self, monkeypatch):
 
@@ -92,8 +148,8 @@ class TestService(object):
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
-        result, err = service.start()
+        message, success = service.start()
 
-        assert result == {}
-        assert err == "Executabe could not be generated for module" \
+        assert not success
+        assert message == "Executabe could not be generated for module" \
             " module_path , with arguments arg. Error: err message"
