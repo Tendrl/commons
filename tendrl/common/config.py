@@ -18,7 +18,7 @@ class TendrlConfig(ConfigParser.SafeConfigParser):
         if not os.path.exists(self.path):
             err = ConfigNotFound(
                 "Configuration for module: %s not found at %s" %
-                module, self.path
+                (module, self.path)
             )
             LOG.error(err, exc_info=True)
             raise err

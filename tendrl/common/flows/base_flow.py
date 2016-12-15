@@ -59,7 +59,7 @@ class BaseFlow(object):
         LOG.info("Starting execution of pre-runs for flow: %s" %
                  self.job['run'])
         for mod in self.pre_run:
-            ret_val = self.execute_atom(mod, self.definitions)
+            ret_val = self.execute_atom(mod)
 
             if not ret_val:
                 LOG.error("Failed executing pre-run: %s for flow: %s" %
@@ -76,7 +76,7 @@ class BaseFlow(object):
         LOG.info("Starting execution of atoms for flow: %s" %
                  self.job['run'])
         for atom in self.atoms:
-            ret_val = self.execute_atom(atom, self.definitions)
+            ret_val = self.execute_atom(atom)
 
             if not ret_val:
                 LOG.error("Failed executing atom: %s on flow: %s" %
@@ -93,7 +93,7 @@ class BaseFlow(object):
         LOG.info("Starting execution of post-runs for flow: %s" %
                  self.job['run'])
         for mod in self.post_run:
-            ret_val = self.execute_atom(mod, self.definitions)
+            ret_val = self.execute_atom(mod)
 
             if not ret_val:
                 LOG.error("Failed executing post-run: %s for flow: %s" %
@@ -105,25 +105,25 @@ class BaseFlow(object):
                 LOG.info("Successfully executed post-run: %s for flow: %s" %
                          (post_atom, self.job['run']))
 
-    def extract_atom_details(self, atom_name, definitions):
+    def extract_atom_details(self, atom_name):
         namespace = atom_name.split('.objects.')[0]
         object_name = atom_name.split('.objects.')[1].split('.atoms.')[0]
-        atom = definitions[namespace]['objects'][object_name]['atoms']
-        [atom_name.split('.')[-1]]
+        atoms = self.definitions[namespace]['objects'][object_name]['atoms']
+        atom = atoms[atom_name.split('.')[-1]]
         return atom.get('name'), atom.get('enabled'), atom.get('help'), \
             atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
 
-    def execute_atom(self, mod, definitions):
+    def execute_atom(self, mod):
         class_name = utils.to_camel_case(mod.split(".")[-1])
         if "tendrl" in mod and "atoms" in mod:
             atom_name, enabled, help, inputs, outputs, uuid = \
-                self.extract_atom_details(mod, self.definitions)
+                self.extract_atom_details(mod)
             exec("from %s import %s as the_atom" % (
                 mod.lower().strip("."),
                 class_name.strip("."))
             )
 
-            ret_val = the_atom(
+            ret_val = the_atom(    # noqa: F821
                 atom_name,
                 enabled,
                 help,

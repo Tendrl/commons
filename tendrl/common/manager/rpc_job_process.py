@@ -85,18 +85,8 @@ class EtcdRPC(object):
         )
         definitions = DefinitionsSchemaValidator(
             definitions).sanitize_definitions()
-        # resp, msg = JobValidator(definitions).validateApi(raw_job)
-        # if resp:
-        #    msg = "Successfull Validation flow %s for %s" %\
-        #          (raw_job['run'], raw_job['request_id'])
-        #    LOG.info(msg)
 
         return definitions
-        # else:
-        #    msg = "Failed Validation flow %s for %s" % (raw_job['run'],
-        #                                               raw_job['request_id'])
-        #    LOG.error(msg)
-        #    return False
 
     def invoke_flow(self, flow_name, job, definitions):
         atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
