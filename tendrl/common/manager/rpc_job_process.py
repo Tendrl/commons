@@ -62,8 +62,10 @@ class EtcdRPC(object):
                         job.key,
                         job_type
                     )
-                    if "etcd_client" in raw_job['parameters']:
+                    if "etcd_client" and "manager" in \
+                        raw_job['parameters'].keys():
                         del raw_job['parameters']['etcd_client']
+                        del raw_job['parameters']['manager']
                 except FlowExecutionFailedError as e:
                     LOG.error(e)
                 if executed:
@@ -97,6 +99,7 @@ class EtcdRPC(object):
                                 flow_path[:-1]])
         kls_name = ".".join([a.encode("ascii", "ignore") for a in
                              flow_path[-1:]])
+        job['parameters'].update({"manager": self.syncJobThread._manager})
         if "tendrl" in flow_path and "flows" in flow_path:
             exec("from %s import %s as the_flow" % (flow_module, kls_name))
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
@@ -107,7 +110,8 @@ class EtcdRPC(object):
         namespace = flow_name.split(".flows.")[0]
         flow = definitions[namespace]['flows'][flow_name.split(".")[-1]]
         return flow['atoms'], flow['help'], flow['enabled'], flow['inputs'], \
-            flow['pre_run'], flow['post_run'], flow['type'], flow['uuid']
+            flow.get('pre_run'), flow.get('post_run'), \
+            flow['type'], flow['uuid']
 
 
 class RpcJobProcessThread(gevent.greenlet.Greenlet):
