@@ -3,6 +3,7 @@ import etcd
 import logging
 import six
 
+from tendrl.common.atoms.exceptions import AtomExecutionFailedError
 from tendrl.common.flows import utils
 
 LOG = logging.getLogger(__name__)
@@ -51,10 +52,6 @@ class BaseFlow(object):
 
     @abc.abstractmethod
     def run(self):
-        post_atom = None
-        pre_atom = None
-        the_atom = None
-
         # Execute the pre runs for the flow
         LOG.info("Starting execution of pre-runs for flow: %s" %
                  self.job['run'])
@@ -64,14 +61,14 @@ class BaseFlow(object):
 
                 if not ret_val:
                     LOG.error("Failed executing pre-run: %s for flow: %s" %
-                              (pre_atom, self.job['run']))
-                    raise Exception(
+                              (mod, self.job['run']))
+                    raise AtomExecutionFailedError(
                         "Error executing pre run function: %s for flow: %s" %
-                        (pre_atom, self.job['run'])
+                        (mod, self.job['run'])
                     )
                 else:
                     LOG.info("Successfully executed pre-run: %s for flow: %s" %
-                             (pre_atom, self.job['run']))
+                             (mod, self.job['run']))
 
         # Execute the atoms for the flow
         LOG.info("Starting execution of atoms for flow: %s" %
@@ -81,8 +78,8 @@ class BaseFlow(object):
 
             if not ret_val:
                 LOG.error("Failed executing atom: %s on flow: %s" %
-                          (the_atom, self.job['run']))
-                raise Exception(
+                          (atom, self.job['run']))
+                raise AtomExecutionFailedError(
                     "Error executing atom: %s on flow: %s" %
                     (atom, self.job['run'])
                 )
@@ -99,14 +96,14 @@ class BaseFlow(object):
 
                 if not ret_val:
                     LOG.error("Failed executing post-run: %s for flow: %s" %
-                              (post_atom, self.job['run']))
-                    raise Exception(
-                        "Error executing post run function: %s" % post_atom
+                              (mod, self.job['run']))
+                    raise AtomExecutionFailedError(
+                        "Error executing post run function: %s" % mod
                     )
                 else:
                     LOG.info(
                         "Successfully executed post-run: %s for flow: %s" %
-                        (post_atom, self.job['run'])
+                        (mod, self.job['run'])
                     )
 
     def extract_atom_details(self, atom_name):
@@ -117,6 +114,9 @@ class BaseFlow(object):
         return atom.get('name'), atom.get('enabled'), atom.get('help'), \
             atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
 
+    # Executes a givem atom specific by given full module name "mod"
+    # It dynamically imports the atom class from module as the_atom
+    # and executes the function run() on the instance of same
     def execute_atom(self, mod):
         class_name = utils.to_camel_case(mod.split(".")[-1])
         if "tendrl" in mod and "atoms" in mod:
@@ -127,14 +127,17 @@ class BaseFlow(object):
                 class_name.strip("."))
             )
 
-            ret_val = the_atom(    # noqa: F821
-                atom_name,
-                enabled,
-                help,
-                inputs,
-                outputs,
-                uuid
-            ).run(self.parameters)
+            try:
+                ret_val = the_atom(    # noqa: F821
+                    atom_name,
+                    enabled,
+                    help,
+                    inputs,
+                    outputs,
+                    uuid
+                ).run(self.parameters)
+            except AtomExecutionFailedError:
+                return False
 
             return ret_val
         return False
