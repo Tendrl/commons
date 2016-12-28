@@ -1,12 +1,21 @@
 import ansible.executor.module_common as module_common
 from ansible import modules
+import errno
 import logging
 import os
 import subprocess
+from tendrl.common.config import TendrlConfig
 import uuid
 
+config = TendrlConfig()
+
 LOG = logging.getLogger(__name__)
-MODULE_EXECUTION_PATH = os.path.expanduser('~') + "/.tendrl_runner_"
+MODULE_EXECUTION_PATH = os.path.expandvars(
+    config.get(
+        "common",
+        "tendrl_exe_file_prefix"
+    )
+)
 
 try:
     import json
@@ -55,7 +64,12 @@ class AnsibleRunner(object):
                 self.executable_module_path,
                 str(e)
             )
-
+        if not os.path.exists(os.path.dirname(self.executable_module_path)):
+            try:
+                os.makedirs(os.path.dirname(self.executable_module_path))
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
         with open(self.executable_module_path, 'w') as f:
             f.write(module_data)
         os.system("chmod +x %s" % self.executable_module_path)

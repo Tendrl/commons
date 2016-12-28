@@ -2,7 +2,7 @@ from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 import logging
 
-ANSIBLE_MODULE_PATH = "core/system/systemd.py"
+ANSIBLE_MODULE_PATH = "core/system/service.py"
 LOG = logging.getLogger(__name__)
 
 
