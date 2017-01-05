@@ -3,12 +3,13 @@ import os
 import yaml
 
 
-from tendrl.common.config import TendrlConfig
-config = TendrlConfig()
+class LogInitFailedError(Exception):
+    def __init___(self, err):
+        self.message = "Error: %s".format(err)
 
 
 def setup_logging(
-    log_cfg_path='/etc/tendrl/logging.yaml',
+    log_cfg_path,
     default_log_level=logging.INFO
 ):
     """Setup logging configuration
@@ -19,10 +20,4 @@ def setup_logging(
             log_config = yaml.safe_load(f.read())
         logging.config.dictConfig(log_config)
     else:
-        raise Exception("logging configuration not found")
-
-
-setup_logging(
-    config.get('common', 'log_cfg_path'),
-    config.get('common', 'log_level')
-)
+        raise LogInitFailedError("logging configuration not found")
