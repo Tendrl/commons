@@ -1,10 +1,16 @@
+from mock import MagicMock
 import pytest
+import sys
+sys.modules['tendrl.common.config'] = MagicMock()
+
 from tendrl.common.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
 from tendrl.common.utils.ansible_module_runner \
     import AnsibleRunner
 from tendrl.common.utils.package_installer \
     import Installer
+
+del sys.modules['tendrl.common.config']
 
 
 class TestInstaller(object):
