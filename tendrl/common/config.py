@@ -9,22 +9,17 @@ class ConfigNotFound(Exception):
     pass
 
 
-DEFAULT_CONFIG_PATH = "/etc/tendrl/tendrl.conf"
-CONFIG_PATH_VAR = "TENDRL_CONFIG"
-
-
 class TendrlConfig(ConfigParser.SafeConfigParser):
-    def __init__(self):
+    def __init__(self, module, cfg_file_path):
         ConfigParser.SafeConfigParser.__init__(self)
 
-        try:
-            self.path = os.environ[CONFIG_PATH_VAR]
-        except KeyError:
-            self.path = DEFAULT_CONFIG_PATH
+        self.path = cfg_file_path
 
         if not os.path.exists(self.path):
-            err = ConfigNotFound("Bridge_Common Configuration not found at "
-                                 "%s" % self.path)
+            err = ConfigNotFound(
+                "Configuration for module: %s not found at %s" %
+                (module, self.path)
+            )
             LOG.error(err, exc_info=True)
             raise err
 

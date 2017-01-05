@@ -6,3 +6,4 @@
 python-etcd
 python-dateutil
 PyYAML
+gevent>=1.0
