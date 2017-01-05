@@ -13,6 +13,7 @@ class MyManager(manager.Manager):
         self,
         name,
         integration_id,
+        node_id,
         config,
         events,
         persister_thread,
@@ -21,6 +22,7 @@ class MyManager(manager.Manager):
         super(MyManager, self).__init__(
             name,
             integration_id,
+            node_id,
             config,
             events,
             persister_thread,
@@ -36,6 +38,7 @@ class TestManager(object):
         self.manager = MyManager(
             "dummymodule",
             'aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6',
+            'aa22a6fe-87f0-45cf-8b70-2d0ff4c02bf7',
             MagicMock(),
             MagicMock(),
             MagicMock(),
