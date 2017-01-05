@@ -25,8 +25,9 @@ def loadSchema(schemaFile):
                 error_pos = " at position: (%s:%s)" % (
                     exc.problem_mark.line + 1,
                     exc.problem_mark.column + 1)
-            msg = "Error loading schema file '" + schemaFile + "'" + error_pos \
-                + ": content format error: Failed to parse yaml format"
+            msg = "Error loading schema file '" + schemaFile + "'" \
+                  + error_pos \
+                  + ": content format error: Failed to parse yaml format"
             return False, msg
 
     except Exception as e:
