@@ -10,6 +10,7 @@
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
 	"sds_name": "gluster",
 	"sds_version": "3.2.0",
+	"node_ids": ["node_id1", ...],
 	"run": "tendrl.gluster_integration.flows.create_volume.CreateVolume",
 	"status": "new",
 	"parameters": {
@@ -24,7 +25,7 @@
 
 {
 	"cluster_id": "bc35fde8-528b-4908-8d52-50d8bf964dd4",
-	"node_id": "node_id", 
+	"node_ids": ["node_id1", ...],
 	"run": "tendrl.node_agent.gluster_integration.flows.import_cluster.ImportCluster",
 	"status": "new",
 	"parameters": {

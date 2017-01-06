@@ -57,6 +57,12 @@ class EtcdRPC(object):
                     continue
                 raw_job = json.loads(job.value.decode('utf-8'))
                 try:
+                    # If current node's id does not fall under job's node_ids,
+                    # ignore the job and dont process
+                    if "node_ids" in raw_job:
+                        if self.syncJobThread._manager.node_id \
+                            not in raw_job['node_ids']:
+                            continue
                     raw_job, executed = self._process_job(
                         raw_job,
                         job.key,

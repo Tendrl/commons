@@ -33,6 +33,7 @@ class Manager(object):
         self,
         name,
         integration_id,
+        node_id,
         config,
         events,
         persister_thread,
@@ -41,6 +42,7 @@ class Manager(object):
         self.name = name
         self._config = config
         self.integration_id = integration_id
+        self.node_id = node_id
         self._complete = gevent.event.Event()
         self._rpc_job_process_thread = RpcJobProcessThread(self)
         self._discovery_thread = events
