@@ -108,8 +108,15 @@ class EtcdRPC(object):
 
     def extract_flow_details(self, flow_name, definitions):
         namespace = flow_name.split(".flows.")[0]
-        flow = definitions[namespace]['flows'][flow_name.split(".")[-1]]
-        return flow['atoms'], flow['help'], flow['enabled'], flow['inputs'], \
+        namespace = namespace.split(".")
+        integration_path = namespace[0] + "." + namespace[1]
+        flow = definitions[integration_path]
+        for path in namespace[2:]:
+            flow = flow[path]
+        flow = flow['flows']
+        flow = flow[flow_name.split(".")[-1]]
+        return flow['atoms'], flow.get('help', ""), \
+            flow['enabled'], flow['inputs'], \
             flow.get('pre_run'), flow.get('post_run'), \
             flow['type'], flow['uuid']
 
