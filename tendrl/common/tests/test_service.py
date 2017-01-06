@@ -1,9 +1,15 @@
+from mock import MagicMock
+import sys
+sys.modules['tendrl.common.config'] = MagicMock()
+
 from tendrl.common.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
 from tendrl.common.utils.ansible_module_runner \
     import AnsibleRunner
 from tendrl.common.utils.service \
     import Service
+
+del sys.modules['tendrl.common.config']
 
 
 class TestService(object):
