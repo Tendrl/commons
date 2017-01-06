@@ -1,7 +1,7 @@
 from mock import MagicMock
 import sys
 sys.modules['tendrl.commons.config'] = MagicMock()
-import ansible.executor.module_commons as module_commons
+import ansible.executor.module_common as module_common
 from ansible import modules
 import os
 import pytest
@@ -69,7 +69,7 @@ class TestAnsibleRunner(object):
         def mock_modify_module(modname, modpath, argument, task_vars={}):
             return ("echo \'{\"key\":\"test message\"}\'",
                     "new", "#! /usr/bin/sh")
-        monkeypatch.setattr(module_commons,
+        monkeypatch.setattr(module_common,
                             'modify_module', mock_modify_module)
 
         def mock_isfile(path):
