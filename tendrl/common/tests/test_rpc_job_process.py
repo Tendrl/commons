@@ -1,6 +1,7 @@
 import etcd
 import gevent.event
 from mock import MagicMock
+from rpc_job_process_data import sample_definition
 from sample_manager import SampleManager
 import sys
 sys.modules['tendrl.common.config'] = MagicMock()
@@ -179,6 +180,37 @@ class Test_EtcdRpc(object):
             "9a9604c0-d2a6-4be0-9a82-262f10037a8f",
             "node")
         assert raw_job['status'] == "finished"
+
+    def test_extract_flow_details(self, monkeypatch):
+        def mock_config_get(package, parameter):
+            if parameter == "etcd_port":
+                return 2379
+            elif parameter == "etcd_connection":
+                return "0.0.0.0"
+        manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
+        monkeypatch.setattr(manager._config, 'get', mock_config_get)
+        syncJobThread = RpcJobProcessThread(manager)
+        server = EtcdRPC(syncJobThread)
+
+        flow_name = "tendrl.gluster_integration.flows."\
+                    "create_volume.CreateVolume"
+
+        definition = sample_definition
+
+        result = server.extract_flow_details(flow_name, definition)
+
+        assert result[0] == [
+            'tendrl.gluster_integration.objects.volume.atoms.create'
+        ]
+
+        flow_name = 'tendrl.gluster_integration.objects.' \
+                    'Volume.flows.start_volume.StartVolume'
+
+        result = server.extract_flow_details(flow_name, definition)
+
+        assert result[0] == [
+            'tendrl.gluster_integration.objects.volume.atoms.start'
+        ]
 
 
 class TestRpcJobProcessThread(object):
