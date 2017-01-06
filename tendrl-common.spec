@@ -22,6 +22,7 @@ Requires: python-etcd
 Requires: systemd-python
 Requires: python-urllib3
 Requires: python-six
+Requires: python-docutils
 
 %description
 Common python module usable by all Tendrl SDS Bridges
