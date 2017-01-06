@@ -3,8 +3,8 @@ import etcd
 import logging
 import six
 
-from tendrl.common.atoms.exceptions import AtomExecutionFailedError
-from tendrl.common.flows import utils
+from tendrl.commons.atoms.exceptions import AtomExecutionFailedError
+from tendrl.commons.flows import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ class BaseFlow(object):
 
         self.parameters.update({'log': []})
         etcd_kwargs = {
-            'port': int(self.config.get("common", "etcd_port")),
-            'host': self.config.get("common", "etcd_connection")
+            'port': int(self.config.get("commons", "etcd_port")),
+            'host': self.config.get("commons", "etcd_connection")
         }
 
         self.etcd_client = etcd.Client(**etcd_kwargs)

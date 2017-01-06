@@ -1,12 +1,11 @@
-ansible
 hacking
 pytest
 pytest-cov
-mock
-setuptools>=11.3
+docutils==0.12
 sphinx!=1.3b1,<1.3,>=1.2.1 # BSD
 oslosphinx!=3.4.0,>=2.5.0 # Apache-2.0
 
 # releasenotes
 reno>=1.8.0 # Apache2
 coveralls
+mock==1.0.1

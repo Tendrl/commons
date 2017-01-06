@@ -1,5 +1,5 @@
 from mock import MagicMock
-from tendrl.common.flows import base_flow
+from tendrl.commons.flows import base_flow
 
 
 class MyFlow(base_flow.BaseFlow):

@@ -1,17 +1,17 @@
 from mock import MagicMock
 import sys
-sys.modules['tendrl.common.config'] = MagicMock()
-import ansible.executor.module_common as module_common
+sys.modules['tendrl.commons.config'] = MagicMock()
+import ansible.executor.module_commons as module_commons
 from ansible import modules
 import os
 import pytest
-from tendrl.common.utils import ansible_module_runner
-from tendrl.common.utils.ansible_module_runner \
+from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
-from tendrl.common.utils.ansible_module_runner \
+from tendrl.commons.utils.ansible_module_runner \
     import AnsibleRunner
 
-del sys.modules['tendrl.common.config']
+del sys.modules['tendrl.commons.config']
 
 
 class TestAnsibleRunnerConstructor(object):
@@ -69,7 +69,7 @@ class TestAnsibleRunner(object):
         def mock_modify_module(modname, modpath, argument, task_vars={}):
             return ("echo \'{\"key\":\"test message\"}\'",
                     "new", "#! /usr/bin/sh")
-        monkeypatch.setattr(module_common,
+        monkeypatch.setattr(module_commons,
                             'modify_module', mock_modify_module)
 
         def mock_isfile(path):

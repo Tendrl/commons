@@ -1,10 +1,10 @@
 import datetime
 import json
 import pytest
-from tendrl.common.tests.test_common import TestBridge_common
+from tendrl.commons.tests.test_commons import TestBridge_commons
 
 
-class TestField(TestBridge_common):
+class TestField(TestBridge_commons):
     def setup_method(self, method):
         self.obj = self.Fields.Field("unittesting")
 
@@ -74,7 +74,7 @@ class TestField(TestBridge_common):
         assert structure == self.obj.render()
 
 
-class TestIntField(TestBridge_common):
+class TestIntField(TestBridge_commons):
     def setup_method(self, method):
         self.obj = self.Fields.IntField("unittesting")
 
@@ -87,7 +87,7 @@ class TestIntField(TestBridge_common):
             self.obj.value = "testing"
 
 
-class TestStrField(TestBridge_common):
+class TestStrField(TestBridge_commons):
     def setup_method(self, method):
         self.obj = self.Fields.StrField("unittesting")
 
@@ -102,7 +102,7 @@ class TestStrField(TestBridge_common):
         assert self.obj._value == "0.123"
 
 
-class TestDateTimeField(TestBridge_common):
+class TestDateTimeField(TestBridge_commons):
     def setup_method(self, method):
         self.obj = self.Fields.DateTimeField('unittesting', '%Y-%m-%d')
 
@@ -135,7 +135,7 @@ class TestDateTimeField(TestBridge_common):
              "dir": False} == self.obj.render())
 
 
-class Test_DictField(TestBridge_common):
+class Test_DictField(TestBridge_commons):
     def setup_method(self, method):
         self.obj = self.Fields.DictField(
             'unittesting', {'value1': int, 'value2': str})

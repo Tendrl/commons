@@ -3,9 +3,9 @@ import sys
 from gevent.event import Event
 
 from mock import MagicMock
-sys.modules['tendrl.common.config'] = MagicMock()
-from tendrl.common.manager import manager
-from tendrl.common.manager.rpc_job_process import RpcJobProcessThread
+sys.modules['tendrl.commons.config'] = MagicMock()
+from tendrl.commons.manager import manager
+from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 
 
 class MyManager(manager.Manager):

@@ -17,7 +17,7 @@ SAFE_COMMAND_LIST = [
 
 class UnsupportedCommandException(Exception):
     def __init__(self, command):
-        self.message = "Command: %s not supported by tendrl common" % (command)
+        self.message = "Command: %s not supported by tendrl commons" % (command)
 
 
 class Command(object):

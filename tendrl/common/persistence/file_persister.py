@@ -1,4 +1,4 @@
-from tendrl.common.persistence.persister import Persister
+from tendrl.commons.persistence.persister import Persister
 
 
 class FilePersister(Persister):

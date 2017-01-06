@@ -2,10 +2,9 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-
+ansible
+setuptools>=11.3
 python-etcd
 python-dateutil
 PyYAML
-ansible
-setuptools>=11.3
 gevent>=1.0

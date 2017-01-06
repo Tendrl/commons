@@ -1,7 +1,7 @@
 import abc
 import six
 
-from tendrl.common.atoms.exceptions import AtomNotImplementedError
+from tendrl.commons.atoms.exceptions import AtomNotImplementedError
 
 
 @six.add_metaclass(abc.ABCMeta)

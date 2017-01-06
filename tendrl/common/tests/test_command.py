@@ -1,18 +1,18 @@
 from mock import MagicMock
 import pytest
 import sys
-sys.modules['tendrl.common.config'] = MagicMock()
+sys.modules['tendrl.commons.config'] = MagicMock()
 
-from tendrl.common.utils.ansible_module_runner \
+from tendrl.commons.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
-from tendrl.common.utils.ansible_module_runner \
+from tendrl.commons.utils.ansible_module_runner \
     import AnsibleRunner
-from tendrl.common.utils.command \
+from tendrl.commons.utils.command \
     import Command
-from tendrl.common.utils.command \
+from tendrl.commons.utils.command \
     import UnsupportedCommandException
 
-del sys.modules['tendrl.common.config']
+del sys.modules['tendrl.commons.config']
 
 
 class TestCommand(object):

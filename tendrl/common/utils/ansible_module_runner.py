@@ -1,10 +1,10 @@
-import ansible.executor.module_common as module_common
+import ansible.executor.module_commons as module_commons
 from ansible import modules
 import errno
 import logging
 import os
 import subprocess
-from tendrl.common.config import TendrlConfig
+from tendrl.commons.config import TendrlConfig
 import uuid
 
 config = TendrlConfig()
@@ -12,7 +12,7 @@ config = TendrlConfig()
 LOG = logging.getLogger(__name__)
 MODULE_EXECUTION_PATH = os.path.expandvars(
     config.get(
-        "common",
+        "commons",
         "tendrl_exe_file_prefix"
     )
 )
@@ -50,7 +50,7 @@ class AnsibleRunner(object):
         modname = os.path.basename(self.module_path)
         modname = os.path.splitext(modname)[0]
         try:
-            (module_data, module_style, shebang) = module_common.modify_module(
+            (module_data, module_style, shebang) = module_commons.modify_module(
                 modname,
                 self.module_path,
                 self.argument_dict,

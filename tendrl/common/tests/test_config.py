@@ -1,6 +1,6 @@
 from mock import MagicMock
 import pytest
-from tendrl.common import config
+from tendrl.commons import config
 
 
 class TestTendrlconfig(object):

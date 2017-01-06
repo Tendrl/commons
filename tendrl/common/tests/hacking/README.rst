@@ -5,7 +5,7 @@ Tendrl Style Commandments
  * [N302] - Ensure that nonexistent "assert_called" is not used
  * [N303] - Ensure that  nonexistent "assert_called_once" is not used
 * [N310-N314] - Reserved for rules related to logging
- * [N310] - Ensure that ``tendrl.common.log`` is used as logging module
+ * [N310] - Ensure that ``tendrl.commons.log`` is used as logging module
  * [N311] - Validate that debug level logs are not translated
  * [N312] - Validate correctness of debug on check.
 * [N32x] - Reserved for rules related to assert* methods

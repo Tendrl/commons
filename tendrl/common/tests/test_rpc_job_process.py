@@ -4,11 +4,11 @@ from mock import MagicMock
 from rpc_job_process_data import sample_definition
 from sample_manager import SampleManager
 import sys
-sys.modules['tendrl.common.config'] = MagicMock()
+sys.modules['tendrl.commons.config'] = MagicMock()
 
-from tendrl.common.flows.exceptions import FlowExecutionFailedError
-from tendrl.common.manager.rpc_job_process import EtcdRPC
-from tendrl.common.manager.rpc_job_process import RpcJobProcessThread
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.manager.rpc_job_process import EtcdRPC
+from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 import uuid
 
 

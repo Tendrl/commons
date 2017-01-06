@@ -1,4 +1,4 @@
-from tendrl.common.singleton import to_singleton
+from tendrl.commons.singleton import to_singleton
 
 
 @to_singleton

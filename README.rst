@@ -1,13 +1,13 @@
 ===============================
-common
+commons
 ===============================
 
 Common code usable by all Tendrl sds side components
 
 * Free software: LGPL2.1
-* Documentation: https://github.com/Tendrl/common/tree/master/doc/source
-* Source: https://github.com/Tendrl/common
-* Bugs: https://github.com/Tendrl/common/issues
+* Documentation: https://github.com/Tendrl/commons/tree/master/doc/source
+* Source: https://github.com/Tendrl/commons
+* Bugs: https://github.com/Tendrl/commons/issues
 
 Features
 --------
@@ -19,14 +19,14 @@ Features
 Builds
 ------
 
-.. image:: https://travis-ci.org/Tendrl/common.svg?branch=master
-    :target: https://travis-ci.org/Tendrl/common
+.. image:: https://travis-ci.org/Tendrl/commons.svg?branch=master
+    :target: https://travis-ci.org/Tendrl/commons
 
 Code Coverage
 -------------
 
-.. image:: https://coveralls.io/repos/github/Tendrl/common/badge.svg
-    :target: https://coveralls.io/github/Tendrl/common
+.. image:: https://coveralls.io/repos/github/Tendrl/commons/badge.svg
+    :target: https://coveralls.io/github/Tendrl/commons
 
 Developer/Install documentation
 -----------------------

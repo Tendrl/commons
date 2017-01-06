@@ -2,6 +2,6 @@
 Usage
 ========
 
-To use common in a project::
+To use commons in a project::
 
-    import common
+    import commons

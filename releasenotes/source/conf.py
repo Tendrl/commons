@@ -41,7 +41,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'common Release Notes'
+project = u'commons Release Notes'
 copyright = u'2016, Tendrl Project'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -87,7 +87,7 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-# modindex_common_prefix = []
+# modindex_commons_prefix = []
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False

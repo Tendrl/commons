@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = common
-omit = tendrl/common/tests/*
+source = commons
+omit = tendrl/commons/tests/*
 
 [report]
 ignore_errors = True

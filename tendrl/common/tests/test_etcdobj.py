@@ -1,11 +1,11 @@
 import json
 from mock import MagicMock
 import pytest
-from tendrl.common.tests.test_common import PytestEtcdObj
-from tendrl.common.tests.test_common import TestBridge_common
+from tendrl.commons.tests.test_commons import PytestEtcdObj
+from tendrl.commons.tests.test_commons import TestBridge_commons
 
 
-class TestEtcdobj(TestBridge_common):
+class TestEtcdobj(TestBridge_commons):
     def setup_method(self, method):
         self.testing_obj = PytestEtcdObj(
             testingInt=10,
@@ -46,7 +46,7 @@ class TestEtcdobj(TestBridge_common):
         assert obj.testingInt == 10
 
 
-class TestEtcdObj(TestBridge_common):
+class TestEtcdObj(TestBridge_commons):
     def setup_method(self, method):
         self.testing_obj = PytestEtcdObj(
             testingInt=10,

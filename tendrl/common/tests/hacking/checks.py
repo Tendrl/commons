@@ -2,7 +2,7 @@
 Guidelines for writing new hacking checks
 
  - Use only for Tendrl specific tests. General tests
-   should be submitted to the common 'hacking' module.
+   should be submitted to the commons 'hacking' module.
  - Pick numbers in the range N3xx. Find the current test with
    the highest allocated number and then pick the next value.
  - Keep the test method code in the source file ordered based
@@ -52,8 +52,8 @@ re_str_format = re.compile(r"""
 """, re.X)
 re_raises = re.compile(
     r"\s:raise[^s] *.*$|\s:raises *:.*$|\s:raises *[^:]+$")
-re_db_import = re.compile(r"^from tendrl.common import db")
-re_objects_import = re.compile(r"^from tendrl.common import objects")
+re_db_import = re.compile(r"^from tendrl.commons import db")
+re_objects_import = re.compile(r"^from tendrl.commons import objects")
 re_old_type_class = re.compile(r"^\s*class \w+(\(\))?:")
 re_datetime_alias = re.compile(r"^(from|import) datetime(?!\s+as\s+dt$)")
 
@@ -141,7 +141,7 @@ def check_import_of_logging(logical_line, physical_line, filename):
     N310
     """
 
-    excluded_files = ["./tendrl/common/logging.py",
+    excluded_files = ["./tendrl/commons/logging.py",
                       "./tests/unit/test_logging.py",
                       "./tests/ci/tendrl_verify.py",
                       "./tests/ci/sync_requirements.py"]
@@ -154,7 +154,7 @@ def check_import_of_logging(logical_line, physical_line, filename):
         for forbidden_import in forbidden_imports:
             if logical_line.startswith(forbidden_import):
                 yield (0, "N310 Wrong module for logging is imported. Please "
-                          "use `tendrl.common.logging` instead.")
+                          "use `tendrl.commons.logging` instead.")
 
 
 @skip_ignored_lines
@@ -186,12 +186,12 @@ def no_use_conf_debug_check(logical_line, physical_line, filename):
 
     N312
     """
-    excluded_files = ["./tendrl/common/logging.py"]
+    excluded_files = ["./tendrl/commons/logging.py"]
 
     point = logical_line.find("CONF.debug")
     if point != -1 and filename not in excluded_files:
         yield(point, "N312 Don't use `CONF.debug`. "
-                     "Function `tendrl.common.logging.is_debug` "
+                     "Function `tendrl.commons.logging.is_debug` "
                      "should be used instead.")
 
 
@@ -284,23 +284,23 @@ def assert_not_equal_none(logical_line, physical_line, filename):
 @skip_ignored_lines
 def check_no_direct_tendrl_objects_import(logical_line, physical_line,
                                           filename):
-    """Check if tendrl.common.objects are properly imported.
+    """Check if tendrl.commons.objects are properly imported.
 
-    If you import "from tendrl.common import objects" you are able to use
+    If you import "from tendrl.commons import objects" you are able to use
     objects directly like objects.Task.
 
     N340
     """
-    if filename == "./tendrl/common/objects/__init__.py":
+    if filename == "./tendrl/commons/objects/__init__.py":
         return
 
-    if filename == "./tendrl/common/objects/endpoint.py":
+    if filename == "./tendrl/commons/objects/endpoint.py":
         return
 
-    if (logical_line.startswith("from tendrl.common.objects")
-       or logical_line.startswith("import tendrl.common.objects.")):
+    if (logical_line.startswith("from tendrl.commons.objects")
+       or logical_line.startswith("import tendrl.commons.objects.")):
         yield (0, "N340: Import objects module:"
-                  "`from tendrl.common import objects`. "
+                  "`from tendrl.commons import objects`. "
                   "After that you can use directly objects e.g. objects.Task")
 
 

@@ -1,4 +1,4 @@
-NAME=tendrl-common
+NAME=tendrl-commons
 VERSION=0.0.1
 RELEASE=1
 

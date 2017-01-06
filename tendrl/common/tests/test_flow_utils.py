@@ -1,4 +1,4 @@
-from tendrl.common.flows import utils
+from tendrl.commons.flows import utils
 
 
 class TestFlowUtils(object):

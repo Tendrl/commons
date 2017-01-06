@@ -1,14 +1,14 @@
 """
-test_common
+test_commons
 ----------------------------------
 
-Tests for `common` module.
+Tests for `commons` module.
 """
 from mock import MagicMock
 import sys
 sys.modules['logging'] = MagicMock()
-from tendrl.common.etcdobj import etcdobj
-from tendrl.common.etcdobj import fields
+from tendrl.commons.etcdobj import etcdobj
+from tendrl.commons.etcdobj import fields
 
 
 class PytestEtcdObj(etcdobj.EtcdObj):
@@ -19,7 +19,7 @@ class PytestEtcdObj(etcdobj.EtcdObj):
         'testingDict', {'value1': str, 'value2': str})
 
 
-class TestBridge_common(object):
+class TestBridge_commons(object):
 
     def setup_class(self):
         self.Fields = fields

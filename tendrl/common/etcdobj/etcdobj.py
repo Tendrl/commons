@@ -32,7 +32,7 @@ A simplistic etcd orm.
 import json
 import logging
 
-from tendrl.common.etcdobj.fields import Field
+from tendrl.commons.etcdobj.fields import Field
 
 LOG = logging.getLogger(__name__)
 

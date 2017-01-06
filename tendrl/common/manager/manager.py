@@ -4,7 +4,7 @@ import gevent.greenlet
 import logging
 import six
 
-from tendrl.common.manager.rpc_job_process import RpcJobProcessThread
+from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 
 LOG = logging.getLogger(__name__)
 

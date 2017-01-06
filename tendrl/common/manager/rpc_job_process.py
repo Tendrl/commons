@@ -6,8 +6,8 @@ import traceback
 import uuid
 import yaml
 
-from tendrl.common.definitions.validator import DefinitionsSchemaValidator
-from tendrl.common.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
@@ -17,8 +17,8 @@ class EtcdRPC(object):
     def __init__(self, syncJobThread):
         self.config = syncJobThread._manager._config
         etcd_kwargs = {
-            'port': int(self.config.get("common", "etcd_port")),
-            'host': self.config.get("common", "etcd_connection")
+            'port': int(self.config.get("commons", "etcd_port")),
+            'host': self.config.get("commons", "etcd_connection")
         }
 
         self.client = etcd.Client(**etcd_kwargs)
