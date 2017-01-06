@@ -1,4 +1,4 @@
-import ansible.executor.module_commons as module_commons
+import ansible.executor.module_common as module_common
 from ansible import modules
 import errno
 import logging
@@ -51,7 +51,7 @@ class AnsibleRunner(object):
         modname = os.path.splitext(modname)[0]
         try:
             (module_data, module_style, shebang) = \
-                module_commons.modify_module(
+                module_common.modify_module(
                 modname,
                 self.module_path,
                 self.argument_dict,
