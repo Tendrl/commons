@@ -50,7 +50,8 @@ class AnsibleRunner(object):
         modname = os.path.basename(self.module_path)
         modname = os.path.splitext(modname)[0]
         try:
-            (module_data, module_style, shebang) = module_commons.modify_module(
+            (module_data, module_style, shebang) = \
+                module_commons.modify_module(
                 modname,
                 self.module_path,
                 self.argument_dict,
