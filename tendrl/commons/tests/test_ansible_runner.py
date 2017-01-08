@@ -1,8 +1,8 @@
 import os
 import sys
 
-from ansible import modules
 import ansible.executor.module_common as module_common
+from ansible import modules
 from mock import MagicMock
 import pytest
 

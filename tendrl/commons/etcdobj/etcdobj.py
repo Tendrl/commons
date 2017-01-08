@@ -106,6 +106,7 @@ class _Server(object):
 
 
 class Server(_Server):
+
     """Server implementation which creates an etcd.Client instance as its
     client.
 

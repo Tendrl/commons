@@ -268,9 +268,8 @@ class JobValidator(object):
         return (objects.get(
             obj_name, {}).get(con, {}).get(atom_name, {}).get(
             "inputs", {}).get("mandatory"),
-            objects.get(
-                        obj_name, {}).get(con, {}).get(atom_name, {}).get(
-                        "inputs", {}).get("optional"))
+            objects.get(obj_name, {}).get(con, {}).get(atom_name, {}).get(
+                "inputs", {}).get("optional"))
 
     def _checkCustomType(self, customType, inputParm, inputVal, objects):
         def _check(inputVal, cType=customType):
