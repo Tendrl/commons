@@ -1,5 +1,7 @@
-from mock import MagicMock
 import sys
+
+from mock import MagicMock
+
 sys.modules['tendrl.commons.config'] = MagicMock()
 import ansible.executor.module_common as module_common
 from ansible import modules
@@ -37,8 +39,8 @@ class TestAnsibleRunnerConstructor(object):
             key1="value1",
             key2="value2",
         )
-        assert runner.module_path == modules.__path__[0] + "/" +  \
-            "core/commands/command.py"
+        assert runner.module_path == modules.__path__[0] + "/" + \
+                                     "core/commands/command.py"
         assert runner.argument_dict == {"key1": "value1",
                                         "key2": "value2"}
 
@@ -47,6 +49,7 @@ class TestAnsibleRunner(object):
     def test_module_executable_generation_failed(self, monkeypatch):
         def mockreturn(path):
             return True
+
         monkeypatch.setattr(os.path, 'isfile', mockreturn)
 
         runner = AnsibleRunner(
@@ -69,11 +72,13 @@ class TestAnsibleRunner(object):
         def mock_modify_module(modname, modpath, argument, task_vars={}):
             return ("echo \'{\"key\":\"test message\"}\'",
                     "new", "#! /usr/bin/sh")
+
         monkeypatch.setattr(module_common,
                             'modify_module', mock_modify_module)
 
         def mock_isfile(path):
             return True
+
         monkeypatch.setattr(os.path, 'isfile', mock_isfile)
 
         runner = AnsibleRunner(

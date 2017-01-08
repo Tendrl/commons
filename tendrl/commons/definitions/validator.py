@@ -1,6 +1,5 @@
 import six
 
-
 PRIMITIVE_TYPES = {'Boolean': lambda value: isinstance(value, bool),
                    'Float': lambda value: isinstance(value, float),
                    'Integer': lambda value: isinstance(value, int),
@@ -203,7 +202,7 @@ class JobValidator(object):
         if missingInputParm != set():
             return (False,
                     "Missing input argument(s) %s" % (list(missingInputParm)))
-        return(True, '')
+        return (True, '')
 
     def checkJobParmDefined(self, gvnParm, docParm):
         # checking whether given arguments are defined in the yaml file
@@ -250,7 +249,7 @@ class JobValidator(object):
                 return (False, "Invalid parameter type: "
                         + "%s. Expected value type is: %s" % (
                             iParm, expectedType))
-        return(True, "")
+        return (True, "")
 
     def getFlowParms(self, flow):
         """This function will return mandatory and
@@ -268,9 +267,9 @@ class JobValidator(object):
         obj_name, con, atom_name = atom.split('.')[-3:]
         return (objects.get(
             obj_name, {}).get(con, {}).get(atom_name, {}).get(
-                "inputs", {}).get("mandatory"),
-            objects.get(
-                obj_name, {}).get(con, {}).get(atom_name, {}).get(
+            "inputs", {}).get("mandatory"),
+                objects.get(
+                    obj_name, {}).get(con, {}).get(atom_name, {}).get(
                     "inputs", {}).get("optional"))
 
     def _checkCustomType(self, customType, inputParm, inputVal, objects):
@@ -368,4 +367,4 @@ class JobValidator(object):
             if not status[0]:
                 return status
         # all check passed successfully!
-        return(True, '')
+        return (True, '')

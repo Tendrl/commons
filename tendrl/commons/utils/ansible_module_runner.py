@@ -1,11 +1,13 @@
-import ansible.executor.module_common as module_common
-from ansible import modules
 import errno
 import logging
 import os
 import subprocess
-from tendrl.commons.config import TendrlConfig
 import uuid
+
+import ansible.executor.module_common as module_common
+from ansible import modules
+
+from tendrl.commons.config import TendrlConfig
 
 config = TendrlConfig()
 
@@ -34,6 +36,7 @@ class AnsibleRunner(object):
     """Class that can be used to run ansible modules
 
     """
+
     def __init__(self, module_path, **kwargs):
         self.executable_module_path = MODULE_EXECUTION_PATH + str(uuid.uuid4())
         self.module_path = modules.__path__[0] + "/" + module_path
@@ -52,11 +55,11 @@ class AnsibleRunner(object):
         try:
             (module_data, module_style, shebang) = \
                 module_common.modify_module(
-                modname,
-                self.module_path,
-                self.argument_dict,
-                task_vars={}
-            )
+                    modname,
+                    self.module_path,
+                    self.argument_dict,
+                    task_vars={}
+                )
         except Exception as e:
             LOG.error("Could not generate executable data for module"
                       ": %s. Error: %s" % (self.module_path, str(e)))

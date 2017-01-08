@@ -1,6 +1,7 @@
+import logging
+
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
-import logging
 
 LOG = logging.getLogger(__name__)
 

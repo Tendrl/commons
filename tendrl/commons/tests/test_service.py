@@ -1,5 +1,7 @@
-from mock import MagicMock
 import sys
+
+from mock import MagicMock
+
 sys.modules['tendrl.commons.config'] = MagicMock()
 
 from tendrl.commons.utils.ansible_module_runner \
@@ -25,6 +27,7 @@ class TestService(object):
             assert attr == {"name": "collectd",
                             "state": "started"}
             return
+
         monkeypatch.setattr(AnsibleRunner, '__init__',
                             mock_AnsibleRunner_constructor)
 
@@ -44,6 +47,7 @@ class TestService(object):
                 }
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
@@ -56,6 +60,7 @@ class TestService(object):
             assert attr == {"name": "collectd",
                             "state": "stopped"}
             return
+
         monkeypatch.setattr(AnsibleRunner, '__init__',
                             mock_AnsibleRunner_constructor)
 
@@ -75,6 +80,7 @@ class TestService(object):
                 }
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
@@ -87,6 +93,7 @@ class TestService(object):
             assert attr == {"name": "collectd",
                             "state": "reloaded"}
             return
+
         monkeypatch.setattr(AnsibleRunner, '__init__',
                             mock_AnsibleRunner_constructor)
 
@@ -106,6 +113,7 @@ class TestService(object):
                 }
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
@@ -118,6 +126,7 @@ class TestService(object):
             assert attr == {"name": "collectd",
                             "state": "restarted"}
             return
+
         monkeypatch.setattr(AnsibleRunner, '__init__',
                             mock_AnsibleRunner_constructor)
 
@@ -137,6 +146,7 @@ class TestService(object):
                 }
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
@@ -145,12 +155,12 @@ class TestService(object):
         assert success
 
     def test_service_error(self, monkeypatch):
-
         def mock_runner_run(obj):
             raise AnsibleExecutableGenerationFailed(
                 "module_path", "arg",
                 "err message"
             )
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         service = Service("collectd")
@@ -158,4 +168,4 @@ class TestService(object):
 
         assert not success
         assert message == "Executabe could not be generated for module" \
-            " module_path , with arguments arg. Error: err message"
+                          " module_path , with arguments arg. Error: err message"

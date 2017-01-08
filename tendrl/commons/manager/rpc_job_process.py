@@ -1,9 +1,10 @@
-import etcd
-import gevent.event
 import json
 import logging
 import traceback
 import uuid
+
+import etcd
+import gevent.event
 import yaml
 
 from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
@@ -13,7 +14,6 @@ LOG = logging.getLogger(__name__)
 
 
 class EtcdRPC(object):
-
     def __init__(self, syncJobThread):
         self.config = syncJobThread._manager._config
         etcd_kwargs = {
@@ -61,7 +61,7 @@ class EtcdRPC(object):
                     # ignore the job and dont process
                     if "node_ids" in raw_job:
                         if self.syncJobThread._manager.node_id \
-                            not in raw_job['node_ids']:
+                                not in raw_job['node_ids']:
                             continue
                     raw_job, executed = self._process_job(
                         raw_job,
@@ -69,7 +69,7 @@ class EtcdRPC(object):
                         job_type
                     )
                     if "etcd_client" and "manager" in \
-                        raw_job['parameters'].keys():
+                            raw_job['parameters'].keys():
                         del raw_job['parameters']['etcd_client']
                         del raw_job['parameters']['manager']
                 except FlowExecutionFailedError as e:
@@ -107,7 +107,7 @@ class EtcdRPC(object):
                              flow_path[-1:]])
         job['parameters'].update({"manager": self.syncJobThread._manager})
         if "tendrl" in flow_path and "flows" in flow_path:
-            exec("from %s import %s as the_flow" % (flow_module, kls_name))
+            exec ("from %s import %s as the_flow" % (flow_module, kls_name))
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
                             post_run, type, uuid, job['parameters'],
                             job, self.config, definitions).run()
@@ -122,9 +122,9 @@ class EtcdRPC(object):
         flow = flow['flows']
         flow = flow[flow_name.split(".")[-1]]
         return flow['atoms'], flow.get('help', ""), \
-            flow['enabled'], flow['inputs'], \
-            flow.get('pre_run'), flow.get('post_run'), \
-            flow['type'], flow['uuid']
+               flow['enabled'], flow['inputs'], \
+               flow.get('pre_run'), flow.get('post_run'), \
+               flow['type'], flow['uuid']
 
 
 class RpcJobProcessThread(gevent.greenlet.Greenlet):

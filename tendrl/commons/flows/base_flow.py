@@ -1,6 +1,7 @@
 import abc
-import etcd
 import logging
+
+import etcd
 import six
 
 from tendrl.commons.atoms.exceptions import AtomExecutionFailedError
@@ -12,20 +13,20 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
     def __init__(
-        self,
-        name,
-        atoms,
-        help,
-        enabled,
-        inputs,
-        pre_run,
-        post_run,
-        type,
-        uuid,
-        parameters,
-        job,
-        config,
-        definitions
+            self,
+            name,
+            atoms,
+            help,
+            enabled,
+            inputs,
+            pre_run,
+            post_run,
+            type,
+            uuid,
+            parameters,
+            job,
+            config,
+            definitions
     ):
         self.name = name
         self.atoms = atoms
@@ -112,7 +113,7 @@ class BaseFlow(object):
         atoms = self.definitions[namespace]['objects'][object_name]['atoms']
         atom = atoms[atom_name.split('.')[-1]]
         return atom.get('name'), atom.get('enabled'), atom.get('help'), \
-            atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
+               atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
 
     # Executes a givem atom specific by given full module name "mod"
     # It dynamically imports the atom class from module as the_atom
@@ -122,13 +123,13 @@ class BaseFlow(object):
         if "tendrl" in mod and "atoms" in mod:
             atom_name, enabled, help, inputs, outputs, uuid = \
                 self.extract_atom_details(mod)
-            exec("from %s import %s as the_atom" % (
+            exec ("from %s import %s as the_atom" % (
                 mod.lower().strip("."),
                 class_name.strip("."))
-            )
+                  )
 
             try:
-                ret_val = the_atom(    # noqa: F821
+                ret_val = the_atom(  # noqa: F821
                     atom_name,
                     enabled,
                     help,

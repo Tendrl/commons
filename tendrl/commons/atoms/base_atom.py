@@ -1,4 +1,5 @@
 import abc
+
 import six
 
 from tendrl.commons.atoms.exceptions import AtomNotImplementedError
@@ -7,13 +8,13 @@ from tendrl.commons.atoms.exceptions import AtomNotImplementedError
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
     def __init__(
-        self,
-        name,
-        enabled,
-        help,
-        inputs,
-        outputs,
-        uuid
+            self,
+            name,
+            enabled,
+            help,
+            inputs,
+            outputs,
+            uuid
     ):
         self.name = name
         self.enabled = enabled

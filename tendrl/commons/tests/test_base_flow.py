@@ -1,23 +1,24 @@
 from mock import MagicMock
+
 from tendrl.commons.flows import base_flow
 
 
 class MyFlow(base_flow.BaseFlow):
     def __init__(
-        self,
-        name,
-        atoms,
-        help,
-        enabled,
-        inputs,
-        pre_run,
-        post_run,
-        type,
-        uuid,
-        parameters,
-        job,
-        config,
-        definitions
+            self,
+            name,
+            atoms,
+            help,
+            enabled,
+            inputs,
+            pre_run,
+            post_run,
+            type,
+            uuid,
+            parameters,
+            job,
+            config,
+            definitions
     ):
         super(MyFlow, self).__init__(
             name,
@@ -99,42 +100,42 @@ class TestBaseFlow(object):
                                 'name': 'atom1',
                                 'enabled': True,
                                 'run':
-                                'tendrl.dummymodule.objects.myobject.atoms.'
-                                'atom1.Atom1',
+                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                    'atom1.Atom1',
                                 'help': 'atom1',
                                 'uuid':
-                                '61959242-628f-4847-a5e2-2c8d8daac0cd',
+                                    '61959242-628f-4847-a5e2-2c8d8daac0cd',
                                 'inputs': {
                                     'mandatory':
-                                    ['myobject.field1', 'myobject.field2']
+                                        ['myobject.field1', 'myobject.field2']
                                 }
                             },
                             'pre_run1': {
                                 'name': 'pre_run1',
                                 'enabled': True,
                                 'run':
-                                'tendrl.dummymodule.objects.myobject.atoms.'
-                                'pre_run1.PreRun1',
+                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                    'pre_run1.PreRun1',
                                 'help': 'atom1',
                                 'uuid':
-                                '61959242-628f-4847-a5e2-2c8d8daac0c3',
+                                    '61959242-628f-4847-a5e2-2c8d8daac0c3',
                                 'inputs': {
                                     'mandatory':
-                                    ['myobject.field1', 'myobject.field2']
+                                        ['myobject.field1', 'myobject.field2']
                                 }
                             },
                             'post_run1': {
                                 'name': 'post_run1',
                                 'enabled': True,
                                 'run':
-                                'tendrl.dummymodule.objects.myobject.atoms.'
-                                'post_run1.PostRun1',
+                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                    'post_run1.PostRun1',
                                 'help': 'atom1',
                                 'uuid':
-                                '61959242-628f-4847-a5e2-2c8d8daac0c4',
+                                    '61959242-628f-4847-a5e2-2c8d8daac0c4',
                                 'inputs': {
                                     'mandatory':
-                                    ['myobject.field1', 'myobject.field2']
+                                        ['myobject.field1', 'myobject.field2']
                                 }
                             }
                         }

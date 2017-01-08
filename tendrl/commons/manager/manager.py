@@ -1,7 +1,8 @@
 import abc
+import logging
+
 import gevent.event
 import gevent.greenlet
-import logging
 import six
 
 from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
@@ -30,14 +31,14 @@ class SyncStateThread(gevent.greenlet.Greenlet):
 @six.add_metaclass(abc.ABCMeta)
 class Manager(object):
     def __init__(
-        self,
-        name,
-        integration_id,
-        node_id,
-        config,
-        events,
-        persister_thread,
-        defs_dir
+            self,
+            name,
+            integration_id,
+            node_id,
+            config,
+            events,
+            persister_thread,
+            defs_dir
     ):
         self.name = name
         self._config = config

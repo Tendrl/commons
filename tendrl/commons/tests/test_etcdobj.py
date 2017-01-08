@@ -1,6 +1,8 @@
 import json
-from mock import MagicMock
+
 import pytest
+from mock import MagicMock
+
 from tendrl.commons.tests.test_commons import PytestEtcdObj
 from tendrl.commons.tests.test_commons import TestBridge_commons
 
@@ -55,13 +57,13 @@ class TestEtcdObj(TestBridge_commons):
     def test_render(self):
         item = self.testing_obj.render()
         for obj in item:
-            assert(
+            assert (
                 {"name": "testingInt", "key": "/unittesting/testingInt",
                  "value": 10, "dir": False} in item)
 
     def test_json(self):
-        assert(json.dumps({"testingDict": {
-                           "value1": "string1",
-                           "value2": "string2"},
-                           "testingInt": 10
-                           }) == self.testing_obj.json)
+        assert (json.dumps({"testingDict": {
+            "value1": "string1",
+            "value2": "string2"},
+            "testingInt": 10
+        }) == self.testing_obj.json)

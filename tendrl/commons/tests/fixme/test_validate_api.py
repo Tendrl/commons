@@ -21,7 +21,6 @@ def getSchemaFile(schemaName):
 
 
 class TestValidateJobApi(object):
-
     def test_validate(self):
         # Success test
         glusterApiJob = {
@@ -94,21 +93,21 @@ class TestValidateJobApi(object):
         # Testing with invalid data type for strip_count
         glusterApiJob['parameters']['stripe_count'] = '10'
         status, error = sdsoper.validateApi(glusterApiJob)
-        msg = "Invalid parameter type: stripe_count. "\
+        msg = "Invalid parameter type: stripe_count. " \
               "Expected value type is: Integer"
         assert error == msg
         assert not status
 
         glusterApiJob['parameters']['stripe_count'] = []
         status, error = sdsoper.validateApi(glusterApiJob)
-        msg = "Invalid parameter type: stripe_count. "\
+        msg = "Invalid parameter type: stripe_count. " \
               "Expected value type is: Integer"
         assert error == msg
         assert not status
 
         glusterApiJob['parameters']['stripe_count'] = "RAID"
         status, error = sdsoper.validateApi(glusterApiJob)
-        msg = "Invalid parameter type: stripe_count. "\
+        msg = "Invalid parameter type: stripe_count. " \
               "Expected value type is: Integer"
         assert error == msg
         assert not status
