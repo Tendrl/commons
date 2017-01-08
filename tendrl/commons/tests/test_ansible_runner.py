@@ -1,10 +1,10 @@
 import os
 import sys
 
-import ansible.executor.module_common as module_common
-import pytest
 from ansible import modules
+import ansible.executor.module_common as module_common
 from mock import MagicMock
+import pytest
 
 sys.modules['tendrl.commons.config'] = MagicMock()
 

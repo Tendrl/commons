@@ -58,12 +58,12 @@ class TestEtcdObj(TestBridge_commons):
         item = self.testing_obj.render()
         for obj in item:
             assert (
-                {"name" : "testingInt", "key": "/unittesting/testingInt",
+                {"name": "testingInt", "key": "/unittesting/testingInt",
                  "value": 10, "dir": False} in item)
 
     def test_json(self):
         assert (json.dumps({"testingDict": {
             "value1": "string1",
             "value2": "string2"},
-            "testingInt"                 : 10
+            "testingInt": 10
         }) == self.testing_obj.json)
