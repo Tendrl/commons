@@ -28,8 +28,31 @@ Code Coverage
 .. image:: https://coveralls.io/repos/github/Tendrl/commons/badge.svg
     :target: https://coveralls.io/github/Tendrl/commons
 
+Release process
+---------------
+
+When you are ready to cut a new version:
+
+#. Bump the version number in ``tendrl/commons/__init__.py`` and commit your
+   changes.
+   ::
+
+      python setup.py bumpversion
+
+#. Tag and push to GitHub.
+   ::
+
+      python setup.py release
+
+#. Make an SRPM.
+   ::
+
+      make srpm
+
+
+
 Developer/Install documentation
------------------------
+-------------------------------
 
 We also have sphinx documentation in ``docs/source``.
 
