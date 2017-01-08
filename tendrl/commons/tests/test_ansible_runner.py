@@ -1,12 +1,13 @@
+import os
 import sys
 
+import ansible.executor.module_common as module_common
+import pytest
+from ansible import modules
 from mock import MagicMock
 
 sys.modules['tendrl.commons.config'] = MagicMock()
-import ansible.executor.module_common as module_common
-from ansible import modules
-import os
-import pytest
+
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
@@ -40,7 +41,7 @@ class TestAnsibleRunnerConstructor(object):
             key2="value2",
         )
         assert runner.module_path == modules.__path__[0] + "/" + \
-                                     "core/commands/command.py"
+            "core/commands/command.py"
         assert runner.argument_dict == {"key1": "value1",
                                         "key2": "value2"}
 

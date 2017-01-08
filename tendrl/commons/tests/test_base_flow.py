@@ -100,7 +100,7 @@ class TestBaseFlow(object):
                                 'name': 'atom1',
                                 'enabled': True,
                                 'run':
-                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                'tendrl.dummymodule.objects.myobject.atoms.'
                                     'atom1.Atom1',
                                 'help': 'atom1',
                                 'uuid':
@@ -114,7 +114,7 @@ class TestBaseFlow(object):
                                 'name': 'pre_run1',
                                 'enabled': True,
                                 'run':
-                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                'tendrl.dummymodule.objects.myobject.atoms.'
                                     'pre_run1.PreRun1',
                                 'help': 'atom1',
                                 'uuid':
@@ -128,7 +128,7 @@ class TestBaseFlow(object):
                                 'name': 'post_run1',
                                 'enabled': True,
                                 'run':
-                                    'tendrl.dummymodule.objects.myobject.atoms.'
+                                'tendrl.dummymodule.objects.myobject.atoms.'
                                     'post_run1.PostRun1',
                                 'help': 'atom1',
                                 'uuid':

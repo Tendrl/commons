@@ -113,7 +113,7 @@ class BaseFlow(object):
         atoms = self.definitions[namespace]['objects'][object_name]['atoms']
         atom = atoms[atom_name.split('.')[-1]]
         return atom.get('name'), atom.get('enabled'), atom.get('help'), \
-               atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
+            atom.get('inputs'), atom.get('outputs'), atom.get('uuid')
 
     # Executes a givem atom specific by given full module name "mod"
     # It dynamically imports the atom class from module as the_atom

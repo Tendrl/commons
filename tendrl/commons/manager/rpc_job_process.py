@@ -122,9 +122,9 @@ class EtcdRPC(object):
         flow = flow['flows']
         flow = flow[flow_name.split(".")[-1]]
         return flow['atoms'], flow.get('help', ""), \
-               flow['enabled'], flow['inputs'], \
-               flow.get('pre_run'), flow.get('post_run'), \
-               flow['type'], flow['uuid']
+            flow['enabled'], flow['inputs'], \
+            flow.get('pre_run'), flow.get('post_run'), \
+            flow['type'], flow['uuid']
 
 
 class RpcJobProcessThread(gevent.greenlet.Greenlet):

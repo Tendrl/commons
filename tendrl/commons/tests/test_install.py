@@ -54,7 +54,8 @@ class TestInstaller(object):
 
         assert not success
         assert message == "Executabe could not be generated for module" \
-                          " module_path , with arguments arg. Error: err message"
+                          " module_path , with arguments arg. Error: err " \
+                          "message"
 
     def test_installer(self, monkeypatch):
         def mock_runner_run(obj):

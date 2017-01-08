@@ -35,7 +35,7 @@ class Test_EtcdRpc(object):
         assert server.client.port == local_client.port
         assert server.client.host == local_client.host
         assert server.syncJobThread._manager.integration_id == \
-               "aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
+            "aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
 
     def test_stop(self):
         assert True
@@ -88,7 +88,7 @@ class Test_EtcdRpc(object):
         assert executed
         assert raw_job['status'] == "finished"
         assert raw_job['request_id'] == "49fa2adde8a6e98591f0f5cb4bc5f44d" \
-                                        "/flow_aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
+            "/flow_aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
 
         input_raw_job2 = {
             "status": "processing", "sds_type": "generic",

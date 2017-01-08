@@ -65,7 +65,8 @@ class TestCommand(object):
 
         assert stdout == ""
         assert stderr == "Executabe could not be generated for module" \
-                         " module_path , with arguments arg. Error: err message"
+                         " module_path , with arguments arg. Error: err " \
+                         "message"
         assert rc == -1
 
     def test_command_unsafe_command(self, monkeypatch):
