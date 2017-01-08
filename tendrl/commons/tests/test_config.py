@@ -1,5 +1,6 @@
 from mock import MagicMock
 import pytest
+
 from tendrl.commons import config
 
 

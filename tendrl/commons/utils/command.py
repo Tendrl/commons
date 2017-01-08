@@ -1,6 +1,7 @@
+import logging
+
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
-import logging
 
 ANSIBLE_MODULE_PATH = "core/commands/command.py"
 LOG = logging.getLogger(__name__)

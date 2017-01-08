@@ -1,6 +1,8 @@
+import sys
+
 from mock import MagicMock
 import pytest
-import sys
+
 sys.modules['tendrl.commons.config'] = MagicMock()
 
 from tendrl.commons.utils.ansible_module_runner \
@@ -17,7 +19,6 @@ del sys.modules['tendrl.commons.config']
 
 class TestCommand(object):
     def test_command_run(self, monkeypatch):
-
         def mock_runner_run(obj):
             result = {
                 u'changed': True,
@@ -40,6 +41,7 @@ class TestCommand(object):
                 u'warnings': []
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         c = Command("cat /asdf.txt")
@@ -50,12 +52,12 @@ class TestCommand(object):
         assert rc == 0
 
     def test_command_error(self, monkeypatch):
-
         def mock_runner_run(obj):
             raise AnsibleExecutableGenerationFailed(
                 "module_path", "arg",
                 "err message"
             )
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         c = Command("cat /asdf")
@@ -63,7 +65,8 @@ class TestCommand(object):
 
         assert stdout == ""
         assert stderr == "Executabe could not be generated for module" \
-            " module_path , with arguments arg. Error: err message"
+                         " module_path , with arguments arg. Error: err " \
+                         "message"
         assert rc == -1
 
     def test_command_unsafe_command(self, monkeypatch):

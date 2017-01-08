@@ -1,6 +1,8 @@
 import datetime
 import json
+
 import pytest
+
 from tendrl.commons.tests.test_commons import TestBridge_commons
 
 
@@ -128,7 +130,7 @@ class TestDateTimeField(TestBridge_commons):
         self.obj.value = '1993-05-26'
         value = datetime.datetime(1993, 5, 26)
         value = datetime.datetime.strftime(value, '%Y-%m-%d')
-        assert(
+        assert (
             {"name": "unittesting",
              "key": "unittesting",
              "value": value,
@@ -150,7 +152,7 @@ class Test_DictField(TestBridge_commons):
 
     def test_json(self):
         self.obj.value = {'value1': "10", 'value2': 10}
-        assert(
+        assert (
             json.dumps({"value1": 10, "value2": "10"}) == self.obj.json)
 
     def test_render(self):
@@ -164,4 +166,4 @@ class Test_DictField(TestBridge_commons):
                         "value": "10",
                         "dir": True}]
         for obj in testing_obj:
-            assert(obj in self.obj.render())
+            assert (obj in self.obj.render())

@@ -44,6 +44,7 @@ class Persister(gevent.greenlet.Greenlet):
                                     "data: %s" % (dc.fn,)
                                 )
                                 LOG.exception(ex)
+
                         return defer
                     else:
                         return object.__getattribute__(self, item)

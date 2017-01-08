@@ -1,8 +1,8 @@
 import sys
 
 from gevent.event import Event
-
 from mock import MagicMock
+
 sys.modules['tendrl.commons.config'] = MagicMock()
 from tendrl.commons.manager import manager
 from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
@@ -10,14 +10,14 @@ from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 
 class MyManager(manager.Manager):
     def __init__(
-        self,
-        name,
-        integration_id,
-        node_id,
-        config,
-        events,
-        persister_thread,
-        defs_dir
+            self,
+            name,
+            integration_id,
+            node_id,
+            config,
+            events,
+            persister_thread,
+            defs_dir
     ):
         super(MyManager, self).__init__(
             name,
@@ -56,15 +56,16 @@ class TestManager(object):
         )
 
     def test_manager_stop(self, monkeypatch):
-
         def mock_rpc_job_process_thread_stop():
             return
+
         monkeypatch.setattr(self.manager._rpc_job_process_thread,
                             'stop',
                             mock_rpc_job_process_thread_stop)
 
         def mock_persister_thread_stop():
             return
+
         monkeypatch.setattr(self.manager.persister_thread,
                             'stop',
                             mock_persister_thread_stop)
@@ -73,15 +74,16 @@ class TestManager(object):
         assert True
 
     def test_manager_start(self, monkeypatch):
-
         def mock_rpc_job_process_thread_start():
             return
+
         monkeypatch.setattr(self.manager._rpc_job_process_thread,
                             'start',
                             mock_rpc_job_process_thread_start)
 
         def mock_persister_thread_start():
             return
+
         monkeypatch.setattr(self.manager.persister_thread,
                             'start',
                             mock_persister_thread_start)
@@ -90,15 +92,16 @@ class TestManager(object):
         assert True
 
     def test_manager_join(self, monkeypatch):
-
         def mock_rpc_job_process_thread_join():
             return
+
         monkeypatch.setattr(self.manager._rpc_job_process_thread,
                             'join',
                             mock_rpc_job_process_thread_join)
 
         def mock_persister_thread_join():
             return
+
         monkeypatch.setattr(self.manager.persister_thread,
                             'join',
                             mock_persister_thread_join)

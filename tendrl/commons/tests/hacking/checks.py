@@ -59,7 +59,6 @@ re_datetime_alias = re.compile(r"^(from|import) datetime(?!\s+as\s+dt$)")
 
 
 def skip_ignored_lines(func):
-
     @functools.wraps(func)
     def wrapper(logical_line, physical_line, filename):
         line = physical_line.strip()
@@ -172,7 +171,7 @@ def no_translate_debug_logs(logical_line, physical_line, filename):
     N311
     """
     if logical_line.startswith("LOG.debug(_("):
-        yield(0, "N311 Don't translate debug level logs")
+        yield (0, "N311 Don't translate debug level logs")
 
 
 @skip_ignored_lines
@@ -190,9 +189,9 @@ def no_use_conf_debug_check(logical_line, physical_line, filename):
 
     point = logical_line.find("CONF.debug")
     if point != -1 and filename not in excluded_files:
-        yield(point, "N312 Don't use `CONF.debug`. "
-                     "Function `tendrl.commons.logging.is_debug` "
-                     "should be used instead.")
+        yield (point, "N312 Don't use `CONF.debug`. "
+                      "Function `tendrl.commons.logging.is_debug` "
+                      "should be used instead.")
 
 
 @skip_ignored_lines
@@ -298,7 +297,7 @@ def check_no_direct_tendrl_objects_import(logical_line, physical_line,
         return
 
     if (logical_line.startswith("from tendrl.commons.objects")
-       or logical_line.startswith("import tendrl.commons.objects.")):
+            or logical_line.startswith("import tendrl.commons.objects.")):
         yield (0, "N340: Import objects module:"
                   "`from tendrl.commons import objects`. "
                   "After that you can use directly objects e.g. objects.Task")
@@ -314,7 +313,7 @@ def check_no_oslo_deprecated_import(logical_line, physical_line, filename):
     N341
     """
     if (logical_line.startswith("from oslo.")
-       or logical_line.startswith("import oslo.")):
+            or logical_line.startswith("import oslo.")):
         yield (0, "N341: Import oslo module: `from oslo_xyz import ...`. "
                   "The oslo.xyz namespace was deprecated, use oslo_xyz "
                   "instead")

@@ -4,8 +4,10 @@ test_commons
 
 Tests for `commons` module.
 """
-from mock import MagicMock
 import sys
+
+from mock import MagicMock
+
 sys.modules['logging'] = MagicMock()
 from tendrl.commons.etcdobj import etcdobj
 from tendrl.commons.etcdobj import fields
@@ -20,7 +22,6 @@ class PytestEtcdObj(etcdobj.EtcdObj):
 
 
 class TestBridge_commons(object):
-
     def setup_class(self):
         self.Fields = fields
         self.Etcdobj = etcdobj

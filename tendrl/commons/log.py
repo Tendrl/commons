@@ -1,5 +1,6 @@
 import logging.config
 import os
+
 import yaml
 
 
@@ -9,8 +10,8 @@ class LogInitFailedError(Exception):
 
 
 def setup_logging(
-    log_cfg_path,
-    default_log_level=logging.INFO
+        log_cfg_path,
+        default_log_level=logging.INFO
 ):
     """Setup logging configuration
 

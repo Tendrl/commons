@@ -1,6 +1,8 @@
+import sys
+
 from mock import MagicMock
 import pytest
-import sys
+
 sys.modules['tendrl.commons.config'] = MagicMock()
 
 from tendrl.commons.utils.ansible_module_runner \
@@ -39,12 +41,12 @@ class TestInstaller(object):
         )
 
     def test_installer_error(self, monkeypatch):
-
         def mock_runner_run(obj):
             raise AnsibleExecutableGenerationFailed(
                 "module_path", "arg",
                 "err message"
             )
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         installer = Installer("emacs", "rpm", "3.4.5")
@@ -52,10 +54,10 @@ class TestInstaller(object):
 
         assert not success
         assert message == "Executabe could not be generated for module" \
-            " module_path , with arguments arg. Error: err message"
+                          " module_path , with arguments arg. Error: err " \
+                          "message"
 
     def test_installer(self, monkeypatch):
-
         def mock_runner_run(obj):
             result = {
                 u'msg': u'',
@@ -81,6 +83,7 @@ class TestInstaller(object):
                 u'rc': 0
             }
             return result, ""
+
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         installer = Installer("emacs", "rpm", "3.4.5")

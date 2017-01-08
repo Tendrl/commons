@@ -9,7 +9,6 @@ tendrl_bug_id = None
 tendrl_spec = None
 github_base_url = "http://github.com"
 
-
 # Extract "tendrl-bug-id" and "tendrl-spec" name from the commit message
 for line in commit_msg.split("\n"):
     if "tendrl-bug-id" in line:
