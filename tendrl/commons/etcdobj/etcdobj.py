@@ -106,7 +106,8 @@ class _Server(object):
 
 
 class Server(_Server):
-    """Server implementation which creates an etcd.Client instance as its
+    """
+    Server implementation which creates an etcd.Client instance as its
     client.
 
     """
@@ -164,7 +165,8 @@ class EtcdObj(object):
             object.__setattr__(self, name, value)
 
     def __getattribute__(self, name):
-        """Overridden  getattribute to catch fields or pass along if not a
+        """
+        Overridden  getattribute to catch fields or pass along if not a
         field.
 
         :param name: The name of the field.

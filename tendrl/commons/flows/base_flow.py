@@ -126,7 +126,7 @@ class BaseFlow(object):
             exec ("from %s import %s as the_atom" % (
                 mod.lower().strip("."),
                 class_name.strip("."))
-                  )
+                )
 
             try:
                 ret_val = the_atom(  # noqa: F821

@@ -1,7 +1,7 @@
 import sys
 
-import pytest
 from mock import MagicMock
+import pytest
 
 sys.modules['tendrl.commons.config'] = MagicMock()
 
