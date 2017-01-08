@@ -1,8 +1,10 @@
 import re
 import subprocess
+
+from setuptools import Command
 from setuptools import find_packages
 from setuptools import setup
-from setuptools import Command
+
 try:
     # Python 2 backwards compat
     from __builtin__ import raw_input as input
@@ -14,7 +16,9 @@ def extract_requirements(filename):
     with open(filename, 'r') as requirements_file:
         return [x[:-1] for x in requirements_file.readlines()]
 
+
 install_requires = extract_requirements('requirements.txt')
+
 
 def read_module_contents():
     with open('tendrl/commons/__init__.py') as app_init:
@@ -25,13 +29,14 @@ def read_spec_contents():
     with open('tendrl-commons.spec') as spec:
         return spec.read()
 
+
 module_file = read_module_contents()
 metadata = dict(re.findall("__([a-z]+)__\s*=\s*'([^']+)'", module_file))
 version = metadata['version']
 
 
 class BumpCommand(Command):
-    """ Bump the __version__ number and commit all changes. """
+    """Bump the __version__ number and commit all changes. """
 
     user_options = [('version=', 'v', 'version number to use')]
 
@@ -71,7 +76,7 @@ class BumpCommand(Command):
 
 
 class ReleaseCommand(Command):
-    """ Tag and push a new release. """
+    """Tag and push a new release. """
 
     user_options = [('sign', 's', 'GPG-sign the Git tag and release files')]
 
