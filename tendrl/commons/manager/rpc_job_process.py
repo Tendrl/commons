@@ -107,20 +107,43 @@ class EtcdRPC(object):
                              flow_path[-1:]])
         job['parameters'].update({"manager": self.syncJobThread._manager})
         if "tendrl" in flow_path and "flows" in flow_path:
-            exec ("from %s import %s as the_flow" % (flow_module, kls_name))
+            exec ("from %s import %s as the_flow" % (
+                flow_module.lower(),
+                kls_name)
+            )
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
                             post_run, type, uuid, job['parameters'],
                             job, self.config, definitions).run()
 
     def extract_flow_details(self, flow_name, definitions):
-        namespace = flow_name.split(".flows.")[0]
-        namespace = namespace.split(".")
-        integration_path = namespace[0] + "." + namespace[1]
-        flow = definitions[integration_path]
-        for path in namespace[2:]:
-            flow = flow[path]
-        flow = flow['flows']
-        flow = flow[flow_name.split(".")[-1]]
+        try:
+            # This block takes care of extracting the flows that are at the
+            # global level. For example:
+            # "tendrl.node_agent.ceph_integration.flows.
+            # import_cluster.ImportCluster"
+            # For above flow the dictionary to extract flow would be
+            # definitions["tendrl.node_agent.ceph_integration"]["flows"]
+            # ["ImportCluster"]
+            namespace = flow_name.split(".flows.")[0]
+            flow = definitions[namespace]['flows'][flow_name.split(".")[-1]]
+        except KeyError:
+            # This section is for extracting flows that are tied to objects
+            # For example:
+            # "tendrl.gluster_integration.objects.Volume.flows.
+            # delete_volume.DeleteVolume"
+            # Here the dictionary for extracting flow is
+            # definition["tendrl.gluster_integration"]["objects"]["Volume"]
+            # ["flows"]["DeleteVolume"]
+            # in this case we parse the dictionary step by step
+            namespace = flow_name.split(".flows.")[0]
+            namespace = namespace.split(".")
+            integration_path = namespace[0] + "." + namespace[1]
+            flow = definitions[integration_path]
+            for path in namespace[2:]:
+                flow = flow[path]
+            flow = flow['flows']
+            flow = flow[flow_name.split(".")[-1]]
+
         return flow['atoms'], flow.get('help', ""), \
             flow['enabled'], flow['inputs'], \
             flow.get('pre_run'), flow.get('post_run'), \
