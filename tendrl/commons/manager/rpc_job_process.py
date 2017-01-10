@@ -3,26 +3,21 @@ import logging
 import traceback
 import uuid
 
-import etcd
 import gevent.event
 import yaml
 
 from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.utils import import_utils
 
 LOG = logging.getLogger(__name__)
 
 
 class EtcdRPC(object):
-    def __init__(self, syncJobThread):
-        self.config = syncJobThread._manager._config
-        etcd_kwargs = {
-            'port': int(self.config.get("commons", "etcd_port")),
-            'host': self.config.get("commons", "etcd_connection")
-        }
-
-        self.client = etcd.Client(**etcd_kwargs)
-        self.syncJobThread = syncJobThread
+    def __init__(self, syncjobthread, etcd_client):
+        self.config = syncjobthread._manager._config
+        self.client = etcd_client
+        self.syncJobThread = syncjobthread
 
     def _process_job(self, raw_job, job_key, job_type):
         # Pick up the "new" job that is not locked by any other integration
@@ -99,15 +94,9 @@ class EtcdRPC(object):
     def invoke_flow(self, flow_name, job, definitions):
         atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
             self.extract_flow_details(flow_name, definitions)
-        the_flow = None
-        flow_path = flow_name.split('.')
-        flow_module = ".".join([a.encode("ascii", "ignore") for a in
-                                flow_path[:-1]])
-        kls_name = ".".join([a.encode("ascii", "ignore") for a in
-                             flow_path[-1:]])
         job['parameters'].update({"manager": self.syncJobThread._manager})
-        if "tendrl" in flow_path and "flows" in flow_path:
-            exec ("from %s import %s as the_flow" % (flow_module, kls_name))
+        if "tendrl" in flow_name and "flows" in flow_name:
+            the_flow = import_utils.load_abs_class(flow_name)
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
                             post_run, type, uuid, job['parameters'],
                             job, self.config, definitions).run()
