@@ -1,16 +1,19 @@
-import etcd
 import json
 from tendrl.common.config import TendrlConfig
+from tendrl.common.etcdobj.etcdobj import Server as etcd_server
 from tendrl.common.singleton import to_singleton
+
 
 alert_severity_map = {
     'INFO': 0,
     'WARNING': 1,
     'CRITICAL': 2
 }
+config = TendrlConfig("commons", "/etc/tendrl/tendrl.conf")
 
 
 class Alert(object):
+
     def __init__(self, alert_id, node_id, time_stamp, resource, current_value,
                  tags, alert_type, severity, significance, ackedby, acked,
                  pid, source):
@@ -31,63 +34,17 @@ class Alert(object):
     def to_json_string(self):
         return json.dumps(self.__dict__)
 
-    def is_same(self, alert2):
-        if self.resource != alert2.resource:
-            return False
-        if self.alert_type != alert2.alert_type:
-            return False
-        if 'Tendrl_context.cluster_id' in self.tags:
-            if 'Tendrl_context.cluster_id' in alert2.tags:
-                if (
-                    self.tags['Tendrl_context.cluster_id'] !=
-                    alert2.tags['Tendrl_context.cluster_id']
-                ):
-                    return False
-            else:
-                return False
-        if 'Tendrl_context.cluster_id' not in self.tags:
-            if 'Tendrl_context.cluster_id' in alert2.tags:
-                return False
-            if self.node_id != alert2.node_id:
-                return False
-        if 'plugin_instance' in self.tags:
-            if 'plugin_instance' not in alert2.tags:
-                False
-            else:
-                if (
-                    self.tags['plugin_instance'] !=
-                    alert2.tags['plugin_instance']
-                ):
-                    return False
-        return True
-
-    def update(self, existing_alert):
-        if (
-            alert_severity_map[self.severity] < alert_severity_map[
-                existing_alert.severity] and
-            alert_severity_map[self.severity] == alert_severity_map[
-                'INFO']
-        ):
-            self.ackedby = 'Tendrl'
-            self.acked = True
-
-    @staticmethod
-    def to_obj(json_str):
-        return Alert(**json.loads(json_str))
-
 
 @to_singleton
 class AlertUtils(object):
     def __init__(self):
-        config = TendrlConfig()
         etcd_kwargs = {
-            'port': int(config.get("common", "etcd_port")),
-            'host': config.get("common", "etcd_connection")
+            'port': int(config.get("commons", "etcd_port")),
+            'host': config.get("commons", "etcd_connection")
         }
-        self.etcd_client = etcd.Client(**etcd_kwargs)
+        self.etcd_client = etcd_server(etcd_kwargs=etcd_kwargs).client
 
-    def validate_alert_json(self, alert_data):
-        alert = json.loads(alert_data)
+    def validate_alert_json(self, alert):
         if 'time_stamp' not in alert:
             raise KeyError('time_stamp')
         if 'resource' not in alert:
@@ -107,3 +64,90 @@ class AlertUtils(object):
             '/alerts/%s' % alert.alert_id,
             alert.to_json_string()
         )
+
+    def get_alerts(self):
+        alerts_arr = []
+        alerts = self.etcd_client.read('/alerts', recursive=True)
+        for child in alerts._children:
+            alerts_arr.append(self.to_obj(json.loads(child['value'])))
+        return alerts_arr
+
+    def to_obj(self, alert_json):
+        alert_json = self.validate_alert_json(alert_json)
+        return Alert(
+            alert_id=alert_json["alert_id"],
+            node_id=alert_json["node_id"],
+            time_stamp=alert_json["time_stamp"],
+            resource=alert_json["resource"],
+            current_value=alert_json["current_value"],
+            tags=alert_json["tags"],
+            alert_type=alert_json["alert_type"],
+            severity=alert_json["severity"],
+            significance=alert_json["significance"],
+            ackedby=alert_json["ackedby"],
+            acked=alert_json["acked"],
+            pid=alert_json["pid"],
+            source=alert_json["source"]
+        )
+
+    def is_same(self, alert1, alert2):
+        if alert1.resource != alert2.resource:
+            return False
+        if 'plugin_instance' in alert1.tags:
+            if 'plugin_instance' not in alert2.tags:
+                return False
+            else:
+                if (
+                    alert1.tags['plugin_instance'] !=
+                    alert2.tags['plugin_instance']
+                ):
+                    return False
+        if 'Tendrl_context.cluster_id' in alert1.tags:
+            if 'Tendrl_context.cluster_id' in alert2.tags:
+                if (
+                    alert1.tags['Tendrl_context.cluster_id'] !=
+                    alert2.tags['Tendrl_context.cluster_id']
+                ):
+                    return False
+            else:
+                return False
+        if 'Tendrl_context.cluster_id' not in alert1.tags:
+            if 'Tendrl_context.cluster_id' in alert2.tags:
+                return False
+            if alert1.node_id != alert2.node_id:
+                return False
+        if alert1.alert_type != alert2.alert_type:
+            return False
+        return True
+
+    def equals(self, alert1, alert2):
+        return (
+            alert1.alert_id == alert2.alert_id and
+            alert1.node_id == alert2.node_id and
+            alert1.time_stamp == alert2.time_stamp and
+            alert1.resource == alert2.resource and
+            alert1.current_value == alert2.current_value and
+            alert1.tags == alert2.tags and
+            alert1.alert_type == alert2.alert_type and
+            alert1.severity == alert2.severity and
+            alert1.significance == alert2.significance and
+            alert1.ackedby == alert2.ackedby and
+            alert1.acked == alert2.acked and
+            alert1.pid == alert2.pid and
+            alert1.source == alert2.source
+        )
+
+    def update(self, alert1, existing_alert):
+        time_stamp = existing_alert.time_stamp
+        if (
+            alert_severity_map[alert1.severity] < alert_severity_map[
+                existing_alert.severity] and
+            alert_severity_map[alert1.severity] == alert_severity_map[
+                'INFO']
+        ):
+            time_stamp = alert1.time_stamp
+            alert1.ackedby = 'Tendrl'
+            alert1.acked = True
+        alert1.alert_id = existing_alert.alert_id
+        alert1.time_stamp = time_stamp
+        return alert1
