@@ -34,11 +34,11 @@ class Manager(object):
             self,
             name,
             integration_id,
-            node_id,
             config,
             events,
             persister_thread,
-            defs_dir
+            defs_dir,
+            node_id=None
     ):
         self.name = name
         self._config = config
