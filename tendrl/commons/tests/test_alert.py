@@ -5,9 +5,9 @@ import pytest
 import sys
 sys.modules['tendrl.common.config'] = MagicMock()
 del sys.modules['tendrl.common.config']
-from tendrl.common.alert import Alert
-from tendrl.common.alert import AlertUtils
-from tendrl.common.alert import config
+from tendrl.commons.alert import Alert
+from tendrl.commons.alert import AlertUtils
+from tendrl.commons.alert import config
 import uuid
 
 
@@ -149,7 +149,7 @@ class Test_alerts_utils(object):
                     matching_alert_found = True
             if not matching_alert_found:
                 assert False
-                return
+
 
     def test_to_obj(self, monkeypatch):
         df_alert_id = str(uuid.uuid4())
