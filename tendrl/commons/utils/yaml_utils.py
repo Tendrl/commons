@@ -36,4 +36,3 @@ def loadSchema(schemaFile):
             schemaFile, str(e)))
 
     return config
-

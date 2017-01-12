@@ -29,7 +29,6 @@ class AnsibleRunner(object):
 
     def __init__(self, module_path, exec_path, **kwargs):
         """
-
         :param module_path: Path to ansible module
         :type: module_path: str
         :param exec_path: Path where ansible module is executed

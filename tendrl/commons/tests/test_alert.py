@@ -150,7 +150,6 @@ class Test_alerts_utils(object):
             if not matching_alert_found:
                 assert False
 
-
     def test_to_obj(self, monkeypatch):
         df_alert_id = str(uuid.uuid4())
         alert_dict = self.get_alert('df', df_alert_id)
