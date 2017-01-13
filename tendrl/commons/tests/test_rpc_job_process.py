@@ -96,7 +96,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_etcd_write(key, value):
             pass
@@ -128,7 +128,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_etcd_write(key, value):
             pass
