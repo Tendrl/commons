@@ -31,7 +31,8 @@ class TestAnsibleRunnerConstructor(object):
         pytest.raises(
             ValueError,
             AnsibleRunner,
-            "core/commands/command.py"
+            "core/commands/command.py",
+            "/tmp/"
         )
 
     def test_successful_ansible_runner(self, monkeypatch):
