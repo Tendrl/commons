@@ -8,6 +8,9 @@ from tendrl.commons import config
 
 
 class TestConfig(object):
+    def some(self, file_path):
+        with open(file_path) as f:
+            return f.read()
 
     @mock.patch("open", create=True)
     def test_load_config(self, mock_open):

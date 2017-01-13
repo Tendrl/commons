@@ -1,6 +1,5 @@
 import sys
 
-import etcd
 import gevent.event
 from mock import MagicMock
 
