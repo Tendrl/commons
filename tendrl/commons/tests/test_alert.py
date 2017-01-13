@@ -5,9 +5,9 @@ import pytest
 import sys
 sys.modules['tendrl.common.config'] = MagicMock()
 del sys.modules['tendrl.common.config']
-from tendrl.common.alert import Alert
-from tendrl.common.alert import AlertUtils
-from tendrl.common.alert import config
+from tendrl.commons.alert import Alert
+from tendrl.commons.alert import AlertUtils
+from tendrl.commons.alert import config
 import uuid
 
 

@@ -1,7 +1,7 @@
 import json
-from tendrl.common.config import TendrlConfig
-from tendrl.common.etcdobj.etcdobj import Server as etcd_server
-from tendrl.common.singleton import to_singleton
+from tendrl.commons.config import TendrlConfig
+from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
+from tendrl.commons.singleton import to_singleton
 
 
 alert_severity_map = {
