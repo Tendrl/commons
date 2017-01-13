@@ -1,6 +1,5 @@
 import sys
 
-import etcd
 import gevent.event
 from mock import MagicMock
 
@@ -26,14 +25,8 @@ class Test_EtcdRpc(object):
         manager = SampleManager("aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
-        local_client = etcd.Client(
-            port=2379,
-            host="0.0.0.0"
-        )
-        assert server.client.port == local_client.port
-        assert server.client.host == local_client.host
         assert server.syncJobThread._manager.integration_id == \
             "aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
 
@@ -50,7 +43,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_uuid4():
             return 'aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6'
@@ -103,7 +96,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_etcd_write(key, value):
             pass
@@ -135,7 +128,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_etcd_write(key, value):
             pass
@@ -164,7 +157,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         def mock_uuid4():
             return 'aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6'
@@ -207,7 +200,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         flow_name = "tendrl.gluster_integration.flows." \
                     "create_volume.CreateVolume"

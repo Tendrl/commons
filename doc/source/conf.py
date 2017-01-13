@@ -24,7 +24,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'commons'
-copyright = u'2016, Tendrl Project'
+copyright = u'2017, Tendrl Project'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True

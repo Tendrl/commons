@@ -7,7 +7,7 @@ import gevent.queue
 LOG = logging.getLogger(__name__)
 
 
-class deferred_call(object):
+class DeferredCall(object):
     def __init__(self, fn, args, kwargs):
         self.fn = fn
         self.args = args
@@ -18,11 +18,10 @@ class deferred_call(object):
 
 
 class Persister(gevent.greenlet.Greenlet):
-    def __init__(self, config):
+    def __init__(self):
         super(Persister, self).__init__()
         self._queue = gevent.queue.Queue()
         self._complete = gevent.event.Event()
-        self._config = config
 
     def __get_attribute__(self, item):
         if item.startswith('_'):
@@ -35,7 +34,7 @@ class Persister(gevent.greenlet.Greenlet):
                     attr = object.__getattribute__(self, "_%s" % item)
                     if callable(attr):
                         def defer(*args, **kwargs):
-                            dc = deferred_call(attr, args, kwargs)
+                            dc = DeferredCall(attr, args, kwargs)
                             try:
                                 dc.call_it()
                             except Exception as ex:

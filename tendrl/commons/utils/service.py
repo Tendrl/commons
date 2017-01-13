@@ -8,9 +8,10 @@ LOG = logging.getLogger(__name__)
 
 
 class Service(object):
-    def __init__(self, service_name, enabled=None):
+    def __init__(self, service_name, exec_path, enabled=None):
         self.attributes = {}
         self.attributes["name"] = service_name
+        self.exec_path = exec_path
 
         if enabled:
             self.attributes["enabled"] = enabled
@@ -19,6 +20,7 @@ class Service(object):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
+                self.exec_path,
                 **attr
             )
             result, err = runner.run()
