@@ -28,14 +28,6 @@ class AnsibleRunner(object):
     """
 
     def __init__(self, module_path, exec_path, **kwargs):
-        """
-        :param module_path: Path to ansible module
-        :type: module_path: str
-        :param exec_path: Path where ansible module is executed
-        :type: exec_path: str
-        :param kwargs: Other key-value args
-        :type: kwargs: dict
-        """
         self.executable_module_path = exec_path + str(uuid.uuid4())
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):

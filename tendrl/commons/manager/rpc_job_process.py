@@ -3,6 +3,7 @@ import logging
 import traceback
 import uuid
 
+import etcd
 import gevent.event
 import yaml
 
@@ -145,7 +146,13 @@ class RpcJobProcessThread(gevent.greenlet.Greenlet):
         super(RpcJobProcessThread, self).__init__()
         self._manager = manager
         self._complete = gevent.event.Event()
-        self._server = EtcdRPC(self)
+
+        etcd_kwargs = {
+            'port': int(manager.config.get("commons", "etcd_port")),
+            'host': manager.config.get("commons", "etcd_connection")
+        }
+        etcd_client = etcd.Client(**etcd_kwargs)
+        self._server = EtcdRPC(self, etcd_client),
 
     def stop(self):
         self._complete.set()
