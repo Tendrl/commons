@@ -148,8 +148,8 @@ class RpcJobProcessThread(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
         etcd_kwargs = {
-            'port': int(manager.config.get("commons", "etcd_port")),
-            'host': manager.config.get("commons", "etcd_connection")
+            'port': int(manager._config.get("commons", "etcd_port")),
+            'host': manager._config.get("commons", "etcd_connection")
         }
         etcd_client = etcd.Client(**etcd_kwargs)
         self._server = EtcdRPC(self, etcd_client),

@@ -16,15 +16,18 @@ del sys.modules['tendrl.commons.config']
 
 class TestService(object):
     def test_service_constructor(self, monkeypatch):
-        service = Service("collectd", "yes")
+        service = Service("collectd", "/tmp/", "yes")
         expected_attr = {"name": "collectd",
+                         "exec_path": "/tmp/",
                          "enabled": "yes"}
 
         assert expected_attr == service.attributes
 
     def test_service_start(self, monkeypatch):
-        def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
+        def mock_AnsibleRunner_constructor(obj, ansible_module_path,
+                                           exec_path, **attr):
             assert attr == {"name": "collectd",
+                            "exec_path": "/tmp/",
                             "state": "started"}
             return
 
@@ -50,14 +53,16 @@ class TestService(object):
 
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        service = Service("collectd")
+        service = Service("collectd", "/tmp/")
         message, success = service.start()
         assert message == ""
         assert success
 
     def test_service_stop(self, monkeypatch):
-        def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
+        def mock_AnsibleRunner_constructor(obj, ansible_module_path,
+                                           exec_path, **attr):
             assert attr == {"name": "collectd",
+                            "exec_path": "/tmp/",
                             "state": "stopped"}
             return
 
@@ -83,14 +88,16 @@ class TestService(object):
 
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        service = Service("collectd")
+        service = Service("collectd", "/tmp/")
         message, success = service.stop()
         assert message == ""
         assert success
 
     def test_service_reload(self, monkeypatch):
-        def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
+        def mock_AnsibleRunner_constructor(obj, ansible_module_path,
+                                           exec_path, **attr):
             assert attr == {"name": "collectd",
+                            "exec_path": "/tmp/",
                             "state": "reloaded"}
             return
 
@@ -116,14 +123,16 @@ class TestService(object):
 
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        service = Service("collectd")
+        service = Service("collectd", "/tmp/")
         message, success = service.reload()
         assert message == ""
         assert success
 
     def test_service_restart(self, monkeypatch):
-        def mock_AnsibleRunner_constructor(obj, asnible_module_path, **attr):
+        def mock_AnsibleRunner_constructor(obj, ansible_module_path,
+                                           exec_path, **attr):
             assert attr == {"name": "collectd",
+                            "exec_path": "/tmp/",
                             "state": "restarted"}
             return
 
@@ -149,7 +158,7 @@ class TestService(object):
 
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        service = Service("collectd")
+        service = Service("collectd", "/tmp")
         message, success = service.restart()
         assert message == ""
         assert success
@@ -163,7 +172,7 @@ class TestService(object):
 
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
-        service = Service("collectd")
+        service = Service("collectd", "/tmp")
         message, success = service.start()
 
         assert not success

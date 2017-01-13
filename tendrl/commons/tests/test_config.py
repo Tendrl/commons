@@ -1,17 +1,17 @@
+import os
 from mock import MagicMock
 import pytest
 
 from tendrl.commons import config
 
 
-class TestTendrlconfig(object):
-    def setup_method(self, method):
-        config.os.path.exists = MagicMock(return_value=True)
-
-    def test_Tendrlconfig(self, monkeypatch):
-        config.TendrlConfig("module", "/etc/tendrl/tendrl.conf")
-        config.os.path.exists.assert_called_with("/etc/tendrl/tendrl.conf")
-        monkeypatch.setattr(config.os, 'environ', {"TENDRL_CONFIG": "/temp/"})
-        config.os.path.exists = MagicMock(return_value=False)
+class TestConfig(object):
+    def test_load_config(self):
+        os.path.exists = MagicMock(return_value=True)
+        config.load_config("module-name",
+                            "/etc/tendrl/module-name/module-name.conf.yaml")
+        os.path.exists.assert_called_with(
+            "/etc/tendrl/module-name/module-name.conf.yaml")
+        os.path.exists = MagicMock(return_value=False)
         with pytest.raises(config.ConfigNotFound):
-            config.TendrlConfig("module", "/temp/dummy.conf")
+            config.load_config("module-name", "/temp/dummy.conf")

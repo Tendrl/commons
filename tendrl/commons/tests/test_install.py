@@ -50,7 +50,7 @@ class TestInstaller(object):
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         installer = Installer("emacs", "rpm", "3.4.5")
-        message, success = installer.install()
+        message, success = installer.install("/tmp/")
 
         assert not success
         assert message == "Executabe could not be generated for module" \
@@ -87,7 +87,7 @@ class TestInstaller(object):
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         installer = Installer("emacs", "rpm", "3.4.5")
-        message, success = installer.install()
+        message, success = installer.install("/tmp/")
 
         assert message == ""
         assert success

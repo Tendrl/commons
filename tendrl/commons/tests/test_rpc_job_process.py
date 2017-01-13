@@ -26,7 +26,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         local_client = etcd.Client(
             port=2379,
@@ -207,7 +207,7 @@ class Test_EtcdRpc(object):
         manager = SampleManager("49fa2adde8a6e98591f0f5cb4bc5f44d")
         monkeypatch.setattr(manager._config, 'get', mock_config_get)
         syncJobThread = RpcJobProcessThread(manager)
-        server = EtcdRPC(syncJobThread)
+        server = EtcdRPC(syncJobThread, MagicMock())
 
         flow_name = "tendrl.gluster_integration.flows." \
                     "create_volume.CreateVolume"

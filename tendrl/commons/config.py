@@ -10,7 +10,7 @@ class ConfigNotFound(Exception):
     pass
 
 
-def load_config(self, module, yaml_cfg_file_path):
+def load_config(module, yaml_cfg_file_path):
 
         if not os.path.exists(yaml_cfg_file_path):
             err = ConfigNotFound(
