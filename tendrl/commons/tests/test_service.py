@@ -18,7 +18,6 @@ class TestService(object):
     def test_service_constructor(self, monkeypatch):
         service = Service("collectd", "/tmp/", "yes")
         expected_attr = {"name": "collectd",
-                         "exec_path": "/tmp/",
                          "enabled": "yes"}
 
         assert expected_attr == service.attributes
@@ -27,7 +26,6 @@ class TestService(object):
         def mock_AnsibleRunner_constructor(obj, ansible_module_path,
                                            exec_path, **attr):
             assert attr == {"name": "collectd",
-                            "exec_path": "/tmp/",
                             "state": "started"}
             return
 
@@ -62,7 +60,6 @@ class TestService(object):
         def mock_AnsibleRunner_constructor(obj, ansible_module_path,
                                            exec_path, **attr):
             assert attr == {"name": "collectd",
-                            "exec_path": "/tmp/",
                             "state": "stopped"}
             return
 
@@ -97,7 +94,6 @@ class TestService(object):
         def mock_AnsibleRunner_constructor(obj, ansible_module_path,
                                            exec_path, **attr):
             assert attr == {"name": "collectd",
-                            "exec_path": "/tmp/",
                             "state": "reloaded"}
             return
 
@@ -132,7 +128,6 @@ class TestService(object):
         def mock_AnsibleRunner_constructor(obj, ansible_module_path,
                                            exec_path, **attr):
             assert attr == {"name": "collectd",
-                            "exec_path": "/tmp/",
                             "state": "restarted"}
             return
 

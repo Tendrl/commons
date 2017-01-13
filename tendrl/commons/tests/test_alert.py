@@ -7,7 +7,6 @@ sys.modules['tendrl.common.config'] = MagicMock()
 del sys.modules['tendrl.common.config']
 from tendrl.commons.alert import Alert
 from tendrl.commons.alert import AlertUtils
-from tendrl.commons import config
 import uuid
 
 

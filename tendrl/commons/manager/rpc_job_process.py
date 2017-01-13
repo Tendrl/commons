@@ -152,7 +152,7 @@ class RpcJobProcessThread(gevent.greenlet.Greenlet):
             'host': manager._config.get("commons", "etcd_connection")
         }
         etcd_client = etcd.Client(**etcd_kwargs)
-        self._server = EtcdRPC(self, etcd_client),
+        self._server = EtcdRPC(self, etcd_client)
 
     def stop(self):
         self._complete.set()

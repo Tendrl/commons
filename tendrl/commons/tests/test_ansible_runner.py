@@ -8,7 +8,6 @@ import pytest
 
 sys.modules['tendrl.commons.config'] = MagicMock()
 
-from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
 from tendrl.commons.utils.ansible_module_runner \
