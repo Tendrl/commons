@@ -1,5 +1,5 @@
 NAME = python-etcd
-VERSION = 0.4.3
+VERSION = 0.4.4
 
 all: srpm
 
@@ -11,7 +11,7 @@ clean:
 
 dist:
 	git clone https://github.com/jplana/python-etcd $(NAME)-$(VERSION)
-	tar -zcvf python-etcd-0.4.3.tar.gz $(NAME)-$(VERSION)
+	tar -zcvf python-etcd-0.4.4.tar.gz $(NAME)-$(VERSION)
 	rm -fr $(NAME)-$(VERSION)
 
 srpm: dist

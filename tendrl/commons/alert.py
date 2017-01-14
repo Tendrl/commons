@@ -1,7 +1,5 @@
 import json
-from tendrl.common.config import TendrlConfig
-from tendrl.common.etcdobj.etcdobj import Server as etcd_server
-from tendrl.common.singleton import to_singleton
+from tendrl.commons.singleton import to_singleton
 
 
 alert_severity_map = {
@@ -9,7 +7,6 @@ alert_severity_map = {
     'WARNING': 1,
     'CRITICAL': 2
 }
-config = TendrlConfig("commons", "/etc/tendrl/tendrl.conf")
 
 
 class Alert(object):
@@ -37,12 +34,9 @@ class Alert(object):
 
 @to_singleton
 class AlertUtils(object):
-    def __init__(self):
-        etcd_kwargs = {
-            'port': int(config.get("commons", "etcd_port")),
-            'host': config.get("commons", "etcd_connection")
-        }
-        self.etcd_client = etcd_server(etcd_kwargs=etcd_kwargs).client
+    def __init__(self, etcd_client):
+        # TODO(anmol) refactor code using this class to provide etcd_client
+        self.etcd_client = etcd_client
 
     def validate_alert_json(self, alert):
         if 'time_stamp' not in alert:

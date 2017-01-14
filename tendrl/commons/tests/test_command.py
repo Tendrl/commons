@@ -45,7 +45,7 @@ class TestCommand(object):
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         c = Command("cat /asdf.txt")
-        stdout, stderr, rc = c.run()
+        stdout, stderr, rc = c.run('/tmp/')
 
         assert stdout == "Hello world"
         assert stderr == ""
@@ -61,7 +61,7 @@ class TestCommand(object):
         monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
 
         c = Command("cat /asdf")
-        stdout, stderr, rc = c.run()
+        stdout, stderr, rc = c.run('/tmp/')
 
         assert stdout == ""
         assert stderr == "Executabe could not be generated for module" \
