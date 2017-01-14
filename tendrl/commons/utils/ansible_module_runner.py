@@ -9,7 +9,7 @@ from ansible import modules
 
 from tendrl.commons.config import TendrlConfig
 
-config = TendrlConfig()
+config = TendrlConfig('commons', '/etc/tendrl/tendrl.conf')
 
 LOG = logging.getLogger(__name__)
 MODULE_EXECUTION_PATH = os.path.expandvars(

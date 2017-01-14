@@ -1,8 +1,7 @@
-import json
 from tendrl.commons.config import TendrlConfig
 from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 from tendrl.commons.singleton import to_singleton
-
+import yaml
 
 alert_severity_map = {
     'INFO': 0,
@@ -32,7 +31,7 @@ class Alert(object):
         self.source = source
 
     def to_json_string(self):
-        return json.dumps(self.__dict__)
+        return yaml.safe_dump(self.__dict__)
 
 
 @to_singleton
@@ -69,7 +68,7 @@ class AlertUtils(object):
         alerts_arr = []
         alerts = self.etcd_client.read('/alerts', recursive=True)
         for child in alerts._children:
-            alerts_arr.append(self.to_obj(json.loads(child['value'])))
+            alerts_arr.append(self.to_obj(yaml.safe_load(child['value'])))
         return alerts_arr
 
     def to_obj(self, alert_json):
