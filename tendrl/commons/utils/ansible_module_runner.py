@@ -7,17 +7,7 @@ import uuid
 import ansible.executor.module_common as module_common
 from ansible import modules
 
-from tendrl.commons.config import TendrlConfig
-
-config = TendrlConfig('commons', '/etc/tendrl/tendrl.conf')
-
 LOG = logging.getLogger(__name__)
-MODULE_EXECUTION_PATH = os.path.expandvars(
-    config.get(
-        "commons",
-        "tendrl_exe_file_prefix"
-    )
-)
 
 try:
     import json
@@ -37,8 +27,8 @@ class AnsibleRunner(object):
 
     """
 
-    def __init__(self, module_path, **kwargs):
-        self.executable_module_path = MODULE_EXECUTION_PATH + str(uuid.uuid4())
+    def __init__(self, module_path, exec_path, **kwargs):
+        self.executable_module_path = exec_path + str(uuid.uuid4())
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
             LOG.error("Module path: %s does not exist" % self.module_path)

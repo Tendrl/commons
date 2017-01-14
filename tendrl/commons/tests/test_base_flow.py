@@ -17,7 +17,6 @@ class MyFlow(base_flow.BaseFlow):
             uuid,
             parameters,
             job,
-            config,
             definitions
     ):
         super(MyFlow, self).__init__(
@@ -32,7 +31,6 @@ class MyFlow(base_flow.BaseFlow):
             uuid,
             parameters,
             job,
-            config,
             definitions
         )
 
@@ -78,7 +76,6 @@ class TestBaseFlow(object):
                 'myobject.field2': 'val2'
             }
         }
-        self.config = MagicMock()
         self.definitions = {
             'tendrl.dummymodule': {
                 'objects': {
@@ -186,7 +183,6 @@ class TestBaseFlow(object):
             "61959242-628f-4847-a5e2-2c8d8daac0ca",
             self.flow_parameters,
             self.job,
-            self.config,
             self.definitions
         )
 

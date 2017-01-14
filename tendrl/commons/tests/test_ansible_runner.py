@@ -8,7 +8,6 @@ import pytest
 
 sys.modules['tendrl.commons.config'] = MagicMock()
 
-from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils.ansible_module_runner \
     import AnsibleExecutableGenerationFailed
 from tendrl.commons.utils.ansible_module_runner \
@@ -23,6 +22,7 @@ class TestAnsibleRunnerConstructor(object):
             ValueError,
             AnsibleRunner,
             "invalid/module/path",
+            '/tmp_exec_path',
             key1="value1",
             key2="value2"
         )
@@ -31,12 +31,14 @@ class TestAnsibleRunnerConstructor(object):
         pytest.raises(
             ValueError,
             AnsibleRunner,
-            "core/commands/command.py"
+            "core/commands/command.py",
+            "/tmp/"
         )
 
     def test_successful_ansible_runner(self, monkeypatch):
         runner = AnsibleRunner(
             "core/commands/command.py",
+            '/tmp/',
             key1="value1",
             key2="value2",
         )
@@ -55,6 +57,7 @@ class TestAnsibleRunner(object):
 
         runner = AnsibleRunner(
             "/tmp/testansiblemodulefile",
+            '/tmp/',
             key1="value1",
             key2="value2"
         )
@@ -64,12 +67,6 @@ class TestAnsibleRunner(object):
         )
 
     def test_module_run(self, monkeypatch):
-        monkeypatch.setattr(
-            ansible_module_runner,
-            'MODULE_EXECUTION_PATH',
-            "/tmp/.tendrl_runner"
-        )
-
         def mock_modify_module(modname, modpath, argument, task_vars={}):
             return ("echo \'{\"key\":\"test message\"}\'",
                     "new", "#! /usr/bin/sh")
@@ -84,6 +81,7 @@ class TestAnsibleRunner(object):
 
         runner = AnsibleRunner(
             "/tmp/testansiblemodulefile",
+            "/tmp/",
             key1="value1",
             key2="value2"
         )

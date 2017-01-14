@@ -1,11 +1,10 @@
 import abc
 import logging
 
-import etcd
 import six
 
 from tendrl.commons.atoms.exceptions import AtomExecutionFailedError
-from tendrl.commons.flows import utils
+from tendrl.commons.utils import import_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +24,6 @@ class BaseFlow(object):
             uuid,
             parameters,
             job,
-            config,
             definitions
     ):
         self.name = name
@@ -39,17 +37,10 @@ class BaseFlow(object):
         self.uuid = uuid
         self.parameters = parameters
         self.job = job
-        self.config = config
         self.definitions = definitions
 
+        # Add etcd_client to parameters via child flows
         self.parameters.update({'log': []})
-        etcd_kwargs = {
-            'port': int(self.config.get("commons", "etcd_port")),
-            'host': self.config.get("commons", "etcd_connection")
-        }
-
-        self.etcd_client = etcd.Client(**etcd_kwargs)
-        self.parameters.update({'etcd_client': self.etcd_client})
 
     @abc.abstractmethod
     def run(self):
@@ -119,17 +110,12 @@ class BaseFlow(object):
     # It dynamically imports the atom class from module as the_atom
     # and executes the function run() on the instance of same
     def execute_atom(self, mod):
-        class_name = utils.to_camel_case(mod.split(".")[-1])
         if "tendrl" in mod and "atoms" in mod:
             atom_name, enabled, help, inputs, outputs, uuid = \
                 self.extract_atom_details(mod)
-            exec ("from %s import %s as the_atom" % (
-                mod.lower().strip("."),
-                class_name.strip("."))
-                )
-
+            the_atom = import_utils.load_abs_class(mod)
             try:
-                ret_val = the_atom(  # noqa: F821
+                ret_val = the_atom(
                     atom_name,
                     enabled,
                     help,
