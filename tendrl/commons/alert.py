@@ -1,5 +1,3 @@
-from tendrl.commons.config import TendrlConfig
-from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 from tendrl.commons.singleton import to_singleton
 import yaml
 
