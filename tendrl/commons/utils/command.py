@@ -12,7 +12,8 @@ SAFE_COMMAND_LIST = [
     "lscpu",
     "getenforce",
     "gluster",
-    "ceph"
+    "ceph",
+    "systemctl"
 ]
 
 
@@ -41,7 +42,7 @@ class Command(object):
             LOG.error("could not run the command %s. Error: %s" % (
                 self.attributes["_raw_params"], str(e)))
             return "", str(e.message), -1
-        stdout = result.get("stdout", "").encode("ascii")
+        stdout = result.get("stdout", "")
         stderr = result.get("stderr", "").encode("ascii")
         rc = result.get("rc", -1)
         return stdout, stderr, rc
