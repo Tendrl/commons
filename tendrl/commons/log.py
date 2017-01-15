@@ -10,8 +10,7 @@ class LogInitFailedError(Exception):
 
 
 def setup_logging(
-        log_cfg_path,
-        default_log_level=logging.INFO
+        log_cfg_path
 ):
     """Setup logging configuration
 
@@ -21,4 +20,5 @@ def setup_logging(
             log_config = yaml.safe_load(f.read())
         logging.config.dictConfig(log_config)
     else:
-        raise LogInitFailedError("logging configuration not found")
+        raise LogInitFailedError("logging configuration not found at %s" %
+                                 log_cfg_path)
