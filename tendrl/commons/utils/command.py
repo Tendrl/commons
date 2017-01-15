@@ -2,6 +2,7 @@ import logging
 
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
+import shlex
 
 ANSIBLE_MODULE_PATH = "core/commands/command.py"
 LOG = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ SAFE_COMMAND_LIST = [
     "getenforce",
     "gluster",
     "ceph",
+    "config_manager"
     "systemctl"
 ]
 
@@ -25,7 +27,7 @@ class UnsupportedCommandException(Exception):
 
 class Command(object):
     def __init__(self, command):
-        if command.split()[0] not in SAFE_COMMAND_LIST:
+        if shlex.split(command)[0] not in SAFE_COMMAND_LIST:
             raise UnsupportedCommandException(command.split()[0])
         self.attributes = {"_raw_params": command}
 
