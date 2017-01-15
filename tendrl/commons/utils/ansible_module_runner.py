@@ -7,10 +7,6 @@ import uuid
 import ansible.executor.module_common as module_common
 from ansible import modules
 
-from tendrl.commons.config import TendrlConfig
-
-config = TendrlConfig("commons", "/etc/tendrl/tendrl.conf")
-
 LOG = logging.getLogger(__name__)
 
 try:
