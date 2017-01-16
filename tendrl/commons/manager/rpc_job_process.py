@@ -95,7 +95,8 @@ class EtcdRPC(object):
     def invoke_flow(self, flow_name, job, definitions):
         atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
             self.extract_flow_details(flow_name, definitions)
-        job['parameters'].update({"manager": self.syncJobThread._manager})
+        job['parameters'].update({"manager": self.syncJobThread._manager,
+                                  "etcd_client": self.client})
         if "tendrl" in flow_name and "flows" in flow_name:
             the_flow = import_utils.load_abs_class(flow_name)
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
