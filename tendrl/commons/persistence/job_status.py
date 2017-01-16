@@ -15,7 +15,6 @@ class JobStatus(EtcdObj):
     log_warn = fields.StrField("warn")
     log_debug = fields.StrField("debug")
 
-
     def render(self):
         self.__name__ = self.__name__ % self.req_id
         return super(JobStatus, self).render()

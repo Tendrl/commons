@@ -82,8 +82,8 @@ class BaseFlow(object):
                     self.log['all'].append(msg)
                     self.log['error'].append(msg)
                     self.etcd_server.save(
-                    JobStatus(req_id=self.job['request_id'],
-                              log_info = self.log['info'],
+                        JobStatus(req_id=self.job['request_id'],
+                              log_info=self.log['info'],
                               log_all=self.log['all'],
                               log_error=self.log['error'],
                               log_debug=self.log['debug'],
@@ -99,7 +99,6 @@ class BaseFlow(object):
                     LOG.info(msg)
                     self.log['all'].append(msg)
                     self.log['info'].append(msg)
-
 
         # Execute the atoms for the flow
         msg = "Processing atoms for flow: %s" % self.job['run']
@@ -147,7 +146,6 @@ class BaseFlow(object):
                 LOG.info(msg)
                 self.log['all'].append(msg)
                 self.log['info'].append(msg)
-
 
         # Execute the post runs for the flow
         msg = "Processing post-runs for flow: %s" % self.job['run']
@@ -201,7 +199,6 @@ class BaseFlow(object):
                       log_error=self.log['error'],
                       log_debug=self.log['debug'],
                       log_warn=self.log['warn']))
-
 
     def extract_atom_details(self, atom_name):
         namespace = atom_name.split('.objects.')[0]

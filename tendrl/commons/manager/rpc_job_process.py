@@ -7,9 +7,9 @@ import gevent.event
 import yaml
 
 from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
+from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.utils import import_utils
-from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 
 LOG = logging.getLogger(__name__)
 
