@@ -7,7 +7,6 @@ sys.modules['tendrl.common.config'] = MagicMock()
 del sys.modules['tendrl.common.config']
 from tendrl.commons.alert import Alert
 from tendrl.commons.alert import AlertUtils
-from tendrl.commons.alert import config
 import uuid
 
 
@@ -56,18 +55,11 @@ class Test_alerts_utils(object):
         }
         return ret_val
 
-    def test_alertsSuccessfulValidate(self, monkeypatch):
+    def test_alertsSuccessfulValidate(self):
         expected_alert = self.get_alert('memory', uuid.uuid4())
 
-        alert = AlertUtils().validate_alert_json(expected_alert)
+        alert = AlertUtils(MagicMock()).validate_alert_json(expected_alert)
 
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
         assert alert == expected_alert
 
     def test_alertfailurevalidation(self, monkeypatch):
