@@ -223,8 +223,9 @@ class BaseFlow(object):
                     help,
                     inputs,
                     outputs,
-                    uuid
-                ).run(self.parameters)
+                    uuid,
+                    self.parameters
+                ).run()
             except AtomExecutionFailedError:
                 return False
 
