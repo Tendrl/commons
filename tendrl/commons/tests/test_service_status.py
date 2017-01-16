@@ -6,7 +6,7 @@ from tendrl.commons.utils.service_status \
 
 class TestServiceStatus(object):
     def test_service_status_constructor(self, monkeypatch):
-        service = ServiceStatus("tendrl-node-agent")
+        service = ServiceStatus("tendrl-node-agent", '/tmp/')
         assert service.name == "tendrl-node-agent"
 
     def test_service_exists_true(self, monkeypatch):
@@ -26,7 +26,7 @@ class TestServiceStatus(object):
 
         monkeypatch.setattr(Command, 'run', mock_command_run)
 
-        service = ServiceStatus("tendrl-node-agent")
+        service = ServiceStatus("tendrl-node-agent", '/tmp/')
         exists = service.exists()
         assert exists
 
@@ -47,7 +47,7 @@ class TestServiceStatus(object):
 
         monkeypatch.setattr(Command, 'run', mock_command_run)
 
-        service = ServiceStatus("tendrl-node-agent")
+        service = ServiceStatus("tendrl-node-agent", '/tmp/')
         exists = service.exists()
         assert not exists
 
@@ -74,7 +74,7 @@ class TestServiceStatus(object):
 
         monkeypatch.setattr(Command, 'run', mock_command_run)
 
-        service = ServiceStatus("tendrl-node-agent")
+        service = ServiceStatus("tendrl-node-agent", '/tmp/')
         status = service.status()
         assert status
 
@@ -95,6 +95,6 @@ class TestServiceStatus(object):
 
         monkeypatch.setattr(Command, 'run', mock_command_run)
 
-        service = ServiceStatus("tendrl-node-agent")
+        service = ServiceStatus("tendrl-node-agent", '/tmp/')
         status = service.status()
         assert not status
