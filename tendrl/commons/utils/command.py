@@ -14,7 +14,7 @@ SAFE_COMMAND_LIST = [
     "getenforce",
     "gluster",
     "ceph",
-    "config_manager"
+    "config_manager",
     "systemctl"
 ]
 
