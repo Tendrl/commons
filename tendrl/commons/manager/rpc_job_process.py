@@ -3,13 +3,13 @@ import logging
 import traceback
 import uuid
 
-import etcd
 import gevent.event
 import yaml
 
 from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.utils import import_utils
+from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 
 LOG = logging.getLogger(__name__)
 
@@ -27,8 +27,9 @@ class EtcdRPC(object):
             # Generate a request ID for tracking this job
             # further by tendrl-api
             req_id = str(uuid.uuid4())
-            raw_job['request_id'] = "%s/flow_%s" % (
-                self.syncJobThread._manager.integration_id, req_id)
+            raw_job['request_id'] = "/clusters/%s/_jobs/%s_%s" % (
+                self.syncJobThread._manager.integration_id, raw_job['run'],
+                req_id)
             self.client.write(job_key, json.dumps(raw_job))
             try:
                 definitions = self.validate_flow(raw_job)
@@ -64,10 +65,11 @@ class EtcdRPC(object):
                         job.key,
                         job_type
                     )
-                    if "etcd_client" and "manager" in \
+                    if "etcd_server" and "manager" and "config" in \
                             raw_job['parameters'].keys():
-                        del raw_job['parameters']['etcd_client']
+                        del raw_job['parameters']['etcd_server']
                         del raw_job['parameters']['manager']
+                        del raw_job['parameters']['config']
                 except FlowExecutionFailedError as e:
                     LOG.error(e)
                 if executed:
@@ -96,7 +98,8 @@ class EtcdRPC(object):
         atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
             self.extract_flow_details(flow_name, definitions)
         job['parameters'].update({"manager": self.syncJobThread._manager,
-                                  "etcd_client": self.client})
+                                  "etcd_server": self.client,
+                                  "config": self.config})
         if "tendrl" in flow_name and "flows" in flow_name:
             the_flow = import_utils.load_abs_class(flow_name)
             return the_flow(flow_name, atoms, help, enabled, inputs, pre_run,
@@ -152,7 +155,7 @@ class RpcJobProcessThread(gevent.greenlet.Greenlet):
             'port': int(manager._config.get("commons", "etcd_port")),
             'host': manager._config.get("commons", "etcd_connection")
         }
-        etcd_client = etcd.Client(**etcd_kwargs)
+        etcd_client = etcd_server(etcd_kwargs=etcd_kwargs)
         self._server = EtcdRPC(self, etcd_client)
 
     def stop(self):
