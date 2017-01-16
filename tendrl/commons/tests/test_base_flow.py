@@ -62,7 +62,11 @@ class TestBaseFlow(object):
         self.flow_post_run = \
             ['tendrl.dummymodule.objects.myobject.atoms.post_run1']
         self.flow_parameters = {
-            'Tendrl_context.cluster_id': "61959242-628f-4847-a5e2-2c8d8daac0ab"
+            'Tendrl_context.cluster_id':
+                "61959242-628f-4847-a5e2-2c8d8daac0ab",
+            'etcd_server': MagicMock(),
+            'config': MagicMock(),
+            'manager': MagicMock()
         }
         self.job = {
             'cluster_id': "61959242-628f-4847-a5e2-2c8d8daac0ab",
@@ -74,7 +78,10 @@ class TestBaseFlow(object):
                     "61959242-628f-4847-a5e2-2c8d8daac0ab",
                 'myobject.field1': 'val1',
                 'myobject.field2': 'val2'
-            }
+            },
+            "request_id": "/clusters/61959242-628f-4847-a5e2-2c8d8daac0ab"
+                          "/_jobs/tendrl.dummymodule.flows.dummy_flow"
+                          ".DummyFlow_1"
         }
         self.definitions = {
             'tendrl.dummymodule': {
@@ -168,7 +175,7 @@ class TestBaseFlow(object):
                 }
             }
         }
-        base_flow.etcd_client = MagicMock()
+        base_flow.etcd_server = MagicMock()
         base_flow.LOG = MagicMock()
 
         self.flow_obj = MyFlow(
