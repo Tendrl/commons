@@ -78,7 +78,10 @@ class TestBaseFlow(object):
                     "61959242-628f-4847-a5e2-2c8d8daac0ab",
                 'myobject.field1': 'val1',
                 'myobject.field2': 'val2'
-            }
+            },
+            "request_id": "/clusters/61959242-628f-4847-a5e2-2c8d8daac0ab"
+                          "/_jobs/tendrl.dummymodule.flows.dummy_flow"
+                          ".DummyFlow_1"
         }
         self.definitions = {
             'tendrl.dummymodule': {
