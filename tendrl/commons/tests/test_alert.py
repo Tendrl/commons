@@ -65,14 +65,6 @@ class Test_alerts_utils(object):
     def test_alertfailurevalidation(self, monkeypatch):
         test_alert = {}
 
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
-
         pytest.raises(
             KeyError,
             AlertUtils().validate_alert_json,
@@ -80,13 +72,6 @@ class Test_alerts_utils(object):
         )
 
     def test_get_alerts(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
         df_alert_id = str(uuid.uuid4())
         alert1_dict = self.get_alert('df', df_alert_id)
         alert1 = AlertUtils().to_obj(alert1_dict)
@@ -147,14 +132,6 @@ class Test_alerts_utils(object):
         df_alert_id = str(uuid.uuid4())
         alert_dict = self.get_alert('df', df_alert_id)
 
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
-
         alert = AlertUtils().to_obj(alert_dict)
         expected_alert = Alert(
             alert_id=alert_dict["alert_id"],
@@ -174,13 +151,6 @@ class Test_alerts_utils(object):
         assert AlertUtils().equals(alert, expected_alert)
 
     def test_is_same(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
         df_alert1_id = str(uuid.uuid4())
         alert1_dict = self.get_alert(
             'df',
@@ -198,13 +168,6 @@ class Test_alerts_utils(object):
         assert AlertUtils().is_same(alert1, alert2)
 
     def test_equals(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
         df_alert_id = str(uuid.uuid4())
         alert_dict = self.get_alert(
             'df',
@@ -215,13 +178,6 @@ class Test_alerts_utils(object):
         assert AlertUtils().equals(alert, alert)
 
     def test_update(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "etcd_port":
-                return '2379'
-            if parameter == 'etcd_connection':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
         df_alert1_id = str(uuid.uuid4())
         alert1_dict = self.get_alert(
             'df',
