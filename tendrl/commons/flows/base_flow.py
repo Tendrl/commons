@@ -81,13 +81,13 @@ class BaseFlow(object):
                     LOG.error(msg)
                     self.log['all'].append(msg)
                     self.log['error'].append(msg)
-                    self.etcd_server.save(
-                        JobStatus(req_id=self.job['request_id'],
-                              log_info=self.log['info'],
-                              log_all=self.log['all'],
-                              log_error=self.log['error'],
-                              log_debug=self.log['debug'],
-                              log_warn=self.log['warn']))
+                    self.etcd_server.save(JobStatus(
+                        req_id=self.job['request_id'],
+                        log_info=self.log['info'],
+                        log_all=self.log['all'],
+                        log_error=self.log['error'],
+                        log_debug=self.log['debug'],
+                        log_warn=self.log['warn']))
 
                     raise AtomExecutionFailedError(
                         "Error executing pre run function: %s for flow: %s" %

@@ -80,8 +80,9 @@ class Test_EtcdRpc(object):
 
         assert executed
         assert raw_job['status'] == "finished"
-        assert raw_job['request_id'] == "49fa2adde8a6e98591f0f5cb4bc5f44d" \
-            "/tendrl.node_agent.gluster_integration.flows.import_cluster" \
+        assert raw_job['request_id'] == "/clusters/" \
+            "49fa2adde8a6e98591f0f5cb4bc5f44d/_jobs/" \
+            "tendrl.node_agent.gluster_integration.flows.import_cluster" \
             ".ImportCluster_aa22a6fe-87f0-45cf-8b70-2d0ff4c02af6"
 
         input_raw_job2 = {

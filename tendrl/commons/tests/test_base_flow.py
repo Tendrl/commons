@@ -64,7 +64,9 @@ class TestBaseFlow(object):
         self.flow_parameters = {
             'Tendrl_context.cluster_id':
                 "61959242-628f-4847-a5e2-2c8d8daac0ab",
-            'etcd_server': MagicMock()
+            'etcd_server': MagicMock(),
+            'config': MagicMock(),
+            'manager': MagicMock()
         }
         self.job = {
             'cluster_id': "61959242-628f-4847-a5e2-2c8d8daac0ab",
