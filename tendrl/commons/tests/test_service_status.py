@@ -18,7 +18,7 @@ class TestServiceStatus(object):
         monkeypatch.setattr(Command, '__init__',
                             mock_command_constructor)
 
-        def mock_command_run(obj):
+        def mock_command_run(obj, exec_path):
             stdout = "LoadState=loaded"
             stderr = ""
             rc = 0
@@ -39,7 +39,7 @@ class TestServiceStatus(object):
         monkeypatch.setattr(Command, '__init__',
                             mock_command_constructor)
 
-        def mock_command_run(obj):
+        def mock_command_run(obj, exec_path):
             stdout = ""
             stderr = ""
             rc = 1
@@ -60,7 +60,7 @@ class TestServiceStatus(object):
         monkeypatch.setattr(Command, '__init__',
                             mock_command_constructor)
 
-        def mock_command_run(obj):
+        def mock_command_run(obj, exec_path):
             stdout = "tendrl-node-agent.service - A python agent local to" + \
                      " every managed storage node in the sds cluster " + \
                      "   Loaded: loaded (/usr/lib/systemd/system/tendrl" + \
@@ -87,7 +87,7 @@ class TestServiceStatus(object):
         monkeypatch.setattr(Command, '__init__',
                             mock_command_constructor)
 
-        def mock_command_run(obj):
+        def mock_command_run(obj, exec_path):
             stdout = ""
             stderr = ""
             rc = 1
