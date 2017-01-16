@@ -31,19 +31,19 @@ class TestAnsibleRunnerConstructor(object):
         pytest.raises(
             ValueError,
             AnsibleRunner,
-            "core/commands/command.py",
+            "core/commands/cmd_utils.py",
             "/tmp/"
         )
 
     def test_successful_ansible_runner(self, monkeypatch):
         runner = AnsibleRunner(
-            "core/commands/command.py",
+            "core/commands/cmd_utils.py",
             '/tmp/',
             key1="value1",
             key2="value2",
         )
         assert runner.module_path == modules.__path__[0] + "/" + \
-            "core/commands/command.py"
+            "core/commands/cmd_utils.py"
         assert runner.argument_dict == {"key1": "value1",
                                         "key2": "value2"}
 

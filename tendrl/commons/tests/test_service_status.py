@@ -1,5 +1,4 @@
-from tendrl.commons.utils.command \
-    import Command
+from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils.service_status \
     import ServiceStatus
 
@@ -15,7 +14,7 @@ class TestServiceStatus(object):
                 " tendrl-node-agent.service"
             return
 
-        monkeypatch.setattr(Command, '__init__',
+        monkeypatch.setattr(cmd_utils.Command, '__init__',
                             mock_command_constructor)
 
         def mock_command_run(obj, exec_path):
@@ -24,7 +23,7 @@ class TestServiceStatus(object):
             rc = 0
             return stdout, stderr, rc
 
-        monkeypatch.setattr(Command, 'run', mock_command_run)
+        monkeypatch.setattr(cmd_utils.Command, 'run', mock_command_run)
 
         service = ServiceStatus("tendrl-node-agent", '/tmp/')
         exists = service.exists()
@@ -36,7 +35,7 @@ class TestServiceStatus(object):
                 "tendrl-node-agent.service"
             return
 
-        monkeypatch.setattr(Command, '__init__',
+        monkeypatch.setattr(cmd_utils.Command, '__init__',
                             mock_command_constructor)
 
         def mock_command_run(obj, exec_path):
@@ -45,7 +44,7 @@ class TestServiceStatus(object):
             rc = 1
             return stdout, stderr, rc
 
-        monkeypatch.setattr(Command, 'run', mock_command_run)
+        monkeypatch.setattr(cmd_utils.Command, 'run', mock_command_run)
 
         service = ServiceStatus("tendrl-node-agent", '/tmp/')
         exists = service.exists()
@@ -57,7 +56,7 @@ class TestServiceStatus(object):
                 "tendrl-node-agent.service"
             return
 
-        monkeypatch.setattr(Command, '__init__',
+        monkeypatch.setattr(cmd_utils.Command, '__init__',
                             mock_command_constructor)
 
         def mock_command_run(obj, exec_path):
@@ -72,7 +71,7 @@ class TestServiceStatus(object):
             rc = 0
             return stdout, stderr, rc
 
-        monkeypatch.setattr(Command, 'run', mock_command_run)
+        monkeypatch.setattr(cmd_utils.Command, 'run', mock_command_run)
 
         service = ServiceStatus("tendrl-node-agent", '/tmp/')
         status = service.status()
@@ -84,7 +83,7 @@ class TestServiceStatus(object):
                 "tendrl-node-agent.service"
             return
 
-        monkeypatch.setattr(Command, '__init__',
+        monkeypatch.setattr(cmd_utils.Command, '__init__',
                             mock_command_constructor)
 
         def mock_command_run(obj, exec_path):
@@ -93,7 +92,7 @@ class TestServiceStatus(object):
             rc = 1
             return stdout, stderr, rc
 
-        monkeypatch.setattr(Command, 'run', mock_command_run)
+        monkeypatch.setattr(cmd_utils.Command, 'run', mock_command_run)
 
         service = ServiceStatus("tendrl-node-agent", '/tmp/')
         status = service.status()
