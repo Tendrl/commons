@@ -24,9 +24,10 @@ class BaseAtom(object):
         self.outputs = outputs
         self.uuid = uuid
         self.parameters = parameters
-        self.etcd_server = self.parameters['etcd_server']
+        self.etcd_orm = self.parameters['etcd_orm']
         self.config = self.parameters['config']
         self.manager = self.parameters['manager']
+        self.request_id = self.parameters.get('request_id')
 
     @abc.abstractmethod
     def run(self):
