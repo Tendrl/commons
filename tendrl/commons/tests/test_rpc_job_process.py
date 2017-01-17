@@ -53,7 +53,7 @@ class Test_EtcdRpc(object):
         def mock_etcd_write(key, value):
             pass
 
-        monkeypatch.setattr(server.client, 'write', mock_etcd_write)
+        monkeypatch.setattr(server.etcd_orm.client, 'write', mock_etcd_write)
 
         def mock_invoke_flow(flow, job, definitions):
             return {"key1": "value1", "key2": "value2"}, "", ""
@@ -103,7 +103,7 @@ class Test_EtcdRpc(object):
         def mock_etcd_write(key, value):
             pass
 
-        monkeypatch.setattr(server.client, 'write', mock_etcd_write)
+        monkeypatch.setattr(server.etcd_orm.client, 'write', mock_etcd_write)
 
         def mock_invoke_flow(flow, job):
             return {"key1": "value1", "key2": "value2"}, ""
@@ -135,7 +135,7 @@ class Test_EtcdRpc(object):
         def mock_etcd_write(key, value):
             pass
 
-        monkeypatch.setattr(server.client, 'write', mock_etcd_write)
+        monkeypatch.setattr(server.etcd_orm.client, 'write', mock_etcd_write)
 
         def mock_invoke_flow(flow, job):
             return {"key1": "value1", "key2": "value2"}, ""
