@@ -15,7 +15,8 @@ SAFE_COMMAND_LIST = [
     "gluster",
     "ceph",
     "config_manager",
-    "systemctl"
+    "systemctl",
+    "hwinfo"
 ]
 
 
