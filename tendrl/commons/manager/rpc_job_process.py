@@ -7,7 +7,7 @@ import gevent.event
 import yaml
 
 from tendrl.commons.definitions.validator import DefinitionsSchemaValidator
-from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
+from tendrl.commons.etcdobj import etcdobj
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.utils import import_utils
 
@@ -15,9 +15,9 @@ LOG = logging.getLogger(__name__)
 
 
 class EtcdRPC(object):
-    def __init__(self, syncjobthread, etcd_client):
+    def __init__(self, syncjobthread, etcd_orm):
         self.config = syncjobthread._manager._config
-        self.client = etcd_client
+        self.etcd_orm = etcd_orm
         self.syncJobThread = syncjobthread
 
     def _process_job(self, raw_job, job_key, job_type):
@@ -30,7 +30,7 @@ class EtcdRPC(object):
             raw_job['request_id'] = "/clusters/%s/_jobs/%s_%s" % (
                 self.syncJobThread._manager.integration_id, raw_job['run'],
                 req_id)
-            self.client.write(job_key, json.dumps(raw_job))
+            self.etcd_orm.client.write(job_key, json.dumps(raw_job))
             try:
                 definitions = self.validate_flow(raw_job)
                 if definitions:
@@ -47,7 +47,7 @@ class EtcdRPC(object):
 
     def _acceptor(self, job_type):
         while not self.syncJobThread._complete.is_set():
-            jobs = self.client.read("/queue")
+            jobs = self.etcd_orm.client.read("/queue")
             for job in jobs.children:
                 executed = False
                 if job.value is None:
@@ -65,15 +65,15 @@ class EtcdRPC(object):
                         job.key,
                         job_type
                     )
-                    if "etcd_server" and "manager" and "config" in \
+                    if "etcd_orm" and "manager" and "config" in \
                             raw_job['parameters'].keys():
-                        del raw_job['parameters']['etcd_server']
+                        del raw_job['parameters']['etcd_orm']
                         del raw_job['parameters']['manager']
                         del raw_job['parameters']['config']
                 except FlowExecutionFailedError as e:
                     LOG.error(e)
                 if executed:
-                    self.client.write(job.key, json.dumps(raw_job))
+                    self.etcd_orm.client.write(job.key, json.dumps(raw_job))
                     break
             gevent.sleep(2)
 
@@ -85,7 +85,7 @@ class EtcdRPC(object):
 
     def validate_flow(self, raw_job):
         definitions = yaml.load(
-            self.client.read(
+            self.etcd_orm.client.read(
                 self.syncJobThread._manager.defs_dir
             ).value.decode("utf-8")
         )
@@ -98,7 +98,7 @@ class EtcdRPC(object):
         atoms, help, enabled, inputs, pre_run, post_run, type, uuid = \
             self.extract_flow_details(flow_name, definitions)
         job['parameters'].update({"manager": self.syncJobThread._manager,
-                                  "etcd_server": self.client,
+                                  "etcd_orm": self.etcd_orm,
                                   "config": self.config})
         if "tendrl" in flow_name and "flows" in flow_name:
             the_flow = import_utils.load_abs_class(flow_name)
@@ -152,11 +152,11 @@ class RpcJobProcessThread(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
         etcd_kwargs = {
-            'port': int(manager._config["configuration"]["etcd_port"]),
-            'host': manager._config["configuration"]["etcd_connection"]
+            'port': int(manager._config["etcd_port"]),
+            'host': manager._config["etcd_connection"]
         }
-        etcd_client = etcd_server(etcd_kwargs=etcd_kwargs)
-        self._server = EtcdRPC(self, etcd_client)
+        etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
+        self._server = EtcdRPC(self, etcd_orm)
 
     def stop(self):
         self._complete.set()
