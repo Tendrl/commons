@@ -4,7 +4,7 @@ from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 import shlex
 
-ANSIBLE_MODULE_PATH = "core/commands/cmd_utils.py"
+ANSIBLE_MODULE_PATH = "core/commands/command.py"
 LOG = logging.getLogger(__name__)
 
 SAFE_COMMAND_LIST = [
