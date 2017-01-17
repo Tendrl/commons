@@ -169,7 +169,7 @@ class Test_EtcdRpc(object):
         def mock_etcd_write(key, value):
             pass
 
-        monkeypatch.setattr(server.client, 'write', mock_etcd_write)
+        monkeypatch.setattr(server.etcd_orm.client, 'write', mock_etcd_write)
 
         def mock_invoke_flow(flow, job):
             raise FlowExecutionFailedError("Flow Execution failed")
