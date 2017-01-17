@@ -14,7 +14,8 @@ class BaseAtom(object):
             help,
             inputs,
             outputs,
-            uuid
+            uuid,
+            parameters
     ):
         self.name = name
         self.enabled = enabled
@@ -22,9 +23,13 @@ class BaseAtom(object):
         self.help = help
         self.outputs = outputs
         self.uuid = uuid
+        self.parameters = parameters
+        self.etcd_server = self.parameters['etcd_server']
+        self.config = self.parameters['config']
+        self.manager = self.parameters['manager']
 
     @abc.abstractmethod
-    def run(self, parameters):
+    def run(self):
         raise AtomNotImplementedError(
             'define the function run to use this class'
         )

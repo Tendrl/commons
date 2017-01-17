@@ -5,14 +5,8 @@ import pytest
 
 sys.modules['tendrl.commons.config'] = MagicMock()
 
-from tendrl.commons.utils.ansible_module_runner \
-    import AnsibleExecutableGenerationFailed
-from tendrl.commons.utils.ansible_module_runner \
-    import AnsibleRunner
-from tendrl.commons.utils.command \
-    import Command
-from tendrl.commons.utils.command \
-    import UnsupportedCommandException
+from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import cmd_utils
 
 del sys.modules['tendrl.commons.config']
 
@@ -42,9 +36,10 @@ class TestCommand(object):
             }
             return result, ""
 
-        monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
+        monkeypatch.setattr(ansible_module_runner.AnsibleRunner, 'run',
+                            mock_runner_run)
 
-        c = Command("cat /asdf.txt")
+        c = cmd_utils.Command("cat /asdf.txt")
         stdout, stderr, rc = c.run('/tmp/')
 
         assert stdout == "Hello world"
@@ -53,14 +48,15 @@ class TestCommand(object):
 
     def test_command_error(self, monkeypatch):
         def mock_runner_run(obj):
-            raise AnsibleExecutableGenerationFailed(
+            raise ansible_module_runner.AnsibleExecutableGenerationFailed(
                 "module_path", "arg",
                 "err message"
             )
 
-        monkeypatch.setattr(AnsibleRunner, 'run', mock_runner_run)
+        monkeypatch.setattr(ansible_module_runner.AnsibleRunner, 'run',
+                            mock_runner_run)
 
-        c = Command("cat /asdf")
+        c = cmd_utils.Command("cat /asdf")
         stdout, stderr, rc = c.run('/tmp/')
 
         assert stdout == ""
@@ -71,7 +67,7 @@ class TestCommand(object):
 
     def test_command_unsafe_command(self, monkeypatch):
         pytest.raises(
-            UnsupportedCommandException,
-            Command,
+            cmd_utils.UnsupportedCommandException,
+            cmd_utils.Command,
             "rm -f /sadf"
         )
