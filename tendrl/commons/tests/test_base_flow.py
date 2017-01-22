@@ -1,9 +1,9 @@
 from mock import MagicMock
 
-from tendrl.commons.flows import base_flow
+from tendrl.commons import flows
 
 
-class MyFlow(base_flow.BaseFlow):
+class MyFlow(flows.BaseFlow):
     def __init__(
             self,
             name,

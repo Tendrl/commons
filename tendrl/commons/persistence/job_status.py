@@ -1,4 +1,4 @@
-from tendrl.commons.etcdobj.etcdobj import EtcdObj
+from tendrl.commons.etcdobj import EtcdObj
 from tendrl.commons.etcdobj import fields
 
 

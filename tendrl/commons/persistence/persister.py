@@ -7,16 +7,6 @@ import gevent.queue
 LOG = logging.getLogger(__name__)
 
 
-class DeferredCall(object):
-    def __init__(self, fn, args, kwargs):
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-
-    def call_it(self):
-        self.fn(*self.args, **self.kwargs)
-
-
 class Persister(gevent.greenlet.Greenlet):
     def __init__(self):
         super(Persister, self).__init__()
