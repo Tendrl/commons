@@ -1,6 +1,7 @@
 import abc
 
-import gevent
+import gevent.event
+import gevent.greenlet
 import six
 
 
