@@ -1,3 +1,5 @@
+import abc
+
 import six
 
 from tendrl.commons.atoms.exceptions import AtomNotImplementedError

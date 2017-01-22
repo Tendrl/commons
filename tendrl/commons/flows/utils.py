@@ -1,4 +1,4 @@
-from tendrl.commons.persistence.job_status import JobStatus
+from tendrl.commons.central_store.job_status import JobStatus
 
 
 def to_camel_case(snake_str):
