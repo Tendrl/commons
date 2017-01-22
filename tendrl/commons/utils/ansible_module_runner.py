@@ -28,6 +28,7 @@ class AnsibleRunner(object):
     """
 
     def __init__(self, module_path, exec_path, **kwargs):
+        exec_path = os.path.expandvars(exec_path)
         self.executable_module_path = exec_path + str(uuid.uuid4())
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
