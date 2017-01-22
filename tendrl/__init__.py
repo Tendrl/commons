@@ -96,6 +96,3 @@ class CommonNS(object):
                                           sub_class)
                     else:
                         self.add_flow(sub_name, sub_class)
-
-
-
