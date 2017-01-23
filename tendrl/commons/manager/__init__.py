@@ -25,7 +25,6 @@ class Manager(object):
         self.sds_sync_thread.stop()
         self._central_store_thread.stop()
 
-
     def start(self):
         LOG.info("%s starting" % self.__class__.__name__)
         self._job_consumer_thread.start()

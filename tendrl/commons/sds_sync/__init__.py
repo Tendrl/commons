@@ -25,14 +25,3 @@ class StateSyncThread(gevent.greenlet.Greenlet):
 class SdsSyncThread(StateSyncThread):
     def __init__(self):
         super(SdsSyncThread, self).__init__()
-
-        self._complete = gevent.event.Event()
-
-    def stop(self):
-        self._complete.set()
-
-    @abc.abstractmethod
-    def _run(self):
-        raise NotImplementedError(
-            'define the function run to use this class'
-        )
