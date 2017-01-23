@@ -65,7 +65,7 @@ class CommonNS(object):
     def get_flow(self, name):
         return self.get_ns().flows[name]
 
-    def register_subclasses_to_ns(self, base_class):
+    def register_subclasses_to_ns(self):
         # registers all subclasses of BaseObject, BaseFlow, BaseAtom to
         # tendrl_ns
         def _discover_subclasses(cls, _seen=None):
