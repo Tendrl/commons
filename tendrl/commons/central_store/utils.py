@@ -3,9 +3,8 @@ from tendrl.commons.etcdobj import fields
 
 def to_etcdobj(cls_etcd, obj):
     for attr, value in vars(obj).iteritems():
-        if "_" in attr:
-            continue
-        setattr(cls_etcd, attr, to_etcd_field(attr, value))
+        if not attr.startswith("_"):
+            setattr(cls_etcd, attr, to_etcd_field(attr, value))
     return cls_etcd
 
 
