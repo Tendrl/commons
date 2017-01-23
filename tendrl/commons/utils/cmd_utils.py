@@ -1,4 +1,5 @@
 import logging
+import shlex
 
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
@@ -28,7 +29,7 @@ class UnsupportedCommandException(Exception):
 
 class Command(object):
     def __init__(self, command):
-        if command not in SAFE_COMMAND_LIST:
+        if shlex.split(command)[0] not in SAFE_COMMAND_LIST:
             raise UnsupportedCommandException(command.split()[0])
         self.attributes = {"_raw_params": command}
 
