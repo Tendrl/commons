@@ -11,5 +11,6 @@ def to_etcdobj(cls_etcd, obj):
 def to_etcd_field(name, value):
     type_to_etcd_fields_map = {dict: fields.DictField,
                                str: fields.StrField,
-                               int: fields.IntField}
+                               int: fields.IntField,
+                               bool: fields.StrField}
     return type_to_etcd_fields_map[type(value)](name)
