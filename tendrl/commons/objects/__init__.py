@@ -39,11 +39,11 @@ class BaseObject(object):
         return instance
 
     def save(self):
-        cls_etcd = cs_utils.to_etcdobj(self.etcd_cls, self)
+        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
         getattr(tendrl_ns.central_store, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 
     def load(self):
-        cls_etcd = cs_utils.to_etcdobj(self.etcd_cls, self)
+        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
         result = tendrl_ns.etcd_orm.read(cls_etcd())
         return result.to_tendrl_obj()
