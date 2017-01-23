@@ -2,7 +2,6 @@ import logging
 
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
-import shlex
 
 ANSIBLE_MODULE_PATH = "core/commands/command.py"
 LOG = logging.getLogger(__name__)
@@ -16,7 +15,8 @@ SAFE_COMMAND_LIST = [
     "ceph",
     "config_manager",
     "systemctl",
-    "hwinfo"
+    "hwinfo",
+    "cat"
 ]
 
 
@@ -28,7 +28,7 @@ class UnsupportedCommandException(Exception):
 
 class Command(object):
     def __init__(self, command):
-        if shlex.split(command)[0] not in SAFE_COMMAND_LIST:
+        if command not in SAFE_COMMAND_LIST:
             raise UnsupportedCommandException(command.split()[0])
         self.attributes = {"_raw_params": command}
 
