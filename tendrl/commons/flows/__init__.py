@@ -3,7 +3,7 @@ import logging
 
 import six
 
-from tendrl.commons.objects.atoms.exceptions import AtomExecutionFailedError
+from tendrl.commons.objects.atoms import AtomExecutionFailedError
 from tendrl.commons.flows import utils as flow_utils
 
 LOG = logging.getLogger(__name__)
