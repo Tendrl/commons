@@ -40,7 +40,7 @@ class BaseObject(object):
 
     def save(self):
         cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
-        getattr(tendrl_ns.central_store, "save_%s" %
+        getattr(tendrl_ns.central_store_thread, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 
     def load(self):
