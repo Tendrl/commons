@@ -2,8 +2,6 @@ import abc
 
 import six
 
-from tendrl.commons.atoms.exceptions import AtomNotImplementedError
-
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
@@ -43,3 +41,14 @@ class BaseAtom(object):
             instance = super_new(cls, *args, **kwargs)
 
         return instance
+
+
+class AtomNotImplementedError(NotImplementedError):
+    def __init___(self, err):
+        self.message = "run function not implemented. %s".format(err)
+
+
+class AtomExecutionFailedError(Exception):
+    def __init___(self, err):
+        self.message = "Atom Execution failed. Error:" + \
+                       " %s".format(err)
