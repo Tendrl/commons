@@ -212,3 +212,13 @@ class EtcdObj(object):
             if attribute.name in data[attribute.name].keys():
                 data[attribute.name] = data[attribute.name][attribute.name]
         return json.dumps(data)
+
+    def to_tendrl_obj(self):
+        klass = self.__class__
+        result = self._tendrl_cls()
+        for key in dir(klass):
+            if not key.startswith('_'):
+                attr = getattr(klass, key)
+                if issubclass(attr.__class__, fields.Field):
+                    setattr(result, key, attr.value)
+        return result
