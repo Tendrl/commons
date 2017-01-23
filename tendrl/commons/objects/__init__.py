@@ -1,6 +1,7 @@
 import abc
 import six
 
+from tendrl.commons.central_store import utils as cs_utils
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
@@ -36,3 +37,13 @@ class BaseObject(object):
             instance = super_new(cls, *args, **kwargs)
 
         return instance
+
+    def save(self):
+        cls_etcd = cs_utils.to_etcdobj(self.etcd_cls, self)
+        getattr(tendrl_ns.central_store, "save_%s" %
+                self.__class__.__name__.lower())(cls_etcd())
+
+    def load(self):
+        cls_etcd = cs_utils.to_etcdobj(self.etcd_cls, self)
+        result = tendrl_ns.etcd_orm.read(cls_etcd())
+        return result.to_tendrl_obj()
