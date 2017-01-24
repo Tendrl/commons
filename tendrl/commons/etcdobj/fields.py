@@ -38,14 +38,14 @@ class Field(object):
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name, value=None):
         """Initializes a new Field instance.
 
         :param name: The name of the field
         :type name: str
         """
         self.name = name
-        self._value = None
+        self._value = value
 
     @property
     def json(self):
