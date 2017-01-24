@@ -65,6 +65,7 @@ class JobConsumer(object):
                                 not in raw_job['node_ids']:
                             continue
                     raw_job['parameters']['cluster_id'] = raw_job['cluster_id']
+                    raw_job['parameters']['node_ids'] = raw_job['node_ids']
                     raw_job, executed = self._process_job(
                         raw_job,
                         job.key
