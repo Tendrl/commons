@@ -24,7 +24,7 @@ class BaseFlow(object):
             parameters=None,
             request_id=None
     ):
-        if self.obj:
+        if hasattr(self, "obj"):
             # flow_fqn eg:tendrl.node_agent.objects.abc.flows.temp_flows
             obj_name = self.obj.__name__
             obj_def = tendrl_ns.definitions.get_obj_definition(
