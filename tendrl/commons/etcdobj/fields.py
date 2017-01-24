@@ -183,7 +183,7 @@ class DictField(Field):
 
     """
 
-    def __init__(self, name, caster):
+    def __init__(self, name, value, caster):
         """Initializes an instance of DictField.
 
         :param caster: A caster structure for casting dictionary items.
@@ -191,7 +191,7 @@ class DictField(Field):
         """
         super(DictField, self).__init__(name)
         self._caster = caster
-        self._value = {}
+        self._value = value or {}
 
     @property
     def json(self):
