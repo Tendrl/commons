@@ -5,7 +5,8 @@ def to_etcdobj(cls_etcd, obj):
     for attr, value in vars(obj).iteritems():
         if attr.startswith("_"):
             continue
-        if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms", "flows"]:
+        if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms",
+                    "flows", "value", "list"]:
             continue
         setattr(cls_etcd, attr, to_etcd_field(attr, value))
     return cls_etcd
