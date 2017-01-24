@@ -10,6 +10,8 @@ def to_etcdobj(cls_etcd, obj):
         if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms",
                     "flows", "value", "list"]:
             continue
+        if type(value) == list:
+            value = "\n".join(value)
         setattr(cls_etcd, attr, to_etcd_field(attr, value))
     return cls_etcd
 
