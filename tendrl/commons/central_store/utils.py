@@ -16,4 +16,4 @@ def to_etcd_field(name, value):
                                str: fields.StrField,
                                int: fields.IntField,
                                bool: fields.StrField}
-    return type_to_etcd_fields_map[type(value)](name)
+    return type_to_etcd_fields_map[type(value)](name, value)
