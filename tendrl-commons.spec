@@ -16,6 +16,7 @@ BuildRequires: systemd
 BuildRequires: python-yaml
 
 Requires: ansible >= 2.2
+Requires: namespaces
 Requires: python-dateutil
 Requires: python-dns
 Requires: python-etcd
@@ -44,7 +45,6 @@ rm -rf %{name}.egg-info
 py.test -v tendrl/commons/tests || :
 
 %files -f INSTALLED_FILES
-%dir %{_sysconfdir}/tendrl
 %doc README.rst
 %license LICENSE
 
