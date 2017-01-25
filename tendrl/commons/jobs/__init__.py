@@ -69,7 +69,7 @@ class JobConsumer(object):
                         if tendrl_ns.node_context.node_id \
                                 not in raw_job['node_ids']:
                             continue
-                    raw_job['parameters']['cluster_id'] = raw_job['cluster_id']
+                    raw_job['parameters']['integration_id'] = raw_job['integration_id']
                     raw_job['parameters']['node_ids'] = raw_job['node_ids']
                     raw_job, executed = self._process_job(
                         raw_job,
