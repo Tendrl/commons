@@ -69,7 +69,7 @@ class JobConsumer(object):
                         if tendrl_ns.node_context.node_id \
                                 not in raw_job['node_ids']:
                             continue
-                    raw_job['parameters']['cluster_id'] = raw_job['cluster_id']
+                    raw_job['parameters']['integration_id'] = raw_job['integration_id']
                     raw_job['parameters']['node_ids'] = raw_job['node_ids']
                     raw_job, executed = self._process_job(
                         raw_job,
@@ -95,14 +95,14 @@ class JobConsumer(object):
         # flow_fqn eg:tendrl.node_agent.objects.abc.flows.temp_flows
         if "tendrl" in flow_fqn and "objects" in flow_fqn:
             obj_name, flow_name = flow_fqn.split(".objects.")[-1].split(
-                ".flows.")
+                ".flows.")[-1].split(".")[-1]
             flow = tendrl_ns.get_obj_flow(obj_name, flow_name)
             return flow(parameters=job['parameters'],
                         request_id=job['request_id']).run()
 
         # flow_fqn eg: tendrl.node_agent.flows.temp_flows
         if "tendrl" in flow_fqn and "flows" in flow_fqn:
-            flow_name = flow_fqn.split(".flows.")[-1]
+            flow_name = flow_fqn.split(".flows.")[-1].split(".")[-1]
             flow = tendrl_ns.get_flow(flow_name)
             return flow(parameters=job['parameters'],
                         request_id=job['request_id']).run()
