@@ -23,7 +23,7 @@ def to_etcd_field(name, value):
                                str: fields.StrField,
                                int: fields.IntField,
                                bool: fields.StrField,
-                               unicode: fields.StrField
+                               unicode: fields.StrField,
                                datetime.datetime: fields.StrField}
     if type(value) == dict:
         return fields.DictField(name, value, {'str':'str'})
