@@ -3,6 +3,7 @@ import logging
 import traceback
 import uuid
 
+import etcd
 import gevent.event
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -51,7 +52,11 @@ class JobConsumer(object):
     def _acceptor(self):
         while not self.job_consumer_thread._complete.is_set():
             # TODO(team) replace below raw write with a "EtcdJobQueue" class
-            jobs = tendrl_ns.etcd_orm.client.read("/queue")
+            try:
+                jobs = tendrl_ns.etcd_orm.client.read("/queue")
+            except etcd.EtcdKeyNotFound:
+                continue
+                
             for job in jobs.children:
                 executed = False
                 if job.value is None:
