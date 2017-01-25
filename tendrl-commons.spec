@@ -44,7 +44,6 @@ rm -rf %{name}.egg-info
 py.test -v tendrl/commons/tests || :
 
 %files -f INSTALLED_FILES
-%dir %{_sysconfdir}/tendrl
 %doc README.rst
 %license LICENSE
 
