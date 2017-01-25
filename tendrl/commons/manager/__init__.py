@@ -15,9 +15,10 @@ class Manager(object):
             sds_sync_thread,
             central_store_thread,
     ):
-        self._job_consumer_thread = jobs.JobConsumerThread()
-        self._sds_sync_thread = sds_sync_thread
         self._central_store_thread = central_store_thread
+        self._sds_sync_thread = sds_sync_thread
+        self._job_consumer_thread = jobs.JobConsumerThread()
+
 
     def stop(self):
         LOG.info("%s stopping" % self.__class__.__name__)
@@ -27,12 +28,14 @@ class Manager(object):
 
     def start(self):
         LOG.info("%s starting" % self.__class__.__name__)
-        self._job_consumer_thread.start()
-        self._sds_sync_thread.start()
         self._central_store_thread.start()
+        self._sds_sync_thread.start()
+        self._job_consumer_thread.start()
+
 
     def join(self):
         LOG.info("%s joining" % self.__class__.__name__)
         self._job_consumer_thread.join()
         self._sds_sync_thread.join()
         self._central_store_thread.join()
+
