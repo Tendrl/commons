@@ -16,6 +16,7 @@ BuildRequires: systemd
 BuildRequires: python-yaml
 
 Requires: ansible >= 2.2
+Requires: namespaces
 Requires: python-dateutil
 Requires: python-dns
 Requires: python-etcd
