@@ -79,28 +79,28 @@ class BaseFlow(object):
 
                 if not ret_val:
                     msg = "Failed pre-run: %s for flow: %s" % \
-                          (atom_fqn, self.job['run'])
+                          (atom_fqn, self.help)
                     LOG.error(msg)
                     flow_utils.update_job_status(self.request_id, msg,
                                                  self.log,
-                                                 'error', self.etcd_orm)
+                                                 'error', tendrl_ns.etcd_orm)
 
                     raise AtomExecutionFailedError(
                         "Error executing pre run function: %s for flow: %s" %
-                        (atom_fqn, self.job['run'])
+                        (atom_fqn, self.help)
                     )
                 else:
                     msg = "Finished pre-run: %s for flow: %s" %\
-                          (atom_fqn, self.job['run'])
+                          (atom_fqn, self.help)
                     LOG.info(msg)
                     self.log['all'].append(msg)
                     self.log['info'].append(msg)
 
         # Execute the atoms for the flow
-        msg = "Processing atoms for flow: %s" % self.job['run']
+        msg = "Processing atoms for flow: %s" % self.help
         LOG.info(msg)
         flow_utils.update_job_status(self.request_id, msg, self.log,
-                                     'info', self.etcd_orm)
+                                     'info', tendrl_ns.etcd_orm)
 
         for atom_fqn in self.atoms:
             msg = "Start atom : %s" % atom_fqn
@@ -112,27 +112,27 @@ class BaseFlow(object):
 
             if not ret_val:
                 msg = "Failed atom: %s on flow: %s" % \
-                      (atom_fqn, self.job['run'])
+                      (atom_fqn, self.help)
                 LOG.error(msg)
                 flow_utils.update_job_status(self.request_id, msg, self.log,
-                                             'error', self.etcd_orm)
+                                             'error', tendrl_ns.etcd_orm)
 
                 raise AtomExecutionFailedError(
                     "Error executing atom: %s on flow: %s" %
-                    (atom_fqn, self.job['run'])
+                    (atom_fqn, self.help)
                 )
             else:
                 msg = 'Finished atom %s for flow: %s' %\
-                      (atom_fqn, self.job['run'])
+                      (atom_fqn, self.help)
                 LOG.info(msg)
                 self.log['all'].append(msg)
                 self.log['info'].append(msg)
 
         # Execute the post runs for the flow
-        msg = "Processing post-runs for flow: %s" % self.job['run']
+        msg = "Processing post-runs for flow: %s" % self.help
         LOG.info(msg)
         flow_utils.update_job_status(self.request_id, msg, self.log,
-                                     'info', self.etcd_orm)
+                                     'info', tendrl_ns.etcd_orm)
         if self.post_run is not None:
             for atom_fqn in self.post_run:
                 msg = "Start post-run : %s" % atom_fqn
@@ -144,22 +144,22 @@ class BaseFlow(object):
 
                 if not ret_val:
                     msg = "Failed post-run: %s for flow: %s" % \
-                          (atom_fqn, self.job['run'])
+                          (atom_fqn, self.help)
                     LOG.error(msg)
                     flow_utils.update_job_status(self.request_id, msg,
                                                  self.log,
-                                                 'error', self.etcd_orm)
+                                                 'error', tendrl_ns.etcd_orm)
 
                     raise AtomExecutionFailedError(
                         "Error executing post run function: %s" % atom_fqn
                     )
                 else:
                     msg = "Finished post-run: %s for flow: %s" %\
-                          (atom_fqn, self.job['run'])
+                          (atom_fqn, self.help)
                     LOG.info(msg)
                     flow_utils.update_job_status(self.request_id, msg,
                                                  self.log,
-                                                 'info', self.etcd_orm)
+                                                 'info', tendrl_ns.etcd_orm)
 
     def execute_atom(self, atom_fqn):
         # atom_fqn eg: tendrl.node_agent.objects.abc.atoms.xyz
@@ -167,6 +167,7 @@ class BaseFlow(object):
         if "tendrl" in atom_fqn and "atoms" in atom_fqn:
             obj_name, atom_name = atom_fqn.split(".objects.")[-1].split(
                 ".atoms.")
+            atom_name = atom_name.split(".")[-1]
             atom = tendrl_ns.get_atom(obj_name, atom_name)
             try:
                 ret_val = atom(

@@ -24,7 +24,7 @@ class JobConsumer(object):
             # Generate a request ID for tracking this job
             # further by tendrl-api
             req_id = str(uuid.uuid4())
-            if tendrl_ns.type == "node":
+            if tendrl_ns.type == "node" or tendrl_ns.type == "monitoring":
                 raw_job['request_id'] = "nodes/%s/_jobs/%s_%s" % (
                     tendrl_ns.node_context.node_id, raw_job['run'],
                     req_id)
