@@ -12,11 +12,12 @@ from tendrl.commons import log
 class CommonNS(object):
     def __init__(self):
         super(CommonNS, self).__init__()
-        self.register_subclasses_to_ns()
         ns_str = self.to_str.split(".")[-1]
         # Create the component namespace
         setattr(self, ns_str,
                 ns.Namespace(objects=ns.Namespace(), flows=ns.Namespace()))
+        self.register_subclasses_to_ns()
+
         ns_obj = getattr(self, ns_str)
         # Definitions
         self.definitions = ns_obj.objects.Definition()
