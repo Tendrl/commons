@@ -22,8 +22,8 @@ class Manager(object):
 
     def stop(self):
         LOG.info("%s stopping" % self.__class__.__name__)
-        self.job_consumer_thread.stop()
-        self.sds_sync_thread.stop()
+        self._job_consumer_thread.stop()
+        self._sds_sync_thread.stop()
         self._central_store_thread.stop()
 
     def start(self):
