@@ -12,6 +12,9 @@ from tendrl.commons import log
 class CommonNS(object):
     def __init__(self):
         super(CommonNS, self).__init__()
+        import __builtin__
+        setattr(__builtin__, "tendrl_ns", self)
+
         ns_str = self.to_str.split(".")[-1]
         # Create the component namespace
         setattr(self, ns_str,
