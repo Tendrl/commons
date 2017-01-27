@@ -1,0 +1,37 @@
+From 2cd9de053477da0ad4b4c2410b6968772924764e Mon Sep 17 00:00:00 2001
+From: Timothy Asir J <tjeyasin@redhat.com>
+Date: Sat, 28 Jan 2017 02:22:43 +0530
+Subject: [PATCH] Fix python-six dependency version issue
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Namespaces has a dependency on python-six-1.10.0.
+The rpm package of this purticular version is not available.
+Namespaces use this python-six module to get an
+iterator over dictionary‘s items by using a function
+iteritems() which is also available and supported in
+version 1.9.0.
+This patch update the setup required version to 1.9.0
+
+Signed-off-by: Timothy Asir J <tjeyasin@redhat.com>
+---
+ setup.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index d5f4a40..d3b2486 100644
+--- a/setup.py
++++ b/setup.py
+@@ -10,7 +10,7 @@ setup(
+   license='MIT',
+   packages=['namespaces'],
+   install_requires=[
+-    'six>=1.10.0'
++    'six>=1.9.0'
+   ],
+   test_suite='tests',
+   classifiers=[
+-- 
+2.4.3
+
