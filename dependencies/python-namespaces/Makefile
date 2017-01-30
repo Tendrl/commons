@@ -1,6 +1,6 @@
 NAME=namespaces
 VERSION=4.2.0
-RELEASE=1
+RELEASE=2
 COMMIT := $(shell git rev-parse HEAD)
 SHORTCOMMIT := $(shell echo $(COMMIT) | cut -c1-7)
 GIT_RELEASE := $(shell git describe --tags --match 'v*' \
