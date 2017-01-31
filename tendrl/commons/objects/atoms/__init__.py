@@ -15,7 +15,7 @@ class BaseAtom(object):
             help=None
     ):
 
-        obj_def = tendrl_ns.definitions.get_obj_defs(tendrl_ns.to_str,
+        obj_def = tendrl_ns.definitions.get_obj_definition(tendrl_ns.to_str,
                                              self.obj.__name__)
         atom_def = obj_def.atoms[self.__class__.__name__]
 
@@ -24,7 +24,7 @@ class BaseAtom(object):
         self.outputs = outputs or atom_def['outputs']
         self.uuid = uuid or atom_def['uuid']
         self.help = help or atom_def['help']
-        self.paramaters = parameters
+        self.parameters = parameters
 
     @abc.abstractmethod
     def run(self):
