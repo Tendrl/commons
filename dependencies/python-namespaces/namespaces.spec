@@ -1,9 +1,10 @@
 Name: namespaces
 Version: 4.2.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 BuildArch: noarch
 Summary: python namespaces
 Source0: %{name}-%{version}.tar.gz
+Patch0: 0001-Fix-python-six-dependency-version-issue.patch
 License: MIT
 URL: https://github.com/pcattori/namespaces
 
@@ -18,6 +19,7 @@ Python dictionaries with items also accessible via dot-notation
 
 %prep
 %setup
+%patch0 -p1
 
 # Remove bundled egg-info
 rm -rf %{name}.egg-info
