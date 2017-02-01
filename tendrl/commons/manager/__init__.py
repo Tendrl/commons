@@ -23,14 +23,14 @@ class Manager(object):
     def stop(self):
         LOG.info("%s stopping" % self.__class__.__name__)
         self._job_consumer_thread.stop()
-        if self._sds_sync_thread:
+        if self._sds_sync_thread is not None:
             self._sds_sync_thread.stop()
         self._central_store_thread.stop()
 
     def start(self):
         LOG.info("%s starting" % self.__class__.__name__)
         self._central_store_thread.start()
-        if self._sds_sync_thread:
+        if self._sds_sync_thread is not None:
             self._sds_sync_thread.start()
         self._job_consumer_thread.start()
 
@@ -38,6 +38,6 @@ class Manager(object):
     def join(self):
         LOG.info("%s joining" % self.__class__.__name__)
         self._job_consumer_thread.join()
-        if self._sds_sync_thread:
+        if self._sds_sync_thread is not None:
             self._sds_sync_thread.join()
         self._central_store_thread.join()
