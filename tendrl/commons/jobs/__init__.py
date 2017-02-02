@@ -51,6 +51,8 @@ class JobConsumer(object):
 
     def _acceptor(self):
         while not self.job_consumer_thread._complete.is_set():
+            gevent.sleep(2)
+
             # TODO(team) replace below raw write with a "EtcdJobQueue" class
             try:
                 jobs = tendrl_ns.etcd_orm.client.read("/queue")
@@ -83,7 +85,6 @@ class JobConsumer(object):
                     tendrl_ns.etcd_orm.client.write(job.key, json.dumps(
                         raw_job))
                     break
-            gevent.sleep(2)
 
     def run(self):
         self._acceptor()
