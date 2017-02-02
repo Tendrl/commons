@@ -43,12 +43,12 @@ class BaseFlow(object):
 
 
         self.atoms = atoms or flow_def['atoms']
-        self.help = help or flow_def['help']
+        self.help = help or flow_def.get('help')
         self.enabled = enabled or flow_def['enabled']
-        self.inputs = inputs or flow_def['inputs']
-        self.pre_run = pre_run or flow_def['pre_run']
-        self.post_run = post_run or flow_def['post_run']
-        self.type = type or flow_def['type']
+        self.inputs = inputs or flow_def.get('inputs')
+        self.pre_run = pre_run or flow_def.get('pre_run')
+        self.post_run = post_run or flow_def.get('post_run')
+        self.type = type or flow_def.get('type')
         self.uuid = uuid or flow_def['uuid']
         self.parameters = parameters
         self.request_id = request_id

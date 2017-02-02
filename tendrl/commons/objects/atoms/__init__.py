@@ -19,11 +19,11 @@ class BaseAtom(object):
                                              self.obj.__name__)
         atom_def = obj_def.atoms[self.__class__.__name__]
 
-        self.inputs = inputs or atom_def['inputs']['mandatory']
-        self.enabled = enabled or atom_def['enabled']
-        self.outputs = outputs or atom_def['outputs']
-        self.uuid = uuid or atom_def['uuid']
-        self.help = help or atom_def['help']
+        self.inputs = inputs or atom_def.get('inputs').get('mandatory')
+        self.enabled = enabled or atom_def.get('enabled')
+        self.outputs = outputs or atom_def.get('outputs')
+        self.uuid = uuid or atom_def.get('uuid')
+        self.help = help or atom_def.get('help')
         self.parameters = parameters
 
     @abc.abstractmethod

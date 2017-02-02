@@ -94,8 +94,8 @@ class JobConsumer(object):
     def invoke_flow(self, flow_fqn, job):
         # flow_fqn eg:tendrl.node_agent.objects.abc.flows.temp_flows
         if "tendrl" in flow_fqn and "objects" in flow_fqn:
-            obj_name, flow_name = flow_fqn.split(".objects.")[-1].split(
-                ".flows.")[-1].split(".")[-1]
+            obj_name = flow_fqn.split(".objects.")[-1].split(".")[0]
+            flow_name = flow_fqn.split(".flows.")[-1].split(".")[-1]
             flow = tendrl_ns.get_obj_flow(obj_name, flow_name)
             return flow(parameters=job['parameters'],
                         request_id=job['request_id']).run()
