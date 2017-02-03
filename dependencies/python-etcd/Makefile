@@ -11,7 +11,7 @@ clean:
 
 dist:
 	git clone https://github.com/jplana/python-etcd $(NAME)-$(VERSION)
-	tar -zcvf python-etcd-0.4.4.tar.gz $(NAME)-$(VERSION)
+	tar -zcvf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	rm -fr $(NAME)-$(VERSION)
 
 srpm: dist
