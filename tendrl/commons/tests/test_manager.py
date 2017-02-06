@@ -1,11 +1,10 @@
 import sys
 
-from gevent.event import Event
 from mock import MagicMock
 
 sys.modules['tendrl.commons.config'] = MagicMock()
-from tendrl.commons import manager
 from tendrl.commons import jobs
+from tendrl.commons import manager
 
 
 class MyManager(manager.Manager):

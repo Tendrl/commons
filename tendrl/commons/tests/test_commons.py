@@ -17,8 +17,8 @@ class PytestEtcdObj(etcdobj.EtcdObj):
     """A simple EtcdObj for testing."""
     __name__ = 'unittesting'
     testingInt = fields.IntField('testingInt')
-    testdict = fields.DictField("testdict",
-        {'value1': str, 'value2': str}, None)
+    testdict = fields.DictField("testdict", {'value1': str, 'value2': str},
+                                None)
 
 
 class TestBridge_commons(object):
