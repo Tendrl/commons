@@ -3,6 +3,7 @@ import six
 
 from tendrl.commons.central_store import utils as cs_utils
 
+
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
     def __init__(

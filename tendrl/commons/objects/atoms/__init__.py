@@ -16,7 +16,7 @@ class BaseAtom(object):
     ):
 
         obj_def = tendrl_ns.definitions.get_obj_definition(tendrl_ns.to_str,
-                                             self.obj.__name__)
+                                                           self.obj.__name__)
         atom_def = obj_def.atoms[self.__class__.__name__]
 
         self.inputs = inputs or atom_def.get('inputs').get('mandatory')

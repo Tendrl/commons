@@ -7,11 +7,11 @@ import pkgutil
 
 import namespaces as ns
 
-from tendrl.commons import objects
-from tendrl.commons import flows
-from tendrl.commons.objects import atoms
 from tendrl.commons import etcdobj
+from tendrl.commons import flows
 from tendrl.commons import log
+from tendrl.commons import objects
+from tendrl.commons.objects import atoms
 
 
 class CommonNS(object):
@@ -43,11 +43,9 @@ class CommonNS(object):
 
         self.tendrl_context = ns_obj.objects.TendrlContext()
 
-
         log.setup_logging(
             self.config.data['log_cfg_path'],
         )
-
 
     def get_ns(self):
         # eg: input : "tendrl.node_agent", return: "node_agent"
@@ -107,7 +105,7 @@ class CommonNS(object):
         ns_objects_path = ns_root + "/objects"
         ns_objects_prefix = self.to_str + ".objects."
         objs = self._list_modules_in_package_path(ns_objects_path,
-                                                     ns_objects_prefix)
+                                                  ns_objects_prefix)
         for name, obj_fqdn in objs:
             obj = importlib.import_module(obj_fqdn)
             for obj_cls in inspect.getmembers(obj, inspect.isclass):
@@ -124,7 +122,7 @@ class CommonNS(object):
                         atom = importlib.import_module(atom_fqdn)
 
                         for atom_cls in inspect.getmembers(atom,
-                                                         inspect.isclass):
+                                                           inspect.isclass):
                             if issubclass(atom_cls[1], atoms.BaseAtom):
                                 self.add_atom(atom_cls[1].obj.__name__,
                                               atom_cls[1].__name__,
@@ -139,7 +137,7 @@ class CommonNS(object):
                         flow = importlib.import_module(flow_fqdn)
 
                         for flow_cls in inspect.getmembers(flow,
-                                                         inspect.isclass):
+                                                           inspect.isclass):
                             if issubclass(flow_cls[1], flows.BaseFlow):
                                 self.add_obj_flow(flow_cls[1].obj.__name__,
                                                   flow_cls[1].__name__,
@@ -155,11 +153,9 @@ class CommonNS(object):
                 if issubclass(flow_cls[1], flows.BaseFlow):
                     self.add_flow(flow_cls[0], flow_cls[1])
 
-
     def _list_modules_in_package_path(self, package_path, prefix):
         modules = []
         for importer, name, ispkg in pkgutil.walk_packages(
                 path=[package_path]):
             modules.append((name, prefix + name))
         return modules
-
