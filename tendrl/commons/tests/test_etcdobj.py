@@ -52,7 +52,7 @@ class TestEtcdObj(TestBridge_commons):
     def setup_method(self, method):
         self.testing_obj = PytestEtcdObj(
             testingInt=10,
-            testingDict={'value1': "string1", 'value2': "string2"})
+            testdict={'value1': "string1", 'value2': "string2"})
 
     def test_render(self):
         item = self.testing_obj.render()
@@ -62,7 +62,7 @@ class TestEtcdObj(TestBridge_commons):
                  "value": 10, "dir": False} in item)
 
     def test_json(self):
-        assert (json.dumps({"testingDict": {
+        assert (json.dumps({"testdict": {
             "value1": "string1",
             "value2": "string2"},
             "testingInt": 10

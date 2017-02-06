@@ -3,8 +3,9 @@ import logging
 
 import six
 
-from tendrl.commons.objects.atoms import AtomExecutionFailedError
 from tendrl.commons.flows import utils as flow_utils
+from tendrl.commons.objects.atoms import AtomExecutionFailedError
+
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +42,6 @@ class BaseFlow(object):
             self.to_str = "%s.flows.%s" % (tendrl_ns.to_str,
                                            self.__class__.__name__)
 
-
         self.atoms = atoms or flow_def['atoms']
         self.help = help or flow_def.get('help')
         self.enabled = enabled or flow_def['enabled']
@@ -58,7 +58,6 @@ class BaseFlow(object):
         # log levels list below, logging everything to "all" is mandatory
         self.log = {"all": [], "info": [], "error": [], "warn": [],
                     "debug": []}
-
 
     @abc.abstractmethod
     def run(self):

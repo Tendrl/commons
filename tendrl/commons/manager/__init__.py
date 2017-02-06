@@ -19,7 +19,6 @@ class Manager(object):
         self._sds_sync_thread = sds_sync_thread
         self._job_consumer_thread = jobs.JobConsumerThread()
 
-
     def stop(self):
         LOG.info("%s stopping" % self.__class__.__name__)
         self._job_consumer_thread.stop()
@@ -33,7 +32,6 @@ class Manager(object):
         if self._sds_sync_thread is not None:
             self._sds_sync_thread.start()
         self._job_consumer_thread.start()
-
 
     def join(self):
         LOG.info("%s joining" % self.__class__.__name__)

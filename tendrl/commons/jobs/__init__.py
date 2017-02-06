@@ -8,6 +8,7 @@ import gevent.event
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -33,7 +34,6 @@ class JobConsumer(object):
                     tendrl_ns.tendrl_context.integration_id, raw_job['run'],
                     req_id)
 
-
             # TODO(team) Convert this raw write to done via
             # persister.update_job()
             tendrl_ns.etcd_orm.client.write(job_key, json.dumps(raw_job))
@@ -58,7 +58,7 @@ class JobConsumer(object):
                 jobs = tendrl_ns.etcd_orm.client.read("/queue")
             except etcd.EtcdKeyNotFound:
                 continue
-                
+
             for job in jobs.children:
                 executed = False
                 if job.value is None:
@@ -71,7 +71,8 @@ class JobConsumer(object):
                         if tendrl_ns.node_context.node_id \
                                 not in raw_job['node_ids']:
                             continue
-                    raw_job['parameters']['integration_id'] = raw_job['integration_id']
+                    raw_job['parameters']['integration_id'] = raw_job[
+                        'integration_id']
                     raw_job['parameters']['node_ids'] = raw_job['node_ids']
                     raw_job, executed = self._process_job(
                         raw_job,
@@ -107,6 +108,7 @@ class JobConsumer(object):
             flow = tendrl_ns.get_flow(flow_name)
             return flow(parameters=job['parameters'],
                         request_id=job['request_id']).run()
+
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
     # In case server.run throws an exception, prevent

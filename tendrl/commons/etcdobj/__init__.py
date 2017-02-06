@@ -32,7 +32,7 @@ A simplistic etcd orm.
 import json
 import logging
 
-from tendrl.commons.etcdobj.fields import Field
+from tendrl.commons.etcdobj import fields
 
 LOG = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ class EtcdObj(object):
         for key in dir(self):
             if not key.startswith('_'):
                 attr = getattr(self, key)
-                if issubclass(attr.__class__, Field):
+                if issubclass(attr.__class__, fields.Field):
                     self._fields.append(key)
                     if key in kwargs.keys():
                         attr.value = kwargs[key]
