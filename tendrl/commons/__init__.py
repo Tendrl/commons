@@ -5,7 +5,7 @@ import inspect
 import pkgutil
 
 
-import namespaces as ns
+import maps
 
 from tendrl.commons import etcdobj
 from tendrl.commons import flows
@@ -19,14 +19,21 @@ class CommonNS(object):
         super(CommonNS, self).__init__()
         import __builtin__
         setattr(__builtin__, "tendrl_ns", self)
-
         self.ns_str = self.to_str.split(".")[-1]
+
+        if 'integrations' in self.to_str:
+            self.integrations = maps.NamedDict({self.ns_str: maps.NamedDict(
+                                                objects=maps.NamedDict(),
+                                                flows=maps.NamedDict())
+})
+        else:
         # Create the component namespace
-        setattr(self, self.ns_str,
-                ns.Namespace(objects=ns.Namespace(), flows=ns.Namespace()))
+            setattr(self, self.ns_str,
+                    maps.NamedDict(objects=maps.NamedDict(),
+                                   flows=maps.NamedDict()))
         self.register_subclasses_to_ns()
 
-        ns_obj = getattr(self, self.ns_str)
+        ns_obj = self.get_ns()
         # Definitions
         self.definitions = ns_obj.objects.Definition()
 
@@ -49,7 +56,10 @@ class CommonNS(object):
 
     def get_ns(self):
         # eg: input : "tendrl.node_agent", return: "node_agent"
-        return getattr(self, self.ns_str)
+        if "integrations" in self.to_str:
+            return getattr(self.integrations, self.ns_str)
+        else:
+            return getattr(self, self.ns_str)
 
         # Create the "tendrl_ns.node_agent.objects.$obj.{atoms, flows} NS
     def add_object(self, name, obj_class):
@@ -59,13 +69,13 @@ class CommonNS(object):
 
         # This is to link atoms and flows (insdie obj) to the obj ns
         private_name = "_" + name
-        self.get_ns().objects[private_name] = ns.Namespace()
+        self.get_ns().objects[private_name] = maps.NamedDict()
 
         if 'atoms' not in self.get_ns().objects[private_name]:
-            self.get_ns().objects[private_name]['atoms'] = ns.Namespace()
+            self.get_ns().objects[private_name]['atoms'] = maps.NamedDict()
 
         if "flows" not in self.get_ns().objects[private_name]:
-            self.get_ns().objects[private_name]['flows'] = ns.Namespace()
+            self.get_ns().objects[private_name]['flows'] = maps.NamedDict()
 
     def get_object(self, name):
         return self.get_ns().objects[name]
