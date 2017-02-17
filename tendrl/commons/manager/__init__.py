@@ -14,21 +14,26 @@ class Manager(object):
             self,
             sds_sync_thread,
             central_store_thread,
+            message_handler_thread=None,
     ):
         self._central_store_thread = central_store_thread
         self._sds_sync_thread = sds_sync_thread
         self._job_consumer_thread = jobs.JobConsumerThread()
-
+        self._message_handler_thread = message_handler_thread
 
     def stop(self):
-        LOG.info("%s stopping" % self.__class__.__name__)
+        LOG.debug("%s stopping" % self.__class__.__name__)
+        if self._message_handler_thread is not None:
+            self._message_handler_thread.stop()
         self._job_consumer_thread.stop()
         if self._sds_sync_thread is not None:
             self._sds_sync_thread.stop()
         self._central_store_thread.stop()
 
     def start(self):
-        LOG.info("%s starting" % self.__class__.__name__)
+        LOG.debug("%s starting" % self.__class__.__name__)
+        if self._message_handler_thread is not None:
+            self._message_handler_thread.start()
         self._central_store_thread.start()
         if self._sds_sync_thread is not None:
             self._sds_sync_thread.start()
@@ -36,7 +41,9 @@ class Manager(object):
 
 
     def join(self):
-        LOG.info("%s joining" % self.__class__.__name__)
+        LOG.debug("%s joining" % self.__class__.__name__)
+        if self._message_handler_thread is not None:
+            self._message_handler_thread.join()
         self._job_consumer_thread.join()
         if self._sds_sync_thread is not None:
             self._sds_sync_thread.join()
