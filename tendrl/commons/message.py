@@ -3,8 +3,14 @@ from dateutil import parser
 from inspect import getframeinfo
 from inspect import stack
 import json
+import sys
 from tendrl.commons.utils.time_utils import now
+sys.path.remove('/usr/lib64/collectd')
 import uuid
+sys.path.append('/usr/lib64/collectd')
+# TODO(anmol, collectd) This is required due to
+# https://github.com/collectd/collectd/issues/2179
+# An appropriate solution needs to be carved out
 
 
 class Message(object):
@@ -35,7 +41,9 @@ class Message(object):
             self.caller = caller
         self.priority = priority
         self.publisher = publisher
-        self.node_id = tendrl_ns.node_context.node_id
+        self.node_id = node_id
+        if self.node_id is None:
+            self.node_id = tendrl_ns.node_context.node_id
         self.request_id = request_id
         self.flow_id = flow_id
         self.parent_id = parent_id
