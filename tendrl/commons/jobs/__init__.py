@@ -1,5 +1,4 @@
 import json
-import logging
 import traceback
 
 import etcd
@@ -8,9 +7,6 @@ import gevent.event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import etcd_util
-
-
-LOG = logging.getLogger(__name__)
 
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
@@ -124,3 +120,5 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             return getattr(NS.integrations, ns_str), flow_name, obj_name
         else:
             return getattr(NS, ns_str), flow_name, obj_name
+
+

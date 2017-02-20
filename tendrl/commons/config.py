@@ -1,9 +1,9 @@
-import logging
 import os
 
 from ruamel import yaml
 
-LOG = logging.getLogger(__name__)
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 class ConfigNotFound(Exception):
@@ -11,14 +11,19 @@ class ConfigNotFound(Exception):
 
 
 def load_config(module, yaml_cfg_file_path):
-
-        if not os.path.exists(yaml_cfg_file_path):
-            err = ConfigNotFound(
-                "Configuration for module: %s not found at %s" %
-                (module, yaml_cfg_file_path)
+    if not os.path.exists(yaml_cfg_file_path):
+        err = ConfigNotFound(
+            "Configuration for module: %s not found at %s" %
+            (module, yaml_cfg_file_path)
+        )
+        Event(
+            Message(
+                priority="error",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": err}
             )
-            LOG.error(err, exc_info=True)
-            raise err
+        )
+        raise err
 
-        with open(yaml_cfg_file_path, 'r') as ymlfile:
-            return yaml.safe_load(ymlfile)
+    with open(yaml_cfg_file_path, 'r') as ymlfile:
+        return yaml.safe_load(ymlfile)
