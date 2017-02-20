@@ -17,7 +17,6 @@ class CentralStore(gevent.greenlet.Greenlet):
 
         while not self._complete.is_set():
             gevent.sleep(0.1)
-            continue
 
     def stop(self):
         self._complete.set()

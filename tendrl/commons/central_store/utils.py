@@ -9,8 +9,7 @@ def to_etcdobj(cls_etcd, obj):
             continue
         if attr.startswith("_"):
             continue
-        if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms",
-                    "flows", "value", "list"]:
+        if attr in ["definition"]:
             continue
         if type(value) == list:
             value = "\n".join(value)

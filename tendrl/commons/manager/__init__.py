@@ -13,7 +13,7 @@ class Manager(object):
     def __init__(
             self,
             sds_sync_thread,
-            central_store_thread,
+            central_store_thread
     ):
         self._central_store_thread = central_store_thread
         self._sds_sync_thread = sds_sync_thread
