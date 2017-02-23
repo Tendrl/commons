@@ -5,9 +5,13 @@ from inspect import stack
 import json
 import sys
 from tendrl.commons.utils.time_utils import now
-sys.path.remove('/usr/lib64/collectd')
+is_collectd_imported = False
+if '/usr/lib64/collectd' in sys.path:
+    is_collectd_imported = True
+    sys.path.remove('/usr/lib64/collectd')
 import uuid
-sys.path.append('/usr/lib64/collectd')
+if is_collectd_imported:
+    sys.path.append('/usr/lib64/collectd')
 # TODO(anmol, collectd) This is required due to
 # https://github.com/collectd/collectd/issues/2179
 # An appropriate solution needs to be carved out
