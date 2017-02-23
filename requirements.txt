@@ -9,3 +9,4 @@ python-dateutil
 PyYAML
 gevent>=1.0
 namespaces
+pytz
