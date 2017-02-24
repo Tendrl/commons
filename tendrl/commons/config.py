@@ -1,10 +1,6 @@
 import os
-
 from ruamel import yaml
-
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-
+import yaml
 
 class ConfigNotFound(Exception):
     pass
@@ -16,13 +12,7 @@ def load_config(module, yaml_cfg_file_path):
             "Configuration for module: %s not found at %s" %
             (module, yaml_cfg_file_path)
         )
-        Event(
-            Message(
-                priority="error",
-                publisher=tendrl_ns.publisher_id,
-                payload={"message": err}
-            )
-        )
+        sys.stderr.write(str(err))
         raise err
 
     with open(yaml_cfg_file_path, 'r') as ymlfile:

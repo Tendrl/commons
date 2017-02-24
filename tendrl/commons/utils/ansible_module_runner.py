@@ -1,8 +1,3 @@
-<<<<<<< b6410b3ad3263d3f522b49ba858c2eced197e54b
-import logging
-=======
-import errno
->>>>>>> Made logging changes
 import os
 import subprocess
 import tempfile

@@ -30,6 +30,7 @@ A simplistic etcd orm.
 """
 
 import json
+import sys
 
 from tendrl.commons.etcdobj import fields
 from tendrl.commons.event import Event
