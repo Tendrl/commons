@@ -7,6 +7,7 @@ import etcd
 import gevent.event
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects.atoms import AtomExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,9 @@ class JobConsumer(object):
             try:
                 self.invoke_flow(raw_job['run'], raw_job)
             except FlowExecutionFailedError as e:
+                LOG.error(e)
+                raw_job['status'] = "failed"
+            except AtomExecutionFailedError as e:
                 LOG.error(e)
                 raw_job['status'] = "failed"
             else:
