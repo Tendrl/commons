@@ -8,6 +8,7 @@ import gevent.event
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.atoms import AtomExecutionFailedError
+from tendrl.commons.objects.job import Job
 
 LOG = logging.getLogger(__name__)
 
@@ -37,15 +38,17 @@ class JobConsumer(object):
 
             # TODO(team) Convert this raw write to done via
             # persister.update_job()
-            tendrl_ns.etcd_orm.client.write(job_key, json.dumps(raw_job))
+            Job(**raw_job).save()
             try:
                 self.invoke_flow(raw_job['run'], raw_job)
             except FlowExecutionFailedError as e:
                 LOG.error(e)
                 raw_job['status'] = "failed"
+                raw_job['errors'] = str(e)
             except AtomExecutionFailedError as e:
                 LOG.error(e)
                 raw_job['status'] = "failed"
+                raw_job['errors'] = str(e)
             else:
                 raw_job['status'] = "finished"
 
@@ -56,24 +59,37 @@ class JobConsumer(object):
     def _acceptor(self):
         while not self.job_consumer_thread._complete.is_set():
             gevent.sleep(2)
-
             # TODO(team) replace below raw write with a "EtcdJobQueue" class
             try:
                 jobs = tendrl_ns.etcd_orm.client.read("/queue")
             except etcd.EtcdKeyNotFound:
                 continue
-                
             for job in jobs.children:
-                executed = False
-                if job.value is None:
+                try:
+                    raw_job = {"job_id": None,
+                               "integration_id": None,
+                               "run": None,
+                               "status": None,
+                               "parameters": None,
+                               "type": None,
+                               "node_ids": None,
+                               "request_id": None,
+                               "errors": None,
+                               "parent": None}
+                    job_id = job.key.split("/")[-1]
+                    result = self.read_job(job.key)
+                    result['job_id'] = job_id
+                    for item in result:
+                        raw_job[item] = result[item]
+                except etcd.EtcdKeyNotFound:
                     continue
-                raw_job = json.loads(job.value.decode('utf-8'))
+                executed = False
                 try:
                     # If current node's id does not fall under job's node_ids,
                     # ignore the job and dont process
                     if "node_ids" in raw_job:
                         if tendrl_ns.node_context.node_id \
-                                not in raw_job['node_ids']:
+                                not in raw_job['node_ids'].split(", "):
                             continue
                     raw_job['parameters']['integration_id'] = raw_job['integration_id']
                     raw_job['parameters']['node_ids'] = raw_job['node_ids']
@@ -86,8 +102,7 @@ class JobConsumer(object):
                 if executed:
                     # TODO(team) replace below raw write with a
                     # "EtcdJobQueue" class
-                    tendrl_ns.etcd_orm.client.write(job.key, json.dumps(
-                        raw_job))
+                    Job(**raw_job).save()
                     break
 
     def run(self):
@@ -95,6 +110,17 @@ class JobConsumer(object):
 
     def stop(self):
         pass
+
+    def read_job(self, key):
+        result = {}
+        job = tendrl_ns.etcd_orm.client.read(key)
+        if hasattr(job, '_children'):
+            for item in job._children:
+                if "dir" in item:
+                    result[item["key"].split("/")[-1]] =  self.read_job(item["key"])
+                else:
+                    result[item["key"].split("/")[-1]] = item["value"]
+        return result
 
     def invoke_flow(self, flow_fqn, job):
         # flow_fqn eg:tendrl.node_agent.objects.abc.flows.temp_flows
