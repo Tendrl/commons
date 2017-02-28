@@ -30,5 +30,7 @@ script:
 env:
   - TOXENV=pep8
   - TOXENV=check_commit_msg
-  - TOXENV=cover
+  - TOXENV=py26-cover
+  - TOXENV=py27-cover
+  - TOXENV=py34-cover
   - TOXENV=docs
