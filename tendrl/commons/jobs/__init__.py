@@ -7,6 +7,8 @@ import gevent.event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import etcd_util
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
