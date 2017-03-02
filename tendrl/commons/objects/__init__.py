@@ -20,8 +20,7 @@ class BaseObject(object):
         return instance
 
     def load_definition(self):
-        self.definition = self.ns.get_obj_definition(self.ns.ns_name,
-                                                     self.__class__.__name__)
+        self.definition = self.ns.get_obj_definition(self.__class__.__name__)
 
     def save(self):
         cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
@@ -41,8 +40,7 @@ class BaseAtom(object):
         self.load_definition()
 
     def load_definition(self):
-        self.definition = self.ns.get_atom_definition(self.ns.ns_name,
-                                                      self.obj.__name__,
+        self.definition = self.ns.get_atom_definition(self.obj.__name__,
                                                       self.__class__.__name__)
 
     @abc.abstractmethod
