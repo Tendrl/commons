@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from tendrl.commons.etcdobj import fields
 
@@ -6,13 +7,13 @@ from tendrl.commons.etcdobj import fields
 def to_etcdobj(cls_etcd, obj):
     for attr, value in vars(obj).iteritems():
         if value is None:
-            continue
+            value = ""
         if attr.startswith("_"):
             continue
         if attr in ["definition"]:
             continue
         if type(value) == list:
-            value = "\n".join(value)
+            value = json.dumps(value)
         setattr(cls_etcd, attr, to_etcd_field(attr, value))
     return cls_etcd
 
