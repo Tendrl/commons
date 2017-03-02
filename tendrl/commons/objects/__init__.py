@@ -24,7 +24,7 @@ class BaseObject(object):
                                                      self.__class__.__name__)
 
     def save(self):
-        current_obj = self.load()
+        current_obj = self.load_etcd()
         for attr, val in self.__dict__.iteritems():
             if attr in ["definition"]:
                 continue
