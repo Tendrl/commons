@@ -23,7 +23,18 @@ class BaseObject(object):
         self.definition = self.ns.get_obj_definition(self.__class__.__name__)
 
     def save(self):
-        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
+        current_obj = self.load_etcd()
+        for attr, val in self.__dict__.iteritems():
+            if attr in ["definition"]:
+                continue
+            if val is None:
+                continue
+            if attr.startswith("_"):
+                continue
+                
+            setattr(current_obj, attr, val)
+            
+        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
         getattr(tendrl_ns.central_store_thread, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 
