@@ -26,8 +26,6 @@ class AuthorizeKey(object):
     def __init__(self, ssh_key, user="root"):
         self.attributes = {}
         self.attributes["user"] = user
-        # self.attributes["path"] = "/home/%s/.ssh/authorized_keys" % user
-        # self.attributes["manage_dir"] = "False"
         self.attributes["key"] = ssh_key
 
     def run(self):
@@ -69,6 +67,6 @@ class AuthorizeKey(object):
                     payload={"message": "Unable to copy authorize key .err:%s" % err}
                 )
             )
-            return False
+            return False, err
         else:
-            return True
+            return True, err
