@@ -2,7 +2,7 @@
 def read(key):
     result = {}
     job = tendrl_ns.etcd_orm.client.read(key)
-    if hasattr(job, 'children'):
+    if hasattr(job, 'leaves'):
         for item in job.leaves:
             if item.dir is True:
                 result[item.key.split("/")[-1]] =  read(item.key)
