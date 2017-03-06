@@ -5,6 +5,7 @@ import six
 
 from tendrl.commons.objects.atoms import AtomExecutionFailedError
 from tendrl.commons.flows import utils as flow_utils
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
@@ -59,6 +60,13 @@ class BaseFlow(object):
         # Execute the pre runs for the flow
         msg = "Processing pre-runs for flow: %s" % self.to_str
         LOG.info(msg)
+        # Check for mandatory parameters
+        if 'mandatory' in self.inputs:
+            for item in self.inputs['mandatory']:
+                if item not in self.parameters:
+                    raise FlowExecutionFailedError(
+                        "Mandatory parameter %s not provided" % item
+                    )
 
         if self.pre_run is not None:
             for atom_fqn in self.pre_run:
