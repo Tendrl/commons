@@ -9,6 +9,7 @@ import gevent.event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.atoms import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import etcd_util
 
 LOG = logging.getLogger(__name__)
 
@@ -77,10 +78,11 @@ class JobConsumer(object):
                                "errors": None,
                                "parent": None}
                     job_id = job.key.split("/")[-1]
-                    result = self.read_job(job.key)
+                    result = etcd_util.read(job.key)
                     result['job_id'] = job_id
                     for item in result:
-                        raw_job[item] = result[item]
+                        if item in raw_job:
+                            raw_job[item] = result[item]
                 except etcd.EtcdKeyNotFound:
                     continue
                 executed = False
@@ -89,7 +91,7 @@ class JobConsumer(object):
                     # ignore the job and dont process
                     if "node_ids" in raw_job:
                         if tendrl_ns.node_context.node_id \
-                                not in raw_job['node_ids'].split(", "):
+                                not in raw_job['node_ids']:
                             continue
                     raw_job['parameters']['integration_id'] = raw_job['integration_id']
                     raw_job['parameters']['node_ids'] = raw_job['node_ids']
@@ -110,17 +112,6 @@ class JobConsumer(object):
 
     def stop(self):
         pass
-
-    def read_job(self, key):
-        result = {}
-        job = tendrl_ns.etcd_orm.client.read(key)
-        if hasattr(job, '_children'):
-            for item in job._children:
-                if "dir" in item:
-                    result[item["key"].split("/")[-1]] =  self.read_job(item["key"])
-                else:
-                    result[item["key"].split("/")[-1]] = item["value"]
-        return result
 
     def invoke_flow(self, flow_fqn, job):
         # flow_fqn eg:tendrl.node_agent.objects.abc.flows.temp_flows
