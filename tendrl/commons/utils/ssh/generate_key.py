@@ -9,6 +9,21 @@ ANSIBLE_MODULE_PATH = "core/system/user.py"
 
 
 class GenerateKey(object):
+    """GenerateKey is used to generate ssh-key
+
+    for the user. If the user is not exist then
+    it will create user with ssh-key.
+
+    At the time of initialize it takes user and
+    group as parameters.
+    
+    input:
+        user (default is root)
+        group (optional)
+
+    output:
+        "some ssh-key", error/None
+    """
     def __init__(self, user="root", group=None):
         self.attributes = {}
         self.attributes["name"] = user

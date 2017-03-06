@@ -5,6 +5,20 @@ from tendrl.commons.utils import cmd_utils
 
 
 def find_status():
+    """This util is used to find the status of
+
+    sshd service. It will identify sshd status using
+    process id of sshd service.
+
+    input:
+        (No input required)
+
+    output:
+        {"name": "",
+         "port": "",
+         "status": ""}
+    """
+
     sshd = {"name": "",
             "port": "",
             "status": ""}
