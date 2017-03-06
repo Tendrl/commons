@@ -1,5 +1,7 @@
-from ansible_module_runner import AnsibleExecutableGenerationFailed
-from ansible_module_runner import AnsibleRunner
+from tendrl.commons.utils.ansible_module_runner import \
+    AnsibleExecutableGenerationFailed
+from tendrl.commons.utils.ansible_module_runner import \
+    AnsibleRunner
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 
@@ -10,14 +12,16 @@ class AuthorizeKey(object):
     def __init__(self, ssh_key, user="root"):
         self.attributes = {}
         self.attributes["user"] = user
-        self.attributes["state"] = "present"
+        # self.attributes["path"] = "/home/%s/.ssh/authorized_keys" % user
+        # self.attributes["manage_dir"] = "False"
         self.attributes["key"] = ssh_key
 
-    def run(self, exec_path):
+    def run(self):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                exec_path,
+                tendrl_ns.config.data[
+                    'tendrl_ansible_exec_file'],
                 **self.attributes
             )
             result, err = runner.run()
@@ -31,17 +35,21 @@ class AuthorizeKey(object):
         except AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
-                    priority="error",
+                    priority="warning",
                     publisher="commons",
                     payload={"message": "Copying authorize key failed %s. "
                              "Error: %s" % (
-                                 self.attributes["_raw_params"], str(e))}
+                                 self.attributes["_raw_params"], str(e.message))}
                 )
             )
-            return False, str(e.message)
-        # if key is copied success fully then result should be None
-        if result is not None:
-            # result not None so some err came
-            return False, result
+        if err is not "":
+            Event(
+                Message(
+                    priority="warning",
+                    publisher="commons",
+                    payload={"message": "Unable to copy authorize key .err:%s" % err}
+                )
+            )
+            return False
         else:
-            return True, None
+            return True

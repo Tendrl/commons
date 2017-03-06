@@ -1,12 +1,14 @@
-from ansible_module_runner import AnsibleExecutableGenerationFailed
-from ansible_module_runner import AnsibleRunner
+from tendrl.commons.utils.ansible_module_runner import \
+    AnsibleExecutableGenerationFailed
+from tendrl.commons.utils.ansible_module_runner import \
+    AnsibleRunner
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 
 ANSIBLE_MODULE_PATH = "core/system/user.py"
 
 
-class GenerateSSH(object):
+class GenerateKey(object):
     def __init__(self, user="root", group=None):
         self.attributes = {}
         self.attributes["name"] = user
@@ -15,33 +17,44 @@ class GenerateSSH(object):
         if group is not None:
             self.attributes["group"] = group
 
-    def run(self, exec_path):
+    def run(self):
+        result = None
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                exec_path,
+                tendrl_ns.config.data[
+                    'tendrl_ansible_exec_file'],
                 **self.attributes
             )
-            result, err = runner.run()
+            out, err = runner.run()
             Event(
                 Message(
                     priority="debug",
                     publisher="commons",
-                    payload={"message": "SSH-key Generation: %s" % result}
+                    payload={"message": "SSH-key Generation: %s" % out}
                 )
             )
         except AnsibleExecutableGenerationFailed as e:
+            err = str(e.message)
             Event(
                 Message(
-                    priority="error",
+                    priority="warning",
                     publisher="commons",
                     payload={"message": "SSH-Key Genertion failed %s. "
                              "Error: %s" % (
-                                 self.attributes["_raw_params"], str(e))}
+                                 self.attributes["_raw_params"], err)}
                 )
             )
-            return None, str(e.message)
-        if "ssh_public_key" in result:
-            return result["ssh_public_key"], None
-        else:
-            return None, result
+        if out is not None and "ssh_public_key" not in out:
+            err = out
+            Event(
+                Message(
+                    priority="warning",
+                    publisher="commons",
+                    payload={"message":"Unable to generate ssh-key .err: %s" % err}
+                )
+            )
+        elif "ssh_public_key" in out:
+            result = out["ssh_public_key"]
+
+        return result, err
