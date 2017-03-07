@@ -113,6 +113,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "ansible",
+        "psutil",
         "python-etcd",
         "python-dateutil",
         "PyYAML",
