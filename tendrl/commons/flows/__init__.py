@@ -4,7 +4,7 @@ import logging
 import six
 
 from tendrl.commons.objects import AtomExecutionFailedError
-
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
@@ -17,23 +17,19 @@ class BaseFlow(object):
         self.parameters = parameters
         self.request_id = request_id
         self.parameters.update({'request_id': self.request_id})
-
-        # Flows and atoms expected to APPEND their job statuses to appropriate
-        # log levels list below, logging everything to "all" is mandatory
-        self.log = {"all": [], "info": [], "error": [], "warn": [],
-                    "debug": []}
+        self.parameters.update({'flow_id': self._defs['uuid']})
 
     def load_definition(self):
         obj_name = self.obj.__name__
         cls_name = self.__class__.__name__
         if hasattr(self, "obj"):
-            self.definition = self._ns.get_obj_flow_definition(obj_name,
+            self._defs = self._ns.get_obj_flow_definition(obj_name,
                                                               cls_name)
             self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
                                                       obj_name,
                                                       cls_name)
         else:
-            self.definition = self._ns.get_flow_definition(cls_name)
+            self._defs = self._ns.get_flow_definition(cls_name)
             self.to_str = "%s.flows.%s" % (self._ns.ns_name, cls_name)
 
     @abc.abstractmethod
@@ -41,81 +37,77 @@ class BaseFlow(object):
         # Execute the pre runs for the flow
         msg = "Processing pre-runs for flow: %s" % self.to_str
         LOG.info(msg)
+        # Check for mandatory parameters
+        if 'mandatory' in self._defs['inputs']:
+            for item in self._defs['inputs']['mandatory']:
+                if item not in self.parameters:
+                    raise FlowExecutionFailedError(
+                        "Mandatory parameter %s not provided" % item
+                    )
 
-        if self.pre_run is not None:
-            for atom_fqn in self.pre_run:
+        if self._defs.get("pre_run") is not None:
+            for atom_fqn in self._defs.get("pre_run"):
                 msg = "Start pre-run : %s" % atom_fqn
                 LOG.info(msg)
-                self.log['all'].append(msg)
-                self.log['info'].append(msg)
 
                 ret_val = self._execute_atom(atom_fqn)
 
                 if not ret_val:
                     msg = "Failed pre-run: %s for flow: %s" % \
-                          (atom_fqn, self.help)
+                          (atom_fqn, self._defs['help'])
                     LOG.error(msg)
                     raise AtomExecutionFailedError(
                         "Error executing pre run function: %s for flow: %s" %
-                        (atom_fqn, self.help)
+                        (atom_fqn, self._defs['help'])
                     )
                 else:
                     msg = "Finished pre-run: %s for flow: %s" %\
-                          (atom_fqn, self.help)
+                          (atom_fqn, self._defs['help'])
                     LOG.info(msg)
-                    self.log['all'].append(msg)
-                    self.log['info'].append(msg)
 
         # Execute the atoms for the flow
-        msg = "Processing atoms for flow: %s" % self.help
+        msg = "Processing atoms for flow: %s" % self._defs['help']
         LOG.info(msg)
 
-        for atom_fqn in self.atoms:
+        for atom_fqn in self._defs['atoms']:
             msg = "Start atom : %s" % atom_fqn
             LOG.info(msg)
-            self.log['all'].append(msg)
-            self.log['info'].append(msg)
 
             ret_val = self._execute_atom(atom_fqn)
 
             if not ret_val:
                 msg = "Failed atom: %s on flow: %s" % \
-                      (atom_fqn, self.help)
+                      (atom_fqn, self._defs['help'])
                 LOG.error(msg)
-
                 raise AtomExecutionFailedError(
                     "Error executing atom: %s on flow: %s" %
-                    (atom_fqn, self.help)
+                    (atom_fqn, self._defs['help'])
                 )
             else:
                 msg = 'Finished atom %s for flow: %s' %\
-                      (atom_fqn, self.help)
+                      (atom_fqn, self._defs['help'])
                 LOG.info(msg)
-                self.log['all'].append(msg)
-                self.log['info'].append(msg)
 
         # Execute the post runs for the flow
-        msg = "Processing post-runs for flow: %s" % self.help
+        msg = "Processing post-runs for flow: %s" % self._defs['help']
         LOG.info(msg)
-        if self.post_run is not None:
-            for atom_fqn in self.post_run:
+        if self._defs.get("post_run") is not None:
+            for atom_fqn in self._defs.get("post_run"):
                 msg = "Start post-run : %s" % atom_fqn
                 LOG.info(msg)
-                self.log['all'].append(msg)
-                self.log['info'].append(msg)
 
                 ret_val = self._execute_atom(atom_fqn)
 
                 if not ret_val:
                     msg = "Failed post-run: %s for flow: %s" % \
-                          (atom_fqn, self.help)
+                          (atom_fqn, self._defs['help'])
                     LOG.error(msg)
                     raise AtomExecutionFailedError(
                         "Error executing post run function: %s" % atom_fqn
                     )
                 else:
                     msg = "Finished post-run: %s for flow: %s" %\
-                          (atom_fqn, self.help)
+                          (atom_fqn, self._defs['help'])
                     LOG.info(msg)
 
     def _execute_atom(self, atom_fqdn):

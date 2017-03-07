@@ -1,7 +1,6 @@
 include LICENSE
 include AUTHORS
 include ChangeLog
-include requirements.txt
 exclude .gitignore
 exclude .gitreview
 graft docs
