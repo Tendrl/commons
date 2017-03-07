@@ -14,13 +14,14 @@ from tendrl.commons import log
 from tendrl.commons import objects
 from tendrl.commons.objects import atoms
 
+setattr(__builtin__, "tendrl_ns",
+        maps.NamedDict(objects=maps.NamedDict(),
+                       flows=maps.NamedDict()))
+
 
 class TendrlNS(object):
     def __init__(self, ns_name="root", ns_src="tendrl.commons"):
         super(TendrlNS, self).__init__()
-        if not hasattr(__builtin__, "tendrl_ns"):
-            setattr(__builtin__, "tendrl_ns", None)
-
         self.ns_name = ns_name
         self.ns_src = ns_src
 
@@ -61,14 +62,15 @@ class TendrlNS(object):
             tendrl_ns.tendrl_context = self.current_ns.tendrl_context
 
     def _create_ns(self):
-        ns_map = maps.NamedDict(objects=maps.NamedDict(),
-                                flows=maps.NamedDict(), ns=self)
-
         if self.ns_name == "root":
-            setattr(__builtin__, "tendrl_ns", ns_map)
+            tendrl_ns.ns = self
             return
 
+        ns_map = maps.NamedDict(objects=maps.NamedDict(),
+                                flows=maps.NamedDict(),
+                                ns=self)
         self.ns_str = self.ns_name.split(".")[-1]
+
         if 'integrations' in self.ns_name:
             tendrl_ns.integrations = maps.NamedDict({self.ns_str: ns_map})
         else:
@@ -133,10 +135,10 @@ class TendrlNS(object):
     def get_obj_definition(self, obj_name):
         raw_ns = "namespace.%s" % self.ns_name
         if hasattr(tendrl_ns, "compiled_definitions"):
-            raw_obj = tendrl_ns.compiled_definitions.get_parsed_defs[raw_ns][
+            raw_obj = tendrl_ns.compiled_definitions.get_parsed_defs()[raw_ns][
                 'objects'][obj_name]
         else:
-            raw_obj = self.current_ns.definitions.get_parsed_defs[raw_ns][
+            raw_obj = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'objects'][obj_name]
 
         return maps.NamedDict(attrs=raw_obj['attrs'],
@@ -173,10 +175,11 @@ class TendrlNS(object):
         raw_ns = "namespace.%s" % self.ns_name
 
         if hasattr(tendrl_ns, "compiled_definitions"):
-            raw_flow = tendrl_ns.compiled_definitions.get_parsed_defs[raw_ns][
+            raw_flow = tendrl_ns.compiled_definitions.get_parsed_defs()[
+                raw_ns][
                 'flows'][flow_name]
         else:
-            raw_flow = self.current_ns.definitions.get_parsed_defs[raw_ns][
+            raw_flow = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'flows'][flow_name]
         return maps.NamedDict(atoms=raw_flow['atoms'],
                               help=raw_flow['help'],
