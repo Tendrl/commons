@@ -25,3 +25,6 @@ class CentralStore(gevent.greenlet.Greenlet):
 class EtcdCentralStore(CentralStore):
     def __init__(self):
         super(EtcdCentralStore, self).__init__()
+
+    def save_job(self, job):
+        tendrl_ns.etcd_orm.save(job)

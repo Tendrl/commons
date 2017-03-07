@@ -7,6 +7,8 @@ import etcd
 import gevent.event
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import etcd_util
 
 
 LOG = logging.getLogger(__name__)
@@ -22,58 +24,43 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
         while not self._complete.is_set():
             try:
                 gevent.sleep(2)
-
-                # TODO(team) replace below raw write with a "EtcdJobQueue"
-                # class
-                # Look for job in namespace queue
                 try:
                     jobs = NS.etcd_orm.client.read(
                         "/queue")
                 except etcd.EtcdKeyNotFound:
                     continue
 
-                for job in jobs.children:
+                for job in jobs.leaves:
                     if job.value is None:
                         continue
 
-                    raw_job = json.loads(job.value.decode('utf-8'))
-                    if raw_job["type"] == NS.type and \
+                    raw_job = {"job_id": None,
+                               "status": None,
+                               "payload": None,
+                               "errors": None
+                               }
+
+                    raw_job["payload"] = json.loads(raw_job["payload"].decode('utf-8'))
+                    if raw_job['payload']["type"] == NS.type and \
                             raw_job['status'] == "new":
 
                         # TODO(ndarshan) replace this check with Tag based
                         # routing
-                        if "node_ids" in raw_job:
+                        if "node_ids" in raw_job['payload']:
                             if NS.node_context.node_id not in \
-                                    raw_job['node_ids']:
+                                    raw_job['payload']['node_ids']:
                                 continue
                         raw_job['status'] = "processing"
-                        # Generate a request ID for tracking this job
-                        # further by tendrl-api
-                        req_id = str(uuid.uuid4())
-                        if NS.type == "node" or \
-                                NS.type == "monitoring":
-                            raw_job['request_id'] = "nodes/%s/_jobs/%s_%s" % (
-                                NS.node_context.node_id, raw_job['run'],
-                                req_id)
-                        else:
-                            raw_job[
-                                'request_id'] = "clusters/%s/_jobs/%s_%s" % (
-                                NS.tendrl_context.integration_id,
-                                raw_job['run'],
-                                req_id)
+                        Job(job_id=raw_job['job_id'],
+                            status=raw_job['status'],
+                            payload=json.dumps(raw_job['payload']),
+                            errors=raw_job['errors']).save()
 
-                        # TODO(team) Convert this raw write to done via
-                        # persister.update_job()
-                        NS.etcd_orm.client.write(job.key,
-                                                        json.dumps(raw_job))
-
-                        raw_job['parameters']['integration_id'] = raw_job[
-                            'integration_id']
-                        raw_job['parameters']['node_ids'] = raw_job[
-                            'node_ids']
+                        raw_job['parameters']['integration_id'] = raw_job['payload']['integration_id']
+                        raw_job['parameters']['node_ids'] = raw_job['payload']['node_ids']
 
                         current_ns, flow_name, obj_name = \
-                            self._extract_fqdn(raw_job['run'])
+                            self._extract_fqdn(raw_job['payload']['run'])
 
                         if obj_name:
                             runnable_flow = current_ns.ns.get_obj_flow(
@@ -81,23 +68,21 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         else:
                             runnable_flow = current_ns.ns.get_flow(flow_name)
                         try:
-                            runnable_flow(parameters=raw_job['parameters'],
-                                          request_id=raw_job[
-                                              'request_id']).run()
+                            runnable_flow(parameters=raw_job['payload']['parameters'],
+                                          job_id=raw_job['job_id']).run()
                             raw_job['status'] = "finished"
                             # TODO(team) replace below raw write with a
                             # "EtcdJobQueue" class
-                            NS.etcd_orm.client.write(job.key,
-                                                            json.dumps(
-                                                                raw_job))
-
+                            Job(job_id=raw_job['job_id'],
+                                status=raw_job['status'],
+                                payload=json.dumps(raw_job['payload']),
+                                errors=raw_job['errors']).save()
                         except FlowExecutionFailedError as e:
                             LOG.error(e)
                             raw_job['status'] = "failed"
 
                             NS.etcd_orm.client.write(
                                 job.key, json.dumps(raw_job))
-
                         break
             except Exception:
                 LOG.error(traceback.format_exc())

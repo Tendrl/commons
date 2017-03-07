@@ -1,5 +1,5 @@
 Name: tendrl-commons
-Version: 1.2
+Version: 1.2.1
 Release: 2%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
@@ -16,7 +16,7 @@ BuildRequires: systemd
 BuildRequires: python-yaml
 
 Requires: ansible >= 2.2
-Requires: namespaces
+Requires: maps
 Requires: python-dateutil
 Requires: python-dns
 Requires: python-etcd
@@ -25,6 +25,8 @@ Requires: python-urllib3
 Requires: python-six
 Requires: python-docutils
 Requires: python-yaml
+Requires: pytz
+Requires: python-psutil
 
 %description
 Common lib for Tendrl sds integrations and node-agent

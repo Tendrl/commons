@@ -3,6 +3,8 @@ import abc
 import etcd
 import six
 
+import etcd
+
 from tendrl.commons.central_store import utils as cs_utils
 
 
