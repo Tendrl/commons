@@ -26,7 +26,7 @@ class Memory(objects.BaseObject):
         '''
 
         cmd = cmd_utils.Command("cat /proc/meminfo")
-        out, err, rc = cmd.run(tendrl_ns.config.data[
+        out, err, rc = cmd.run(NS.config.data[
                                'tendrl_ansible_exec_file'])
         out = str(out)
 
@@ -53,5 +53,5 @@ class _MemoryEtcd(etcdobj.EtcdObj):
     _tendrl_cls = Memory
 
     def render(self):
-        self.__name__ = self.__name__ % tendrl_ns.node_context.node_id
+        self.__name__ = self.__name__ % NS.node_context.node_id
         return super(_MemoryEtcd, self).render()

@@ -20,5 +20,5 @@ class _DetectedClusterEtcd(etcdobj.EtcdObj):
     _tendrl_cls = DetectedCluster
 
     def render(self):
-        self.__name__ = self.__name__ % tendrl_ns.node_context.node_id
+        self.__name__ = self.__name__ % NS.node_context.node_id
         return super(_DetectedClusterEtcd, self).render()

@@ -27,7 +27,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 # class
                 # Look for job in namespace queue
                 try:
-                    jobs = tendrl_ns.etcd_orm.client.read(
+                    jobs = NS.etcd_orm.client.read(
                         "/queue")
                 except etcd.EtcdKeyNotFound:
                     continue
@@ -37,34 +37,34 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         continue
 
                     raw_job = json.loads(job.value.decode('utf-8'))
-                    if raw_job["type"] == tendrl_ns.type and \
+                    if raw_job["type"] == NS.type and \
                             raw_job['status'] == "new":
 
                         # TODO(ndarshan) replace this check with Tag based
                         # routing
                         if "node_ids" in raw_job:
-                            if tendrl_ns.node_context.node_id not in \
+                            if NS.node_context.node_id not in \
                                     raw_job['node_ids']:
                                 continue
                         raw_job['status'] = "processing"
                         # Generate a request ID for tracking this job
                         # further by tendrl-api
                         req_id = str(uuid.uuid4())
-                        if tendrl_ns.type == "node" or \
-                                tendrl_ns.type == "monitoring":
+                        if NS.type == "node" or \
+                                NS.type == "monitoring":
                             raw_job['request_id'] = "nodes/%s/_jobs/%s_%s" % (
-                                tendrl_ns.node_context.node_id, raw_job['run'],
+                                NS.node_context.node_id, raw_job['run'],
                                 req_id)
                         else:
                             raw_job[
                                 'request_id'] = "clusters/%s/_jobs/%s_%s" % (
-                                tendrl_ns.tendrl_context.integration_id,
+                                NS.tendrl_context.integration_id,
                                 raw_job['run'],
                                 req_id)
 
                         # TODO(team) Convert this raw write to done via
                         # persister.update_job()
-                        tendrl_ns.etcd_orm.client.write(job.key,
+                        NS.etcd_orm.client.write(job.key,
                                                         json.dumps(raw_job))
 
                         raw_job['parameters']['integration_id'] = raw_job[
@@ -87,7 +87,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             raw_job['status'] = "finished"
                             # TODO(team) replace below raw write with a
                             # "EtcdJobQueue" class
-                            tendrl_ns.etcd_orm.client.write(job.key,
+                            NS.etcd_orm.client.write(job.key,
                                                             json.dumps(
                                                                 raw_job))
 
@@ -95,7 +95,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             LOG.error(e)
                             raw_job['status'] = "failed"
 
-                            tendrl_ns.etcd_orm.client.write(
+                            NS.etcd_orm.client.write(
                                 job.key, json.dumps(raw_job))
 
                         break
@@ -117,10 +117,10 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             pass
 
         if "tendrl.flows" in flow_fqdn or "tendrl.objects" in flow_fqdn:
-            return tendrl_ns, flow_name, obj_name
+            return NS, flow_name, obj_name
 
         ns_str = ns.split(".")[-1]
         if "integrations" in ns:
-            return getattr(tendrl_ns.integrations, ns_str), flow_name, obj_name
+            return getattr(NS.integrations, ns_str), flow_name, obj_name
         else:
-            return getattr(tendrl_ns, ns_str), flow_name, obj_name
+            return getattr(NS, ns_str), flow_name, obj_name

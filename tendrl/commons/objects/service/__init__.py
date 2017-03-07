@@ -19,7 +19,7 @@ class Service(objects.BaseObject):
     def get_service_info(self, service_name):
         service = service_status.ServiceStatus(
             service_name,
-            tendrl_ns.config.data['tendrl_ansible_exec_file']
+            NS.config.data['tendrl_ansible_exec_file']
         )
         return {"exists": service.exists(), "running": service.status()}
 
@@ -33,7 +33,7 @@ class _ServiceEtcd(etcdobj.EtcdObj):
 
     def render(self):
         self.__name__ = self.__name__ % (
-            tendrl_ns.node_context.node_id,
+            NS.node_context.node_id,
             self.service.strip("@*")
         )
         return super(_ServiceEtcd, self).render()

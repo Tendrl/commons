@@ -12,16 +12,15 @@ from tendrl.commons import etcdobj
 from tendrl.commons import flows
 from tendrl.commons import log
 from tendrl.commons import objects
-from tendrl.commons.objects import atoms
-
-setattr(__builtin__, "tendrl_ns",
-        maps.NamedDict(objects=maps.NamedDict(),
-                       flows=maps.NamedDict()))
+from tendrl.commons.objects import BaseAtom
 
 
 class TendrlNS(object):
-    def __init__(self, ns_name="root", ns_src="tendrl.commons"):
+    def __init__(self, ns_name="tendrl", ns_src="tendrl.commons"):
         super(TendrlNS, self).__init__()
+        if not hasattr(__builtin__, "NS"):
+            setattr(__builtin__, "NS", maps.NamedDict())
+
         self.ns_name = ns_name
         self.ns_src = ns_src
 
@@ -40,57 +39,53 @@ class TendrlNS(object):
         # Config, if the namespace has implemented its own Config object
         if "Config" in self.current_ns.objects:
             self.current_ns.config = self.current_ns.objects.Config()
-            tendrl_ns.config = self.current_ns.config
+            NS.config = self.current_ns.config
 
             # etcd_orm
             etcd_kwargs = {'port': self.current_ns.config.data['etcd_port'],
                            'host': self.current_ns.config.data[
                                "etcd_connection"]}
-            tendrl_ns.etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
+            NS.etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
             log.setup_logging(self.current_ns.config.data['log_cfg_path'])
 
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:
             self.current_ns.node_context = \
                 self.current_ns.objects.NodeContext()
-            tendrl_ns.node_context = self.current_ns.node_context
+            NS.node_context = self.current_ns.node_context
 
         # TendrlContext, if the namespace has implemented its own
         if "TendrlContext" in self.current_ns.objects:
             self.current_ns.tendrl_context = \
                 self.current_ns.objects.TendrlContext()
-            tendrl_ns.tendrl_context = self.current_ns.tendrl_context
+            NS.tendrl_context = self.current_ns.tendrl_context
 
     def _create_ns(self):
-        if self.ns_name == "root":
-            tendrl_ns.ns = self
-            return
-
         ns_map = maps.NamedDict(objects=maps.NamedDict(),
                                 flows=maps.NamedDict(),
                                 ns=self)
         self.ns_str = self.ns_name.split(".")[-1]
 
         if 'integrations' in self.ns_name:
-            tendrl_ns.integrations = maps.NamedDict({self.ns_str: ns_map})
+            if not hasattr(NS, "integrations"):
+                setattr(NS, "integrations",
+                        maps.NamedDict())
+            setattr(NS.integrations, self.ns_str, ns_map)
         else:
             # Create the component namespace
-            setattr(tendrl_ns, self.ns_str, ns_map)
+            setattr(NS, self.ns_str, ns_map)
 
     def _get_ns(self):
-        if self.ns_name == "root":
-            return tendrl_ns
-
         # eg: input : "tendrl.node_agent", return: "node_agent"
         if "integrations" in self.ns_name:
-            return getattr(tendrl_ns.integrations, self.ns_str)
+            return getattr(NS.integrations, self.ns_str)
         else:
-            return getattr(tendrl_ns, self.ns_str)
+            return getattr(NS, self.ns_str)
 
     def _add_object(self, name, obj_class):
         # obj is the actual instance of that Tendrl object
         # name of object as defined in Tendrl definitions
-        obj_class.ns = self
+        obj_class._ns = self
         self.current_ns.objects[name] = obj_class
 
         # This is to link atoms and flows (insdie obj) to the obj ns
@@ -134,8 +129,8 @@ class TendrlNS(object):
 
     def get_obj_definition(self, obj_name):
         raw_ns = "namespace.%s" % self.ns_name
-        if hasattr(tendrl_ns, "compiled_definitions"):
-            raw_obj = tendrl_ns.compiled_definitions.get_parsed_defs()[raw_ns][
+        if hasattr(NS, "compiled_definitions"):
+            raw_obj = NS.compiled_definitions.get_parsed_defs()[raw_ns][
                 'objects'][obj_name]
         else:
             raw_obj = self.current_ns.definitions.get_parsed_defs()[raw_ns][
@@ -174,8 +169,8 @@ class TendrlNS(object):
     def get_flow_definition(self, flow_name):
         raw_ns = "namespace.%s" % self.ns_name
 
-        if hasattr(tendrl_ns, "compiled_definitions"):
-            raw_flow = tendrl_ns.compiled_definitions.get_parsed_defs()[
+        if hasattr(NS, "compiled_definitions"):
+            raw_flow = NS.compiled_definitions.get_parsed_defs()[
                 raw_ns][
                 'flows'][flow_name]
         else:
@@ -192,7 +187,7 @@ class TendrlNS(object):
 
     def _register_subclasses_to_ns(self):
         # registers all subclasses of BaseObject, BaseFlow, BaseAtom to
-        # tendrl_ns
+        # NS
         ns_root = importlib.import_module(self.ns_src).__path__[0]
 
         # register objects and atoms, flows inside the objects
@@ -217,7 +212,7 @@ class TendrlNS(object):
 
                         for atom_cls in inspect.getmembers(atom,
                                                            inspect.isclass):
-                            if issubclass(atom_cls[1], atoms.BaseAtom):
+                            if issubclass(atom_cls[1], BaseAtom):
                                 self._add_atom(obj_name,
                                                atom_cls[1].__name__,
                                                atom_cls[1])

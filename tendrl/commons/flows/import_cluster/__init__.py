@@ -15,13 +15,13 @@ class ImportCluster(flows.BaseFlow):
         self.post_run = []
 
         integration_id = self.parameters['TendrlContext.integration_id']
-        tendrl_ns.tendrl_context.integration_id = integration_id
-        tendrl_ns.tendrl_context.save()
+        NS.tendrl_context.integration_id = integration_id
+        NS.tendrl_context.save()
         node_list = self.parameters['Node[]']
         if len(node_list) > 1:
             # This is the master node for this flow
             for node in node_list:
-                if tendrl_ns.node_context.node_id != node:
+                if NS.node_context.node_id != node:
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
                 # create same flow for each node in node list except $this
@@ -34,12 +34,12 @@ class ImportCluster(flows.BaseFlow):
                            "type": "node"
                            }
 
-                    tendrl_ns.etcd_orm.client.write("/queue/%s" % uuid.uuid4(),
+                    NS.etcd_orm.client.write("/queue/%s" % uuid.uuid4(),
                                                json.dumps(job))
 
 
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
-            import_ceph(tendrl_ns.tendrl_context.integration_id)
+            import_ceph(NS.tendrl_context.integration_id)
         else:
-            import_gluster(tendrl_ns.tendrl_context.integration_id)
+            import_gluster(NS.tendrl_context.integration_id)

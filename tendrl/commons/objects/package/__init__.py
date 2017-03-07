@@ -23,7 +23,7 @@ class _PackageEtcd(EtcdObj):
 
     def render(self):
         self.__name__ = self.__name__ % (
-            tendrl_ns.node_context.node_id,
+            NS.node_context.node_id,
             self.name
         )
         return super(_PackageEtcd, self).render()

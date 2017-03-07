@@ -25,7 +25,7 @@ class Install(objects.BaseObject):
         try:
             runner = ansible_module_runner.AnsibleRunner(
                 ansible_module_path,
-                tendrl_ns.config.data['tendrl_ansible_exec_file'],
+                NS.config.data['tendrl_ansible_exec_file'],
                 **attributes
             )
             result, err = runner.run()

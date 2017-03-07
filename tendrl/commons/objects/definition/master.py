@@ -30,8 +30,8 @@ namespace.tendrl:
     Definition:
         enabled: True
         help: "Definition"
-        value: _tendrl/definitions/data
-        list: _tendrl/definitions/data
+        value: _NS/tendrl/definitions/data
+        list: _NS/tendrl/definitions/data
         attrs:
             master:
                 help: master definitions
@@ -39,8 +39,8 @@ namespace.tendrl:
     Config:
         enabled: True
         help: "Config"
-        value: _tendrl/config/data
-        list: _tendrl/config/
+        value: _NS/tendrl/config/data
+        list: _NS/tendrl/config/
         attrs:
             data:
                 help: config

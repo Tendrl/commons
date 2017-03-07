@@ -20,6 +20,6 @@ class _FileEtcd(EtcdObj):
 
     def render(self):
         self.__name__ = self.__name__ % (
-            tendrl_ns.node_context.node_id
+            NS.node_context.node_id
         )
         return super(_FileEtcd, self).render()
