@@ -1,6 +1,8 @@
 import abc
 import six
 
+import etcd
+
 from tendrl.commons.central_store import utils as cs_utils
 
 @six.add_metaclass(abc.ABCMeta)
@@ -39,19 +41,23 @@ class BaseObject(object):
         return instance
 
     def save(self):
-        current_obj = self.load()
-        for attr, val in self.__dict__.iteritems():
-            if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms",
-                        "flows", "value", "list"]:
-                continue
-            if val is None:
-                continue
-            if attr.startswith("_"):
-                continue
-                
-            setattr(current_obj, attr, val)
-            
-        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
+        try:
+            current_obj = self.load()
+            for attr, val in self.__dict__.iteritems():
+                if attr in ["attrs", "enabled", "obj_list", "obj_value", "atoms",
+                            "flows", "value", "list"]:
+                    continue
+                if val is None:
+                    continue
+                if attr.startswith("_"):
+                    continue
+
+                setattr(current_obj, attr, val)
+
+            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
+        except etcd.EtcdKeyNotFound as ex:
+            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
+
         getattr(tendrl_ns.central_store_thread, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 
