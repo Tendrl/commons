@@ -28,8 +28,7 @@ class NodeContext(objects.BaseObject):
 
     def _get_machine_id(self):
         cmd = cmd_utils.Command("cat /etc/machine-id")
-        out, err, rc = cmd.run(
-            tendrl_ns.config.data['tendrl_ansible_exec_file'])
+        out, err, rc = cmd.run(NS.config.data['tendrl_ansible_exec_file'])
         return str(out)
 
     def _create_node_id(self, node_id=None):
@@ -39,7 +38,7 @@ class NodeContext(objects.BaseObject):
         with open(local_node_context, 'wb+') as f:
             f.write(node_id)
             LOG.info("SET_LOCAL: "
-                     "tendrl_ns.objects.NodeContext.node_id==%s" %
+                     "NS.objects.NodeContext.node_id==%s" %
                      node_id)
         return node_id
 
@@ -52,7 +51,7 @@ class NodeContext(objects.BaseObject):
                     node_id = f.read()
                     if node_id:
                         LOG.info("GET_LOCAL: "
-                                 "tendrl_ns.objects.NodeContext"
+                                 "NS.objects.NodeContext"
                                  ".node_id==%s" % node_id)
                         return node_id
         except AttributeError:
@@ -67,5 +66,5 @@ class _NodeContextEtcd(EtcdObj):
     _tendrl_cls = NodeContext
 
     def render(self):
-        self.__name__ = self.__name__ % tendrl_ns.node_context.node_id
+        self.__name__ = self.__name__ % NS.node_context.node_id
         return super(_NodeContextEtcd, self).render()

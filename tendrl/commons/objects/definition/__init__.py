@@ -12,7 +12,7 @@ class Definition(objects.BaseObject):
     def __init__(self, *args, **kwargs):
         super(Definition, self).__init__(*args, **kwargs)
 
-        self.value = '_tendrl/definitions'
+        self.value = '_NS/tendrl/definitions'
         self.data = master.data
         self._parsed_defs = yaml.safe_load(self.data)
         self._etcd_cls = _DefinitionEtcd
@@ -29,5 +29,5 @@ class _DefinitionEtcd(etcdobj.EtcdObj):
     """A table of the Definitions, lazily updated
 
     """
-    __name__ = '_tendrl/definitions'
+    __name__ = '_NS/tendrl/definitions'
     _tendrl_cls = Definition

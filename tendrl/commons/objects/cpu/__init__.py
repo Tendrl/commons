@@ -41,7 +41,7 @@ class Cpu(objects.BaseObject):
 
         '''
         cmd = cmd_utils.Command("lscpu")
-        out, err, rc = cmd.run(tendrl_ns.config.data[
+        out, err, rc = cmd.run(NS.config.data[
                                'tendrl_ansible_exec_file'])
         out = str(out)
         if out:
@@ -75,5 +75,5 @@ class _CpuEtcd(etcdobj.EtcdObj):
     _tendrl_cls = Cpu
 
     def render(self):
-        self.__name__ = self.__name__ % tendrl_ns.node_context.node_id
+        self.__name__ = self.__name__ % NS.node_context.node_id
         return super(_CpuEtcd, self).render()

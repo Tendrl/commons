@@ -1,4 +1,6 @@
 import abc
+
+import etcd
 import six
 
 from tendrl.commons.central_store import utils as cs_utils
@@ -20,27 +22,31 @@ class BaseObject(object):
         return instance
 
     def load_definition(self):
-        self.definition = self.ns.get_obj_definition(self.__class__.__name__)
+        self._defs = self._ns.get_obj_definition(self.__class__.__name__)
 
     def save(self):
-        current_obj = self.load_etcd()
-        for attr, val in self.__dict__.iteritems():
-            if attr in ["definition"]:
-                continue
-            if val is None:
-                continue
-            if attr.startswith("_"):
-                continue
-                
-            setattr(current_obj, attr, val)
-            
-        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
-        getattr(tendrl_ns.central_store_thread, "save_%s" %
+        try:
+            current_obj = self.load()
+            for attr, val in self.__dict__.iteritems():
+                if attr in ["defs"]:
+                    continue
+                if val is None:
+                    continue
+                if attr.startswith("_"):
+                    continue
+
+                setattr(current_obj, attr, val)
+
+            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
+        except etcd.EtcdKeyNotFound as ex:
+            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
+
+        getattr(NS.central_store_thread, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 
-    def load_etcd(self):
+    def load(self):
         cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
-        result = tendrl_ns.etcd_orm.read(cls_etcd())
+        result = NS.etcd_orm.read(cls_etcd())
         return result.to_tendrl_obj()
 
 
@@ -51,7 +57,7 @@ class BaseAtom(object):
         self.load_definition()
 
     def load_definition(self):
-        self.definition = self.ns.get_atom_definition(self.obj.__name__,
+        self._defs = self._ns.get_atom_definition(self.obj.__name__,
                                                       self.__class__.__name__)
 
     @abc.abstractmethod

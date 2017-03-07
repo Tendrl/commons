@@ -22,7 +22,7 @@ class Os(objects.BaseObject):
 
     def _getNodeOs(self):
         cmd = cmd_utils.Command("getenforce")
-        out, err, rc = cmd.run(tendrl_ns.config.data[
+        out, err, rc = cmd.run(NS.config.data[
                                'tendrl_ansible_exec_file'])
         se_out = str(out)
 
@@ -47,5 +47,5 @@ class _OsEtcd(etcdobj.EtcdObj):
     _tendrl_cls = Os
 
     def render(self):
-        self.__name__ = self.__name__ % tendrl_ns.node_context.node_id
+        self.__name__ = self.__name__ % NS.node_context.node_id
         return super(_OsEtcd, self).render()

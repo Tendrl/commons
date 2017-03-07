@@ -1,7 +1,7 @@
-from tendrl.commons.objects import atoms
+from tendrl.commons.objects import BaseAtom
 
 
-class Write(atoms.BaseAtom):
+class Write(BaseAtom):
 
     def run(self, parameters=None, *args, **kwargs):
         super(Write, self).run(*args, **kwargs)
