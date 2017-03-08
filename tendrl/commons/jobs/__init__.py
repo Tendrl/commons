@@ -32,16 +32,20 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     continue
 
                 for job in jobs.leaves:
-                    if job.value is None:
+                    try:
+                        raw_job = {"job_id": None,
+                                   "status": None,
+                                   "payload": None,
+                                   "errors": None
+                                   }
+                        result = etcd_util.read(job.key)
+                        for item in result:
+                            if item in raw_job:
+                                raw_job[item] = result[item]
+                        raw_job["payload"] = json.loads(raw_job["payload"].decode('utf-8'))
+                    except etcd.EtcdKeyNotFound:
                         continue
 
-                    raw_job = {"job_id": None,
-                               "status": None,
-                               "payload": None,
-                               "errors": None
-                               }
-
-                    raw_job["payload"] = json.loads(raw_job["payload"].decode('utf-8'))
                     if raw_job['payload']["type"] == NS.type and \
                             raw_job['status'] == "new":
 
@@ -84,9 +88,11 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         except FlowExecutionFailedError as e:
                             LOG.error(e)
                             raw_job['status'] = "failed"
-
-                            NS.etcd_orm.client.write(
-                                job.key, json.dumps(raw_job))
+                            raw_job['errors'] = str(e)
+                            Job(job_id=raw_job['job_id'],
+                                status=raw_job['status'],
+                                payload=json.dumps(raw_job['payload']),
+                                errors=raw_job['errors']).save()
                         break
             except Exception:
                 LOG.error(traceback.format_exc())
