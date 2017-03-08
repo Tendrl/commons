@@ -11,12 +11,12 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
-    def __init__(self, parameters=None, request_id=None):
+    def __init__(self, parameters=None, job_id=None):
 
         self.load_definition()
         self.parameters = parameters
-        self.request_id = request_id
-        self.parameters.update({'request_id': self.request_id})
+        self.job_id = job_id
+        self.parameters.update({'job_id': self.job_id})
         self.parameters.update({'flow_id': self._defs['uuid']})
 
     def load_definition(self):
