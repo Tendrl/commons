@@ -49,8 +49,12 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     if raw_job['payload']["type"] == NS.type and \
                             raw_job['status'] == "new":
 
-                        # TODO(ndarshan) replace this check with Tag based
-                        # routing
+                        # Job routing
+                        if "tags" in raw_job['payload']:
+                            if set(NS.node_context.tags).isdisjoint(raw_job[
+                                                                        'payload']['tags']):
+                                continue
+
                         if "node_ids" in raw_job['payload']:
                             if NS.node_context.node_id not in \
                                     raw_job['payload']['node_ids']:
