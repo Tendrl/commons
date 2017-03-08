@@ -22,8 +22,7 @@ class Os(objects.BaseObject):
 
     def _getNodeOs(self):
         cmd = cmd_utils.Command("getenforce")
-        out, err, rc = cmd.run(NS.config.data[
-                               'tendrl_ansible_exec_file'])
+        out, err, rc = cmd.run()
         se_out = str(out)
 
         os_out = platform.linux_distribution()

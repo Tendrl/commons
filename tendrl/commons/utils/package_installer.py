@@ -25,11 +25,10 @@ class Installer(object):
         if package_version:
             self.attributes["name"] = package_name + "-" + package_version
 
-    def install(self, exec_path):
+    def install(self):
         try:
             runner = AnsibleRunner(
                 self.ansible_module_path,
-                exec_path,
                 **self.attributes
             )
             result, err = runner.run()
