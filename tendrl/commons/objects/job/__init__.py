@@ -14,6 +14,9 @@ class Job(objects.BaseObject):
         self.errors = errors
         self._etcd_cls = _JobEtcd
 
+    def load_definition(self):
+        return {}
+
 
 class _JobEtcd(etcdobj.EtcdObj):
     """Job etcd object, lazily updated

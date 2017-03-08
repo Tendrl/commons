@@ -25,18 +25,18 @@ class ImportCluster(flows.BaseFlow):
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
                 # create same flow for each node in node list except $this
-                    job = {"integration_id": integration_id,
-                           "node_ids": [node],
-                           "run": "tendrl.commons.flows.ImportCluster",
-                           "status": "new",
-                           "parameters": new_params,
-                           "parent": self.parameters['request_id'],
-                           "type": "node"
-                           }
+                    payload = {"integration_id": integration_id,
+                               "node_ids": [node],
+                               "run": "tendrl.commons.flows.ImportCluster",
+                               "status": "new",
+                               "parameters": new_params,
+                               "parent": self.parameters['job_id'],
+                               "type": "node"
+                               }
 
-                    NS.etcd_orm.client.write("/queue/%s" % uuid.uuid4(),
-                                               json.dumps(job))
-
+                    Job(job_id=str(uuid.uuid4()),
+                        status="new",
+                        payload=json.dumps(payload)).save()
 
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
