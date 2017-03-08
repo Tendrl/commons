@@ -26,6 +26,7 @@ Requires: python-six
 Requires: python-docutils
 Requires: python-yaml
 Requires: pytz
+Requires: python-psutil
 
 %description
 Common lib for Tendrl sds integrations and node-agent
