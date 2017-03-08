@@ -26,8 +26,7 @@ class Memory(objects.BaseObject):
         '''
 
         cmd = cmd_utils.Command("cat /proc/meminfo")
-        out, err, rc = cmd.run(NS.config.data[
-                               'tendrl_ansible_exec_file'])
+        out, err, rc = cmd.run()
         out = str(out)
 
         if out:

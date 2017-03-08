@@ -17,10 +17,7 @@ class Service(objects.BaseObject):
         self._etcd_cls = _ServiceEtcd
 
     def get_service_info(self, service_name):
-        service = service_status.ServiceStatus(
-            service_name,
-            NS.config.data['tendrl_ansible_exec_file']
-        )
+        service = service_status.ServiceStatus(service_name)
         return {"exists": service.exists(), "running": service.status()}
 
 

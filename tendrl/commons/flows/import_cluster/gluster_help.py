@@ -23,7 +23,6 @@ def import_gluster(integration_id):
     try:
         runner = ansible_module_runner.AnsibleRunner(
             ansible_module_path,
-            NS.config.data['tendrl_ansible_exec_file'],
             **attributes
         )
         result, err = runner.run()
@@ -36,7 +35,6 @@ def import_gluster(integration_id):
 
     config_data = {"etcd_port": NS.config.data['etcd_port'],
                    "etcd_connection": NS.config.data['etcd_connection'],
-                   "tendrl_ansible_exec_file": "$HOME/.tendrl/gluster-integration/ansible_exec",
                    "log_cfg_path":"/etc/tendrl/gluster-integration/gluster-integration_logging"
                        ".yaml", "log_level": "DEBUG"}
     with open("/etc/tendrl/gluster-integration/gluster-integration"
