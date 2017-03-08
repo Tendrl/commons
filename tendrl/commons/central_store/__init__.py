@@ -27,4 +27,4 @@ class EtcdCentralStore(CentralStore):
         super(EtcdCentralStore, self).__init__()
 
     def save_job(self, job):
-        tendrl_ns.etcd_orm.save(job)
+        NS.etcd_orm.save(job)

@@ -10,7 +10,7 @@ class Event(object):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.socket_path = socket_path
         if self.socket_path is None:
-            self.socket_path = tendrl_ns.config.data['logging_socket_path']
+            self.socket_path = NS.config.data['logging_socket_path']
         self._write(message)
 
     def _write(self, message):

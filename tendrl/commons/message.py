@@ -47,7 +47,7 @@ class Message(object):
         self.publisher = publisher
         self.node_id = node_id
         if self.node_id is None:
-            self.node_id = tendrl_ns.node_context.node_id
+            self.node_id = NS.node_context.node_id
         self.request_id = request_id
         self.flow_id = flow_id
         self.parent_id = parent_id
