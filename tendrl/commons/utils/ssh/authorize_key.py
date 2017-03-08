@@ -37,7 +37,7 @@ class AuthorizeKey(object):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                tendrl_ns.config.data[
+                NS.config.data[
                     'tendrl_ansible_exec_file'],
                 **self.attributes
             )
