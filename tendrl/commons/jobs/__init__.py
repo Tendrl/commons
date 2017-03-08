@@ -18,6 +18,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
     EXCEPTION_BACKOFF = 5
 
     def __init__(self):
+        super(JobConsumerThread, self).__init__()
         self._complete = gevent.event.Event()
 
     def _run(self):
