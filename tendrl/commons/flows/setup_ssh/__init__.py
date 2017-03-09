@@ -23,7 +23,8 @@ class SetupSsh(flows.BaseFlow):
         os.system("chmod +x %s" % _temp_file.name)
         retval = os.system('/usr/bin/bash %s' % _temp_file.name)
         LOG.info("SSH setup result %s" % retval)
+        os.remove(_temp_file.name)
 
     def load_definition(self):
-        return {"help": "Setup SSH",
-                "uuid": "dc4c8775-1595-43c7-a6c6-517f0081598f"}
+        self._defs = {"help": "Setup SSH",
+                      "uuid": "dc4c8775-1595-43c7-a6c6-517f0081598f"}
