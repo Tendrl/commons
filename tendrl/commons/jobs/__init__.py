@@ -22,12 +22,12 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
     def _run(self):
+        LOG.info("%s running" % self.__class__.__name__)
         while not self._complete.is_set():
             try:
                 gevent.sleep(2)
                 try:
-                    jobs = NS.etcd_orm.client.read(
-                        "/queue")
+                    jobs = NS.etcd_orm.client.read("/queue")
                 except etcd.EtcdKeyNotFound:
                     continue
 
@@ -114,9 +114,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             ns, obj_name = ns.split(".objects.")
         except ValueError:
             pass
-
-        if "tendrl.flows" in flow_fqdn or "tendrl.objects" in flow_fqdn:
-            return NS, flow_name, obj_name
 
         ns_str = ns.split(".")[-1]
         if "integrations" in ns:
