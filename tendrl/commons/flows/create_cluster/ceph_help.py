@@ -9,7 +9,7 @@ def create_ceph(parameters):
     # Configure Mons
     created_mons = create_mons(parameters, mon_ips)
     # Configure osds
-    create_osds(parameters, created_mons, osd_ips)
+    create_osds(parameters, created_mons)
 
 
 def install_packages(parameters):
