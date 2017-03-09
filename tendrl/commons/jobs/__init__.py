@@ -50,16 +50,17 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             raw_job['status'] == "new":
 
                         # Job routing
-                        if "tags" in raw_job['payload']:
+                        if raw_job.get("payload", {}).get("tags", []):
                             NS.node_context = NS.node_context.load()
                             tags = json.loads(NS.node_context.tags)
                             if set(tags).isdisjoint(raw_job['payload']['tags']):
                                 continue
 
-                        if "node_ids" in raw_job['payload']:
+                        if raw_job.get("payload", {}).get("node_ids", []):
                             if NS.node_context.node_id not in \
                                     raw_job['payload']['node_ids']:
                                 continue
+
                         raw_job['status'] = "processing"
                         Job(job_id=raw_job['job_id'],
                             status=raw_job['status'],
