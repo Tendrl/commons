@@ -41,7 +41,13 @@ class ImportCluster(flows.BaseFlow):
 
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
-            import_ceph(NS.tendrl_context.integration_id)
+            node_context = NS.node_context.load()
+            is_mon = False
+            for tag in node_context.tags:
+                if "ceph-mon" in tag:
+                    is_mon = True
+            if is_mon:
+                import_ceph(NS.tendrl_context.integration_id)
         else:
             import_gluster(NS.tendrl_context.integration_id)
 
