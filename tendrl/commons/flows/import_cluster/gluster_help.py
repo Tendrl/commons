@@ -2,9 +2,9 @@
 
 import subprocess
 
-from tendrl.commons.utils import ansible_module_runner
-import yaml
+from ruamel import yaml
 
+from tendrl.commons.utils import ansible_module_runner
 
 def import_gluster(integration_id):
     attributes = {}

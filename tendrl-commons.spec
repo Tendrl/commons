@@ -24,7 +24,7 @@ Requires: systemd-python
 Requires: python-urllib3
 Requires: python-six
 Requires: python-docutils
-Requires: python-yaml
+Requires: python-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
 
