@@ -33,7 +33,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                 for job in jobs.leaves:
                     try:
-                        raw_job = {"job_id": None,
+                        raw_job = {"job_id": job.key.split('/')[-1],
                                    "status": None,
                                    "payload": None,
                                    "errors": None
