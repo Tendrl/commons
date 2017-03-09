@@ -49,3 +49,7 @@ class CreateCluster(flows.BaseFlow):
 
         # SSH setup jobs finished above, now install ceph
         ceph_help.create_ceph(self.parameters)
+
+    def load_definition(self):
+        return {"help": "Create Cluster",
+                "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"}
