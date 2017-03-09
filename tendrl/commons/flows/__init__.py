@@ -38,7 +38,7 @@ class BaseFlow(object):
         msg = "Processing pre-runs for flow: %s" % self.to_str
         LOG.info(msg)
         # Check for mandatory parameters
-        if 'mandatory' in self._defs['inputs']:
+        if 'mandatory' in self._defs.get('inputs', {}):
             for item in self._defs['inputs']['mandatory']:
                 if item not in self.parameters:
                     raise FlowExecutionFailedError(
@@ -69,7 +69,7 @@ class BaseFlow(object):
         msg = "Processing atoms for flow: %s" % self._defs['help']
         LOG.info(msg)
 
-        for atom_fqn in self._defs['atoms']:
+        for atom_fqn in self._defs.get("atoms"):
             msg = "Start atom : %s" % atom_fqn
             LOG.info(msg)
 

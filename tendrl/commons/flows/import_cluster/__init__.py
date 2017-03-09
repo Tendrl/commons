@@ -2,17 +2,18 @@
 
 import json
 import uuid
+
+import etcd
+import gevent
+from tendrl.commons.objects.job import Job
+
 from tendrl.commons import flows
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 
 
-
 class ImportCluster(flows.BaseFlow):
     def run(self):
-        self.pre_run = []
-        self.atoms = []
-        self.post_run = []
 
         integration_id = self.parameters['TendrlContext.integration_id']
         NS.tendrl_context.integration_id = integration_id
@@ -43,3 +44,16 @@ class ImportCluster(flows.BaseFlow):
             import_ceph(NS.tendrl_context.integration_id)
         else:
             import_gluster(NS.tendrl_context.integration_id)
+
+        # import cluster's run() should not return unless the new cluster entry
+        # is updated in etcd, as the job is marked as finished if this
+        # function is returned. This might lead to inconsistancy in the API
+        # functionality. The below loop waits for the cluster details
+        # to be updated in etcd.
+        while True:
+            gevent.sleep(2)
+            try:
+                NS.etcd_orm.client.read("/clusters/%s" % integration_id)
+                break
+            except etcd.EtcdKeyNotFound:
+                continue
