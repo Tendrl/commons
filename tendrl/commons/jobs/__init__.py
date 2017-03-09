@@ -62,6 +62,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 continue
 
                         raw_job['status'] = "processing"
+                        LOG.info("Processing Job %s" % raw_job['job_id'])
                         Job(job_id=raw_job['job_id'],
                             status=raw_job['status'],
                             payload=json.dumps(raw_job['payload']),
