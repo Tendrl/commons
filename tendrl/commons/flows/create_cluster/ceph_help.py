@@ -44,8 +44,9 @@ def create_mons(parameters, mon_ips):
     plugin = NS.provisioner.get_plugin()
     for mon_ip in mon_ips:
             task_id = plugin.configure_mon(mon_ip,
-                                           parameters["TendrlContext.integration_id"],
+                                           parameters['fsid'],
                                            parameters["name"],
+                                           mon_ip,
                                            parameters["cluster_network"],
                                            parameters["public_network"],
                                            created_mons
@@ -76,7 +77,7 @@ def create_osds(parameters, created_mons):
                 task_id = plugin.configure_osd(
                     config["provisioning_ip"],
                     devices,
-                    parameters["TendrlContext.integration_id"],
+                    parameters["fsid"],
                     parameters["name"],
                     config["journal_size"],
                     parameters["cluster_network"],
