@@ -55,5 +55,5 @@ class CreateCluster(flows.BaseFlow):
         ceph_help.create_ceph(self.parameters)
 
     def load_definition(self):
-        return {"help": "Create Cluster",
-                "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"}
+        self._defs = {"help": "Create Cluster",
+                      "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"}
