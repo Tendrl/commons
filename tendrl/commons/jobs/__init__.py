@@ -51,6 +51,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                         # Job routing
                         if "tags" in raw_job['payload']:
+                            NS.node_context = NS.node_context.load()
                             tags = json.loads(NS.node_context.tags)
                             if set(tags).isdisjoint(raw_job['payload']['tags']):
                                 continue
