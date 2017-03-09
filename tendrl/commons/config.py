@@ -1,7 +1,7 @@
 import logging
 import os
 
-import yaml
+from ruamel import yaml
 
 LOG = logging.getLogger(__name__)
 
