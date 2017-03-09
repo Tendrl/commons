@@ -110,6 +110,7 @@ class TendrlNS(object):
         return self.current_ns.objects[private_name]['flows'][flow_name]
 
     def _add_atom(self, obj_name, atom_name, atom_class):
+        atom_class._ns = self
         private_name = "_" + obj_name
         self.current_ns.objects[private_name]['atoms'][atom_name] = atom_class
         atom_class.obj = self._get_object(obj_name)
@@ -120,6 +121,7 @@ class TendrlNS(object):
         flow_class.obj = self._get_object(obj_name)
 
     def _add_flow(self, name, flow_class):
+        flow_class._ns = self
         # flow is the actual instance of that Tendrl flow
         # name of object as defined in Tendrl definitions
         self.current_ns.flows[name] = flow_class

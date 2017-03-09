@@ -20,9 +20,9 @@ class BaseFlow(object):
         self.parameters.update({'flow_id': self._defs['uuid']})
 
     def load_definition(self):
-        obj_name = self.obj.__name__
         cls_name = self.__class__.__name__
         if hasattr(self, "obj"):
+            obj_name = self.obj.__name__
             self._defs = self._ns.get_obj_flow_definition(obj_name,
                                                               cls_name)
             self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
