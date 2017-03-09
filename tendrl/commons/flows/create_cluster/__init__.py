@@ -3,11 +3,14 @@
 import json
 import uuid
 
+import logging
+
 from tendrl.commons.objects.job import Job
 
 from tendrl.commons import flows
 from tendrl.commons.flows.create_cluster import ceph_help
 
+LOG = logging.getLogger(__name__)
 
 class CreateCluster(flows.BaseFlow):
     def run(self):
@@ -24,6 +27,7 @@ class CreateCluster(flows.BaseFlow):
                     new_params['Node[]'] = [node]
                     new_params['ssh_setup_script'] = ssh_setup_script
                 # create same flow for each node in node list except $this
+                    LOG.info("Create SSH setup job for node %s" % node)
                     payload = {"integration_id": integration_id,
                                "node_ids": [node],
                                "run": "tendrl.commons.flows.SetupSsh",
