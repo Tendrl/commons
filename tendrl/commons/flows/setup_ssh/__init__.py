@@ -2,7 +2,11 @@
 import os
 import tempfile
 
+import logging
+
 from tendrl.commons import flows
+
+LOG = logging.getLogger(__name__)
 
 
 class SetupSsh(flows.BaseFlow):
@@ -16,11 +20,9 @@ class SetupSsh(flows.BaseFlow):
 
         _temp_file.write(ssh_setup_script)
         _temp_file.close()
-        ret_val = os.system('/usr/bin/bash %s' % _temp_file.name)
-        if ret_val == 0:
-            return True
-        else:
-            return False
+        os.system("chmod +x %s" % _temp_file.name)
+        retval = os.system('/usr/bin/bash %s' % _temp_file.name)
+        LOG.info("SSH setup result %s" % retval)
 
     def load_definition(self):
         return {"help": "Setup SSH",
