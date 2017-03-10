@@ -33,10 +33,12 @@ def import_ceph(integration_id):
                        ".yaml", 'w+') as f:
         f.write(logging_file)
 
-    config_data = {"etcd_port": NS.config.data['etcd_port'],
-                   "etcd_connection": NS.config.data['etcd_connection'],
+    config_data = {"etcd_port": int(NS.config.data['etcd_port']),
+                   "etcd_connection": str(NS.config.data['etcd_connection']),
                    "log_cfg_path":"/etc/tendrl/ceph-integration/ceph-integration_logging"
-                       ".yaml", "log_level": "DEBUG"}
+                       ".yaml", "log_level": "DEBUG",
+                       "logging_socket_path": "/var/run/tendrl/message.sock",
+                       "tags": "[\"ceph-mon\"]"}
     with open("/etc/tendrl/ceph-integration/ceph-integration"
               ".conf.yaml", 'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
