@@ -39,7 +39,6 @@ class Manager(object):
             self._sds_sync_thread.start()
         self._job_consumer_thread.start()
 
-
     def join(self):
         LOG.debug("%s joining" % self.__class__.__name__)
         if self._message_handler_thread is not None:

@@ -1,4 +1,4 @@
-NAME=namespaces
+NAME=maps
 VERSION=4.2.0
 RELEASE=2
 COMMIT := $(shell git rev-parse HEAD)
@@ -16,8 +16,8 @@ clean:
 	rm -rf $(NAME)-$(VERSION)-$(RELEASE).el7.src.rpm
 
 dist:
-	git clone https://github.com/pcattori/namespaces
-	mv namespaces $(NAME)-$(VERSION)
+	git clone https://github.com/pcattori/maps
+	mv maps $(NAME)-$(VERSION)
 	tar -zcvf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	rm -fr $(NAME)-$(VERSION)
 

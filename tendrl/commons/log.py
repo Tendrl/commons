@@ -1,7 +1,7 @@
 import logging.config
 import os
 
-import yaml
+from ruamel import yaml
 
 
 class LogInitFailedError(Exception):

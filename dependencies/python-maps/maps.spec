@@ -1,12 +1,11 @@
-Name: namespaces
+Name: maps
 Version: 4.2.0
 Release: 2%{?dist}
 BuildArch: noarch
-Summary: python namespaces
+Summary: python maps
 Source0: %{name}-%{version}.tar.gz
-Patch0: 0001-Fix-python-six-dependency-version-issue.patch
 License: MIT
-URL: https://github.com/pcattori/namespaces
+URL: https://github.com/pcattori/maps
 
 BuildRequires: python-urllib3
 BuildRequires: python2-devel
@@ -19,7 +18,6 @@ Python dictionaries with items also accessible via dot-notation
 
 %prep
 %setup
-%patch0 -p1
 
 # Remove bundled egg-info
 rm -rf %{name}.egg-info

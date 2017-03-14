@@ -1,8 +1,7 @@
-import errno
 import logging
 import os
 import subprocess
-import uuid
+import tempfile
 
 import ansible.executor.module_common as module_common
 from ansible import modules
@@ -18,8 +17,8 @@ except ImportError:
 class AnsibleExecutableGenerationFailed(Exception):
     def __init__(self, module_path=None, arguments=None, err=None):
         self.message = "Executabe could not be generated for module" \
-                       " %s , with arguments %s. Error: %s" % (
-                           str(module_path), str(arguments), str(err))
+                       " %s . Error: %s" % (
+                           str(module_path), str(err))
 
 
 class AnsibleRunner(object):
@@ -27,9 +26,7 @@ class AnsibleRunner(object):
 
     """
 
-    def __init__(self, module_path, exec_path, **kwargs):
-        exec_path = os.path.expandvars(exec_path)
-        self.executable_module_path = exec_path + str(uuid.uuid4())
+    def __init__(self, module_path, **kwargs):
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
             LOG.error("Module path: %s does not exist" % self.module_path)
@@ -56,37 +53,36 @@ class AnsibleRunner(object):
                       ": %s. Error: %s" % (self.module_path, str(e)))
             raise AnsibleExecutableGenerationFailed(
                 self.module_path,
-                self.executable_module_path,
                 str(e)
             )
-        if not os.path.exists(os.path.dirname(self.executable_module_path)):
-            try:
-                os.makedirs(os.path.dirname(self.executable_module_path))
-            except OSError as exc:
-                if exc.errno != errno.EEXIST:
-                    raise
-        with open(self.executable_module_path, 'w') as f:
-            f.write(module_data)
-        os.system("chmod +x %s" % self.executable_module_path)
-
-    def __destroy_executable_module(self):
-        os.remove(self.executable_module_path)
+        return module_data
 
     def run(self):
-        self.__generate_executable_module()
+        module_data = self.__generate_executable_module()
+        _temp_file = tempfile.NamedTemporaryFile(mode="w+",
+                                                 prefix="tendrl_ansible_",
+                                                 suffix="exec",
+                                                 dir="/tmp",
+                                                 delete=False)
 
-        cmd = subprocess.Popen(
-            self.executable_module_path,
+        _temp_file.write(module_data)
+        _temp_file.close()
+
+        try:
+            os.system("chmod +x %s" % _temp_file.name)
+            cmd = subprocess.Popen(
+            _temp_file.name,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        out, err = cmd.communicate()
-        try:
+            out, err = cmd.communicate()
             result = json.loads(out)
-        except ValueError:
-            result = out
 
-        self.__destroy_executable_module()
+        except (subprocess.CalledProcessError, ValueError) as ex:
+            result = repr(ex)
+            err = result
+        finally:
+            os.remove(_temp_file.name)
 
         return result, err
