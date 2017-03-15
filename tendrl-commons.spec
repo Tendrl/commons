@@ -26,6 +26,8 @@ Requires: python-docutils
 Requires: python-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
+Requires: python-gevent
+
 
 %description
 Common lib for Tendrl sds integrations and node-agent
