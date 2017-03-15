@@ -65,7 +65,7 @@ class ImportCluster(flows.BaseFlow):
                     # create same flow for each node in node list except $this
                     payload = {"integration_id": integration_id,
                                "node_ids": [node],
-                               "run": "tendrl.commons.flows.ImportCluster",
+                               "run": "tendrl.flows.ImportCluster",
                                "status": "new",
                                "parameters": new_params,
                                "parent": self.parameters['job_id'],
