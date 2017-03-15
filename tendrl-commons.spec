@@ -27,7 +27,6 @@ Requires: python-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
 Requires: python-gevent
-Requires: python-greenlet
 
 
 %description
