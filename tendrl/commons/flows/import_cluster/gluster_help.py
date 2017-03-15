@@ -1,5 +1,5 @@
 # flake8: noqa
-
+import json
 import subprocess
 
 from ruamel import yaml
@@ -9,7 +9,7 @@ from tendrl.commons.utils import ansible_module_runner
 def import_gluster(integration_id):
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
-        name = "git+https://github.com/Tendrl/gluster-integration.git@v1.2"
+        name = "git+https://github.com/Tendrl/gluster-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
@@ -38,7 +38,7 @@ def import_gluster(integration_id):
                    "log_cfg_path":"/etc/tendrl/gluster-integration/gluster-integration_logging"
                        ".yaml", "log_level": "DEBUG",
                        "logging_socket_path": "/var/run/tendrl/message.sock",
-                       "tags": "[\"glusterfs\"]"}
+                       "tags": json.dumps(["tendrl/integration/gluster"])}
     with open("/etc/tendrl/gluster-integration/gluster-integration"
               ".conf.yaml", 'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
