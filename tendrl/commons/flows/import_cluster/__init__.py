@@ -65,7 +65,7 @@ class ImportCluster(flows.BaseFlow):
                     # create same flow for each node in node list except $this
                     payload = {"integration_id": integration_id,
                                "node_ids": [node],
-                               "run": "tendrl.commons.flows.ImportCluster",
+                               "run": "tendrl.flows.ImportCluster",
                                "status": "new",
                                "parameters": new_params,
                                "parent": self.parameters['job_id'],
@@ -80,8 +80,8 @@ class ImportCluster(flows.BaseFlow):
         if "ceph" in sds_name.lower():
             node_context = NS.node_context.load()
             is_mon = False
-            for tag in node_context.tags:
-                if "ceph-mon" in tag:
+            for tag in json.loads(node_context.tags):
+                if "ceph/mon" in tag:
                     is_mon = True
             if is_mon:
                 import_ceph(NS.tendrl_context.integration_id)
