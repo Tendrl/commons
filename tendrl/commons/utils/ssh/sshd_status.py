@@ -23,8 +23,7 @@ def find_status():
             "port": "",
             "status": ""}
     cmd = cmd_utils.Command("systemctl show sshd.service")
-    out, err, rc = cmd.run(tendrl_ns.config.data[
-                           'tendrl_ansible_exec_file'])
+    out, err, rc = cmd.run()
     if not err:
         pid = _find_pid(out)
         if pid != 0:

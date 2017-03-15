@@ -1,5 +1,6 @@
+from ruamel import yaml
+
 from tendrl.commons.singleton import to_singleton
-import yaml
 
 alert_severity_map = {
     'INFO': 0,

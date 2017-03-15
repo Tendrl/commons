@@ -33,11 +33,10 @@ class Command(object):
             raise UnsupportedCommandException(command.split()[0])
         self.attributes = {"_raw_params": command}
 
-    def run(self, exec_path):
+    def run(self):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                exec_path,
                 **self.attributes
             )
             result, err = runner.run()

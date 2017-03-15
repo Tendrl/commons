@@ -3,30 +3,19 @@ from tendrl.commons import objects
 
 
 class Job(objects.BaseObject):
-    def __init__(self, job_id=None, integration_id=None,
-                 run=None, status=None, parameters=None,
-                 type=None, node_ids=None, request_id=None,
-                 parent=None, errors=None):
-        super(Job, self).__init__(
-            attrs=None,
-            enabled=None,
-            obj_list=None,
-            obj_value=None,
-            atoms=None,
-            flows=None
-        )
+    def __init__(self, job_id=None, payload=None,
+                 status=None, errors=None, *args,
+                 **kwargs):
+        super(Job, self).__init__(*args, **kwargs)
         self.value = 'queue/%s'
         self.job_id = job_id
-        self.integration_id = integration_id
-        self.run = run
         self.status = status
-        self.parameters = parameters
-        self.type = type
-        self.node_ids = node_ids
-        self.request_id = request_id
-        self.parent = parent
+        self.payload = payload
         self.errors = errors
         self._etcd_cls = _JobEtcd
+
+    def load_definition(self):
+        return {}
 
 
 class _JobEtcd(etcdobj.EtcdObj):

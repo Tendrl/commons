@@ -17,7 +17,6 @@ class CentralStore(gevent.greenlet.Greenlet):
 
         while not self._complete.is_set():
             gevent.sleep(0.1)
-            continue
 
     def stop(self):
         self._complete.set()
@@ -28,4 +27,4 @@ class EtcdCentralStore(CentralStore):
         super(EtcdCentralStore, self).__init__()
 
     def save_job(self, job):
-        tendrl_ns.etcd_orm.save(job)
+        NS.etcd_orm.save(job)

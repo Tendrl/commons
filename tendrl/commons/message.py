@@ -23,12 +23,12 @@ class Message(object):
     """At the time of message object intialization
 
     message_id, timestamp and caller are always None
-    because it assinged by Message class but request_id,
+    because it assinged by Message class but job_id,
     flwo_id, parent_id, cluster_id may come, when from_json
     function call message old message_id, time_stamp and
     caller is populated
     """
-    def __init__(self, priority, publisher, payload, request_id=None,
+    def __init__(self, priority, publisher, payload, job_id=None,
                  flow_id=None, parent_id=None, cluster_id=None,
                  message_id=None, timestamp=None, node_id=None,
                  caller=None, *args, **kwargs):
@@ -51,8 +51,8 @@ class Message(object):
         self.publisher = publisher
         self.node_id = node_id
         if self.node_id is None:
-            self.node_id = tendrl_ns.node_context.node_id
-        self.request_id = request_id
+            self.node_id = NS.node_context.node_id
+        self.job_id = job_id
         self.flow_id = flow_id
         self.parent_id = parent_id
         self.cluster_id = cluster_id
@@ -97,7 +97,7 @@ class Message(object):
             self.node_id is None or
                 "message" not in self.payload):
             return False
-        if self.request_id is not None:
+        if self.job_id is not None:
             if self.flow_id is None:
                 return False
 
