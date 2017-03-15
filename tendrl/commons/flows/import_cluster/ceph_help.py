@@ -9,7 +9,7 @@ from tendrl.commons.utils import ansible_module_runner
 def import_ceph(integration_id):
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
-        name = "git+https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
+        name = "https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
