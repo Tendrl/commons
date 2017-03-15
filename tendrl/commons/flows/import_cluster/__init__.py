@@ -1,5 +1,6 @@
 # flake8: noqa
 
+import etcd
 import json
 import uuid
 
@@ -8,6 +9,7 @@ import gevent
 from tendrl.commons.objects.job import Job
 
 from tendrl.commons import flows
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 
@@ -16,6 +18,41 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
 
         integration_id = self.parameters['TendrlContext.integration_id']
+
+        # Check if cluster with given id already exists in central store
+        try:
+            cluster = NS.etcd_orm.client.read(
+                'clusters/%s' % self.parameters['TendrlContext.integration_id']
+            )
+        except etcd.EtcdKeyNotFound:
+            # cluster doesnt exist, go ahead and import
+            pass
+        else:
+            raise FlowExecutionFailedError(
+                "Cluster with id %s already exists" % integration_id
+            )
+
+        # Check if nodes participate in some existing cluster
+        try:
+            clusters = NS.etcd_orm.client.read('clusters')
+        except etcd.EtcdKeyNotFound:
+            # no clusters imported yet, go ahead
+            pass
+        else:
+            try:
+                for entry in self.parameters["Node[]"]:
+                    integration_id = NS.etcd_orm.client.read(
+                        'nodes/%s/TendrlContext/integration_id' % entry
+                    )
+                    if integration_id.value != "":
+                        raise FlowExecutionFailedError(
+                            "Nodes already participate in existing cluster"
+                        )
+            except etcd.EtcdKeyNotFound:
+                raise FlowExecutionFailedError(
+                    "Error while checking pre-participation of nodes in any cluster"
+                )
+
         NS.tendrl_context.integration_id = integration_id
         NS.tendrl_context.save()
         node_list = self.parameters['Node[]']
@@ -25,7 +62,7 @@ class ImportCluster(flows.BaseFlow):
                 if NS.node_context.node_id != node:
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
-                # create same flow for each node in node list except $this
+                    # create same flow for each node in node list except $this
                     payload = {"integration_id": integration_id,
                                "node_ids": [node],
                                "run": "tendrl.commons.flows.ImportCluster",
