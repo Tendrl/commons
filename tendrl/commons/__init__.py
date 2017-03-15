@@ -116,6 +116,7 @@ class TendrlNS(object):
         atom_class.obj = self._get_object(obj_name)
 
     def _add_obj_flow(self, obj_name, flow_name, flow_class):
+        flow_class._ns = self
         private_name = "_" + obj_name
         self.current_ns.objects[private_name]['flows'][flow_name] = flow_class
         flow_class.obj = self._get_object(obj_name)
