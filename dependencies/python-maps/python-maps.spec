@@ -1,8 +1,8 @@
-Name: maps
+Name: python-maps
 Version: 4.2.0
 Release: 2%{?dist}
 BuildArch: noarch
-Summary: python maps
+Summary: Python's missing mappings
 Source0: %{name}-%{version}.tar.gz
 License: MIT
 URL: https://github.com/pcattori/maps

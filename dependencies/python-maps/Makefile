@@ -1,4 +1,4 @@
-NAME=maps
+NAME=python-maps
 VERSION=4.2.0
 RELEASE=2
 COMMIT := $(shell git rev-parse HEAD)
