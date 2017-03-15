@@ -1,5 +1,5 @@
 # flake8: noqa
-
+import json
 import subprocess
 
 from ruamel import yaml
@@ -9,7 +9,7 @@ from tendrl.commons.utils import ansible_module_runner
 def import_ceph(integration_id):
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
-        name = "git+https://github.com/Tendrl/ceph-integration.git@v1.2"
+        name = "git+https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
@@ -38,7 +38,7 @@ def import_ceph(integration_id):
                    "log_cfg_path":"/etc/tendrl/ceph-integration/ceph-integration_logging"
                        ".yaml", "log_level": "DEBUG",
                        "logging_socket_path": "/var/run/tendrl/message.sock",
-                       "tags": "[\"ceph-mon\"]"}
+                       "tags": json.dumps(["tendrl/integration/ceph"])}
     with open("/etc/tendrl/ceph-integration/ceph-integration"
               ".conf.yaml", 'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
