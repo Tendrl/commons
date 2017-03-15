@@ -20,7 +20,7 @@ def create_ceph(parameters):
     LOG.info("Created Ceph Cluster %s" % parameters['fsid'])
 
 def install_packages(parameters):
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     mon_ips = []
     osd_ips = []
     for node, config in parameters["node_configuration"].iteritems():
@@ -41,7 +41,7 @@ def install_packages(parameters):
 
 def create_mons(parameters, mon_ips):
     created_mons = []
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     for mon_ip in mon_ips:
             task_id = plugin.configure_mon(mon_ip,
                                            parameters['fsid'],
@@ -62,7 +62,7 @@ def create_mons(parameters, mon_ips):
 
 def create_osds(parameters, created_mons):
     failed = []
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     for node, config in parameters["node_configuration"].iteritems():
         if "osd" in config["role"].lower():
             if config["journal_colocation"]:
@@ -92,7 +92,7 @@ def create_osds(parameters, created_mons):
 def sync_task_status(task_id):
     status = False
     count = 0
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     resp = {}
     while count < 90:
         gevent.sleep(10)
