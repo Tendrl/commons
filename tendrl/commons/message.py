@@ -15,7 +15,8 @@ if is_collectd_imported:
 # TODO(anmol, collectd) This is required due to
 # https://github.com/collectd/collectd/issues/2179
 # An appropriate solution needs to be carved out
-
+import traceback
+from ruamel import yaml
 
 class Message(object):
     """At the time of message object intialization
@@ -34,14 +35,16 @@ class Message(object):
         if message_id is None:
             self.message_id = str(uuid.uuid4())
             self.timestamp = now()
-            # From which function, line and file error raised
-            caller = getframeinfo(stack()[1][0])
-            self.caller = {"filename": (caller.filename.rsplit('/', 1))[1],
-                           "line_no": caller.lineno,
-                           "function": caller.function}
         else:
             self.message_id = message_id
             self.timestamp = timestamp
+        if caller is None:
+            # From which function, line and file error raised
+            caller = getframeinfo(stack()[1][0])
+            self.caller = {"filename": caller.filename,
+                           "line_no": caller.lineno,
+                           "function": caller.function}
+        else:
             self.caller = caller
         self.priority = priority
         self.publisher = publisher
@@ -100,6 +103,44 @@ class Message(object):
         return True
 
 
+class ExceptionMessage(Message):
+    def __init__(self, priority, publisher, payload):
+        # skip last function call
+        formatted_stack = traceback.extract_stack()[:-2]
+        caller = getframeinfo(stack()[1][0])
+        caller = {"filename": caller.filename,
+                  "line_no": caller.lineno,
+                  "function": caller.function}
+        exception_traceback, err = self.format_exception(
+            formatted_stack, payload)
+        if err is None:
+            payload["exception_traceback"] = exception_traceback
+            payload["exception_type"] = type(payload["exception"]).__name__
+            super(ExceptionMessage, self).__init__(
+                priority=priority, publisher=publisher, payload=payload,
+                caller=caller)
+        else:
+            sys.stderr.write(err)
+
+    def format_exception(self, formatted_stack, payload):
+        if "exception" in payload:
+            if isinstance(payload["exception"], Exception):
+                traceback = {}
+                for i in range(len(formatted_stack)):
+                    traceback[i] = {}
+                    file, line, module, function = formatted_stack[i]
+                    traceback[i]["file"] = file
+                    traceback[i]["line"] = line
+                    traceback[i]["module"] = module
+                    traceback[i]["function"] = function
+                return traceback, None
+            else:
+                return None, "Given exception %s is not a subclass of " \
+                    "Exception class \n" % (str(payload["exception"]))
+        else:
+            return None, "Exception field is not found in payload"
+
+
 # To serialize when json contains old message object
 def serialize_message(obj):
     if isinstance(obj, Message):
@@ -108,6 +149,8 @@ def serialize_message(obj):
     elif isinstance(obj, datetime.datetime):
         serial = obj.isoformat()
         return serial
+    elif isinstance(obj, Exception):
+        return yaml.dump(obj)
     else:
         raise TypeError(
             "Message object is not serializable")
