@@ -23,14 +23,51 @@ class BaseFlow(object):
         cls_name = self.__class__.__name__
         if hasattr(self, "obj"):
             obj_name = self.obj.__name__
-            self._defs = self._ns.get_obj_flow_definition(obj_name,
-                                                              cls_name)
-            self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
+            LOG.info("Load definitions for namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
+                                                                                obj_name,
+                                                                                cls_name))
+            try:
+                self._defs = self._ns.get_obj_flow_definition(obj_name,
+                                                          cls_name)
+            except KeyError as ex:
+                if hasattr(self, "internal"):
+                    if self.internal:
+                        self._defs = {}
+                        pass   
+                else:
+                    msg = "Could not find definitions for namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
+                                                                            obj_name,
+                                                                            cls_name)
+                    LOG.error(ex)
+                    LOG.error(msg)
+                    raise Exception(msg)
+            finally:
+                self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
                                                       obj_name,
                                                       cls_name)
+
         else:
-            self._defs = self._ns.get_flow_definition(cls_name)
-            self.to_str = "%s.flows.%s" % (self._ns.ns_name, cls_name)
+            LOG.info("Load definitions for namespace.%s.flows.%s" % (self._ns.ns_src,
+                                                                     cls_name))
+            try:
+                self._defs = self._ns.get_flow_definition(cls_name)
+            except KeyError as ex:
+                if hasattr(self, "internal"):
+                    if self.internal:
+                        self._defs = {}
+                        pass   
+                else:
+                    msg = "Could not find definitions for namespace.%s.flows.%s" % (self._ns.ns_src,
+                                                                            cls_name)
+                    LOG.error(ex)
+                    LOG.error(msg)
+                    raise Exception(msg)
+            finally:
+                self.to_str = "%s.flows.%s" % (self._ns.ns_name, cls_name)
+
+
+            
+
 
     @abc.abstractmethod
     def run(self):
