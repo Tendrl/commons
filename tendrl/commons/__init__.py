@@ -28,18 +28,20 @@ class TendrlNS(object):
         self._create_ns()
 
         self.current_ns = self._get_ns()
-        LOG.info("namespace.%s created!" % self.ns_str)
+        LOG.info("namespace.%s created!" % self.ns_name)
         self._register_subclasses_to_ns()
 
         self.setup_definitions()
         self.setup_common_objects()
 
     def setup_definitions(self):
+        LOG.info("Setup Definitions for namespace.%s" % self.ns_name)
         self.current_ns.definitions = self.current_ns.objects.Definition()
 
     def setup_common_objects(self):
         # Config, if the namespace has implemented its own Config object
         if "Config" in self.current_ns.objects:
+            LOG.info("Setup Config for namespace.%s" % self.ns_name)
             self.current_ns.config = self.current_ns.objects.Config()
             NS.config = self.current_ns.config
 
@@ -47,17 +49,21 @@ class TendrlNS(object):
             etcd_kwargs = {'port': self.current_ns.config.data['etcd_port'],
                            'host': self.current_ns.config.data[
                                "etcd_connection"]}
+            LOG.info("Setup Etcd Orm for namespace.%s" % self.ns_name)
             NS.etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
             log.setup_logging(self.current_ns.config.data['log_cfg_path'])
 
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:
+            LOG.info("Setup NodeContext for namespace.%s" % self.ns_name)
+
             self.current_ns.node_context = \
                 self.current_ns.objects.NodeContext()
             NS.node_context = self.current_ns.node_context
 
         # TendrlContext, if the namespace has implemented its own
         if "TendrlContext" in self.current_ns.objects:
+            LOG.info("Setup TendrlContext for namespace.%s" % self.ns_name)
             self.current_ns.tendrl_context = \
                 self.current_ns.objects.TendrlContext()
             NS.tendrl_context = self.current_ns.tendrl_context
@@ -193,7 +199,7 @@ class TendrlNS(object):
     def _register_subclasses_to_ns(self):
         # registers all subclasses of BaseObject, BaseFlow, BaseAtom to
         # NS
-        LOG.info("Finding objects in namespace.%s.objects" % self.ns_src)
+        LOG.info("Finding objects in namespace.%s.objects" % self.ns_name)
 
         ns_root = importlib.import_module(self.ns_src).__path__[0]
 
@@ -207,12 +213,12 @@ class TendrlNS(object):
             for obj_cls in inspect.getmembers(obj, inspect.isclass):
                 if issubclass(obj_cls[1], objects.BaseObject):
                     obj_name = obj_cls[0]
-                    LOG.info("Registering object namespace.%s.objects.%s" % (self.ns_src, obj_name))
+                    LOG.info("Registering object namespace.%s.objects.%s" % (self.ns_name, obj_name))
                     self._add_object(obj_name, obj_cls[1])
 
                     ns_object_atoms_path = obj.__path__[0] + "/atoms"
                     ns_object_atoms_prefix = obj_fqdn + ".atoms."
-                    LOG.info("Finding atoms in namespace.%s.objects.%s.atoms" % (self.ns_src, obj_name))
+                    LOG.info("Finding atoms in namespace.%s.objects.%s.atoms" % (self.ns_name, obj_name))
                     for atom_name, atom_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_atoms_path,
@@ -222,7 +228,7 @@ class TendrlNS(object):
                         for atom_cls in inspect.getmembers(atom,
                                                            inspect.isclass):
                             if issubclass(atom_cls[1], BaseAtom):
-                                LOG.info("Registering atom namespace.%s.objects.%s.atoms.%s" % (self.ns_src,
+                                LOG.info("Registering atom namespace.%s.objects.%s.atoms.%s" % (self.ns_name,
                                                                                                 obj_name,
                                                                                                 atom_cls[1].__name__))
 
@@ -232,7 +238,7 @@ class TendrlNS(object):
 
                     ns_object_flows_path = obj.__path__[0] + "/flows"
                     ns_object_flows_prefix = obj_fqdn + ".flows."
-                    LOG.info("Finding flows in namespace.%s.objects.%s.flows" % (self.ns_src, obj_name))
+                    LOG.info("Finding flows in namespace.%s.objects.%s.flows" % (self.ns_name, obj_name))
                     for flow_name, flow_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_flows_path,
@@ -242,7 +248,7 @@ class TendrlNS(object):
                         for flow_cls in inspect.getmembers(flow,
                                                            inspect.isclass):
                             if issubclass(flow_cls[1], flows.BaseFlow):
-                                LOG.info("Registering flow namespace.%s.objects.%s.flow.%s" % (self.ns_src,
+                                LOG.info("Registering flow namespace.%s.objects.%s.flow.%s" % (self.ns_name,
                                                                                                obj_name,
                                                                                                flow_cls[1].__name__))
                                 self._add_obj_flow(obj_name,
@@ -253,12 +259,12 @@ class TendrlNS(object):
         ns_flows_prefix = self.ns_src + ".flows."
         flowz = self._list_modules_in_package_path(ns_flows_path,
                                                    ns_flows_prefix)
-        LOG.info("Finding flows in namespace.%s.flows" % self.ns_src)
+        LOG.info("Finding flows in namespace.%s.flows" % self.ns_name)
         for name, flow_fqdn in flowz:
             the_flow = importlib.import_module(flow_fqdn)
             for flow_cls in inspect.getmembers(the_flow, inspect.isclass):
                 if issubclass(flow_cls[1], flows.BaseFlow):
-                    LOG.info("Registering flow namespace.%s.flows.%s" % (self.ns_src, flow_cls[0]))
+                    LOG.info("Registering flow namespace.%s.flows.%s" % (self.ns_name, flow_cls[0]))
                     self._add_flow(flow_cls[0], flow_cls[1])
 
     def _list_modules_in_package_path(self, package_path, prefix):
