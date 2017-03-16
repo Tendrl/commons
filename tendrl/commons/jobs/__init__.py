@@ -1,7 +1,6 @@
 import json
 import logging
 import traceback
-import uuid
 
 import etcd
 import gevent.event
@@ -22,7 +21,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
     def _run(self):
-        LOG.info("%s running" % self.__class__.__name__)
+        LOG.info("%s running", self.__class__.__name__)
         while not self._complete.is_set():
             try:
                 gevent.sleep(2)
@@ -42,7 +41,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         for item in result:
                             if item in raw_job:
                                 raw_job[item] = result[item]
-                        raw_job["payload"] = json.loads(raw_job["payload"].decode('utf-8'))
+                        raw_job["payload"] = json.loads(
+                            raw_job["payload"].decode('utf-8'))
                     except etcd.EtcdKeyNotFound:
                         continue
 
@@ -53,7 +53,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         if raw_job.get("payload", {}).get("tags", []):
                             NS.node_context = NS.node_context.load()
                             tags = json.loads(NS.node_context.tags)
-                            if set(tags).isdisjoint(raw_job['payload']['tags']):
+                            if set(tags).isdisjoint(
+                                raw_job['payload']['tags']):
                                 continue
 
                         if raw_job.get("payload", {}).get("node_ids", []):
@@ -62,7 +63,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 continue
 
                         raw_job['status'] = "processing"
-                        LOG.info("Processing Job %s" % raw_job['job_id'])
+                        LOG.info("Processing Job %s", raw_job['job_id'])
                         Job(job_id=raw_job['job_id'],
                             status=raw_job['status'],
                             payload=json.dumps(raw_job['payload']),
@@ -83,8 +84,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         else:
                             runnable_flow = current_ns.ns.get_flow(flow_name)
                         try:
-                            runnable_flow(parameters=raw_job['payload']['parameters'],
-                                          job_id=raw_job['job_id']).run()
+                            runnable_flow(parameters=raw_job['payload'][
+                                'parameters'], job_id=raw_job['job_id']).run()
                             raw_job['status'] = "finished"
                             # TODO(team) replace below raw write with a
                             # "EtcdJobQueue" class

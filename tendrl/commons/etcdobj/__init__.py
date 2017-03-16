@@ -79,7 +79,7 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Writing %s to %s" % (item['key'], item['value']))
+            LOG.debug("Writing %s to %s", item['key'], item['value'])
             self.client.write(item['key'], item['value'], quorum=True)
         return obj
 
@@ -92,7 +92,7 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Reading %s" % item['key'])
+            LOG.debug("Reading %s", item['key'])
             etcd_resp = self.client.read(item['key'], quorum=True)
             value = etcd_resp.value
 

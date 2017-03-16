@@ -40,10 +40,10 @@ class Command(object):
                 **self.attributes
             )
             result, err = runner.run()
-            LOG.debug("Command Execution: %s" % result)
+            LOG.debug("Command Execution: %s", result)
         except AnsibleExecutableGenerationFailed as e:
-            LOG.error("could not run the command %s. Error: %s" % (
-                self.attributes["_raw_params"], str(e)))
+            LOG.error("could not run the command %s. Error: %s",
+                      self.attributes["_raw_params"], str(e))
             return "", str(e.message), -1
         stdout = result.get("stdout", "")
         stderr = result.get("stderr", "").encode("ascii")
