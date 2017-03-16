@@ -1,12 +1,12 @@
 import abc
+import logging
 
 import etcd
 import six
 
-import etcd
-
 from tendrl.commons.central_store import utils as cs_utils
 
+LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
@@ -24,7 +24,20 @@ class BaseObject(object):
         return instance
 
     def load_definition(self):
-        self._defs = self._ns.get_obj_definition(self.__class__.__name__)
+        LOG.info("Load definitions for namespace.%s.objects.%s" % (self._ns.ns_src, self.__class__.__name__))
+        try:
+            self._defs = self._ns.get_obj_definition(self.__class__.__name__)
+        except KeyError as ex:
+            if hasattr(self, "internal"):
+                if self.internal:
+                    self._defs = {}
+                    pass   
+            else:
+                msg = "Could not find definitions for namespace.%s.objects.%s" % (self._ns.ns_src, self.__class__.__name__)
+                LOG.error(ex)
+                LOG.error(msg)
+                raise Exception(msg)
+
 
     def save(self):
         try:
@@ -41,6 +54,7 @@ class BaseObject(object):
 
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
         except etcd.EtcdKeyNotFound as ex:
+            LOG.error(ex)
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
 
         getattr(NS.central_store_thread, "save_%s" %
@@ -59,8 +73,26 @@ class BaseAtom(object):
         self.load_definition()
 
     def load_definition(self):
-        self._defs = self._ns.get_atom_definition(self.obj.__name__,
+        LOG.info("Load definitions for namespace.%s.objects.%s.atoms.%s" % (self._ns.ns_src,
+                                                                            self.obj.__name__,
+                                                                            self.__class__.__name__))
+        try:
+            self._defs = self._ns.get_atom_definition(self.obj.__name__,
                                                       self.__class__.__name__)
+        except KeyError as ex:
+            if hasattr(self, "internal"):
+                if self.internal:
+                    self._defs = {}
+                    pass   
+            else:
+                msg = "Could not find definitions for namespace.%s.objects.%s.atoms.%s" % (self._ns.ns_src,
+                                                                            self.obj.__name__,
+                                                                            self.__class__.__name__)
+                LOG.error(ex)
+                LOG.error(msg)
+                raise Exception(msg)
+
+            
 
     @abc.abstractmethod
     def run(self):
