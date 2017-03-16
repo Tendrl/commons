@@ -3,8 +3,8 @@ import logging
 
 import six
 
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects import AtomExecutionFailedError
 
 LOG = logging.getLogger(__name__)
 
@@ -12,9 +12,10 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
     def __init__(self, parameters=None, job_id=None):
-        if not hasattr(self, "internal"): # Tendrl internal flows should populate their own self._defs
+        # Tendrl internal flows should populate their own self._defs
+        if not hasattr(self, "internal"):
             self._defs = self.load_definition()
-            
+
         self.parameters = parameters
         self.job_id = job_id
         self.parameters.update({'job_id': self.job_id})
@@ -24,41 +25,37 @@ class BaseFlow(object):
         cls_name = self.__class__.__name__
         if hasattr(self, "obj"):
             obj_name = self.obj.__name__
-            LOG.info("Load definitions for namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
-                                                                                obj_name,
-                                                                                cls_name))
+            LOG.debug("Load definitions for namespace.%s.objects.%s.flows.%s",
+                      self._ns.ns_src, obj_name, cls_name)
             try:
                 return self._ns.get_obj_flow_definition(obj_name,
-                                                          cls_name)
+                                                        cls_name)
             except KeyError as ex:
-                msg = "Could not find definitions for namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
-                                                                        obj_name,
-                                                                        cls_name)
+                msg = "Could not find definitions for " \
+                      "namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
+                                                            obj_name,
+                                                            cls_name)
                 LOG.error(ex)
                 LOG.error(msg)
                 raise Exception(msg)
             finally:
                 self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
-                                                      obj_name,
-                                                      cls_name)
+                                                          obj_name,
+                                                          cls_name)
 
         else:
-            LOG.info("Load definitions for namespace.%s.flows.%s" % (self._ns.ns_src,
-                                                                     cls_name))
+            LOG.debug("Load definitions for namespace.%s.flows.%s",
+                      self._ns.ns_src, cls_name)
             try:
                 return self._ns.get_flow_definition(cls_name)
             except KeyError as ex:
-                msg = "Could not find definitions for namespace.%s.flows.%s" % (self._ns.ns_src,
-                                                                        cls_name)
+                msg = "Could not find definitions for namespace.%s.flows.%s" %\
+                      (self._ns.ns_src, cls_name)
                 LOG.error(ex)
                 LOG.error(msg)
                 raise Exception(msg)
             finally:
                 self.to_str = "%s.flows.%s" % (self._ns.ns_name, cls_name)
-
-
-            
-
 
     @abc.abstractmethod
     def run(self):

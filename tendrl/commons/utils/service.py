@@ -22,12 +22,10 @@ class Service(object):
                 **attr
             )
             result, err = runner.run()
-            LOG.debug("Service Management: %s" % result)
+            LOG.debug("Service Management: %s", result)
         except AnsibleExecutableGenerationFailed as e:
-            LOG.error("Error switching the service: %s to %s state."
-                      " Error: %s" % (self.attributes["name"],
-                                      attr["state"],
-                                      str(e)))
+            LOG.error("Error switching the service: %s to %s state. Error: "
+                      "%s", self.attributes["name"], attr["state"], str(e))
             return e.message, False
         message = result.get("msg", "").encode("ascii")
         state = result.get("state", "").encode("ascii")

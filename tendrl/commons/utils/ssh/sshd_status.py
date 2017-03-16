@@ -29,8 +29,8 @@ def find_status():
         if pid != 0:
             p = psutil.Process(pid)
             result = [con for con in p.connections() if con.status ==
-                  psutil.CONN_LISTEN and con.laddr[0] == "0.0.0.0"]
-            if result != []:
+                      psutil.CONN_LISTEN and con.laddr[0] == "0.0.0.0"]
+            if result:
                 sshd["name"] = p.name()
                 sshd["port"] = int(result[0].laddr[1])
                 sshd["status"] = result[0].status
@@ -44,7 +44,7 @@ def find_status():
                     )
                 )
         else:
-            err = "sshd service is not running" 
+            err = "sshd service is not running"
             Event(
                 Message(
                     priority="warning",
@@ -63,8 +63,9 @@ def find_status():
         )
     return sshd, err
 
+
 def _find_pid(out):
-    pid = 0 # 0 when sshd not run
+    pid = 0  # 0 when sshd not run
     out = out.split("\n")
     for item in out:
         item = item.split("=")

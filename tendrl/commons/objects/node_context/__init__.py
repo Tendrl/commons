@@ -46,9 +46,7 @@ class NodeContext(objects.BaseObject):
 
         with open(local_node_context, 'wb+') as f:
             f.write(node_id)
-            LOG.info("SET_LOCAL: "
-                     "NS.objects.NodeContext.node_id==%s" %
-                     node_id)
+            LOG.info("SET_LOCAL: NS.objects.NodeContext.node_id==%s", node_id)
         return node_id
 
     def _get_node_id(self):
@@ -60,8 +58,7 @@ class NodeContext(objects.BaseObject):
                     node_id = f.read()
                     if node_id:
                         LOG.info("GET_LOCAL: "
-                                 "NS.objects.NodeContext"
-                                 ".node_id==%s" % node_id)
+                                 "NS.objects.NodeContext.node_id==%s", node_id)
                         return node_id
         except AttributeError:
             return None

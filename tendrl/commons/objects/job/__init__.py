@@ -19,8 +19,8 @@ class Job(objects.BaseObject):
 
 
 class _JobEtcd(etcdobj.EtcdObj):
-    """Job etcd object, lazily updated
-    """
+    # Job etcd object, lazily updated
+
     __name__ = 'queue/%s'
     _tendrl_cls = Job
 

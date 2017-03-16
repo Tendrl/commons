@@ -1,6 +1,6 @@
 from tendrl.commons import etcdobj
-from tendrl.commons.utils import cmd_utils
 from tendrl.commons import objects
+from tendrl.commons.utils import cmd_utils
 
 
 class Cpu(objects.BaseObject):

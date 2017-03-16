@@ -29,7 +29,7 @@ class AnsibleRunner(object):
     def __init__(self, module_path, **kwargs):
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
-            LOG.error("Module path: %s does not exist" % self.module_path)
+            LOG.error("Module path: %s does not exist", self.module_path)
             raise ValueError
         if kwargs == {}:
             LOG.error("Empty argument dictionary")
@@ -50,7 +50,7 @@ class AnsibleRunner(object):
                 )
         except Exception as e:
             LOG.error("Could not generate executable data for module"
-                      ": %s. Error: %s" % (self.module_path, str(e)))
+                      ": %s. Error: %s", self.module_path, str(e))
             raise AnsibleExecutableGenerationFailed(
                 self.module_path,
                 str(e)
@@ -70,12 +70,10 @@ class AnsibleRunner(object):
 
         try:
             os.system("chmod +x %s" % _temp_file.name)
-            cmd = subprocess.Popen(
-            _temp_file.name,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+            cmd = subprocess.Popen(_temp_file.name, shell=True,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE
+                                   )
             out, err = cmd.communicate()
             result = json.loads(out)
 
