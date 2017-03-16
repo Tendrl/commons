@@ -3,7 +3,6 @@ from gevent.socket import error as socket_error
 from gevent.socket import timeout as socket_timeout
 import sys
 from tendrl.commons.message import Message
-import traceback
 
 
 class Event(object):
@@ -19,12 +18,19 @@ class Event(object):
             json_str = Message.to_json(message)
             self.sock.connect(self.socket_path)
             self.sock.send(json_str)
-        except (socket_error, socket_timeout, TypeError):
+        except (socket_error) as ex:
             msg = Message.to_json(message)
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            traceback.print_exception(
-                exc_type, exc_value, exc_tb, file=sys.stderr)
+            sys.stderr.write(
+                "Socket connection failed.%s\n" % str(ex))
             sys.stderr.write(
                 "Unable to pass the message into socket.%s\n" % msg)
+        except (socket_timeout) as ex:
+            msg = Message.to_json(message)
+            sys.stderr.write(
+                "Socket connection timeout.%s\n" % str(ex))
+            sys.stderr.write(
+                "Unable to pass the message into socket.%s\n" % msg)
+        except (TypeError) as ex:
+            sys.stderr.write("%s-%s\n" % (str(ex), message.__dict__))
         finally:
             self.sock.close()
