@@ -16,8 +16,7 @@ if is_collectd_imported:
 # https://github.com/collectd/collectd/issues/2179
 # An appropriate solution needs to be carved out
 import traceback
-import yaml
-
+from ruamel import yaml
 
 class Message(object):
     """At the time of message object intialization
