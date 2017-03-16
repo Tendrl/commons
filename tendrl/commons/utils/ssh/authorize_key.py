@@ -1,9 +1,9 @@
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 from tendrl.commons.utils.ansible_module_runner import \
     AnsibleExecutableGenerationFailed
 from tendrl.commons.utils.ansible_module_runner import \
     AnsibleRunner
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 
 ANSIBLE_MODULE_PATH = "core/system/authorized_key.py"
 
@@ -29,7 +29,7 @@ class AuthorizeKey(object):
         self.attributes["key"] = ssh_key
 
     def run(self):
-        """This function is used to copy the given authorize ssh-key 
+        """This function is used to copy the given authorize ssh-key
 
         output:
             True/False, error
@@ -53,8 +53,8 @@ class AuthorizeKey(object):
                     priority="warning",
                     publisher="commons",
                     payload={"message": "Copying authorize key failed %s. "
-                             "Error: %s" % (
-                                 self.attributes["_raw_params"], str(e.message))}
+                             "Error: %s" % (self.attributes["_raw_params"],
+                                            str(e.message))}
                 )
             )
         if err is not "":
@@ -62,7 +62,8 @@ class AuthorizeKey(object):
                 Message(
                     priority="warning",
                     publisher="commons",
-                    payload={"message": "Unable to copy authorize key .err:%s" % err}
+                    payload={"message": "Unable to copy authorize key "
+                                        ".err:%s" % err}
                 )
             )
             return False, err

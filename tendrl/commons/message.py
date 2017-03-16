@@ -4,7 +4,6 @@ from inspect import getframeinfo
 from inspect import stack
 import json
 import sys
-from tendrl.commons.utils.time_utils import now
 is_collectd_imported = False
 if '/usr/lib64/collectd' in sys.path:
     is_collectd_imported = True
@@ -15,6 +14,9 @@ if is_collectd_imported:
 # TODO(anmol, collectd) This is required due to
 # https://github.com/collectd/collectd/issues/2179
 # An appropriate solution needs to be carved out
+
+
+from tendrl.commons.utils.time_utils import now  # flake8:noqa
 
 
 class Message(object):

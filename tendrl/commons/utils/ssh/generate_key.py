@@ -1,9 +1,9 @@
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 from tendrl.commons.utils.ansible_module_runner import \
     AnsibleExecutableGenerationFailed
 from tendrl.commons.utils.ansible_module_runner import \
     AnsibleRunner
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 
 ANSIBLE_MODULE_PATH = "core/system/user.py"
 
@@ -16,7 +16,7 @@ class GenerateKey(object):
 
     At the time of initialize it takes user and
     group as parameters.
-    
+
     input:
         user (default is root)
         group (optional)
@@ -64,7 +64,8 @@ class GenerateKey(object):
                 Message(
                     priority="warning",
                     publisher="commons",
-                    payload={"message":"Unable to generate ssh-key .err: %s" % err}
+                    payload={"message": "Unable to generate ssh-key .err: "
+                                        "%s" % err}
                 )
             )
         elif "ssh_public_key" in out:
