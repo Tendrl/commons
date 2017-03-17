@@ -2,11 +2,14 @@
 import json
 import subprocess
 
+import pkg_resources
 from ruamel import yaml
 
 from tendrl.commons.utils import ansible_module_runner
 
 def import_ceph(integration_id):
+    logging_file_name = "ceph-integration_logging.yaml"
+    logging_config_file_path = "/etc/tendrl/ceph-integration/"
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
         name = "https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
@@ -25,22 +28,22 @@ def import_ceph(integration_id):
             ansible_module_path,
             **attributes
         )
-        result, err = runner.run()
+        runner.run()
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
         return False
     
-    with open("/etc/tendrl/ceph-integration/ceph-integration_logging"
-                       ".yaml", 'w+') as f:
-        f.write(logging_file)
+    with open(logging_config_file_path + logging_file_name,
+              'w+') as f:
+        f.write(pkg_resources.resource_string(__name__, logging_file_name))
 
     config_data = {"etcd_port": int(NS.config.data['etcd_port']),
                    "etcd_connection": str(NS.config.data['etcd_connection']),
-                   "log_cfg_path":"/etc/tendrl/ceph-integration/ceph-integration_logging"
-                       ".yaml", "log_level": "DEBUG",
-                       "logging_socket_path": "/var/run/tendrl/message.sock",
-                       "tags": json.dumps(["tendrl/integration/ceph"])}
-    with open("/etc/tendrl/ceph-integration/ceph-integration"
-              ".conf.yaml", 'w') as outfile:
+                   "log_cfg_path": logging_config_file_path + logging_file_name,
+                   "log_level": "DEBUG",
+                    "logging_socket_path": "/var/run/tendrl/message.sock",
+                    "tags": json.dumps(["tendrl/integration/ceph"])}
+    with open("/etc/tendrl/ceph-integration/ceph-integration.conf.yaml",
+              'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
 
     ceph_integration_context = "/etc/tendrl/ceph-integration/integration_id"
@@ -48,52 +51,3 @@ def import_ceph(integration_id):
         f.write(integration_id)
 
     subprocess.Popen(["nohup", "tendrl-ceph-integration", "&"])
-
-
-
-
-
-
-
-
-
-
-logging_file = """version: 1
-disable_existing_loggers: False
-formatters:
-    simple:
-        format: "%(asctime)s - %(pathname)s - %(filename)s:%(lineno)s - %(funcName)20s() - %(levelname)s - %(message)s"
-        datefmt: "%Y-%m-%dT%H:%M:%S%z"
-
-handlers:
-    console:
-        class: logging.StreamHandler
-        level: DEBUG
-        formatter: simple
-        stream: ext://sys.stdout
-
-    info_file_handler:
-        class: logging.handlers.TimedRotatingFileHandler
-        level: INFO
-        formatter: simple
-        filename: /var/log/tendrl/ceph-integration/ceph-integration_info.log
-
-    error_file_handler:
-        class: logging.handlers.RotatingFileHandler
-        level: ERROR
-        formatter: simple
-        filename: /var/log/tendrl/ceph-integration/ceph-integration_errors.log
-        maxBytes: 10485760 # 10MB
-        backupCount: 20
-        encoding: utf8
-
-loggers:
-    my_module:
-        level: ERROR
-        handlers: [console]
-        propagate: no
-
-root:
-    level: INFO
-    handlers: [console, info_file_handler, error_file_handler]
-"""

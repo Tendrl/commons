@@ -122,6 +122,8 @@ class Server(_Server):
         import etcd
         if not etcd_kwargs:
             etcd_kwargs = dict()
+        etcd_kwargs["allow_reconnect"] = True
+        etcd_kwargs["per_host_pool_size"] = 20
         super(Server, self).__init__(
             etcd.Client(**etcd_kwargs))
 

@@ -121,5 +121,6 @@ setup(
         "maps",
         "pytz",
         ],
+    include_package_data=True,
     cmdclass={'bumpversion': BumpCommand, 'release': ReleaseCommand},
 )
