@@ -1,8 +1,9 @@
+import pkg_resources
+
 from ruamel import yaml
 
 from tendrl.commons import etcdobj
 from tendrl.commons import objects
-from tendrl.commons.objects.definition import master
 
 # Definitions need there own special init and have to be present in the NS
 # before anything else, Hence subclassing BaseObject
@@ -13,7 +14,7 @@ class Definition(objects.BaseObject):
         super(Definition, self).__init__(*args, **kwargs)
 
         self.value = '_NS/tendrl/definitions'
-        self.data = master.data
+        self.data = pkg_resources.resource_string(__name__, "master.yaml")
         self._parsed_defs = yaml.safe_load(self.data)
         self._etcd_cls = _DefinitionEtcd
 
