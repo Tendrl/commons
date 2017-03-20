@@ -86,6 +86,20 @@ class ImportCluster(flows.BaseFlow):
             if is_mon:
                 import_ceph(NS.tendrl_context.integration_id)
         else:
+            # Check if minimum required version of underlying gluster
+            # cluster met. If not fail the import task
+            sds_version = NS.etcd_orm.client.read(
+                "nodes/%s/DetectedCluster/sds_pkg_version" %
+                NS.node_context.node_id
+            ).value
+            maj_ver, min_ver, rel = sds_version.split('.')
+            req_maj_ver, req_min_ver, req_rel = \
+                NS.config.data['min_reqd_gluster_ver'].split('.')
+            if int(maj_ver) < int(req_maj_ver) or \
+                int(min_ver) < int(req_min_ver):
+                raise FlowExecutionFailedError(
+                    "Detected gluster version is less than required one"
+                )
             import_gluster(NS.tendrl_context.integration_id)
 
         # import cluster's run() should not return unless the new cluster entry
