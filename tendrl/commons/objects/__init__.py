@@ -53,7 +53,11 @@ class BaseObject(object):
 
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
         except etcd.EtcdKeyNotFound as ex:
-            LOG.error(ex)
+            # No need to log the error. This would keep happening
+            # till first cluster is imported/created or some data
+            # synchronized in central store.
+            # This un-necessarily hog the log as every few seconds
+            # these errors would be logged.
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
 
         getattr(NS.central_store_thread, "save_%s" %
