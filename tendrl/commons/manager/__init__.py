@@ -25,7 +25,7 @@ class Manager(object):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": "%s stopping" % self.__class__.__name__}
             )
         )
@@ -40,7 +40,7 @@ class Manager(object):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": "%s starting" % self.__class__.__name__}
             )
         )
@@ -55,7 +55,7 @@ class Manager(object):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": "%s joining" % self.__class__.__name__}
             )
         )

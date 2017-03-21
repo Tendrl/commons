@@ -15,7 +15,7 @@ class CentralStore(gevent.greenlet.Greenlet):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": "Central Store listening"}
             )
         )

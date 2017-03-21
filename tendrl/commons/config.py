@@ -1,6 +1,5 @@
 import os
 from ruamel import yaml
-import yaml
 
 class ConfigNotFound(Exception):
     pass

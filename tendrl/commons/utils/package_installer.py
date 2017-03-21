@@ -21,7 +21,7 @@ class Installer(object):
             Event(
                 Message(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Unsupported package type: %s" %
                                         package_type
                              }
@@ -42,7 +42,7 @@ class Installer(object):
             Event(
                 Message(
                     priority="debug",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "INSTALLATION: %s" % result}
                 )
             )
@@ -50,7 +50,7 @@ class Installer(object):
             Event(
                 Message(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Could not install package: %s. Error:"
                                         " %s" %
                                         (self.attributes["name"], str(e))

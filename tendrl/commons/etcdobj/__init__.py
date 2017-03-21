@@ -78,16 +78,19 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Writing %s to %s", item['key'], item['value'])
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=tendrl_ns.publisher_id,
-                    payload={"message": "Writing %s to %s" %
-                                        (item['key'], item['value'])
-                             }
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Writing %s to %s" %
+                                            (item['key'], item['value'])
+                                 }
+                    )
                 )
-            )
+            except KeyError:
+                sys.stdout.write("Writing %s to %s" % (item['key'],
+                                                       item['value']))
             self.client.write(item['key'], item['value'], quorum=True)
         # setting ttl after directory creation
         if ttl:
@@ -103,13 +106,16 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=tendrl_ns.publisher_id,
-                    payload={"message": "Reading %s" % item['key']}
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Reading %s" % item['key']}
+                    )
                 )
-            )
+            except KeyError:
+                sys.stdout.write("Reading %s" % item['key'])
             etcd_resp = self.client.read(item['key'], quorum=True)
             value = etcd_resp.value
 

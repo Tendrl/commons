@@ -3,7 +3,7 @@ import six
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.message import Message
+from tendrl.commons.message import Message, ExceptionMessage
 from tendrl.commons.objects import AtomExecutionFailedError
 
 
@@ -35,7 +35,7 @@ class BaseFlow(object):
             Event(
                 Message(
                     priority="debug",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Load definitions for namespace.%s."
                                         "objects.%s.flows.%s" % (
                                             self._ns.ns_src, obj_name,
@@ -52,18 +52,16 @@ class BaseFlow(object):
                                                             obj_name,
                                                             cls_name)
                 Event(
-                    Message(
+                    ExceptionMessage(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
-                        payload={
-                            "message": str(ex)
-                            }
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
                 )
@@ -77,7 +75,7 @@ class BaseFlow(object):
             Event(
                 Message(
                     priority="debug",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Load definitions for namespace.%s."
                                         "flows.%s" % (self._ns.ns_src,
                                                       cls_name)
@@ -90,18 +88,16 @@ class BaseFlow(object):
                 msg = "Could not find definitions for namespace.%s.flows.%s" %\
                       (self._ns.ns_src, cls_name)
                 Event(
-                    Message(
+                    ExceptionMessage(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
-                        payload={
-                            "message": str(ex)
-                        }
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
                 )
@@ -116,7 +112,7 @@ class BaseFlow(object):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": msg}
             )
         )
@@ -134,7 +130,7 @@ class BaseFlow(object):
                 Event(
                     Message(
                         priority="info",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
                 )
@@ -147,7 +143,7 @@ class BaseFlow(object):
                     Event(
                         Message(
                             priority="info",
-                            publisher=tendrl_ns.publisher_id,
+                            publisher=NS.publisher_id,
                             payload={"message": msg}
                         )
                     )
@@ -161,7 +157,7 @@ class BaseFlow(object):
                     Event(
                         Message(
                             priority="info",
-                            publisher=tendrl_ns.publisher_id,
+                            publisher=NS.publisher_id,
                             payload={"message": msg}
                         )
                     )
@@ -171,7 +167,7 @@ class BaseFlow(object):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": msg}
             )
         )
@@ -181,7 +177,7 @@ class BaseFlow(object):
             Event(
                 Message(
                     priority="info",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": msg}
                 )
             )
@@ -194,7 +190,7 @@ class BaseFlow(object):
                 Event(
                     Message(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
                 )
@@ -205,14 +201,20 @@ class BaseFlow(object):
             else:
                 msg = 'Finished atom %s for flow: %s' %\
                       (atom_fqn, self._defs['help'])
-                LOG.info(msg)
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
 
         # Execute the post runs for the flow
         msg = "Processing post-runs for flow: %s" % self._defs['help']
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={"message": msg}
             )
         )
@@ -222,7 +224,7 @@ class BaseFlow(object):
                 Event(
                     Message(
                         priority="info",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
                 )
@@ -235,7 +237,7 @@ class BaseFlow(object):
                     Event(
                         Message(
                             priority="error",
-                            publisher=tendrl_ns.publisher_id,
+                            publisher=NS.publisher_id,
                             payload={"message": msg}
                         )
                     )
@@ -248,7 +250,7 @@ class BaseFlow(object):
                     Event(
                         Message(
                             priority="info",
-                            publisher=tendrl_ns.publisher_id,
+                            publisher=NS.publisher_id,
                             payload={"message": msg}
                         )
                     )
@@ -275,10 +277,10 @@ class BaseFlow(object):
 
         except (KeyError, AttributeError) as ex:
             Event(
-                Message(
+                ExceptionMessage(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
-                    payload={"message": str(ex)}
+                    publisher=NS.publisher_id,
+                    payload={"message": "Error", "exception": ex}
                 )
             )
 

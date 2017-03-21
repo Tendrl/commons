@@ -32,7 +32,7 @@ class AnsibleRunner(object):
             Event(
                 Message(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Module path: %s does not exist" %
                                         self.module_path
                              }
@@ -43,7 +43,7 @@ class AnsibleRunner(object):
             Event(
                 Message(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Empty argument dictionary"}
                 )
             )
@@ -66,7 +66,7 @@ class AnsibleRunner(object):
             Event(
                 Message(
                     priority="error",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={"message": "Could not generate executable data "
                                         "for module  : %s. Error: %s" %
                                         (self.module_path, str(e))

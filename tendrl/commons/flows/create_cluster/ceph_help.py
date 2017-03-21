@@ -1,23 +1,50 @@
 # flake8: noqa
 import gevent
-import logging
 
+from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-
-LOG = logging.getLogger(__name__)
+from tendrl.commons.message import Message
 
 def create_ceph(parameters):
     # install the packages
-    LOG.info("Installing Ceph Packages %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Installing Ceph Packages %s" %
+                                parameters['fsid']
+                     }
+        )
+    )
     mon_ips, osd_ips = install_packages(parameters)
     # Configure Mons
-    LOG.info("Creating Ceph Monitors %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Creating Ceph Monitors %s" %
+                                parameters['fsid']
+                     }
+        )
+    )
 
     created_mons = create_mons(parameters, mon_ips)
     # Configure osds
-    LOG.info("Creating Ceph OSD %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Creating Ceph OSD %s" % parameters['fsid']}
+        )
+    )
     create_osds(parameters, created_mons)
-    LOG.info("Created Ceph Cluster %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Created Ceph Cluster %s" % parameters['fsid']}
+        )
+    )
 
 def install_packages(parameters):
     plugin = NS.provisioner.get_plugin()

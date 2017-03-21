@@ -3,14 +3,11 @@
 import json
 import uuid
 
-import logging
-
-from tendrl.commons.objects.job import Job
-
 from tendrl.commons import flows
+from tendrl.commons.event import Event
 from tendrl.commons.flows.create_cluster import ceph_help
-
-LOG = logging.getLogger(__name__)
+from tendrl.commons.message import Message
+from tendrl.commons.objects.job import Job
 
 class CreateCluster(flows.BaseFlow):
     def run(self):
@@ -40,8 +37,15 @@ class CreateCluster(flows.BaseFlow):
                         status="new",
                         payload=json.dumps(payload)).save()
                     ssh_job_ids.append(_job_id)
-                    LOG.info("Created SSH setup job %s for node %s" % (
-                        _job_id, node))
+                    Event(
+                        Message(
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Created SSH setup job %s for "
+                                                "node %s" % (_job_id, node)
+                                     }
+                        )
+                    )
 
         all_ssh_jobs_done = False
         while not all_ssh_jobs_done:

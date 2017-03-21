@@ -46,18 +46,18 @@ class Command(object):
                 Event(
                     Message(
                         priority="debug",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": "Command Execution: %s" % result}
                     )
                 )
-            except AttributeError:
+            except KeyError:
                 sys.stdout.write("Command Execution: %s \n" % result)
         except AnsibleExecutableGenerationFailed as e:
             try:
                 Event(
                     Message(
                         priority="error",
-                        publisher=tendrl_ns.publisher_id,
+                        publisher=NS.publisher_id,
                         payload={"message": "could not run the command %s. "
                                             "Error: %s" %
                                             (self.attributes["_raw_params"],
@@ -66,7 +66,7 @@ class Command(object):
                                  }
                     )
                 )
-            except AttributeError:
+            except KeyError:
                 sys.stderr.write("could not run the command %s. Error: %s" %
                                  (self.attributes["_raw_params"], str(e))
                                  )

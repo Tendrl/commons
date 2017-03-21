@@ -1,13 +1,11 @@
 import abc
-import logging
-
 import etcd
 import six
+import sys
 
 from tendrl.commons.central_store import utils as cs_utils
-
-LOG = logging.getLogger(__name__)
-
+from tendrl.commons.event import Event
+from tendrl.commons.message import ExceptionMessage, Message
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
@@ -36,15 +34,46 @@ class BaseObject(object):
         return instance
 
     def load_definition(self):
-        LOG.debug("Load definitions for namespace.%s.objects.%s",
-                  self._ns.ns_name, self.__class__.__name__)
+        try:
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Load definitions for namespace.%s."
+                                        "objects.%s" % (self._ns.ns_name,
+                                                        self.__class__.__name__)
+                             }
+                )
+            )
+        except KeyError:
+            sys.stdout.write("Load definitions for namespace.%s.objects.%s" %
+                             (self._ns.ns_name, self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
             msg = "Could not find definitions for namespace.%s.objects.%s" %\
                   (self._ns.ns_name, self.__class__.__name__)
-            LOG.error(ex)
-            LOG.error(msg)
+            try:
+                Event(
+                    ExceptionMessage(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "error",
+                                 "exception": ex}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write(str(ex))
+            try:
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write(msg)
             raise Exception(msg)
 
     def save(self):
@@ -97,9 +126,22 @@ class BaseAtom(object):
                 raise Exception("Internal Atom must provide its own definition via '_defs' attr")
 
     def load_definition(self):
-        LOG.debug("Load definitions for namespace.%s.objects.%s.atoms.%s",
-                  self._ns.ns_name, self.obj.__name__,
-                  self.__class__.__name__)
+        try:
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Load definitions for namespace.%s."
+                                        "objects.%s.atoms.%s" %
+                                        (self._ns.ns_name, self.obj.__name__,
+                                         self.__class__.__name__)
+                             }
+                )
+            )
+        except KeyError:
+            sys.stdout.write("Load definitions for namespace.%s.objects.%s."
+                             "atoms.%s" % (self._ns.ns_name, self.obj.__name__,
+                                           self.__class__.__name__))
         try:
             return self._ns.get_atom_definition(self.obj.__name__,
                                                 self.__class__.__name__)
@@ -109,8 +151,26 @@ class BaseAtom(object):
                                                         self.obj.__name__,
                                                         self.__class__.__name__
                                                         )
-            LOG.error(ex)
-            LOG.error(msg)
+            try:
+                Event(
+                    ExceptionMessage(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error", "exception": ex}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Error: %s" % ex)
+            try:
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write(msg)
             raise Exception(msg)
 
     @abc.abstractmethod
