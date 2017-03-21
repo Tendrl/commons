@@ -1,5 +1,7 @@
 ---
 namespace.tendrl:
+  min_reqd_gluster_ver: 3.10.0
+  min_reqd_ceph_ver: 10.2.5
   flows:
     ImportCluster:
       atoms:
