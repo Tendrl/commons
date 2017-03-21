@@ -90,6 +90,20 @@ namespace.tendrl:
       value: nodes/$Node_context.node_id/Memory
       help: "Node Memory"
     Service:
+      atoms:
+       CheckServiceStatus:
+          enabled: true
+          inputs:
+            mandatory:
+              - Node.fqdn
+              - Service.name
+          outputs:
+            - status
+          name: "check whether the service is running"
+          help: "check whether the service is running"
+          run: tendrl.objects.Service.atoms.CheckServiceStatus
+          type: Create
+          uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
         running:
           type: String
@@ -271,17 +285,19 @@ namespace.tendrl:
       list: nodes/$Node_context.node_id/Disks/free
     Node:
       atoms:
-        cmd:
+        Cmd:
           enabled: true
           inputs:
             mandatory:
               - Node.cmd_str
+          outputs:
+            - Node.status
           name: "Execute CMD on Node"
           help: "Executes a command"
-          run: tendrl.atoms.node.cmd.Cmd
+          run: tendrl.objects.Node.atoms.Cmd
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
-        check_node_up:
+        CheckNodeUp:
           enabled: true
           inputs:
             mandatory:
@@ -290,17 +306,20 @@ namespace.tendrl:
             - Node.status
           name: "check whether the node is up"
           help: "Checks if a node is up"
-          run: tendrl.atoms.node.check_node_up
+          run: tendrl.objects.Node.atoms.CheckNodeUp
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
+        cmd_str:
+          type: String
         fqdn:
           type: String
         status:
           type: Boolean
       enabled: true
-      value: nodes/$Node_context.node_id/Node
-      help: "Node"
+      value: nodes/$NodeContext.node_id/Node
+      list: nodes/
+      help: 'Node'
     Os:
       attrs:
         kernel_version:
@@ -429,6 +448,63 @@ namespace.tendrl:
       enabled: true
       help: "File"
       value: ""
+    Job:
+      attrs:
+        job_id:
+          help: "job unique id"
+          type: String
+        status:
+          help: "job current status"
+          type: String
+        payload:
+          help: "dict"
+          type: Dict
+        errors:
+          help: "any errors occured or not"
+          type: String
+      enabled: true
+      list: /queue
+      value: /queue
+      help: "jobs"
+    JobUpdate:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        job_id:
+          help: "Job id"
+          type: String
+        flow_id:
+          help: "Flow id"
+          type: String
+        parent_id:
+          help: "parent id"
+          type: String
+        cluster_id:
+          help: "cluster id"
+          type: String
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: /Messages/jobs
+      help: "Job Updates"
+      value: /Messages/jobs
     Platform:
       attrs:
         kernel_version:
