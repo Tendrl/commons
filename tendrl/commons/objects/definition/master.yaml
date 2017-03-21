@@ -1,5 +1,4 @@
-# flake8: noqa
-data = """---
+---
 namespace.tendrl:
   flows:
     ImportCluster:
@@ -441,4 +440,3 @@ namespace.tendrl:
       value: nodes/$Node_context.node_id/Platform
       list: nodes/$Node_context.node_id/Platform
 tendrl_schema_version: 0.3
-"""
