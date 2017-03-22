@@ -22,7 +22,7 @@ class CheckServiceStatus(BaseAtom):
                 flow_id=self.parameters['flow_id'],
             )
         )
-        response = ServiceStatus("systemctl status %s" % service_name).status()
+        response = ServiceStatus(service_name).status()
         # and then check the response...
         if response:
             Event(

@@ -112,7 +112,11 @@ class TendrlNS(object):
 
     def get_atom(self, obj_name, atom_name):
         private_name = "_" + obj_name
-        return self.current_ns.objects[private_name]['atoms'][atom_name]
+        if private_name in self.current_ns.objects:
+            self.current_ns.objects[private_name]['atoms'][atom_name]
+        else:
+            return NS.tendrl.objects[private_name]['atoms'][atom_name]
+        #return self.current_ns.objects[private_name]['atoms'][atom_name]
 
     def get_obj_flow(self, obj_name, flow_name):
         private_name = "_" + obj_name
