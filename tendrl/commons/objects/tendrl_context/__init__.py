@@ -14,7 +14,7 @@ class TendrlContext(objects.BaseObject):
         self.value = 'nodes/%s/TendrlContext'
 
         # integration_id is the Tendrl generated cluster UUID
-        self.integration_id = integration_id or ""
+        self.integration_id = integration_id
         self._etcd_cls = _TendrlContextEtcd
 
 
