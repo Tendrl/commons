@@ -70,7 +70,7 @@ class _Server(object):
 
         self.client = client
 
-    def save(self, obj):
+    def save(self, obj, ttl=None):
         """Save an object.
 
         :param obj: An instance that subclasses EtcdObj
@@ -78,7 +78,10 @@ class _Server(object):
         :returns: The same instance
         :rtype: EtcdObj
         """
-        for item in obj.render():
+        render = obj.render()
+        if ttl:
+            self.client.write(obj.name, '', dir=True, ttl=ttl)
+        for item in render:
             LOG.debug("Writing %s to %s", item['key'], item['value'])
             self.client.write(item['key'], item['value'], quorum=True)
         return obj
