@@ -17,7 +17,8 @@ SAFE_COMMAND_LIST = [
     "config_manager",
     "systemctl",
     "hwinfo",
-    "cat"
+    "cat",
+    "ping"
 ]
 
 
