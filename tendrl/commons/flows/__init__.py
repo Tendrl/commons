@@ -146,7 +146,7 @@ class BaseFlow(object):
             else:
                 current_ns = getattr(NS, ns_str)
 
-            runnable_atom = current_ns.get_atom(obj_name, atom_name)
+            runnable_atom = current_ns.ns.get_atom(obj_name, atom_name)
             try:
                 ret_val = runnable_atom(
                     parameters=self.parameters
