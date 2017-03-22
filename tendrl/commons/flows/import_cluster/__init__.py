@@ -84,6 +84,24 @@ class ImportCluster(flows.BaseFlow):
                 if "ceph/mon" in tag:
                     is_mon = True
             if is_mon:
+                # Check if minimum required version of underlying ceph
+                # cluster met. If not fail the import task
+                detected_cluster = NS.tendrl.objects.DetectedCluster().load()
+                maj_ver, min_ver, rel = detected_cluster.sds_pkg_version.split('.')
+                reqd_ceph_ver = NS.compiled_definitions.get_parsed_defs()[
+                    'namespace.tendrl'
+                ]['min_reqd_ceph_ver']
+                req_maj_ver, req_min_ver, req_rel = reqd_ceph_ver.split('.')
+                if int(maj_ver) < int(req_maj_ver) or \
+                    int(min_ver) < int(req_min_ver):
+                    raise FlowExecutionFailedError(
+                        "Detected ceph version: %s"
+                        " is lesser than required version: %s" %
+                        (
+                            detected_cluster.sds_pkg_version,
+                            reqd_ceph_ver
+                        )
+                    )
                 import_ceph(NS.tendrl_context.integration_id)
         else:
             # Check if minimum required version of underlying gluster
