@@ -139,8 +139,14 @@ class BaseFlow(object):
         try:
             ns, atom_name = atom_fqdn.split(".atoms.")
             ns, obj_name = ns.split(".objects.")
+            ns_str = ns.split(".")[-1]
+            
+            if "integrations" in ns:
+                current_ns =  getattr(NS.integrations, ns_str)
+            else:
+                current_ns = getattr(NS, ns_str)
 
-            runnable_atom = self._ns.get_atom(obj_name, atom_name)
+            runnable_atom = current_ns.ns.get_atom(obj_name, atom_name)
             try:
                 ret_val = runnable_atom(
                     parameters=self.parameters

@@ -49,7 +49,7 @@ namespace.tendrl:
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
-      list: nodes/$Node_context.node_id/DetectedCluster
+      list: nodes/$NodeContext.node_id/DetectedCluster
       attrs:
         detected_cluster_id:
           help: "Temporary id for the sds which is detected in Tendrl"
@@ -60,7 +60,7 @@ namespace.tendrl:
         sds_pkg_version:
           help: Storage system package version
           type: String
-      value: nodes/$Node_context.node_id/DetectedCluster
+      value: nodes/$NodeContext.node_id/DetectedCluster
     Cpu:
       attrs:
         architecture:
@@ -78,7 +78,7 @@ namespace.tendrl:
         vendor_id:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Cpu
+      value: nodes/$NodeContext.node_id/Cpu
       help: "CPU"
     Memory:
       attrs:
@@ -87,7 +87,7 @@ namespace.tendrl:
         total_swap:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Memory
+      value: nodes/$NodeContext.node_id/Memory
       help: "Node Memory"
     Service:
       atoms:
@@ -112,9 +112,9 @@ namespace.tendrl:
         service:
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Services
+      list: nodes/$NodeContext.node_id/Services
       help: "Service"
-      value: nodes/$Node_context.node_id/Services
+      value: nodes/$NodeContext.node_id/Services
     Disk:
       attrs:
         disk_id:
@@ -266,8 +266,8 @@ namespace.tendrl:
           type: String
 
       enabled: true
-      list: nodes/$Node_context.node_id/Disks
-      value: nodes/$Node_context.node_id/Disks
+      list: nodes/$NodeContext.node_id/Disks
+      value: nodes/$NodeContext.node_id/Disks
       help: "Disk"
     UsedDisk:
       attrs:
@@ -275,14 +275,14 @@ namespace.tendrl:
           help: "File system UUID"
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Disks/used
+      list: nodes/$NodeContext.node_id/Disks/used
     FreeDisk:
       attrs:
         disk_id:
           help: "File system UUID"
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Disks/free
+      list: nodes/$NodeContext.node_id/Disks/free
     Node:
       atoms:
         Cmd:
@@ -320,6 +320,57 @@ namespace.tendrl:
       value: nodes/$NodeContext.node_id/Node
       list: nodes/
       help: 'Node'
+    NodeNetwork:
+      attrs:
+        interface:
+          help: "network interface name"
+          type: List
+        ipv4:
+          help: "ipv4 addresses"
+          type: List
+        ipv6:
+          help: "ipv6 addresses"
+          type: List
+        netmask:
+          help: "subnet masks"
+          type: List
+        subnet:
+          help: "subnet"
+          type: String
+        status:
+          help: "interface status up/down"
+          type: String
+        interface_id:
+          help: "unique id"
+          type: String
+        sysfs_id:
+          help: "sysfs id"
+          type: String
+        device_link:
+          help: "device link"
+          type: String
+        interface_type:
+          help: "interface type"
+          type: String
+        model:
+          help: "interface model"
+          type: String
+        driver_modules:
+          help: "driver modules"
+          type: String
+        driver:
+          help: "driver"
+          type: String
+        hw_address:
+          help: "hardware address"
+          type: String
+        link_detected:
+          help: "link detected"
+          type: String
+      enabled: true
+      list: nodes/$NodeContext.node_id/Networks
+      help: "Node wise network interface"
+      value: nodes/$NodeContext.node_id/Networks
     Os:
       attrs:
         kernel_version:
@@ -331,7 +382,7 @@ namespace.tendrl:
         selinux_mode:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Os
+      value: nodes/$NodeContext.node_id/Os
       help: "OS"
     Package:
       atoms:
@@ -402,7 +453,7 @@ namespace.tendrl:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
-      value: nodes/$Node_context.node_id/TendrlContext
+      value: nodes/$NodeContext.node_id/TendrlContext
       help: "Tendrl context"
     NodeContext:
       attrs:
@@ -423,9 +474,31 @@ namespace.tendrl:
           type: String
 
       enabled: true
-      list: nodes/$Node_context.node_id/Node_context
-      value: nodes/$Node_context.node_id/Node_context
+      list: nodes/$NodeContext.node_id/NodeContext
+      value: nodes/$NodeContext.node_id/NodeContext
       help: Node Context
+    ClusterNodeContext:
+      attrs:
+        machine_id:
+          help: "Unique /etc/machine-id"
+          type: String
+        fqdn:
+          help: "FQDN of the Tendrl managed node"
+          type: String
+        node_id:
+          help: "Tendrl ID for the managed node"
+          type: String
+        tags:
+          help: "The tags associated with this node"
+          type: String
+        status:
+          help: "Node status"
+          type: String
+
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
+      value: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
+      help: Cluster leval Node Context
     File:
       atoms:
         write:
@@ -515,6 +588,6 @@ namespace.tendrl:
           type: String
       enabled: true
       help: "Platform of the Node"
-      value: nodes/$Node_context.node_id/Platform
-      list: nodes/$Node_context.node_id/Platform
+      value: nodes/$NodeContext.node_id/Platform
+      list: nodes/$NodeContext.node_id/Platform
 tendrl_schema_version: 0.3
