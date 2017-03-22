@@ -153,7 +153,7 @@ def serialize_message(obj):
         serial = obj.isoformat()
         return serial
     elif isinstance(obj, Exception):
-        return yaml.safe_dump(obj)
+        return yaml.dump(obj)
     else:
         raise TypeError(
             "Message object is not serializable")
