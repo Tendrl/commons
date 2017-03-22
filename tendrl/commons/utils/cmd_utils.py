@@ -17,7 +17,6 @@ SAFE_COMMAND_LIST = [
     "config_manager",
     "systemctl",
     "hwinfo",
-#TODO (anmol_b) remove usage of cat to read files, use python open() instead
     "cat",
     "ping"
 ]
