@@ -453,6 +453,12 @@ namespace.tendrl:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
+        cluster_id:
+          help: UUID of the cluster
+          type: String
+        cluster_name:
+          help: Name of the cluster
+          type: String
       value: nodes/$NodeContext.node_id/TendrlContext
       help: "Tendrl context"
     NodeContext:
