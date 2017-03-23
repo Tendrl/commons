@@ -8,9 +8,7 @@ def to_etcdobj(cls_etcd, obj):
     for attr, value in vars(obj).iteritems():
         if value is None:
             value = ""
-        if attr.startswith("_"):
-            continue
-        if attr in ["definition"]:
+        if attr.startswith("_") or attr in ['value', 'list']:
             continue
         if type(value) == list:
             value = json.dumps(value)
