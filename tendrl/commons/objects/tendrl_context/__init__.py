@@ -8,13 +8,20 @@ LOG = logging.getLogger(__name__)
 
 
 class TendrlContext(objects.BaseObject):
-    def __init__(self, integration_id=None, *args, **kwargs):
+    def __init__(
+        self,
+        integration_id=None,
+        cluster_id=None,
+        cluster_name=None,
+        *args, **kwargs):
         super(TendrlContext, self).__init__(*args, **kwargs)
 
         self.value = 'nodes/%s/TendrlContext'
 
         # integration_id is the Tendrl generated cluster UUID
         self.integration_id = integration_id
+        self.cluster_id=cluster_id
+        self.cluster_name=cluster_name
         self._etcd_cls = _TendrlContextEtcd
 
 
