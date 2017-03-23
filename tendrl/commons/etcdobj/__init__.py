@@ -80,7 +80,7 @@ class _Server(object):
         """
         render = obj.render()
         if ttl:
-            self.client.write(obj.name, '', dir=True, ttl=ttl)
+            self.client.write(obj.name, None, dir=True, ttl=ttl)
         for item in render:
             LOG.debug("Writing %s to %s", item['key'], item['value'])
             self.client.write(item['key'], item['value'], quorum=True)
