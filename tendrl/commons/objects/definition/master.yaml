@@ -438,6 +438,29 @@ namespace.tendrl:
           help: "Service state can be started|stopped|restarted|reloaded"
           type: String
       enabled: true
+    ClusterTendrlContext:
+      enabled: True
+      attrs:
+        integration_id:
+          help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
+          type: String
+        sds_name:
+          help: "Name of the Tendrl managed sds, eg: 'gluster'"
+          type: String
+        sds_version:
+          help: "Version of the Tendrl managed sds, eg: '3.2.1'"
+          type: String
+        node_id:
+          help: "Tendrl ID for the managed node"
+          type: String
+        cluster_id:
+          help: UUID of the cluster
+          type: String
+        cluster_name:
+          help: Name of the cluster
+          type: String
+      value: clusters/$TendrlContext.integration_id/TendrlContext
+      help: "Tendrl context"
     TendrlContext:
       enabled: True
       attrs:
