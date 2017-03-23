@@ -14,7 +14,7 @@ class TendrlContext(objects.BaseObject):
         cluster_id=None,
         cluster_name=None,
         sds_name=None,
-        sds_version=None
+        sds_version=None,
         *args, **kwargs):
         super(TendrlContext, self).__init__(*args, **kwargs)
 
