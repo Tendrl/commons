@@ -28,3 +28,6 @@ class EtcdCentralStore(CentralStore):
 
     def save_job(self, job):
         NS.etcd_orm.save(job)
+    
+    def save_clustertendrlcontext(self, cluster_tendrl_context):
+        NS.etcd_orm.save(cluster_tendrl_context)
