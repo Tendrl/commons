@@ -45,5 +45,5 @@ class _ClusterTendrlContextEtcd(EtcdObj):
     _tendrl_cls = ClusterTendrlContext
 
     def render(self):
-        self.__name__ = self.__name__ % NS.node_context.node_id
+        self.__name__ = self.__name__ % NS.tendrl_context.integration_id
         return super(_ClusterTendrlContextEtcd, self).render()
