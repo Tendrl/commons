@@ -78,12 +78,12 @@ class _Server(object):
         :returns: The same instance
         :rtype: EtcdObj
         """
-        render = obj.render()
-        if ttl:
-            self.client.write(obj.name, None, dir=True, ttl=ttl)
-        for item in render:
+        for item in obj.render():
             LOG.debug("Writing %s to %s", item['key'], item['value'])
             self.client.write(item['key'], item['value'], quorum=True)
+        # setting ttl after directory creation
+        if ttl:
+            self.client.refresh(obj.__name__, ttl=ttl)
         return obj
 
     def read(self, obj):
