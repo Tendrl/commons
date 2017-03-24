@@ -1,6 +1,7 @@
 import logging
 import os
 import socket
+import sys
 import uuid
 
 import errno
@@ -9,7 +10,7 @@ from tendrl.commons.etcdobj import EtcdObj
 from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects
-
+import traceback
 
 LOG = logging.getLogger(__name__)
 
@@ -29,9 +30,17 @@ class NodeContext(objects.BaseObject):
         self._etcd_cls = _NodeContextEtcd
 
     def _get_machine_id(self):
-        cmd = cmd_utils.Command("cat /etc/machine-id")
-        out, err, rc = cmd.run()
-        return str(out)
+        try:
+            out = None 
+            with open('/etc/machine-id') as f:
+                out = f.read().strip('\n') 
+        except IOError as ex:
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            traceback.print_exception(
+                exc_type, exc_value, exc_tb, file=sys.stderr)
+            sys.stderr.write(
+                "Unable to find machine id.%s\n" % str(ex))  
+        return out
 
     def _create_node_id(self, node_id=None):
         node_id = node_id or str(uuid.uuid4())
