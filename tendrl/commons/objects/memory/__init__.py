@@ -1,4 +1,6 @@
+from tendrl.commons.event import Event
 from tendrl.commons import etcdobj
+from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects
@@ -24,10 +26,20 @@ class Memory(objects.BaseObject):
                    "Type":      "type"}, ...], ...}
 
         '''
-
-        cmd = cmd_utils.Command("cat /proc/meminfo")
-        out, err, rc = cmd.run()
-        out = str(out)
+        try:
+            out = None
+            with open('/proc/meminfo') as f:
+                out = f.read()
+        except IOError as ex:
+            Event(
+                ExceptionMessage(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Unable to find memory details",
+                             "exception": ex
+                             }
+                )
+            )
 
         if out:
             info_list = out.split('\n')

@@ -9,7 +9,6 @@ LOG = logging.getLogger(__name__)
 
 SAFE_COMMAND_LIST = [
     "lsblk",
-    "cat",
     "lscpu",
     "getenforce",
     "gluster",
