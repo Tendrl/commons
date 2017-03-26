@@ -9,7 +9,6 @@ LOG = logging.getLogger(__name__)
 
 SAFE_COMMAND_LIST = [
     "lsblk",
-    "cat",
     "lscpu",
     "getenforce",
     "gluster",
@@ -17,7 +16,8 @@ SAFE_COMMAND_LIST = [
     "config_manager",
     "systemctl",
     "hwinfo",
-    "cat"
+    "cat",
+    "ping"
 ]
 
 

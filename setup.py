@@ -120,6 +120,7 @@ setup(
         "gevent>=1.0",
         "maps",
         "pytz",
+        "six"
         ],
     include_package_data=True,
     cmdclass={'bumpversion': BumpCommand, 'release': ReleaseCommand},

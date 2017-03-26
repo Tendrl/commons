@@ -1,5 +1,7 @@
 ---
 namespace.tendrl:
+  min_reqd_gluster_ver: 3.9.0
+  min_reqd_ceph_ver: 10.2.5
   flows:
     ImportCluster:
       atoms:
@@ -47,7 +49,7 @@ namespace.tendrl:
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
-      list: nodes/$Node_context.node_id/DetectedCluster
+      list: nodes/$NodeContext.node_id/DetectedCluster
       attrs:
         detected_cluster_id:
           help: "Temporary id for the sds which is detected in Tendrl"
@@ -58,7 +60,7 @@ namespace.tendrl:
         sds_pkg_version:
           help: Storage system package version
           type: String
-      value: nodes/$Node_context.node_id/DetectedCluster
+      value: nodes/$NodeContext.node_id/DetectedCluster
     Cpu:
       attrs:
         architecture:
@@ -76,7 +78,7 @@ namespace.tendrl:
         vendor_id:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Cpu
+      value: nodes/$NodeContext.node_id/Cpu
       help: "CPU"
     Memory:
       attrs:
@@ -85,9 +87,23 @@ namespace.tendrl:
         total_swap:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Memory
+      value: nodes/$NodeContext.node_id/Memory
       help: "Node Memory"
     Service:
+      atoms:
+       CheckServiceStatus:
+          enabled: true
+          inputs:
+            mandatory:
+              - Node.fqdn
+              - Service.name
+          outputs:
+            - status
+          name: "check whether the service is running"
+          help: "check whether the service is running"
+          run: tendrl.objects.Service.atoms.CheckServiceStatus
+          type: Create
+          uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
         running:
           type: String
@@ -96,9 +112,9 @@ namespace.tendrl:
         service:
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Services
+      list: nodes/$NodeContext.node_id/Services
       help: "Service"
-      value: nodes/$Node_context.node_id/Services
+      value: nodes/$NodeContext.node_id/Services
     Disk:
       attrs:
         disk_id:
@@ -250,8 +266,8 @@ namespace.tendrl:
           type: String
 
       enabled: true
-      list: nodes/$Node_context.node_id/Disks
-      value: nodes/$Node_context.node_id/Disks
+      list: nodes/$NodeContext.node_id/Disks
+      value: nodes/$NodeContext.node_id/Disks
       help: "Disk"
     UsedDisk:
       attrs:
@@ -259,27 +275,29 @@ namespace.tendrl:
           help: "File system UUID"
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Disks/used
+      list: nodes/$NodeContext.node_id/Disks/used
     FreeDisk:
       attrs:
         disk_id:
           help: "File system UUID"
           type: String
       enabled: true
-      list: nodes/$Node_context.node_id/Disks/free
+      list: nodes/$NodeContext.node_id/Disks/free
     Node:
       atoms:
-        cmd:
+        Cmd:
           enabled: true
           inputs:
             mandatory:
               - Node.cmd_str
+          outputs:
+            - Node.status
           name: "Execute CMD on Node"
           help: "Executes a command"
-          run: tendrl.atoms.node.cmd.Cmd
+          run: tendrl.objects.Node.atoms.Cmd
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
-        check_node_up:
+        CheckNodeUp:
           enabled: true
           inputs:
             mandatory:
@@ -288,17 +306,71 @@ namespace.tendrl:
             - Node.status
           name: "check whether the node is up"
           help: "Checks if a node is up"
-          run: tendrl.atoms.node.check_node_up
+          run: tendrl.objects.Node.atoms.CheckNodeUp
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
+        cmd_str:
+          type: String
         fqdn:
           type: String
         status:
           type: Boolean
       enabled: true
-      value: nodes/$Node_context.node_id/Node
-      help: "Node"
+      value: nodes/$NodeContext.node_id/Node
+      list: nodes/
+      help: 'Node'
+    NodeNetwork:
+      attrs:
+        interface:
+          help: "network interface name"
+          type: List
+        ipv4:
+          help: "ipv4 addresses"
+          type: List
+        ipv6:
+          help: "ipv6 addresses"
+          type: List
+        netmask:
+          help: "subnet masks"
+          type: List
+        subnet:
+          help: "subnet"
+          type: String
+        status:
+          help: "interface status up/down"
+          type: String
+        interface_id:
+          help: "unique id"
+          type: String
+        sysfs_id:
+          help: "sysfs id"
+          type: String
+        device_link:
+          help: "device link"
+          type: String
+        interface_type:
+          help: "interface type"
+          type: String
+        model:
+          help: "interface model"
+          type: String
+        driver_modules:
+          help: "driver modules"
+          type: String
+        driver:
+          help: "driver"
+          type: String
+        hw_address:
+          help: "hardware address"
+          type: String
+        link_detected:
+          help: "link detected"
+          type: String
+      enabled: true
+      list: nodes/$NodeContext.node_id/Networks
+      help: "Node wise network interface"
+      value: nodes/$NodeContext.node_id/Networks
     Os:
       attrs:
         kernel_version:
@@ -310,7 +382,7 @@ namespace.tendrl:
         selinux_mode:
           type: String
       enabled: true
-      value: nodes/$Node_context.node_id/Os
+      value: nodes/$NodeContext.node_id/Os
       help: "OS"
     Package:
       atoms:
@@ -366,6 +438,29 @@ namespace.tendrl:
           help: "Service state can be started|stopped|restarted|reloaded"
           type: String
       enabled: true
+    ClusterTendrlContext:
+      enabled: True
+      attrs:
+        integration_id:
+          help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
+          type: String
+        sds_name:
+          help: "Name of the Tendrl managed sds, eg: 'gluster'"
+          type: String
+        sds_version:
+          help: "Version of the Tendrl managed sds, eg: '3.2.1'"
+          type: String
+        node_id:
+          help: "Tendrl ID for the managed node"
+          type: String
+        cluster_id:
+          help: UUID of the cluster
+          type: String
+        cluster_name:
+          help: Name of the cluster
+          type: String
+      value: clusters/$TendrlContext.integration_id/TendrlContext
+      help: "Tendrl context"
     TendrlContext:
       enabled: True
       attrs:
@@ -381,7 +476,13 @@ namespace.tendrl:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
-      value: nodes/$Node_context.node_id/TendrlContext
+        cluster_id:
+          help: UUID of the cluster
+          type: String
+        cluster_name:
+          help: Name of the cluster
+          type: String
+      value: nodes/$NodeContext.node_id/TendrlContext
       help: "Tendrl context"
     NodeContext:
       attrs:
@@ -402,9 +503,31 @@ namespace.tendrl:
           type: String
 
       enabled: true
-      list: nodes/$Node_context.node_id/Node_context
-      value: nodes/$Node_context.node_id/Node_context
+      list: nodes/$NodeContext.node_id/NodeContext
+      value: nodes/$NodeContext.node_id/NodeContext
       help: Node Context
+    ClusterNodeContext:
+      attrs:
+        machine_id:
+          help: "Unique /etc/machine-id"
+          type: String
+        fqdn:
+          help: "FQDN of the Tendrl managed node"
+          type: String
+        node_id:
+          help: "Tendrl ID for the managed node"
+          type: String
+        tags:
+          help: "The tags associated with this node"
+          type: String
+        status:
+          help: "Node status"
+          type: String
+
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
+      value: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
+      help: Cluster leval Node Context
     File:
       atoms:
         write:
@@ -427,6 +550,63 @@ namespace.tendrl:
       enabled: true
       help: "File"
       value: ""
+    Job:
+      attrs:
+        job_id:
+          help: "job unique id"
+          type: String
+        status:
+          help: "job current status"
+          type: String
+        payload:
+          help: "dict"
+          type: Dict
+        errors:
+          help: "any errors occured or not"
+          type: String
+      enabled: true
+      list: /queue
+      value: /queue
+      help: "jobs"
+    JobUpdate:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        job_id:
+          help: "Job id"
+          type: String
+        flow_id:
+          help: "Flow id"
+          type: String
+        parent_id:
+          help: "parent id"
+          type: String
+        cluster_id:
+          help: "cluster id"
+          type: String
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: /Messages/jobs
+      help: "Job Updates"
+      value: /Messages/jobs
     Platform:
       attrs:
         kernel_version:
@@ -437,6 +617,6 @@ namespace.tendrl:
           type: String
       enabled: true
       help: "Platform of the Node"
-      value: nodes/$Node_context.node_id/Platform
-      list: nodes/$Node_context.node_id/Platform
+      value: nodes/$NodeContext.node_id/Platform
+      list: nodes/$NodeContext.node_id/Platform
 tendrl_schema_version: 0.3

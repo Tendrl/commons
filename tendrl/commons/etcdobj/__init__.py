@@ -70,7 +70,7 @@ class _Server(object):
 
         self.client = client
 
-    def save(self, obj):
+    def save(self, obj, ttl=None):
         """Save an object.
 
         :param obj: An instance that subclasses EtcdObj
@@ -81,6 +81,9 @@ class _Server(object):
         for item in obj.render():
             LOG.debug("Writing %s to %s", item['key'], item['value'])
             self.client.write(item['key'], item['value'], quorum=True)
+        # setting ttl after directory creation
+        if ttl:
+            self.client.refresh(obj.__name__, ttl=ttl)
         return obj
 
     def read(self, obj):

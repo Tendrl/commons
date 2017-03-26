@@ -11,10 +11,19 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "internal"):
+            if hasattr(cls, "load_definition"):
+                raise Exception("Non internal Object cannot use load_definition, must have definition in (.yml)")
+        return object.__new__(cls, *args, **kwargs)
+
     def __init__(self):
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = self.load_definition()
+        if hasattr(self, "internal"):
+            if not hasattr(self, "_defs"):
+                raise Exception("Internal Object must provide its own definition via '_defs' attr")
 
     def __new__(cls, *args, **kwargs):
 
@@ -53,7 +62,11 @@ class BaseObject(object):
 
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
         except etcd.EtcdKeyNotFound as ex:
-            LOG.error(ex)
+            # No need to log the error. This would keep happening
+            # till first cluster is imported/created or some data
+            # synchronized in central store.
+            # This un-necessarily hog the log as every few seconds
+            # these errors would be logged.
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
 
         getattr(NS.central_store_thread, "save_%s" %
@@ -67,12 +80,21 @@ class BaseObject(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "internal"):
+            if hasattr(cls, "load_definition"):
+                raise Exception("Non internal Atom cannot use load_definition, must have definition in (.yml)")
+        return object.__new__(cls, *args, **kwargs)
+
     def __init__(self, parameters=None):
         self.parameters = parameters
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = self.load_definition()
+        if hasattr(self, "internal"):
+            if not hasattr(self, "_defs"):
+                raise Exception("Internal Atom must provide its own definition via '_defs' attr")
 
     def load_definition(self):
         LOG.debug("Load definitions for namespace.%s.objects.%s.atoms.%s",

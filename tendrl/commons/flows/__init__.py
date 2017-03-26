@@ -11,6 +11,12 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "internal"):
+            if hasattr(cls, "load_definition"):
+                raise Exception("Non internal Flow cannot use load_definition, must have definition in (.yml)")
+        return object.__new__(cls, *args, **kwargs)
+
     def __init__(self, parameters=None, job_id=None):
         # Tendrl internal flows should populate their own self._defs
         if not hasattr(self, "internal"):
@@ -20,6 +26,9 @@ class BaseFlow(object):
         self.job_id = job_id
         self.parameters.update({'job_id': self.job_id})
         self.parameters.update({'flow_id': self._defs['uuid']})
+        if hasattr(self, "internal"):
+            if not hasattr(self, "_defs"):
+                raise Exception("Internal Flow must provide its own definition via '_defs' attr")
 
     def load_definition(self):
         cls_name = self.__class__.__name__
@@ -139,8 +148,14 @@ class BaseFlow(object):
         try:
             ns, atom_name = atom_fqdn.split(".atoms.")
             ns, obj_name = ns.split(".objects.")
+            ns_str = ns.split(".")[-1]
+            
+            if "integrations" in ns:
+                current_ns =  getattr(NS.integrations, ns_str)
+            else:
+                current_ns = getattr(NS, ns_str)
 
-            runnable_atom = self._ns.get_atom(obj_name, atom_name)
+            runnable_atom = current_ns.ns.get_atom(obj_name, atom_name)
             try:
                 ret_val = runnable_atom(
                     parameters=self.parameters
