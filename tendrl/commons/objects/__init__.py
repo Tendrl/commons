@@ -15,7 +15,7 @@ class BaseObject(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                Log.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
+                LOG.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
                            cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
@@ -95,7 +95,7 @@ class BaseAtom(object):
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):
-            self._defs = BaseAtom.load_definition()
+            self._defs = BaseAtom.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Atom must provide its own definition via '_defs' attr")
