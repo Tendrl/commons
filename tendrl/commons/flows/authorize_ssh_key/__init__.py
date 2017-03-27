@@ -20,9 +20,3 @@ class AuthorizeSshKey(flows.BaseFlow):
         if ret_val is not True or err != "":
             raise FlowExecutionFailedError(err)
         return True
-
-    def load_definition(self):
-        return {
-            "help": "Authorize ssh key",
-            "uuid": "dc4c8775-1595-43c7-a6c6-517f0081599f"
-        }
