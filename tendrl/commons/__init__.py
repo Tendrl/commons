@@ -279,7 +279,7 @@ class TendrlNS(object):
     def get_obj_flow_definition(self, obj_name, flow_name):
         obj_def = self.get_obj_definition(obj_name)
         raw_flow = obj_def.flows[flow_name]
-        return maps.NamedDict(atoms=raw_flow['atoms'],
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
@@ -307,7 +307,7 @@ class TendrlNS(object):
         else:
             raw_flow = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'flows'][flow_name]
-        return maps.NamedDict(atoms=raw_flow['atoms'],
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
