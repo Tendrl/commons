@@ -45,7 +45,7 @@ class TendrlNS(object):
         try:
             defs = self.current_ns.definitions.get_parsed_defs()[raw_ns]
         except KeyError:
-            msg = "%s definitions not found" % raw_ns
+            msg = "%s definitions (.yml) not found" % raw_ns
             LOG.error(msg)
             raise Exception(msg)
         
@@ -85,7 +85,7 @@ class TendrlNS(object):
         if self.current_ns.objects:
             LOG.info("Validating registered (.py) objects in %s.objects", raw_ns)
             defined_objs = defs.get("objects", {})
-            regd_objs = [obj_name for obj_name in self.current_ns.objects if not hasattr(self._get_object(obj_name), "internal") and not obj_name.startswith('_')]
+            regd_objs = [obj_name for obj_name in self._get_objects() if not hasattr(self._get_object(obj_name), "internal")]
             undefined_objs = list(set(regd_objs) - set(defined_objs.keys()))
             if undefined_objs:
                 msg = "Registered (.py) objects [%s] not found in definitions (.yml) for %s.objects" % (", ".join(undefined_objs),
@@ -96,7 +96,7 @@ class TendrlNS(object):
                 if self._get_atoms(obj_name):
                     LOG.info("Validating registered (.py) atoms in %s.objects.%s.atoms", raw_ns, obj_name)
                     defined_atoms = defined_objs.get(obj_name, {}).get("atoms", {})
-                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not hasattr(self.get_atom(obj_name,atom_name), "internal") and atom_name != "BaseAtom"]
+                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not hasattr(self.get_atom(obj_name,atom_name), "internal")]
                     undefined_atoms = list(set(regd_atoms) - set(defined_atoms.keys()))
                     if undefined_atoms:
                         msg = "Registered (.py) atoms  [%s] not found in definitions (.yml) for %s.objects.%s.atoms" % (", ".join(undefined_atoms),
@@ -118,7 +118,7 @@ class TendrlNS(object):
             # Validate defined (.yml) objs and its atoms, flows against their discovered/registered (.py) counterparts (non-internal objs only)
             LOG.info("Validating defined (.yml) objects in %s.objects", raw_ns)
             defined_objs = defs.get("objects", {})
-            regd_objs = [obj_name for obj_name in self.current_ns.objects if not hasattr(self._get_object(obj_name), "internal")]
+            regd_objs = [obj_name for obj_name in self._get_objects() if not hasattr(self._get_object(obj_name), "internal")]
             unregd_objs = list(set(defined_objs.keys()) - set(regd_objs))
             if unregd_objs:
                 msg = "Defined (.yaml) objects [%s] not found in registered (.py) objects for %s.objects" % (", ".join(unregd_objs),
@@ -217,7 +217,10 @@ class TendrlNS(object):
 
     def _get_object(self, name):
         return self.current_ns.objects[name]
-
+    
+    def _get_objects(self):
+        return [obj_name for obj_name in self.current_ns.objects if not obj_name.startswith('_')]
+    
     def _get_atoms(self, obj_name):
         private_name = "_" + obj_name
         return self.current_ns.objects[private_name]['atoms']
