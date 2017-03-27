@@ -13,6 +13,12 @@ from tendrl.commons.flows.create_cluster import ceph_help
 LOG = logging.getLogger(__name__)
 
 class CreateCluster(flows.BaseFlow):
+    internal = True
+    _defs = {
+        "help": "Create Cluster",
+        "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"
+    }
+
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
         NS.tendrl_context.integration_id = integration_id
