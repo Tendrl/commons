@@ -3,8 +3,10 @@ from tendrl.commons import objects
 
 
 class File(objects.BaseObject):
+    internal = True
     def __init__(self, data=None, file_path=None,
                  *args, **kwargs):
+        self._defs = {}
         super(File, self).__init__(*args, **kwargs)
         self.data = data
         self.file_path = file_path
