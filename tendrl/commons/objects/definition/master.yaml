@@ -2,13 +2,30 @@
 namespace.tendrl:
   min_reqd_gluster_ver: 3.9.0
   min_reqd_ceph_ver: 10.2.5
+  ceph_provisioner: CephInstallerPlugin
+  gluster_provisioner: GdeployPlugin
   flows:
+    CreateCluster:
+      help: "Create a cluster from scratch"
+      enabled: true
+      inputs:
+        mandatory:
+          - "Node[]"
+          - name
+          - sds_type
+          - sds_version
+          - fsid
+          - public_network
+          - cluster_network
+          - TendrlContext.integration_id
+          - node_configuration
+        optional:
+          - ceph_conf_overrides
+      run: tendrl.flows.CreateCluster
+      type: Create
+      uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
+      version: 1
     ImportCluster:
-      atoms:
-        - tendrl.objects.Package.atoms.Install
-        - tendrl.objects.SDS.atoms.GenerateConfig
-        - tendrl.objects.File.atoms.Write
-        - tendrl.objects.Node.atoms.Cmd
       help: "Import existing Gluster Cluster"
       enabled: true
       inputs:
@@ -17,35 +34,12 @@ namespace.tendrl:
           - DetectedCluster.sds_pkg_name
           - DetectedCluster.sds_pkg_version
           - TendrlContext.integration_id
-      post_run:
-        - tendrl.objects.TendrlContext.atoms.CheckClusterIdExists
-      pre_run:
-        - tendrl.objects.Node.atoms.CheckNodeUp
-        - tendrl..objects.TendrlContext.atoms.Compare
-      run: tendrl.flows.import_cluster.ImportCluster
+      run: tendrl.flows.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
       version: 1
 
   objects:
-    Definition:
-        enabled: True
-        help: "Definition"
-        value: _NS/tendrl/definitions/data
-        list: _NS/tendrl/definitions/data
-        attrs:
-            master:
-                help: master definitions
-                type: String
-    Config:
-        enabled: True
-        help: "Config"
-        value: _NS/tendrl/config/data
-        list: _NS/tendrl/config/
-        attrs:
-            data:
-                help: config
-                type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -269,20 +263,6 @@ namespace.tendrl:
       list: nodes/$NodeContext.node_id/Disks
       value: nodes/$NodeContext.node_id/Disks
       help: "Disk"
-    UsedDisk:
-      attrs:
-        disk_id:
-          help: "File system UUID"
-          type: String
-      enabled: true
-      list: nodes/$NodeContext.node_id/Disks/used
-    FreeDisk:
-      attrs:
-        disk_id:
-          help: "File system UUID"
-          type: String
-      enabled: true
-      list: nodes/$NodeContext.node_id/Disks/free
     Node:
       atoms:
         Cmd:
@@ -384,60 +364,6 @@ namespace.tendrl:
       enabled: true
       value: nodes/$NodeContext.node_id/Os
       help: "OS"
-    Package:
-      atoms:
-        install:
-          enabled: true
-          inputs:
-            mandatory:
-              - Package.name
-              - Package.pkg_type
-            optional:
-              - Package.version
-          name: "Install Package"
-          help: "Checks if a package is installed"
-          post_run:
-            - tendrl.atoms.package.validations.check_package_installed
-          run: tendrl.atoms.package.install.Install
-          type: Create
-          uuid: 16abcfd0-aca9-4022-aa0f-5de1c5a742c7
-      attrs:
-        name:
-          help: "Location of the rpm/deb/pypi package"
-          type: String
-        pkg_type:
-          help: "Type of package can be rpm/deb/pip/"
-        state:
-          help: "State can installed|uninstalled"
-        version:
-          help: "Version of the rpm/deb/pypi package"
-          type: String
-      enabled: true
-      help: "package"
-      value: ""
-    Process:
-      atoms:
-        start:
-          enabled: true
-          inputs:
-            mandatory:
-              - Service.config_path
-              - Service.config_data
-          name: "Configure Service"
-          help: "Checks if a service is running"
-          post_run:
-            - tendrl.atoms.service.validations.check_service_running
-          run: tendrl.atoms.service.configure.Configure
-          type: Update
-          uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a3
-      attrs:
-        name:
-          help: "Name of the service"
-          type: String
-        state:
-          help: "Service state can be started|stopped|restarted|reloaded"
-          type: String
-      enabled: true
     ClusterTendrlContext:
       enabled: True
       attrs:
@@ -528,28 +454,6 @@ namespace.tendrl:
       list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
       value: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
       help: Cluster leval Node Context
-    File:
-      atoms:
-        write:
-          enabled: true
-          inputs:
-            mandatory:
-              - Config.data
-              - Config.file_path
-          name: "Write configuration data"
-          help: "Writes the configuration data"
-          run: tendrl.objects.File.atoms.write.Write
-          uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a5
-      attrs:
-        data:
-          help: "Configuration data"
-          type: String
-        file_path:
-          help: "configuration file path"
-          type: String
-      enabled: true
-      help: "File"
-      value: ""
     Job:
       attrs:
         job_id:
@@ -568,45 +472,6 @@ namespace.tendrl:
       list: /queue
       value: /queue
       help: "jobs"
-    JobUpdate:
-      attrs:
-        message_id:
-          help: "Message UUID"
-          type: String
-        timestamp:
-          help: "time"
-          type: Time
-        priority:
-          help: "Message priority"
-          type: String
-        publisher:
-          help: "Message publisher"
-          type: String
-        node_id:
-          help: "node id"
-          type: String
-        payload:
-          help: "Differ based on message"
-          type: Dict
-        job_id:
-          help: "Job id"
-          type: String
-        flow_id:
-          help: "Flow id"
-          type: String
-        parent_id:
-          help: "parent id"
-          type: String
-        cluster_id:
-          help: "cluster id"
-          type: String
-        caller:
-          help: "Called details"
-          type: Dict
-      enabled: true
-      list: /Messages/jobs
-      help: "Job Updates"
-      value: /Messages/jobs
     Platform:
       attrs:
         kernel_version:

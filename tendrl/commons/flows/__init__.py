@@ -14,21 +14,22 @@ class BaseFlow(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                raise Exception("Non internal Flow cannot use load_definition, must have definition in (.yml)")
+                LOG.warning("Non internal Flow %s cannot use load_definition, must have definition in (.yml)",
+                           cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self, parameters=None, job_id=None):
         # Tendrl internal flows should populate their own self._defs
         if not hasattr(self, "internal"):
-            self._defs = self.load_definition()
+            self._defs = BaseFlow.load_definition(self)
+        if hasattr(self, "internal"):
+            if not hasattr(self, "_defs"):
+                raise Exception("Internal Flow must provide its own definition via '_defs' attr")
 
         self.parameters = parameters
         self.job_id = job_id
         self.parameters.update({'job_id': self.job_id})
         self.parameters.update({'flow_id': self._defs['uuid']})
-        if hasattr(self, "internal"):
-            if not hasattr(self, "_defs"):
-                raise Exception("Internal Flow must provide its own definition via '_defs' attr")
 
     def load_definition(self):
         cls_name = self.__class__.__name__

@@ -45,7 +45,7 @@ class TendrlNS(object):
         try:
             defs = self.current_ns.definitions.get_parsed_defs()[raw_ns]
         except KeyError:
-            msg = "%s definitions not found" % raw_ns
+            msg = "%s definitions (.yml) not found" % raw_ns
             LOG.error(msg)
             raise Exception(msg)
         
@@ -54,14 +54,14 @@ class TendrlNS(object):
         self._validate_ns_flow_definitions(raw_ns, defs)
         self._validate_ns_obj_definitions(raw_ns, defs)
     
-    def _validate_flow_definitions(self, raw_ns, defs):
+    def _validate_ns_flow_definitions(self, raw_ns, defs):
         # TODO(rohan) Validate flow attributes too
         # Validate discovered/registered (.py) flows (non-internal) against their definitions (.yml) (non-internal flows only)
         if self.current_ns.flows:
             LOG.info("Validating registered (.py) flows in %s.flows", raw_ns)
             defined_flows = defs.get("flows", {})
-            regd_flows = [flow_name for flow_name in self.current_ns.flows if not self.get_flow(flow_name).internal]
-            undefined_flows = list(set(self.current_ns.flows.keys()) - set(defined_flows.keys()))
+            regd_flows = [flow_name for flow_name in self.current_ns.flows if not hasattr(self.get_flow(flow_name), "internal") and "BaseFlow" not in flow_name]
+            undefined_flows = list(set(regd_flows) - set(defined_flows.keys()))
             if undefined_flows:
                 msg = "Registered (.py) flows [%s] not found in definitions (.yml) for %s.flows" % (", ".join(undefined_flows),
                                                                                  raw_ns)
@@ -71,7 +71,7 @@ class TendrlNS(object):
         # Validate defined (.yml) flows against their discovered/registered (.py) counterparts (non-internal flows only)
         if defs.get("flows", {}):
             LOG.info("Validating defined (.yml) flows in %s.flows", raw_ns)
-            regd_flows = [flow_name for flow_name in self.current_ns.flows if not self.get_flow(flow_name).internal]
+            regd_flows = [flow_name for flow_name in self.current_ns.flows if not hasattr(self.get_flow(flow_name), "internal") and "BaseFlow" not in flow_name]
             unregd_flows = list(set(defs.get("flows", {})) - set(regd_flows))
             if unregd_flows:
                 msg = "Defined (.yml) flows [%s] not found in registered (.py) flows for %s.flows" % (", ".join(unregd_flows),
@@ -85,7 +85,7 @@ class TendrlNS(object):
         if self.current_ns.objects:
             LOG.info("Validating registered (.py) objects in %s.objects", raw_ns)
             defined_objs = defs.get("objects", {})
-            regd_objs = [obj_name for obj_name in self.current_ns.objects if not self._get_object(obj_name).internal]
+            regd_objs = [obj_name for obj_name in self._get_objects() if not hasattr(self._get_object(obj_name), "internal") and "BaseObject" not in obj_name]
             undefined_objs = list(set(regd_objs) - set(defined_objs.keys()))
             if undefined_objs:
                 msg = "Registered (.py) objects [%s] not found in definitions (.yml) for %s.objects" % (", ".join(undefined_objs),
@@ -96,7 +96,7 @@ class TendrlNS(object):
                 if self._get_atoms(obj_name):
                     LOG.info("Validating registered (.py) atoms in %s.objects.%s.atoms", raw_ns, obj_name)
                     defined_atoms = defined_objs.get(obj_name, {}).get("atoms", {})
-                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not self.get_atom(obj_name,atom_name).internal]
+                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not hasattr(self.get_atom(obj_name,atom_name), "internal") and "BaseAtom" not in atom_name]
                     undefined_atoms = list(set(regd_atoms) - set(defined_atoms.keys()))
                     if undefined_atoms:
                         msg = "Registered (.py) atoms  [%s] not found in definitions (.yml) for %s.objects.%s.atoms" % (", ".join(undefined_atoms),
@@ -106,7 +106,7 @@ class TendrlNS(object):
                 if self._get_obj_flows(obj_name):
                     LOG.info("Validating registered (.py) flows in %s.objects.%s.flows", raw_ns, obj_name)
                     defined_obj_flows = defined_objs.get(obj_name, {}).get("flows", {})
-                    regd_obj_flows = [obj_flow_name for obj_flow_name in self._get_obj_flows(obj_name) if not self.get_obj_flow(obj_name, obj_flow_name).internal]
+                    regd_obj_flows = [obj_flow_name for obj_flow_name in self._get_obj_flows(obj_name) if not hasattr(self.get_obj_flow(obj_name, obj_flow_name), "internal") and "BaseFlow" not in obj_flow_name]
                     undefined_obj_flows = list(set(regd_obj_flows) - set(defined_obj_flows.keys()))
                     if undefined_obj_flows:
                         msg = "Registered (.py) flows  [%s] not found in definitions (.yml) for %s.objects.%s.flows" % (", ".join(undefined_obj_flows),
@@ -118,7 +118,7 @@ class TendrlNS(object):
             # Validate defined (.yml) objs and its atoms, flows against their discovered/registered (.py) counterparts (non-internal objs only)
             LOG.info("Validating defined (.yml) objects in %s.objects", raw_ns)
             defined_objs = defs.get("objects", {})
-            regd_objs = [obj_name for obj_name in self.current_ns.objects if not self._get_object(obj_name).internal]
+            regd_objs = [obj_name for obj_name in self._get_objects() if not hasattr(self._get_object(obj_name), "internal") and "BaseObject" not in obj_name]
             unregd_objs = list(set(defined_objs.keys()) - set(regd_objs))
             if unregd_objs:
                 msg = "Defined (.yaml) objects [%s] not found in registered (.py) objects for %s.objects" % (", ".join(unregd_objs),
@@ -129,7 +129,7 @@ class TendrlNS(object):
                 if defined_objs.get(obj_name, {}).get("atoms", {}):
                     LOG.info("Validating defined (.yml) atoms in %s.objects.%s.atoms", raw_ns, obj_name)
                     defined_atoms = defined_objs.get(obj_name, {}).get("atoms", {})
-                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not self.get_atom(obj_name,atom_name).internal]
+                    regd_atoms = [atom_name for atom_name in self._get_atoms(obj_name) if not hasattr(self.get_atom(obj_name,atom_name), "internal") and "BaseAtom" not in atom_name]
                     unregd_atoms = list(set(defined_atoms.keys()) - set(regd_atoms))
                     if unregd_atoms:
                         msg = "Defined (.yml) atoms  [%s] not found in registered (.py) object for %s.objects.%s.atoms" % (", ".join(unregd_atoms),
@@ -139,7 +139,7 @@ class TendrlNS(object):
                 if defined_objs.get(obj_name, {}).get("flows", {}):
                     LOG.info("Validating defined (.yml) flows in %s.objects.%s.flows", raw_ns, obj_name)
                     defined_obj_flows = defined_objs.get(obj_name, {}).get("flows", {})
-                    regd_obj_flows = [obj_flow_name for obj_flow_name in self._get_obj_flows(obj_name) if not self.get_obj_flow(obj_name, obj_flow_name).internal]
+                    regd_obj_flows = [obj_flow_name for obj_flow_name in self._get_obj_flows(obj_name) if not hasattr(self.get_obj_flow(obj_name, obj_flow_name), "internal") and "BaseFlow" not in obj_flow_name]
                     unregd_obj_flows = list(set(defined_obj_flows.keys()) - set(regd_obj_flows))
                     if unregd_obj_flows:
                         msg = "Defined (.yml) obj flows  [%s] not found in registered (.yml) object for %s.objects.%s.flows" % (", ".join(unregd_obj_flows),
@@ -217,7 +217,10 @@ class TendrlNS(object):
 
     def _get_object(self, name):
         return self.current_ns.objects[name]
-
+    
+    def _get_objects(self):
+        return [obj_name for obj_name in self.current_ns.objects if not obj_name.startswith('_')]
+    
     def _get_atoms(self, obj_name):
         private_name = "_" + obj_name
         return self.current_ns.objects[private_name]['atoms']
@@ -276,7 +279,7 @@ class TendrlNS(object):
     def get_obj_flow_definition(self, obj_name, flow_name):
         obj_def = self.get_obj_definition(obj_name)
         raw_flow = obj_def.flows[flow_name]
-        return maps.NamedDict(atoms=raw_flow['atoms'],
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
@@ -304,7 +307,7 @@ class TendrlNS(object):
         else:
             raw_flow = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'flows'][flow_name]
-        return maps.NamedDict(atoms=raw_flow['atoms'],
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
