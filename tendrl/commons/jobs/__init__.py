@@ -1,16 +1,15 @@
 import json
-import logging
 import traceback
 
 import etcd
 import gevent.event
 
+
+from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.message import Message, ExceptionMessage
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import etcd_util
-
-
-LOG = logging.getLogger(__name__)
 
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
@@ -21,7 +20,13 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
     def _run(self):
-        LOG.info("%s running", self.__class__.__name__)
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "%s running" % self.__class__.__name__}
+            )
+        )
         while not self._complete.is_set():
             try:
                 gevent.sleep(2)
@@ -63,7 +68,15 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 continue
 
                         raw_job['status'] = "processing"
-                        LOG.info("Processing Job %s", raw_job['job_id'])
+                        Event(
+                            Message(
+                                priority="info",
+                                publisher=NS.publisher_id,
+                                payload={"message": "Processing Job %s" %
+                                         raw_job['job_id']
+                                         }
+                            )
+                        )
                         Job(job_id=raw_job['job_id'],
                             status=raw_job['status'],
                             payload=json.dumps(raw_job['payload']),
@@ -94,7 +107,15 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 payload=json.dumps(raw_job['payload']),
                                 errors=raw_job['errors']).save()
                         except FlowExecutionFailedError as e:
-                            LOG.error(e)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "error",
+                                             "exception": e
+                                             }
+                                )
+                            )
                             raw_job['status'] = "failed"
                             raw_job['errors'] = str(e)
                             Job(job_id=raw_job['job_id'],
@@ -102,8 +123,16 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 payload=json.dumps(raw_job['payload']),
                                 errors=raw_job['errors']).save()
                         break
-            except Exception:
-                LOG.error(traceback.format_exc())
+            except Exception as ex:
+                Event(
+                    ExceptionMessage(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "error traceback",
+                                 "exception": ex
+                                 }
+                    )
+                )
                 self._complete.wait(self.EXCEPTION_BACKOFF)
 
     def stop(self):
@@ -124,3 +153,5 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             return getattr(NS.integrations, ns_str), flow_name, obj_name
         else:
             return getattr(NS, ns_str), flow_name, obj_name
+
+

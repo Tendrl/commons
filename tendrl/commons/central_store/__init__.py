@@ -1,10 +1,9 @@
-import logging
-
 import gevent.event
 import gevent.greenlet
 import gevent.queue
 
-LOG = logging.getLogger(__name__)
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 class CentralStore(gevent.greenlet.Greenlet):
@@ -13,8 +12,13 @@ class CentralStore(gevent.greenlet.Greenlet):
         self._complete = gevent.event.Event()
 
     def _run(self):
-        LOG.info("Central Store listening")
-
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Central Store listening"}
+            )
+        )
         while not self._complete.is_set():
             gevent.sleep(0.1)
 
