@@ -12,13 +12,14 @@ class BaseObject(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                raise Exception("Non internal Object cannot use load_definition, must have definition in (.yml)")
+                LOG.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
+                           cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self):
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
-            self._defs = self.load_definition()
+            self._defs = BaseObject.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Object must provide its own definition via '_defs' attr")
@@ -39,19 +40,19 @@ class BaseObject(object):
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions for namespace.%s."
+                    payload={"message": "Load definitions (.yml) for namespace.%s."
                                         "objects.%s" % (self._ns.ns_name,
                                                         self.__class__.__name__)
                              }
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions for namespace.%s.objects.%s" %
+            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s" %
                              (self._ns.ns_name, self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
-            msg = "Could not find definitions for namespace.%s.objects.%s" %\
+            msg = "Could not find definitions (.yml) for namespace.%s.objects.%s" %\
                   (self._ns.ns_name, self.__class__.__name__)
             try:
                 Event(
@@ -112,7 +113,8 @@ class BaseAtom(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                raise Exception("Non internal Atom cannot use load_definition, must have definition in (.yml)")
+                LOG.warning("Non internal Atom %s cannot use load_definition, must have definition in (.yml)",
+                           cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self, parameters=None):
@@ -120,7 +122,7 @@ class BaseAtom(object):
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):
-            self._defs = self.load_definition()
+            self._defs = BaseAtom.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Atom must provide its own definition via '_defs' attr")
@@ -131,7 +133,7 @@ class BaseAtom(object):
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions for namespace.%s."
+                    payload={"message": "Load definitions (.yml) for namespace.%s."
                                         "objects.%s.atoms.%s" %
                                         (self._ns.ns_name, self.obj.__name__,
                                          self.__class__.__name__)
@@ -139,14 +141,14 @@ class BaseAtom(object):
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions for namespace.%s.objects.%s."
+            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s."
                              "atoms.%s" % (self._ns.ns_name, self.obj.__name__,
                                            self.__class__.__name__))
         try:
             return self._ns.get_atom_definition(self.obj.__name__,
                                                 self.__class__.__name__)
         except KeyError as ex:
-            msg = "Could not find definitions for" \
+            msg = "Could not find definitions (.yml) for" \
                   "namespace.%s.objects.%s.atoms.%s" % (self._ns.ns_src,
                                                         self.obj.__name__,
                                                         self.__class__.__name__
