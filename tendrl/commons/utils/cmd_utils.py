@@ -1,15 +1,16 @@
-import logging
 import shlex
+import sys
 
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
+
 ANSIBLE_MODULE_PATH = "core/commands/command.py"
-LOG = logging.getLogger(__name__)
 
 SAFE_COMMAND_LIST = [
     "lsblk",
-    "cat",
     "lscpu",
     "getenforce",
     "gluster",
@@ -17,7 +18,8 @@ SAFE_COMMAND_LIST = [
     "config_manager",
     "systemctl",
     "hwinfo",
-    "cat"
+    "cat",
+    "ping"
 ]
 
 
@@ -33,18 +35,41 @@ class Command(object):
             raise UnsupportedCommandException(command.split()[0])
         self.attributes = {"_raw_params": command}
 
-    def run(self, exec_path):
+    def run(self):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                exec_path,
                 **self.attributes
             )
             result, err = runner.run()
-            LOG.debug("Command Execution: %s" % result)
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Command Execution: %s" % result}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Command Execution: %s \n" % result)
         except AnsibleExecutableGenerationFailed as e:
-            LOG.error("could not run the command %s. Error: %s" % (
-                self.attributes["_raw_params"], str(e)))
+            try:
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "could not run the command %s. "
+                                            "Error: %s" %
+                                            (self.attributes["_raw_params"],
+                                             str(e)
+                                             )
+                                 }
+                    )
+                )
+            except KeyError:
+                sys.stderr.write("could not run the command %s. Error: %s" %
+                                 (self.attributes["_raw_params"], str(e))
+                                 )
             return "", str(e.message), -1
         stdout = result.get("stdout", "")
         stderr = result.get("stderr", "").encode("ascii")

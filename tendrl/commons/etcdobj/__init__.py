@@ -30,12 +30,11 @@ A simplistic etcd orm.
 """
 
 import json
-import logging
+import sys
 
-from tendrl.commons.etcdobj.fields import Field
-
-LOG = logging.getLogger(__name__)
-
+from tendrl.commons.etcdobj import fields
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 class _Server(object):
     """Parent class for all Server implementations.
@@ -70,7 +69,7 @@ class _Server(object):
 
         self.client = client
 
-    def save(self, obj):
+    def save(self, obj, ttl=None):
         """Save an object.
 
         :param obj: An instance that subclasses EtcdObj
@@ -79,8 +78,23 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Writing %s to %s" % (item['key'], item['value']))
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Writing %s to %s" %
+                                            (item['key'], item['value'])
+                                 }
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Writing %s to %s" % (item['key'],
+                                                       item['value']))
             self.client.write(item['key'], item['value'], quorum=True)
+        # setting ttl after directory creation
+        if ttl:
+            self.client.refresh(obj.__name__, ttl=ttl)
         return obj
 
     def read(self, obj):
@@ -92,7 +106,16 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Reading %s" % item['key'])
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Reading %s" % item['key']}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Reading %s" % item['key'])
             etcd_resp = self.client.read(item['key'], quorum=True)
             value = etcd_resp.value
 
@@ -122,6 +145,8 @@ class Server(_Server):
         import etcd
         if not etcd_kwargs:
             etcd_kwargs = dict()
+        etcd_kwargs["allow_reconnect"] = True
+        etcd_kwargs["per_host_pool_size"] = 20
         super(Server, self).__init__(
             etcd.Client(**etcd_kwargs))
 
@@ -142,7 +167,7 @@ class EtcdObj(object):
         for key in dir(self):
             if not key.startswith('_'):
                 attr = getattr(self, key)
-                if issubclass(attr.__class__, Field):
+                if issubclass(attr.__class__, fields.Field):
                     self._fields.append(key)
                     if key in kwargs.keys():
                         attr.value = kwargs[key]

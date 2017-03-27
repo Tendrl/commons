@@ -1,17 +1,16 @@
-import logging
-
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
+
 ANSIBLE_MODULE_PATH = "core/system/service.py"
-LOG = logging.getLogger(__name__)
 
 
 class Service(object):
-    def __init__(self, service_name, exec_path, enabled=None):
+    def __init__(self, service_name, enabled=None):
         self.attributes = {}
         self.attributes["name"] = service_name
-        self.exec_path = exec_path
 
         if enabled:
             self.attributes["enabled"] = enabled
@@ -20,16 +19,30 @@ class Service(object):
         try:
             runner = AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
-                self.exec_path,
                 **attr
             )
             result, err = runner.run()
-            LOG.debug("Service Management: %s" % result)
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Service Management: %s" % result}
+                )
+            )
         except AnsibleExecutableGenerationFailed as e:
-            LOG.error("Error switching the service: %s to %s state."
-                      " Error: %s" % (self.attributes["name"],
-                                      attr["state"],
-                                      str(e)))
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Error switching the service: "
+                                        "%s to %s state. Error: %s" %
+                                        (self.attributes["name"],
+                                         attr["state"],
+                                         str(e)
+                                         )
+                             }
+                )
+            )
             return e.message, False
         message = result.get("msg", "").encode("ascii")
         state = result.get("state", "").encode("ascii")

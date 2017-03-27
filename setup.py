@@ -12,14 +12,6 @@ except ImportError:
     pass
 
 
-def extract_requirements(filename):
-    with open(filename, 'r') as requirements_file:
-        return [x[:-1] for x in requirements_file.readlines()]
-
-
-install_requires = extract_requirements('requirements.txt')
-
-
 def read_module_contents():
     with open('tendrl/commons/__init__.py') as app_init:
         return app_init.read()
@@ -119,6 +111,17 @@ setup(
     author_email="rkanade@redhat.com",
     license="LGPL-2.1+",
     zip_safe=False,
-    install_requires=install_requires,
+    install_requires=[
+        "ansible",
+        "psutil",
+        "python-etcd",
+        "python-dateutil",
+        "ruamel.yaml",
+        "gevent>=1.0",
+        "maps",
+        "pytz",
+        "six"
+        ],
+    include_package_data=True,
     cmdclass={'bumpversion': BumpCommand, 'release': ReleaseCommand},
 )

@@ -21,6 +21,7 @@ class StateSyncThread(gevent.greenlet.Greenlet):
             'define the function run to use this class'
         )
 
+
 @six.add_metaclass(abc.ABCMeta)
 class SdsSyncThread(StateSyncThread):
     def __init__(self):
