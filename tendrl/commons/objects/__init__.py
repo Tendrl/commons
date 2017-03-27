@@ -15,7 +15,8 @@ class BaseObject(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                Log.warning("Non internal Object cannot use load_definition, must have definition in (.yml)")
+                Log.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
+                           cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self):
@@ -85,7 +86,8 @@ class BaseAtom(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                raise Exception("Non internal Atom cannot use load_definition, must have definition in (.yml)")
+                LOG.warning("Non internal Atom %s cannot use load_definition, must have definition in (.yml)",
+                           cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self, parameters=None):
