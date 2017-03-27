@@ -30,12 +30,11 @@ A simplistic etcd orm.
 """
 
 import json
-import logging
+import sys
 
 from tendrl.commons.etcdobj import fields
-
-LOG = logging.getLogger(__name__)
-
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 class _Server(object):
     """Parent class for all Server implementations.
@@ -79,7 +78,19 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Writing %s to %s", item['key'], item['value'])
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Writing %s to %s" %
+                                            (item['key'], item['value'])
+                                 }
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Writing %s to %s" % (item['key'],
+                                                       item['value']))
             self.client.write(item['key'], item['value'], quorum=True)
         # setting ttl after directory creation
         if ttl:
@@ -95,7 +106,16 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
-            LOG.debug("Reading %s", item['key'])
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Reading %s" % item['key']}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Reading %s" % item['key'])
             etcd_resp = self.client.read(item['key'], quorum=True)
             value = etcd_resp.value
 

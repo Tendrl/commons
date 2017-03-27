@@ -2,11 +2,9 @@
 import os
 import tempfile
 
-import logging
-
 from tendrl.commons import flows
-
-LOG = logging.getLogger(__name__)
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 class SetupSsh(flows.BaseFlow):
@@ -33,5 +31,11 @@ class SetupSsh(flows.BaseFlow):
         _temp_file.close()
         os.system("chmod +x %s" % _temp_file.name)
         retval = os.system('/usr/bin/bash %s' % _temp_file.name)
-        LOG.info("SSH setup result %s" % retval)
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "SSH setup result %s" % retval}
+            )
+        )
         os.remove(_temp_file.name)

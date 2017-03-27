@@ -1,12 +1,10 @@
 import abc
-import logging
-
 import six
 
+from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.message import Message, ExceptionMessage
 from tendrl.commons.objects import AtomExecutionFailedError
-
-LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -35,8 +33,17 @@ class BaseFlow(object):
         cls_name = self.__class__.__name__
         if hasattr(self, "obj"):
             obj_name = self.obj.__name__
-            LOG.debug("Load definitions for namespace.%s.objects.%s.flows.%s",
-                      self._ns.ns_src, obj_name, cls_name)
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Load definitions for namespace.%s."
+                                        "objects.%s.flows.%s" % (
+                                            self._ns.ns_src, obj_name,
+                                            cls_name)
+                             }
+                )
+            )
             try:
                 return self._ns.get_obj_flow_definition(obj_name,
                                                         cls_name)
@@ -45,8 +52,20 @@ class BaseFlow(object):
                       "namespace.%s.objects.%s.flows.%s" % (self._ns.ns_src,
                                                             obj_name,
                                                             cls_name)
-                LOG.error(ex)
-                LOG.error(msg)
+                Event(
+                    ExceptionMessage(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error", "exception": ex}
+                    )
+                )
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
                 raise Exception(msg)
             finally:
                 self.to_str = "%s.objects.%s.flows.%s" % (self._ns.ns_name,
@@ -54,15 +73,35 @@ class BaseFlow(object):
                                                           cls_name)
 
         else:
-            LOG.debug("Load definitions for namespace.%s.flows.%s",
-                      self._ns.ns_src, cls_name)
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Load definitions for namespace.%s."
+                                        "flows.%s" % (self._ns.ns_src,
+                                                      cls_name)
+                             }
+                )
+            )
             try:
                 return self._ns.get_flow_definition(cls_name)
             except KeyError as ex:
                 msg = "Could not find definitions for namespace.%s.flows.%s" %\
                       (self._ns.ns_src, cls_name)
-                LOG.error(ex)
-                LOG.error(msg)
+                Event(
+                    ExceptionMessage(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error", "exception": ex}
+                    )
+                )
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
                 raise Exception(msg)
             finally:
                 self.to_str = "%s.flows.%s" % (self._ns.ns_name, cls_name)
@@ -71,7 +110,13 @@ class BaseFlow(object):
     def run(self):
         # Execute the pre runs for the flow
         msg = "Processing pre-runs for flow: %s" % self.to_str
-        LOG.info(msg)
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": msg}
+            )
+        )
         # Check for mandatory parameters
         if 'mandatory' in self._defs.get('inputs', {}):
             for item in self._defs['inputs']['mandatory']:
@@ -83,14 +128,26 @@ class BaseFlow(object):
         if self._defs.get("pre_run") is not None:
             for atom_fqn in self._defs.get("pre_run"):
                 msg = "Start pre-run : %s" % atom_fqn
-                LOG.info(msg)
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
 
                 ret_val = self._execute_atom(atom_fqn)
 
                 if not ret_val:
                     msg = "Failed pre-run: %s for flow: %s" % \
                           (atom_fqn, self._defs['help'])
-                    LOG.error(msg)
+                    Event(
+                        Message(
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
                     raise AtomExecutionFailedError(
                         "Error executing pre run function: %s for flow: %s" %
                         (atom_fqn, self._defs['help'])
@@ -98,22 +155,46 @@ class BaseFlow(object):
                 else:
                     msg = "Finished pre-run: %s for flow: %s" %\
                           (atom_fqn, self._defs['help'])
-                    LOG.info(msg)
+                    Event(
+                        Message(
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
 
         # Execute the atoms for the flow
         msg = "Processing atoms for flow: %s" % self._defs['help']
-        LOG.info(msg)
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": msg}
+            )
+        )
 
         for atom_fqn in self._defs.get("atoms"):
             msg = "Start atom : %s" % atom_fqn
-            LOG.info(msg)
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": msg}
+                )
+            )
 
             ret_val = self._execute_atom(atom_fqn)
 
             if not ret_val:
                 msg = "Failed atom: %s on flow: %s" % \
                       (atom_fqn, self._defs['help'])
-                LOG.error(msg)
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
                 raise AtomExecutionFailedError(
                     "Error executing atom: %s on flow: %s" %
                     (atom_fqn, self._defs['help'])
@@ -121,29 +202,59 @@ class BaseFlow(object):
             else:
                 msg = 'Finished atom %s for flow: %s' %\
                       (atom_fqn, self._defs['help'])
-                LOG.info(msg)
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
 
         # Execute the post runs for the flow
         msg = "Processing post-runs for flow: %s" % self._defs['help']
-        LOG.info(msg)
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": msg}
+            )
+        )
         if self._defs.get("post_run") is not None:
             for atom_fqn in self._defs.get("post_run"):
                 msg = "Start post-run : %s" % atom_fqn
-                LOG.info(msg)
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
+                    )
+                )
 
                 ret_val = self._execute_atom(atom_fqn)
 
                 if not ret_val:
                     msg = "Failed post-run: %s for flow: %s" % \
                           (atom_fqn, self._defs['help'])
-                    LOG.error(msg)
+                    Event(
+                        Message(
+                            priority="error",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
                     raise AtomExecutionFailedError(
                         "Error executing post run function: %s" % atom_fqn
                     )
                 else:
                     msg = "Finished post-run: %s for flow: %s" %\
                           (atom_fqn, self._defs['help'])
-                    LOG.info(msg)
+                    Event(
+                        Message(
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
 
     def _execute_atom(self, atom_fqdn):
         try:
@@ -166,6 +277,12 @@ class BaseFlow(object):
                 return False
 
         except (KeyError, AttributeError) as ex:
-            LOG.error(ex)
+            Event(
+                ExceptionMessage(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Error", "exception": ex}
+                )
+            )
 
         return False

@@ -1,4 +1,3 @@
-import logging
 import os
 import subprocess
 import tempfile
@@ -6,7 +5,8 @@ import tempfile
 import ansible.executor.module_common as module_common
 from ansible import modules
 
-LOG = logging.getLogger(__name__)
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 try:
     import json
@@ -29,10 +29,24 @@ class AnsibleRunner(object):
     def __init__(self, module_path, **kwargs):
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
-            LOG.error("Module path: %s does not exist", self.module_path)
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Module path: %s does not exist" %
+                                        self.module_path
+                             }
+                )
+            )
             raise ValueError
         if kwargs == {}:
-            LOG.error("Empty argument dictionary")
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Empty argument dictionary"}
+                )
+            )
             raise ValueError
         else:
             self.argument_dict = kwargs
@@ -49,8 +63,16 @@ class AnsibleRunner(object):
                     task_vars={}
                 )
         except Exception as e:
-            LOG.error("Could not generate executable data for module"
-                      ": %s. Error: %s", self.module_path, str(e))
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Could not generate executable data "
+                                        "for module  : %s. Error: %s" %
+                                        (self.module_path, str(e))
+                             }
+                )
+            )
             raise AnsibleExecutableGenerationFailed(
                 self.module_path,
                 str(e)
