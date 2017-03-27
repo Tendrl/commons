@@ -40,15 +40,6 @@ namespace.tendrl:
       version: 1
 
   objects:
-    Definition:
-        enabled: True
-        help: "Definition"
-        value: _NS/tendrl/definitions/data
-        list: _NS/tendrl/definitions/data
-        attrs:
-            master:
-                help: master definitions
-                type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
