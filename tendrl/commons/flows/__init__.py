@@ -11,7 +11,6 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
-    internal = True
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
