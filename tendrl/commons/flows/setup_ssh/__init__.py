@@ -10,6 +10,12 @@ LOG = logging.getLogger(__name__)
 
 
 class SetupSsh(flows.BaseFlow):
+    internal = True
+    _defs = {
+        "help": "Setup SSH",
+        "uuid": "dc4c8775-1595-43c7-a6c6-517f00844123"
+    }
+
     def run(self):
         ssh_setup_script = self.parameters.get("ssh_setup_script")
         _temp_file = tempfile.NamedTemporaryFile(mode="w+",
@@ -24,7 +30,3 @@ class SetupSsh(flows.BaseFlow):
         retval = os.system('/usr/bin/bash %s' % _temp_file.name)
         LOG.info("SSH setup result %s" % retval)
         os.remove(_temp_file.name)
-
-    def load_definition(self):
-        self._defs = {"help": "Setup SSH",
-                      "uuid": "dc4c8775-1595-43c7-a6c6-517f0081598f"}
