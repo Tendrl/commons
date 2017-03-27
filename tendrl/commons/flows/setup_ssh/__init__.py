@@ -9,11 +9,14 @@ from tendrl.commons.message import Message
 
 class SetupSsh(flows.BaseFlow):
     internal = True
-    
+
     def __init__(self, *args, **kwargs):
-        self._defs = {}
+        self._defs = {
+            "help": "Setup SSH",
+            "uuid": "759e639a-1315-11e7-93ae-92361f002672"
+        }
         super(SetupSsh, self).__init__(*args, **kwargs)
-    
+
     def run(self):
         ssh_setup_script = self.parameters.get("ssh_setup_script")
         _temp_file = tempfile.NamedTemporaryFile(

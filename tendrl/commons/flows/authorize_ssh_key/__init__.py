@@ -9,11 +9,14 @@ LOG = logging.getLogger(__name__)
 
 class AuthorizeSshKey(flows.BaseFlow):
     internal = True
-    
+
     def __init__(self, *args, **kwargs):
-        self._defs = {}
+        self._defs = {
+            "help": "Authorize SSH Key",
+            "uuid": "759e639a-1315-11e7-93ae-92361f002671"
+        }
         super(AuthorizeSshKey, self).__init__(*args, **kwargs)
-        
+
     def run(self):
         ssh_key = self.parameters['ssh_key']
         ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()

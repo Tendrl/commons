@@ -57,7 +57,7 @@ class AuthorizeKey(object):
                                             str(e.message))}
                 )
             )
-        if err is not "":
+        if err != "":
             Event(
                 Message(
                     priority="warning",
