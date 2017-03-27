@@ -1,4 +1,3 @@
-import logging
 import os
 import socket
 import sys
@@ -7,13 +6,12 @@ import uuid
 import errno
 
 from tendrl.commons.etcdobj import EtcdObj
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects
 import traceback
-
-LOG = logging.getLogger(__name__)
-
 
 class NodeContext(objects.BaseObject):
 
@@ -55,7 +53,19 @@ class NodeContext(objects.BaseObject):
 
         with open(local_node_context, 'wb+') as f:
             f.write(node_id)
-            LOG.info("SET_LOCAL: NS.objects.NodeContext.node_id==%s", node_id)
+            try:
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "SET_LOCAL: NS.objects.NodeContext."
+                                            "node_id==%s" % node_id
+                                 }
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("SET_LOCAL: NS.objects.NodeContext.node_id=="
+                                 "%s" % node_id)
         return node_id
 
     def _get_node_id(self):
@@ -66,8 +76,21 @@ class NodeContext(objects.BaseObject):
                 with open(local_node_context) as f:
                     node_id = f.read()
                     if node_id:
-                        LOG.info("GET_LOCAL: "
-                                 "NS.objects.NodeContext.node_id==%s", node_id)
+                        try:
+                            Event(
+                                Message(
+                                    priority="info",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "GET_LOCAL: NS."
+                                                        "objects.NodeContext."
+                                                        "node_id==%s" % node_id
+                                             }
+                                )
+                            )
+                        except KeyError:
+                            sys.stdout.write("GET_LOCAL: NS.objects."
+                                             "NodeContext.node_id==%s" %
+                                             node_id)
                         return node_id
         except AttributeError:
             return None

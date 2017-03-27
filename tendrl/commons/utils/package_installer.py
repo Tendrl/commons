@@ -1,9 +1,8 @@
-import logging
-
 from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 
-LOG = logging.getLogger(__name__)
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 class Installer(object):
@@ -19,9 +18,16 @@ class Installer(object):
         elif package_type == "deb":
             self.ansible_module_path = "core/packaging/os/apt.py"
         else:
-            msg = "Unsupported package type: %s" % package_type
-            LOG.error(msg)
-            raise ValueError(msg)
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Unsupported package type: %s" %
+                                        package_type
+                             }
+                )
+            )
+            raise ValueError("Unsupported package type: %s" % package_type)
 
         if package_version:
             self.attributes["name"] = package_name + "-" + package_version
@@ -33,10 +39,24 @@ class Installer(object):
                 **self.attributes
             )
             result, err = runner.run()
-            LOG.debug("INSTALLATION: %s", result)
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={"message": "INSTALLATION: %s" % result}
+                )
+            )
         except AnsibleExecutableGenerationFailed as e:
-            LOG.error("Could not install package: %s. Error: %s",
-                      self.attributes["name"], str(e))
+            Event(
+                Message(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Could not install package: %s. Error:"
+                                        " %s" %
+                                        (self.attributes["name"], str(e))
+                             }
+                )
+            )
             return e.message, False
         message = result.get("msg", "").encode("ascii")
         if result.get("rc", -1) == 0:

@@ -1,26 +1,53 @@
 # flake8: noqa
 import gevent
-import logging
 
+from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-
-LOG = logging.getLogger(__name__)
+from tendrl.commons.message import Message
 
 def create_ceph(parameters):
     # install the packages
-    LOG.info("Installing Ceph Packages %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Installing Ceph Packages %s" %
+                                parameters['fsid']
+                     }
+        )
+    )
     mon_ips, osd_ips = install_packages(parameters)
     # Configure Mons
-    LOG.info("Creating Ceph Monitors %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Creating Ceph Monitors %s" %
+                                parameters['fsid']
+                     }
+        )
+    )
 
     created_mons = create_mons(parameters, mon_ips)
     # Configure osds
-    LOG.info("Creating Ceph OSD %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Creating Ceph OSD %s" % parameters['fsid']}
+        )
+    )
     create_osds(parameters, created_mons)
-    LOG.info("Created Ceph Cluster %s" % parameters['fsid'])
+    Event(
+        Message(
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Created Ceph Cluster %s" % parameters['fsid']}
+        )
+    )
 
 def install_packages(parameters):
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     mon_ips = []
     osd_ips = []
     for node, config in parameters["node_configuration"].iteritems():
@@ -41,7 +68,7 @@ def install_packages(parameters):
 
 def create_mons(parameters, mon_ips):
     created_mons = []
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     for mon_ip in mon_ips:
             task_id = plugin.configure_mon(mon_ip,
                                            parameters['fsid'],
@@ -62,7 +89,7 @@ def create_mons(parameters, mon_ips):
 
 def create_osds(parameters, created_mons):
     failed = []
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     for node, config in parameters["node_configuration"].iteritems():
         if "osd" in config["role"].lower():
             if config["journal_colocation"]:
@@ -92,7 +119,7 @@ def create_osds(parameters, created_mons):
 def sync_task_status(task_id):
     status = False
     count = 0
-    plugin = NS.provisioner.get_plugin()
+    plugin = NS.ceph_provisioner.get_plugin()
     resp = {}
     while count < 90:
         gevent.sleep(10)
