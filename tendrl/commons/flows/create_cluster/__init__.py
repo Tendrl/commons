@@ -13,12 +13,6 @@ from tendrl.commons.flows.create_cluster import ceph_help
 LOG = logging.getLogger(__name__)
 
 class CreateCluster(flows.BaseFlow):
-    internal = True
-    _defs = {
-        "help": "Create Cluster",
-        "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"
-    }
-
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
         NS.tendrl_context.integration_id = integration_id
@@ -60,7 +54,3 @@ class CreateCluster(flows.BaseFlow):
 
         # SSH setup jobs finished above, now install ceph
         ceph_help.create_ceph(self.parameters)
-
-    def load_definition(self):
-        self._defs = {"help": "Create Cluster",
-                      "uuid": "dc4c8775-1595-43c7-a6c6-517f0084498f"}
