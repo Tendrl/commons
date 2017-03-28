@@ -198,6 +198,8 @@ class TendrlNS(object):
         # Validate discovered/registered (.py) objs and its atoms, flows
         # (non-internal) against their definitions (.yml) (non-internal
         # flows only)
+        defined_objs = defs.get("objects", {})
+        defined_objs = {obj: val for obj, val in defined_objs.iteritems() if "internal" not in val}
         if self.current_ns.objects:
             try:
                 Event(
@@ -212,7 +214,6 @@ class TendrlNS(object):
             except KeyError:
                 sys.stdout.write("Validating registered (.py) objects in "
                                  "%s.objects" % raw_ns)
-            defined_objs = defs.get("objects", {})
             regd_objs = [obj_name for obj_name in self._get_objects()
                          if not hasattr(self._get_object(obj_name), "internal")
                          and "BaseObject" not in obj_name]
@@ -326,7 +327,7 @@ class TendrlNS(object):
                             sys.stderr.write(msg)
                         raise Exception(msg)
                         
-        if defs.get("objects", {}):
+        if defined_objs:
             '''
             Validate defined (.yml) objs and its atoms, flows against
             their discovered/registered (.py) counterparts (non-internal
@@ -345,7 +346,6 @@ class TendrlNS(object):
             except KeyError:
                 sys.stdout.write("Validating defined (.yml) objects in %s."
                                  "objects" % raw_ns)
-            defined_objs = defs.get("objects", {})
             regd_objs = [obj_name for obj_name in self._get_objects()
                          if not hasattr(self._get_object(obj_name),
                                         "internal") and "BaseObject" not in

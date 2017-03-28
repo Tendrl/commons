@@ -21,7 +21,7 @@ class CreateCluster(flows.BaseFlow):
         NS.tendrl_context.integration_id = integration_id
         NS.tendrl_context.save()
         ssh_job_ids = []
-        if self.parameters['sds_type'] == "ceph":
+        if "ceph" in self.parameters["TendrlContext.sds_name"]:
             ssh_job_ids = utils.ceph_create_ssh_setup_jobs(self.parameters)
         else:
             ssh_job_ids = utils.gluster_create_ssh_setup_jobs(self.parameters)
@@ -36,7 +36,7 @@ class CreateCluster(flows.BaseFlow):
                 all_ssh_jobs_done = True
 
         # SSH setup jobs finished above, now install sds bits and create cluster
-        if self.parameters['sds_type'] == "ceph":
+        if "ceph" in self.parameters["TendrlContext.sds_name"]:
             ceph_help.create_ceph(self.parameters)
         else:
             gluster_help.create_gluster(self.parameters)

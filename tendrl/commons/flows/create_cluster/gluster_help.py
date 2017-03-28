@@ -6,7 +6,7 @@ from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
 def get_node_ips(parameters):
     node_ips = []
-    for node, config in parameters["node_configuration"].iteritems():
+    for node, config in parameters["Cluster.node_configuration"].iteritems():
         node_ips.append(config["provisioning_ip"])
     return node_ips
 
@@ -19,7 +19,7 @@ def create_gluster(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Setting up gluster nodes %s" %
-                                parameters['fsid']
+                                parameters['TendrlContext.cluster_id']
                      }
         )
     )
@@ -32,7 +32,7 @@ def create_gluster(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Creating gluster cluster %s" %
-                                parameters['fsid']
+                                parameters['TendrlContext.cluster_id']
                      }
         )
     )
@@ -45,7 +45,7 @@ def create_gluster(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Created Gluster Cluster %s" %
-                                parameters['fsid']
+                                parameters['TendrlContext.cluster_id']
                      }
         )
     )
