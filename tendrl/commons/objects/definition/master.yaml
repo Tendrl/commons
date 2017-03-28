@@ -48,6 +48,9 @@ namespace.tendrl:
         detected_cluster_id:
           help: "Temporary id for the sds which is detected in Tendrl"
           type: String
+        detected_cluster_name:
+          help: "Name of the sds which is detected in Tendrl"
+          type: String
         sds_pkg_name:
           help: Storage system package name
           type: String
