@@ -7,7 +7,7 @@ from ruamel import yaml
 
 from tendrl.commons.utils import ansible_module_runner
 
-def import_ceph(integration_id):
+def import_ceph():
     logging_file_name = "ceph-integration_logging.yaml"
     logging_config_file_path = "/etc/tendrl/ceph-integration/"
     attributes = {}
@@ -45,9 +45,5 @@ def import_ceph(integration_id):
     with open("/etc/tendrl/ceph-integration/ceph-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
-
-    ceph_integration_context = "/etc/tendrl/ceph-integration/integration_id"
-    with open(ceph_integration_context, 'wb+') as f:
-        f.write(integration_id)
 
     subprocess.Popen(["nohup", "tendrl-ceph-integration", "&"])

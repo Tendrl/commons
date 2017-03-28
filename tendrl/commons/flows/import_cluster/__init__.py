@@ -52,7 +52,7 @@ class ImportCluster(flows.BaseFlow):
                 raise FlowExecutionFailedError(
                     "Error while checking pre-participation of nodes in any cluster"
                 )
-
+        NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
         NS.tendrl_context.save()
         node_list = self.parameters['Node[]']

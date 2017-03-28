@@ -17,6 +17,7 @@ from tendrl.commons.objects.job import Job
 class CreateCluster(flows.BaseFlow):
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
+        NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
         NS.tendrl_context.save()
         ssh_job_ids = []
