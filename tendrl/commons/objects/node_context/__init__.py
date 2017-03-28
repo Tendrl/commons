@@ -55,7 +55,7 @@ class NodeContext(objects.BaseObject):
             )
         )
         except KeyError:
-            sys.stdout.write("message": "Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id))
+            sys.stdout.write("message: Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id))
         return node_id
 
     def _get_node_id(self):
