@@ -5,7 +5,7 @@ from ansible_module_runner import AnsibleExecutableGenerationFailed
 from ansible_module_runner import AnsibleRunner
 
 from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.message import ExceptionMessage, Message
 
 ANSIBLE_MODULE_PATH = "core/commands/command.py"
 
@@ -54,14 +54,12 @@ class Command(object):
         except AnsibleExecutableGenerationFailed as e:
             try:
                 Event(
-                    Message(
+                    ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "could not run the command %s. "
-                                            "Error: %s" %
-                                            (self.attributes["_raw_params"],
-                                             str(e)
-                                             )
+                        payload={"message": "could not run the command %s. " %
+                                            self.attributes["_raw_params"],
+                                 "exception": e
                                  }
                     )
                 )
