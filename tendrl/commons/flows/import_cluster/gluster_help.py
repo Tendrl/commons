@@ -7,7 +7,7 @@ from ruamel import yaml
 
 from tendrl.commons.utils import ansible_module_runner
 
-def import_gluster(integration_id):
+def import_gluster():
     logging_file_name = "gluster-integration_logging.yaml"
     logging_config_file_path = "/etc/tendrl/gluster-integration/"
 
@@ -47,9 +47,5 @@ def import_gluster(integration_id):
     with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
-
-    gluster_integration_context = "/etc/tendrl/gluster-integration/integration_id"
-    with open(gluster_integration_context, 'wb+') as f:
-        f.write(integration_id)
 
     subprocess.Popen(["nohup", "tendrl-gluster-integration", "&"])
