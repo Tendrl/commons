@@ -66,11 +66,9 @@ class BaseObject(object):
         try:
             current_obj = self.load()
             for attr, val in self.__dict__.iteritems():
-                if val is None:
-                    val = "None"
                 if attr.startswith("_") or attr in ['value', 'list']:
                     continue
-
+                
                 setattr(current_obj, attr, val)
 
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
