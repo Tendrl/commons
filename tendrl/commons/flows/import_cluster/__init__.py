@@ -41,10 +41,10 @@ class ImportCluster(flows.BaseFlow):
         else:
             try:
                 for entry in self.parameters["Node[]"]:
-                    integration_id = NS.etcd_orm.client.read(
+                    _integration_id = NS.etcd_orm.client.read(
                         'nodes/%s/TendrlContext/integration_id' % entry
                     )
-                    if integration_id.value != "":
+                    if _integration_id.value != "":
                         raise FlowExecutionFailedError(
                             "Nodes already participate in existing cluster"
                         )
