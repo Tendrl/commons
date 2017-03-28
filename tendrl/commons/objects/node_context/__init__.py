@@ -45,11 +45,12 @@ class NodeContext(objects.BaseObject):
         node_id = str(uuid.uuid4())
         index_key = "/indexes/machine_id/%s" % self.machine_id
         NS.etcd_orm.client.write(index_key, node_id)
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id)
+        try:
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id)
                          }
             )
         )
@@ -62,14 +63,15 @@ class NodeContext(objects.BaseObject):
             return NS.etcd_orm.client.read("/indexes/machine_id/%s" % self.machine_id).value
 
         except etcd.EtcdKeyNotFound:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Unregistered Node found with machine_id==%s" % self.machine_id
-                             }
+            try:
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Unregistered Node found with machine_id==%s" % self.machine_id
+                                }
+                 )
                 )
-            )
             except KeyError:
                 sys.stdout.write("Unregistered Node found with machine_id==%s" %
                                  self.machine_id)
