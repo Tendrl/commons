@@ -68,9 +68,13 @@ class BaseObject(object):
             for attr, val in self.__dict__.iteritems():
                 if attr.startswith("_") or attr in ['value', 'list']:
                     continue
-                
-                setattr(current_obj, attr, val)
-
+                if val is None:
+                    # Dont update attr if self.attr has None val
+                    setattr(current_obj, attr, getattr(current_obj, attr))
+                else:
+                    # Only update attr if self.attr has a new val
+                    setattr(current_obj, attr, val)
+                    
             cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
         except etcd.EtcdKeyNotFound as ex:
             # No need to log the error. This would keep happening
