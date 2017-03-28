@@ -12,7 +12,7 @@ def create_ceph(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Installing Ceph Packages %s" %
-                                parameters['fsid']
+                                parameters['TendrlContext.cluster_id']
                      }
         )
     )
@@ -23,7 +23,7 @@ def create_ceph(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Creating Ceph Monitors %s" %
-                                parameters['fsid']
+                                parameters['TendrlContext.cluster_id']
                      }
         )
     )
@@ -34,7 +34,7 @@ def create_ceph(parameters):
         Message(
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Creating Ceph OSD %s" % parameters['fsid']}
+            payload={"message": "Creating Ceph OSD %s" % parameters['TendrlContext.cluster_id']}
         )
     )
     create_osds(parameters, created_mons)
@@ -42,7 +42,7 @@ def create_ceph(parameters):
         Message(
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Created Ceph Cluster %s" % parameters['fsid']}
+            payload={"message": "Created Ceph Cluster %s" % parameters['TendrlContext.cluster_id']}
         )
     )
 
@@ -50,7 +50,7 @@ def install_packages(parameters):
     plugin = NS.ceph_provisioner.get_plugin()
     mon_ips = []
     osd_ips = []
-    for node, config in parameters["node_configuration"].iteritems():
+    for node, config in parameters["Cluster.node_configuration"].iteritems():
         if "mon" in config["role"].lower():
             mon_ips.append(config["provisioning_ip"])
         elif "osd" in config["role"].lower():
@@ -71,11 +71,11 @@ def create_mons(parameters, mon_ips):
     plugin = NS.ceph_provisioner.get_plugin()
     for mon_ip in mon_ips:
             task_id = plugin.configure_mon(mon_ip,
-                                           parameters['fsid'],
-                                           parameters["name"],
+                                           parameters['TendrlContext.cluster_id'],
+                                           parameters["TendrlContext.cluster_name"],
                                            mon_ip,
-                                           parameters["cluster_network"],
-                                           parameters["public_network"],
+                                           parameters["Cluster.cluster_network"],
+                                           parameters["Cluster.public_network"],
                                            created_mons
                                            )
             status, err = sync_task_status(task_id)
@@ -90,7 +90,7 @@ def create_mons(parameters, mon_ips):
 def create_osds(parameters, created_mons):
     failed = []
     plugin = NS.ceph_provisioner.get_plugin()
-    for node, config in parameters["node_configuration"].iteritems():
+    for node, config in parameters["Cluster.node_configuration"].iteritems():
         if "osd" in config["role"].lower():
             if config["journal_colocation"]:
                 devices = []
@@ -104,11 +104,11 @@ def create_osds(parameters, created_mons):
                 task_id = plugin.configure_osd(
                     config["provisioning_ip"],
                     devices,
-                    parameters["fsid"],
-                    parameters["name"],
+                    parameters["TendrlContext.cluster_id"],
+                    parameters["TendrlContext.cluster_name"],
                     config["journal_size"],
-                    parameters["cluster_network"],
-                    parameters["public_network"],
+                    parameters["Cluster.cluster_network"],
+                    parameters["Cluster.public_network"],
                     created_mons
                     )
                 status, err = sync_task_status(task_id)
