@@ -9,22 +9,6 @@ from tendrl.commons.objects import AtomExecutionFailedError
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseFlow(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "internal"):
-            if hasattr(cls, "load_definition"):
-                Event(
-                    Message(
-                        priority="warning",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Non internal Flow %s cannot use "
-                                            "load_definition, must have "
-                                            "definition in (.yml)" %
-                                 cls.__name__
-                                 }
-                    )
-                )
-        return object.__new__(cls, *args, **kwargs)
-
     def __init__(self, parameters=None, job_id=None):
         # Tendrl internal flows should populate their own self._defs
         if not hasattr(self, "internal"):
