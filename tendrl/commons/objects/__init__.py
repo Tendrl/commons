@@ -9,13 +9,6 @@ from tendrl.commons.message import ExceptionMessage, Message
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "internal"):
-            if hasattr(cls, "load_definition"):
-                LOG.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
-                           cls.__name__)
-        return object.__new__(cls, *args, **kwargs)
-
     def __init__(self):
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
@@ -24,31 +17,23 @@ class BaseObject(object):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Object must provide its own definition via '_defs' attr")
 
-    def __new__(cls, *args, **kwargs):
-
-        super_new = super(BaseObject, cls).__new__
-        if super_new is object.__new__:
-            instance = super_new(cls)
-        else:
-            instance = super_new(cls, *args, **kwargs)
-
-        return instance
-
     def load_definition(self):
         try:
             Event(
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for namespace.%s."
-                                        "objects.%s" % (self._ns.ns_name,
-                                                        self.__class__.__name__)
+                    payload={"message": "Load definitions (.yml) for "
+                                        "namespace.%s.objects.%s" %
+                                        (self._ns.ns_name,
+                                         self.__class__.__name__)
                              }
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s" %
-                             (self._ns.ns_name, self.__class__.__name__))
+            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects"
+                             ".%s" % (self._ns.ns_name,
+                                      self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
@@ -81,11 +66,9 @@ class BaseObject(object):
         try:
             current_obj = self.load()
             for attr, val in self.__dict__.iteritems():
-                if attr in ["defs"]:
-                    continue
                 if val is None:
-                    continue
-                if attr.startswith("_"):
+                    val = "None"
+                if attr.startswith("_") or attr in ['value', 'list']:
                     continue
 
                 setattr(current_obj, attr, val)
@@ -110,13 +93,6 @@ class BaseObject(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "internal"):
-            if hasattr(cls, "load_definition"):
-                LOG.warning("Non internal Atom %s cannot use load_definition, must have definition in (.yml)",
-                           cls.__name__)
-        return object.__new__(cls, *args, **kwargs)
-
     def __init__(self, parameters=None):
         self.parameters = parameters
 
@@ -162,7 +138,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Error: %s" % ex)
+                sys.stderr.write("Error: %s" % ex)
             try:
                 Event(
                     Message(
@@ -172,7 +148,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write(msg)
+                sys.stderr.write(msg)
             raise Exception(msg)
 
     @abc.abstractmethod
@@ -180,17 +156,6 @@ class BaseAtom(object):
         raise AtomNotImplementedError(
             'define the function run to use this class'
         )
-
-    def __new__(cls, *args, **kwargs):
-
-        super_new = super(BaseAtom, cls).__new__
-        if super_new is object.__new__:
-            instance = super_new(cls)
-        else:
-            instance = super_new(cls, *args, **kwargs)
-
-        return instance
-
 
 class AtomNotImplementedError(NotImplementedError):
     def __init___(self, err):
