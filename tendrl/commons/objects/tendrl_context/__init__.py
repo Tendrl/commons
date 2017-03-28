@@ -1,10 +1,5 @@
-import logging
-
 from tendrl.commons.etcdobj import EtcdObj
 from tendrl.commons import objects
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TendrlContext(objects.BaseObject):
@@ -15,7 +10,7 @@ class TendrlContext(objects.BaseObject):
         cluster_name=None,
         sds_name=None,
         sds_version=None,
-        *args, **kwargs):
+            *args, **kwargs):
         super(TendrlContext, self).__init__(*args, **kwargs)
 
         self.value = 'nodes/%s/TendrlContext'

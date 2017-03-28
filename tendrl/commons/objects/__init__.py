@@ -12,8 +12,29 @@ class BaseObject(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                LOG.warning("Non internal Object %s cannot use load_definition, must have definition in (.yml)",
-                           cls.__name__)
+
+                '''
+                Note: Log messages in this file have try-except blocks to run
+                in the condition when the node_agent has not been started and
+                name spaces are being created.
+                '''
+
+                try:
+                    Event(
+                        Message(
+                            priority="warning",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Non internal Object %s cannot"
+                                                " use load_definition, must "
+                                                "have definition in (.yml)"
+                                                % cls.__name__
+                                     }
+                        )
+                    )
+                except KeyError:
+                    sys.stdout.write("Non internal Object %s cannot use "
+                                     "load_definition, must have definition in"
+                                     " (.yml)" % cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self):
@@ -40,15 +61,17 @@ class BaseObject(object):
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for namespace.%s."
-                                        "objects.%s" % (self._ns.ns_name,
-                                                        self.__class__.__name__)
+                    payload={"message": "Load definitions (.yml) for "
+                                        "namespace.%s.objects.%s" %
+                                        (self._ns.ns_name,
+                                         self.__class__.__name__)
                              }
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s" %
-                             (self._ns.ns_name, self.__class__.__name__))
+            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects"
+                             ".%s" % (self._ns.ns_name,
+                                      self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
@@ -113,8 +136,22 @@ class BaseAtom(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                LOG.warning("Non internal Atom %s cannot use load_definition, must have definition in (.yml)",
-                           cls.__name__)
+                try:
+                    Event(
+                        Message(
+                            priority="warning",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Non internal Atom %s cannot "
+                                                "use load_definition, must "
+                                                "have definition in (.yml)"
+                                                % cls.__name__
+                                     }
+                        )
+                    )
+                except KeyError:
+                    sys.stdout.write("Non internal Atom %s cannot use "
+                                     "load_definition, must have definition "
+                                     "in (.yml)" % cls.__name__)
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self, parameters=None):
@@ -162,7 +199,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Error: %s" % ex)
+                sys.stderr.write("Error: %s" % ex)
             try:
                 Event(
                     Message(
@@ -172,7 +209,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write(msg)
+                sys.stderr.write(msg)
             raise Exception(msg)
 
     @abc.abstractmethod

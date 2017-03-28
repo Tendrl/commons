@@ -1,16 +1,10 @@
 import json
-import logging
-import os
-import socket
-import uuid
-
-from tendrl.commons.etcdobj import EtcdObj
-from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects
 
+from tendrl.commons.etcdobj import EtcdObj
 
-LOG = logging.getLogger(__name__)
+
 
 
 class ClusterNodeContext(objects.BaseObject):

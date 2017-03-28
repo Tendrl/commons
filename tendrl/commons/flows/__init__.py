@@ -12,8 +12,17 @@ class BaseFlow(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "internal"):
             if hasattr(cls, "load_definition"):
-                LOG.warning("Non internal Flow %s cannot use load_definition, must have definition in (.yml)",
-                           cls.__name__)
+                Event(
+                    Message(
+                        priority="warning",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Non internal Flow %s cannot use "
+                                            "load_definition, must have "
+                                            "definition in (.yml)" %
+                                 cls.__name__
+                                 }
+                    )
+                )
         return object.__new__(cls, *args, **kwargs)
 
     def __init__(self, parameters=None, job_id=None):
@@ -22,7 +31,8 @@ class BaseFlow(object):
             self._defs = BaseFlow.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
-                raise Exception("Internal Flow must provide its own definition via '_defs' attr")
+                raise Exception("Internal Flow must provide its own definition"
+                                " via '_defs' attr")
 
         self.parameters = parameters
         self.job_id = job_id
