@@ -11,16 +11,15 @@ namespace.tendrl:
       inputs:
         mandatory:
           - "Node[]"
-          - name
-          - sds_type
-          - sds_version
-          - fsid
-          - public_network
-          - cluster_network
+          - TendrlContext.cluster_name
+          - TendrlContext.sds_name
+          - TendrlContext.sds_version
+          - TendrlContext.cluster_id
+          - Cluster.public_network
+          - Cluster.cluster_network
           - TendrlContext.integration_id
-          - node_configuration
-        optional:
-          - ceph_conf_overrides
+          - Cluster.node_configuration
+          - Cluster.conf_overrides
       run: tendrl.flows.CreateCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
@@ -40,6 +39,23 @@ namespace.tendrl:
       version: 1
 
   objects:
+    Cluster:
+      internal: True
+      enabled: True
+      help: "Represents a cluster"
+      list: /clusters
+      attrs:
+        public_network:
+          help: Public Network cidr of the cluster
+          type: String
+        cluster_network:
+          help: Data Nework cidr of the cluster
+        node_configuration:
+          help: Node configuration for the cluster nodes
+          type: String
+        conf_overrides:
+          help: Configuration overrides for the cluster
+          type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -383,7 +399,7 @@ namespace.tendrl:
           help: "Tendrl ID for the managed node"
           type: String
         cluster_id:
-          help: UUID of the cluster
+          help: "FSID (Ceph) or Gluster specific ID"
           type: String
         cluster_name:
           help: Name of the cluster
