@@ -23,15 +23,17 @@ class BaseObject(object):
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for namespace.%s."
-                                        "objects.%s" % (self._ns.ns_name,
-                                                        self.__class__.__name__)
+                    payload={"message": "Load definitions (.yml) for "
+                                        "namespace.%s.objects.%s" %
+                                        (self._ns.ns_name,
+                                         self.__class__.__name__)
                              }
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s" %
-                             (self._ns.ns_name, self.__class__.__name__))
+            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects"
+                             ".%s" % (self._ns.ns_name,
+                                      self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
@@ -136,7 +138,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Error: %s" % ex)
+                sys.stderr.write("Error: %s" % ex)
             try:
                 Event(
                     Message(
@@ -146,7 +148,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write(msg)
+                sys.stderr.write(msg)
             raise Exception(msg)
 
     @abc.abstractmethod

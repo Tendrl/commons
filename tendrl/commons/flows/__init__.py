@@ -15,7 +15,8 @@ class BaseFlow(object):
             self._defs = BaseFlow.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
-                raise Exception("Internal Flow must provide its own definition via '_defs' attr")
+                raise Exception("Internal Flow must provide its own definition"
+                                " via '_defs' attr")
 
         self.parameters = parameters
         self.job_id = job_id

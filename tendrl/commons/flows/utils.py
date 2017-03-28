@@ -1,11 +1,9 @@
 import json
-import logging
 import uuid
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
-
-LOG = logging.getLogger(__name__)
-
 
 def to_camel_case(snake_str):
     return "".join(x.title() for x in snake_str.split('_'))
@@ -35,8 +33,15 @@ def ceph_create_ssh_setup_jobs(parameters):
                     status="new",
                     payload=json.dumps(payload)).save()
                 ssh_job_ids.append(_job_id)
-                LOG.info("Created SSH setup job %s for node %s" % (
-                    _job_id, node))
+                Event(
+                    Message(
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Created SSH setup job %s for node"
+                                            " %s" % (_job_id, node)
+                                 }
+                    )
+                )
     return ssh_job_ids
 
 def gluster_create_ssh_setup_jobs(parameters):
@@ -44,7 +49,14 @@ def gluster_create_ssh_setup_jobs(parameters):
     ssh_job_ids = []
     ssh_key, err = NS.gluster_provisioner.get_plugin().setup()
     if err != "":
-        LOG.erro("Error generating ssh key")
+        Event(
+            Message(
+                priority="error",
+                publisher=NS.publisher_id,
+                payload={"message": "Error generating ssh key"
+                         }
+            )
+        )
         return ssh_job_ids
 
     for node in node_list:
@@ -68,7 +80,14 @@ def gluster_create_ssh_setup_jobs(parameters):
             payload=json.dumps(payload)
         ).save()
         ssh_job_ids.append(_job_id)
-        LOG.info("Created SSH setup job %s for node %s" % (
-            _job_id, node))
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Created SSH setup job %s for node %s" %
+                                    (_job_id, node)
+                         }
+            )
+        )
     return ssh_job_ids
 

@@ -4,8 +4,6 @@ from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.utils.ssh import authorize_key
 
-LOG = logging.getLogger(__name__)
-
 
 class AuthorizeSshKey(flows.BaseFlow):
     internal = True

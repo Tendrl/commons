@@ -1,16 +1,6 @@
-import json
-import logging
-import os
-import socket
-import uuid
-
-from tendrl.commons.etcdobj import EtcdObj
-from tendrl.commons.utils import cmd_utils
-
 from tendrl.commons import objects
 
-
-LOG = logging.getLogger(__name__)
+from tendrl.commons.etcdobj import EtcdObj
 
 
 class ClusterTendrlContext(objects.BaseObject):
@@ -22,7 +12,7 @@ class ClusterTendrlContext(objects.BaseObject):
         cluster_name=None,
         sds_name=None,
         sds_version=None,
-        *args, **kwargs):
+            *args, **kwargs):
 
         super(ClusterTendrlContext, self).__init__(*args, **kwargs)
         

@@ -78,6 +78,11 @@ class _Server(object):
         :rtype: EtcdObj
         """
         for item in obj.render():
+            '''
+                Note: Log messages in this file have try-except blocks to run
+                in the condition when the node_agent has not been started and
+                name spaces are being created.
+            '''
             try:
                 Event(
                     Message(
