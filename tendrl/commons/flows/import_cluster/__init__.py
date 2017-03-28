@@ -54,7 +54,14 @@ class ImportCluster(flows.BaseFlow):
                 )
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
+        _detected_cluster = NS.tendrl.objects.DetectedCluster().load()
+        NS.tendrl_context.cluster_id = _detected_cluster.detected_cluster_id
+        NS.tendrl_context.cluster_name =\
+            _detected_cluster.detected_cluster_name
+        NS.tendrl_context.sds_name = _detected_cluster.sds_pkg_name
+        NS.tendrl_context.sds_version = _detected_cluster.sds_pkg_version
         NS.tendrl_context.save()
+
         node_list = self.parameters['Node[]']
         if len(node_list) > 1:
             # This is the master node for this flow
