@@ -3,16 +3,20 @@ from gevent.socket import error as socket_error
 from gevent.socket import timeout as socket_timeout
 import sys
 from tendrl.commons.message import Message
+from tendrl.commons.logger import Logger
 import traceback
 
 
 class Event(object):
     def __init__(self, message, socket_path=None):
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.socket_path = socket_path
-        if self.socket_path is None:
-            self.socket_path = NS.config.data['logging_socket_path']
-        self._write(message)
+        if message.publisher == "node_agent":
+            Logger(message)
+        else:
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.socket_path = socket_path
+            if self.socket_path is None:
+                self.socket_path = NS.config.data['logging_socket_path']
+            self._write(message)
 
     def _write(self, message):
         try:
