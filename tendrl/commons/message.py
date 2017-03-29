@@ -107,42 +107,51 @@ class Message(object):
 
 
 class ExceptionMessage(Message):
+    # Normal trace will give function calls from try block
+    # but this function will identify traceback from start and
+    # traceback from try block, so it will give traceback like
+    # default python traceback
     def __init__(self, priority, publisher, payload):
         # skip last function call
+        # This will give traceback upto before try function call
         formatted_stack = traceback.extract_stack()[:-2]
+        _, _ , exc_traceback = sys.exc_info()
+        # This will give traceback inside try block
+        recent_call = traceback.extract_tb(exc_traceback)
         caller = getframeinfo(stack()[1][0])
         caller = {"filename": caller.filename,
                   "line_no": caller.lineno,
                   "function": caller.function}
-        exception_traceback, err = self.format_exception(
-            formatted_stack, payload)
-        if err is None:
-            payload["exception_traceback"] = exception_traceback
-            payload["exception_type"] = type(payload["exception"]).__name__
-            super(ExceptionMessage, self).__init__(
-                priority=priority, publisher=publisher, payload=payload,
-                caller=caller)
-        else:
-            sys.stderr.write(err)
-
-    def format_exception(self, formatted_stack, payload):
         if "exception" in payload:
             if isinstance(payload["exception"], Exception):
-                traceback = {}
-                for i in range(len(formatted_stack)):
-                    traceback[i] = {}
-                    file, line, module, function = formatted_stack[i]
-                    traceback[i]["file"] = file
-                    traceback[i]["line"] = line
-                    traceback[i]["module"] = module
-                    traceback[i]["function"] = function
-                return traceback, None
+                exception_traceback = self.format_exception(
+                    formatted_stack)
+                exception_traceback.extend(self.format_exception(
+                    recent_call))
+                payload["exception_traceback"] = exception_traceback
+                payload["exception_type"] = type(payload["exception"]).__name__
+                super(ExceptionMessage, self).__init__(
+                    priority=priority, publisher=publisher, payload=payload,
+                    caller=caller)
             else:
-                return None, "Given exception %s is not a subclass of " \
-                    "Exception class \n" % (str(payload["exception"]))
+                err = "Exception field is not found in payload"
+                sys.stderr.write(err)
         else:
-            return None, "Exception field is not found in payload"
+            err = "Given exception %s is not a subclass of " \
+                "Exception class \n" % (str(payload["exception"]))
+            sys.stderr.write(err)
+    
 
+    def format_exception(self, formatted_stack):
+        tb = []
+        for item in formatted_stack:
+            file, line, function, statement = item
+            tb.append({"file" : file,
+                       "line" : line,
+                       "function" : function,
+                       "statement" : statement
+                       })
+        return tb
 
 # To serialize when json contains old message object
 def serialize_message(obj):
