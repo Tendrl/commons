@@ -25,7 +25,6 @@ class TendrlNS(object):
             the condition when the node_agent has not been started and name
             spaces are being created.
         '''
-
         try:
             Event(
                 Message(
@@ -69,13 +68,13 @@ class TendrlNS(object):
                 Message(
                     priority="info",
                     publisher=NS.publisher_id,
-                    payload={"message": "Setup Definitions for namespace.%s" %
+                    payload={"message": "Setup Tendrl definitions (.yml) for namespace.%s" %
                              self.ns_name
                              }
                 )
             )
         except KeyError:
-            sys.stdout.write("Setup Definitions for namespace.%s" %
+            sys.stdout.write("Setup Tendrl definitions (.yml) for namespace.%s" %
                              self.ns_name)
         self.current_ns.definitions = self.current_ns.objects.Definition()
     
@@ -146,8 +145,7 @@ class TendrlNS(object):
                         )
                     )
                 except KeyError:
-                    sys.stderr.write("Validating registered (.py) flows in %s."
-                                     "flows" % raw_ns)
+                    sys.stderr.write(msg)
                 raise Exception(msg)
         '''
         # Validate defined (.yml) flows against their discovered/registered
@@ -183,14 +181,12 @@ class TendrlNS(object):
                             priority="error",
                             publisher=NS.publisher_id,
                             payload={
-                                "message": "Validating defined (.yml) flows"
-                                           " in %s.flows" % raw_ns
+                                "message": msg
                                 }
                         )
                     )
                 except KeyError:
-                    sys.stderr.write("Validating defined (.yml) flows in "
-                                     "%s.flows" % raw_ns)
+                    sys.stderr.write(msg)
                 raise Exception(msg)
 
     def _validate_ns_obj_definitions(self, raw_ns, defs):
@@ -237,22 +233,6 @@ class TendrlNS(object):
                 raise Exception(msg)
             for obj_name in regd_objs:
                 if self._get_atoms(obj_name):
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Validating registered ("
-                                                    ".py) atoms in %s.objects."
-                                                    "%s.atoms" % (raw_ns,
-                                                                  obj_name)
-                                         }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Validating registered (.py) atoms "
-                                         "in %s.objects.%s.atoms" % (raw_ns,
-                                                                     obj_name))
                     defined_atoms = defined_objs.get(obj_name, {}).get("atoms",
                                                                        {})
                     regd_atoms = [atom_name for atom_name in
@@ -280,24 +260,6 @@ class TendrlNS(object):
                             sys.stderr.write(msg)
                         raise Exception(msg)
                 if self._get_obj_flows(obj_name):
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Validating registered ("
-                                                    ".py) flows in %s.objects"
-                                                    ".%s.flows" % (raw_ns,
-                                                                   obj_name)
-                                         }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Validating registered (.py) flows in"
-                                         " %s.objects.%s.flows" % (raw_ns,
-                                                                   obj_name)
-                                         )
-
                     defined_obj_flows = defined_objs.get(obj_name, {}).get(
                         "flows", {})
                     regd_obj_flows = [obj_flow_name for obj_flow_name in
@@ -370,23 +332,6 @@ class TendrlNS(object):
                 raise Exception(msg)
             for obj_name in defined_objs:
                 if defined_objs.get(obj_name, {}).get("atoms", {}):
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Validating defined (.yml)"
-                                                    " atoms in %s.objects.%s."
-                                                    "atoms" % (raw_ns,
-                                                               obj_name)
-                                         }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Validating defined (.yml) atoms in "
-                                         "%s.objects.%s.atoms" % (raw_ns,
-                                                                  obj_name)
-                                         )
                     defined_atoms = defined_objs.get(obj_name, {}).get("atoms",
                                                                        {})
                     regd_atoms = [atom_name for atom_name in
@@ -415,23 +360,6 @@ class TendrlNS(object):
                             sys.stderr.write(msg)
                         raise Exception(msg)
                 if defined_objs.get(obj_name, {}).get("flows", {}):
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Validating defined (.yml)"
-                                                    " flows in %s.objects.%s."
-                                                    "flows" % (raw_ns,
-                                                               obj_name)
-                                         }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Validating defined (.yml) flows in "
-                                         "%s.objects.%s.flows" % (raw_ns,
-                                                                  obj_name)
-                                         )
                     defined_obj_flows = defined_objs.get(obj_name, {}).get(
                         "flows", {})
                     regd_obj_flows = [obj_flow_name for obj_flow_name in

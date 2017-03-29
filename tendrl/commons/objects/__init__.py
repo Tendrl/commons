@@ -2,6 +2,7 @@ import abc
 import etcd
 import six
 import sys
+import types
 
 from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
@@ -66,6 +67,10 @@ class BaseObject(object):
         try:
             current_obj = self.load()
             for attr, val in self.__dict__.iteritems():
+                if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
+                                  types.MethodType, types.BuiltinMethodType,
+                                  types.UnboundMethodType)):
+                    continue
                 if attr.startswith("_") or attr in ['value', 'list']:
                     continue
                 if val is None:

@@ -487,6 +487,9 @@ namespace.tendrl:
         errors:
           help: "any errors occured or not"
           type: String
+        children:
+          help: "ID of child jobs created by this job"
+          type: String
       enabled: true
       list: /queue
       value: /queue
