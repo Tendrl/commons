@@ -25,7 +25,8 @@ class TendrlNS(object):
             the condition when the node_agent has not been started and name
             spaces are being created.
         '''
-
+        if ns_name=="tendrl":
+            NS.publisher_id = "commons"
         try:
             Event(
                 Message(
