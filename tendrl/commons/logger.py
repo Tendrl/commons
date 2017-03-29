@@ -33,11 +33,11 @@ class Logger(object):
 
     def push_operation(self):
         NS.etcd_orm.client.write(
-            "/Messages/jobs/%s" % self.message.job_id,
+            "/messages/jobs/%s" % self.message.job_id,
             Message.to_json(self.message),
             append=True)
         NS.etcd_orm.client.refresh(
-            "/Messages/jobs/%s" % self.message.job_id,
+            "/messages/jobs/%s" % self.message.job_id,
             ttl=NS.config.data['message_retention_time']
         )
         log_message = ("%s:%s") % (
