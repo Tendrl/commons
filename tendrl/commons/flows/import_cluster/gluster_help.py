@@ -13,12 +13,14 @@ def import_gluster():
 
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
+        _cmd = "nohup tendrl-gluster-integration &"
         name = "https://github.com/Tendrl/gluster-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
     elif NS.config.data['package_source_type'] == 'rpm':
         name = "tendrl-gluster-integration"
+        _cmd = "systemctl restart %s" % name
         ansible_module_path = "core/packaging/os/yum.py"
         attributes["name"] = name
     else:
@@ -48,4 +50,4 @@ def import_gluster():
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
 
-    subprocess.Popen(["nohup", "tendrl-gluster-integration", "&"])
+    subprocess.Popen(_cmd.split())
