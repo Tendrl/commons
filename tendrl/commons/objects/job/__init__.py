@@ -3,11 +3,9 @@ from tendrl.commons import objects
 
 
 class Job(objects.BaseObject):
-    internal = True
     def __init__(self, job_id=None, payload=None,
                  status=None, errors=None, children=None,
                  *args, **kwargs):
-        self._defs = {}
         super(Job, self).__init__(*args, **kwargs)
         self.value = 'queue/%s'
         self.job_id = job_id
