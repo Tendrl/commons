@@ -1,3 +1,5 @@
+import struct
+
 from gevent import socket
 from gevent.socket import error as socket_error
 from gevent.socket import timeout as socket_timeout
@@ -22,7 +24,7 @@ class Event(object):
         try:
             json_str = Message.to_json(message)
             self.sock.connect(self.socket_path)
-            self.sock.send(json_str)
+            self._pack_and_send(json_str)
         except (socket_error, socket_timeout, TypeError):
             msg = Message.to_json(message)
             exc_type, exc_value, exc_tb = sys.exc_info()
@@ -32,3 +34,16 @@ class Event(object):
                 "Unable to pass the message into socket.%s\n" % msg)
         finally:
             self.sock.close()
+    
+    def _pack_and_send(self, msg):
+        frmt = "=%ds" % len(msg)
+        packedMsg = struct.pack(frmt, msg)
+        packedHdr = struct.pack('=I', len(packedMsg))
+        self._send(packedHdr)
+        self._send(packedMsg)
+
+    def _send(self, msg):
+        sent = 0
+        while sent < len(msg):
+            sent += self.sock.send(msg[sent:])
+
