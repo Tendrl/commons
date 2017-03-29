@@ -20,7 +20,6 @@ def ceph_create_ssh_setup_jobs(parameters):
                 new_params['ssh_setup_script'] = ssh_setup_script
                 # create same flow for each node in node list except $this
                 payload = {
-                    "integration_id": parameters['TendrlContext.integration_id'],
                     "node_ids": [node],
                     "run": "tendrl.flows.SetupSsh",
                     "status": "new",
@@ -65,7 +64,6 @@ def gluster_create_ssh_setup_jobs(parameters):
         new_params['ssh_key'] = ssh_key
         # Create same flow for each node from list except this one
         payload = {
-            "integration_id": parameters['TendrlContext.integration_id'],
             "node_ids": [node],
             "run": "tendrl.flows.AuthorizeSshKey",
             "status": "new",
