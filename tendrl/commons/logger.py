@@ -15,7 +15,7 @@ class Logger(object):
 
     def __init__(self, message):
         self.message = message
-        self.push_messages()
+        self.push_message()
         if self.message.job_id is not None:
             """ If job_id is present then
             it is considered as operation
@@ -45,7 +45,7 @@ class Logger(object):
             self.message.payload["message"])
         return log_message
 
-    def push_messages(self):
+    def push_message(self):
         if self.message.priority not in ["info", "debug"]:
             # Storing messages cluster wise
             if self.message.cluster_id is not None:
