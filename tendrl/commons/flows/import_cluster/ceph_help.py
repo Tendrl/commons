@@ -12,12 +12,14 @@ def import_ceph():
     logging_config_file_path = "/etc/tendrl/ceph-integration/"
     attributes = {}
     if NS.config.data['package_source_type'] == 'pip':
+        _cmd = "nohup tendrl-ceph-integration &"
         name = "https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
     elif NS.config.data['package_source_type'] == 'rpm':
         name = "tendrl-ceph-integration"
+        _cmd = "systemctl restart %s" % name
         ansible_module_path = "core/packaging/os/yum.py"
         attributes["name"] = name
     else:
@@ -45,5 +47,5 @@ def import_ceph():
     with open("/etc/tendrl/ceph-integration/ceph-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
-
-    subprocess.Popen(["nohup", "tendrl-ceph-integration", "&"])
+    
+    subprocess.Popen(_cmd.split())
