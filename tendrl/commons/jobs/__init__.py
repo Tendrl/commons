@@ -81,12 +81,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             status=raw_job['status'],
                             payload=json.dumps(raw_job['payload']),
                             errors=raw_job['errors']).save()
-                        if "integration_id" in raw_job['payload']:
-                            raw_job['payload']['parameters']['integration_id'] = \
-                                raw_job[
-                                'payload']['integration_id']
-                        raw_job['payload']['parameters']['node_ids'] = raw_job[
-                            'payload']['node_ids']
 
                         current_ns, flow_name, obj_name = \
                             self._extract_fqdn(raw_job['payload']['run'])
