@@ -12,7 +12,16 @@ import traceback
 class Event(object):
     def __init__(self, message, socket_path=None):
         if message.publisher == "node_agent":
-            Logger(message)
+            try:
+                json_str = Message.to_json(message)
+                message = Message.from_json(json_str)
+                Logger(message)
+            except (TypeError, ValueError, KeyError, AttributeError):
+                sys.stderr.write(
+                    "Unable to log the message.%s\n" % message)
+                exc_type, exc_value, exc_tb = sys.exc_info()
+                traceback.print_exception(
+                    exc_type, exc_value, exc_tb, file=sys.stderr)
         else:
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             self.socket_path = socket_path
