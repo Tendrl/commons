@@ -20,6 +20,17 @@ class ImportCluster(flows.BaseFlow):
         integration_id = self.parameters['TendrlContext.integration_id']
 
         # Check if cluster with given id already exists in central store
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Check integration %s does not exist" % integration_id
+                     }
+            )
+        )
+
         try:
             cluster = NS.etcd_orm.client.read(
                 'clusters/%s' % self.parameters['TendrlContext.integration_id']
@@ -28,6 +39,17 @@ class ImportCluster(flows.BaseFlow):
             # cluster doesnt exist, go ahead and import
             pass
         else:
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Error: Integration %s is already created/imported, stopping current cluster import" % integration_id
+                         }
+                )
+            )
+
             raise FlowExecutionFailedError(
                 "Cluster with id %s already exists" % integration_id
             )
@@ -44,7 +66,29 @@ class ImportCluster(flows.BaseFlow):
                     _integration_id = NS.etcd_orm.client.read(
                         'nodes/%s/TendrlContext/integration_id' % entry
                     )
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Check: Node %s not part of any other cluster" % entry
+                             }
+                    )
+                )
+
                     if _integration_id.value != "":
+                        Event(
+                            Message(
+                                job_id=self.parameters['job_id'],
+                                flow_id = self.parameters['flow_id'],
+                                priority="info",
+                                publisher=NS.publisher_id,
+                                payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
+                                     }
+                            )
+                        )
+
                         raise FlowExecutionFailedError(
                             "Nodes already participate in existing cluster"
                         )
@@ -61,6 +105,17 @@ class ImportCluster(flows.BaseFlow):
         NS.tendrl_context.sds_name = _detected_cluster.sds_pkg_name
         NS.tendrl_context.sds_version = _detected_cluster.sds_pkg_version
         NS.tendrl_context.save()
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Register Node %s with cluster %s" % (NS.node_context.node_id,
+                                                                                NS.tendrl_context.integration_id)
+                     }
+            )
+        )
 
         node_list = self.parameters['Node[]']
         if len(node_list) > 1:
@@ -99,8 +154,35 @@ class ImportCluster(flows.BaseFlow):
                     'namespace.tendrl'
                 ]['min_reqd_ceph_ver']
                 req_maj_ver, req_min_ver, req_rel = reqd_ceph_ver.split('.')
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Check: Minimum required version (%s.%s.%s) of Ceph Storage" % (req_maj_ver,
+                                                                                                            req_min_ver,
+                                                                                                            req_rel)
+                             }
+                    )
+                )
+
                 if int(maj_ver) < int(req_maj_ver) or \
                     int(min_ver) < int(req_min_ver):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Ceph Storage (%s.%s.%s)" % (req_maj_ver,
+                                                                                                                req_min_ver,
+                                                                                                                req_rel,
+                                                                                                                maj_ver, min_ver, rel)
+                                 }
+                        )
+                    )
+
                     raise FlowExecutionFailedError(
                         "Detected ceph version: %s"
                         " is lesser than required version: %s" %
@@ -119,8 +201,35 @@ class ImportCluster(flows.BaseFlow):
                 'namespace.tendrl'
             ]['min_reqd_gluster_ver']
             req_maj_ver, req_min_ver, req_rel = reqd_gluster_ver.split('.')
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Check: Minimum required version (%s.%s.%s) of Gluster Storage" % (req_maj_ver,
+                                                                                                        req_min_ver,
+                                                                                                        req_rel)
+                         }
+                )
+            )
+
             if int(maj_ver) < int(req_maj_ver) or \
                 int(min_ver) < int(req_min_ver):
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Gluster Storage (%s.%s.%s)" % (req_maj_ver,
+                                                                                                            req_min_ver,
+                                                                                                            req_rel,
+                                                                                                            maj_ver, min_ver, rel)
+                             }
+                    )
+                )
+
                 raise FlowExecutionFailedError(
                     "Detected gluster version: %s"
                     " is lesser than required version: %s" %
@@ -143,3 +252,13 @@ class ImportCluster(flows.BaseFlow):
                 break
             except etcd.EtcdKeyNotFound:
                 continue
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Cluster successfully imported %s" % integration_id
+                     }
+            )
+        )
