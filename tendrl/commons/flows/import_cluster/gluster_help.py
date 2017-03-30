@@ -73,14 +73,16 @@ def import_gluster(parameters):
     with open(logging_config_file_path + logging_file_name,
               'w+') as f:
         f.write(pkg_resources.resource_string(__name__, logging_file_name))
-
+    gluster_integration_tag = NS.compiled_definitions.get_parsed_defs()[
+        'namespace.tendrl'
+    ]['tags']['tendrl-gluster-integration']
     config_data = {"etcd_port": int(NS.config.data['etcd_port']),
                    "etcd_connection": str(NS.config.data['etcd_connection']),
                    "log_cfg_path": logging_config_file_path +
                                    logging_file_name,
                    "log_level": "DEBUG",
                     "logging_socket_path": "/var/run/tendrl/message.sock",
-                    "tags": json.dumps(["tendrl/integration/gluster"])}
+                    "tags": json.dumps([gluster_integration_tag])}
     with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)

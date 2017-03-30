@@ -32,7 +32,7 @@ class CreateCluster(flows.BaseFlow):
             for job_id in ssh_job_ids:
                 all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
                                                    job_id).value)
-            if all(status == "finished" for status in all_status):
+            if all([status for status in all_status if status == "finished"]):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
@@ -81,8 +81,25 @@ class CreateCluster(flows.BaseFlow):
         except ValueError:
             # key not found. ignore
             pass
-        new_params = self.parameters.copy()
+
+        # Wait till detected cluster in populated for nodes
+        all_nodes_have_detected_cluster = False
+        while not all_nodes_have_detected_cluster:
+            all_status = []
+            for node in node_list:
+                try:
+                    NS.etcd_orm.client.read("/nodes/%s/DetectedCluster" % node)
+                    all_status.append(True)
+                except etcd.EtcdKeyNotFound:
+                    all_status.append(False)
+            if all([status for status in all_status if status]):
+                all_nodes_have_detected_cluster = True
+
+        # Create the params list for import cluster flow
+        new_params = {}
         new_params['Node[]'] = node_list
+        new_params['TendrlContext.integration_id'] = integration_id
+
         # Get node context for one of the nodes from list
         sds_pkg_name = NS.etcd_orm.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_name" % node_list[0]

@@ -4,6 +4,17 @@ namespace.tendrl:
   min_reqd_ceph_ver: 10.2.5
   ceph_provisioner: CephInstallerPlugin
   gluster_provisioner: GdeployPlugin
+  tags:
+    tendrl-node-agent: "tendrl/node"
+    etcd: "tendrl/central-store"
+    tendrl-apid: "tendrl/server"
+    tendrl-gluster-integration: "tendrl/integration/gluster"
+    tendrl-ceph-integration: "tendrl/integration/ceph"
+    glusterd: "gluster/server"
+    ceph-mon: "ceph/mon"
+    ceph-osd: "ceph/osd"
+    gluster-provisioner: "provisioner/gluster"
+    ceph-provisioner: "provisioner/ceph"
   flows:
     CreateCluster:
       help: "Create a cluster from scratch"

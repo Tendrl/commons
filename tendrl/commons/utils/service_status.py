@@ -29,8 +29,9 @@ class ServiceStatus(object):
             return False
 
     def status(self):
-        stdout, stderr, rc = self._execute_service_command('status')
-        if stdout and rc == 0:
-            return True
-        else:
+        stdout, stderr, rc = self._execute_service_command('is-active')
+        if "inactive" in stdout:
             return False
+        elif "active" in stdout:
+            return True
+        return False
