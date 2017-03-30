@@ -1,3 +1,5 @@
+import json
+
 from tendrl.commons import etcdobj
 from tendrl.commons import objects
 
