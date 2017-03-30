@@ -81,8 +81,29 @@ class CreateCluster(flows.BaseFlow):
         except ValueError:
             # key not found. ignore
             pass
-        new_params = self.parameters.copy()
+
+        # Wait till detected cluster in populated for nodes
+        all_status = []
+        all_nodes_have_detected_cluster = False
+        while True:
+            gevent.sleep(2)
+            for node in node_list:
+                try:
+                    NS.etcd_orm.client.read("/nodes/%s/DetectedCluster" % node)
+                    all_status.append("available")
+                except etcd.EtcdKeyNotFound:
+                    all_status.append("not available")
+            if all(status == "available" for status in all_status):
+                all_nodes_have_detected_cluster = True
+
+            if all_nodes_have_detected_cluster:
+                break
+
+        # Create the params list for import cluster flow
+        new_params = {}
         new_params['Node[]'] = node_list
+        new_params['TendrlContext.integration_id'] = integration_id
+
         # Get node context for one of the nodes from list
         sds_pkg_name = NS.etcd_orm.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_name" % node_list[0]
