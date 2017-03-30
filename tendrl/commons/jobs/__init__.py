@@ -104,7 +104,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "JOB[%s]:  Finished Flow %s" %
-                                            (job_id=job.job_id, raw_job['payload']['run'])
+                                            (job.job_id, raw_job['payload']['run'])
                                          }
                                 )
                             )
