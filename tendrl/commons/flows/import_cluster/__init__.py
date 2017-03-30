@@ -216,25 +216,26 @@ class ImportCluster(flows.BaseFlow):
             
             
         # Wait for all cluster nodes to finish their ImportCluster jobs
-        all_jobs_done = False
-        while not all_jobs_done:
-            all_status = []
-            for job_id in cluster_nodes:
-                all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
-                                                   job_id).value)
-            if all([status for status in all_status if status == "finished"]):
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
-                             }
+        if cluster_nodes:
+            all_jobs_done = False
+            while not all_jobs_done:
+                all_status = []
+                for job_id in cluster_nodes:
+                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                       job_id).value)
+                if all([status for status in all_status if status == "finished"]):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
+                                 }
+                        )
                     )
-                )
 
-                all_jobs_done = True
+                    all_jobs_done = True
                 
             
         # import cluster's run() should not return unless the new cluster entry
