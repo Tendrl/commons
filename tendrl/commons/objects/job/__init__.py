@@ -28,7 +28,7 @@ class Job(objects.BaseObject):
                 # Load existing child job ids
                 _children = json.loads(_parent.children)
                 
-            _children += self.job_id
+            _children += [self.job_id]
             _parent.children = list(set(_children))
             _parent.save()
         
