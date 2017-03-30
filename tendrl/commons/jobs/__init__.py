@@ -9,11 +9,9 @@ from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import Message, ExceptionMessage
 from tendrl.commons.objects.job import Job
-from tendrl.commons.utils import etcd_util
 
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
-    EXCEPTION_BACKOFF = 5
 
     def __init__(self):
         super(JobConsumerThread, self).__init__()
@@ -28,8 +26,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             )
         )
         while not self._complete.is_set():
+            gevent.sleep(2)
             try:
-                gevent.sleep(2)
                 try:
                     jobs = NS.etcd_orm.client.read("/queue")
                 except etcd.EtcdKeyNotFound:
@@ -37,22 +35,15 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                 for job in jobs.leaves:
                     try:
-                        raw_job = {"job_id": job.key.split('/')[-1],
-                                   "status": None,
-                                   "payload": None,
-                                   "errors": None
-                                   }
-                        result = etcd_util.read(job.key)
-                        for item in result:
-                            if item in raw_job:
-                                raw_job[item] = result[item]
-                        raw_job["payload"] = json.loads(
-                            raw_job["payload"].decode('utf-8'))
+                        jib = job.key.split('/')[-1]
+                        job = Job(job_id=jid).load()
+                        raw_job = {}
+                        raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
                     except etcd.EtcdKeyNotFound:
                         continue
 
                     if raw_job['payload']["type"] == NS.type and \
-                            raw_job['status'] == "new":
+                            job.status == "new":
 
                         # Job routing
                         if raw_job.get("payload", {}).get("tags", []):
@@ -67,22 +58,19 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     raw_job['payload']['node_ids']:
                                 continue
 
-                        raw_job['status'] = "processing"
+                        job.status = "processing"
+                        job.save()
                         Event(
                             Message(
-                                job_id=raw_job['job_id'],
+                                job_id=job.job_id,
                                 priority="info",
                                 publisher=NS.publisher_id,
                                 payload={"message": "Processing Job %s" %
-                                         raw_job['job_id']
+                                         job.job_id
                                          }
                             )
                         )
-                        Job(job_id=raw_job['job_id'],
-                            status=raw_job['status'],
-                            payload=json.dumps(raw_job['payload']),
-                            errors=raw_job['errors']).save()
-
+                        job = job.load()
                         current_ns, flow_name, obj_name = \
                             self._extract_fqdn(raw_job['payload']['run'])
 
@@ -94,10 +82,10 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         try:
                             
                             the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
-                                                     job_id=raw_job['job_id'])
+                                                     job_id=job.job_id)
                             Event(
                                 Message(
-                                    job_id=raw_job['job_id'],
+                                    job_id=job.job_id,
                                     flow_id = the_flow.parameters['flow_id'],
                                     priority="info",
                                     publisher=NS.publisher_id,
@@ -107,19 +95,16 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 )
                             )
                             the_flow.run()
-                            raw_job['status'] = "finished"
-                            Job(job_id=raw_job['job_id'],
-                                status=raw_job['status'],
-                                payload=json.dumps(raw_job['payload']),
-                                errors=raw_job['errors']).save()
+                            job.status = "finished"
+                            job.save()
                             Event(
                                 Message(
-                                    job_id=raw_job['job_id'],
+                                    job_id=job.job_id,
                                     flow_id = the_flow.parameters['flow_id'],
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "JOB[%s]:  Finished Flow %s" %
-                                            (raw_job['job_id'], raw_job['payload']['run'])
+                                            (job_id=job.job_id, raw_job['payload']['run'])
                                          }
                                 )
                             )
@@ -134,12 +119,10 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                              }
                                 )
                             )
-                            raw_job['status'] = "failed"
-                            raw_job['errors'] = str(e)
-                            Job(job_id=raw_job['job_id'],
-                                status=raw_job['status'],
-                                payload=json.dumps(raw_job['payload']),
-                                errors=raw_job['errors']).save()
+                            job = job.load()
+                            job.status = "failed"
+                            job.errors = str(e)
+                            job.save()
                         break
             except Exception as ex:
                 Event(
@@ -151,7 +134,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                  }
                     )
                 )
-                self._complete.wait(self.EXCEPTION_BACKOFF)
 
     def stop(self):
         self._complete.set()

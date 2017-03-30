@@ -35,7 +35,7 @@ class ImportCluster(flows.BaseFlow):
                     )
                     Event(
                         Message(
-                            job_id=self.parameters['job_id'],
+                            job_id=self.job_id,
                             flow_id = self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
@@ -48,7 +48,7 @@ class ImportCluster(flows.BaseFlow):
                     if _integration_id.value != "":
                         Event(
                             Message(
-                                job_id=self.parameters['job_id'],
+                                job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
@@ -75,11 +75,11 @@ class ImportCluster(flows.BaseFlow):
         NS.tendrl_context.save()
         Event(
             Message(
-                job_id=self.parameters['job_id'],
+                job_id=self.job_id,
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Register Node %s with cluster %s" % (NS.node_context.node_id,
+                payload={"message": "Registered Node %s with cluster %s" % (NS.node_context.node_id,
                                                                                 NS.tendrl_context.integration_id)
                      }
             )
@@ -94,12 +94,11 @@ class ImportCluster(flows.BaseFlow):
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
                     # create same flow for each node in node list except $this
-                    payload = {"integration_id": integration_id,
-                               "node_ids": [node],
+                    payload = {"node_ids": [node],
                                "run": "tendrl.flows.ImportCluster",
                                "status": "new",
                                "parameters": new_params,
-                               "parent": self.parameters['job_id'],
+                               "parent": self.job_id,
                                "type": "node"
                                }
                     _job_id = str(uuid.uuid4())
@@ -107,6 +106,17 @@ class ImportCluster(flows.BaseFlow):
                     Job(job_id=_job_id,
                         status="new",
                         payload=json.dumps(payload)).save()
+                     Event(
+                        Message(
+                            job_id=self.job_id,
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Importing Node %s to cluster %s" % (node, integration_id)
+                                 }
+                        )
+                    )
+
 
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
@@ -216,25 +226,26 @@ class ImportCluster(flows.BaseFlow):
             
             
         # Wait for all cluster nodes to finish their ImportCluster jobs
-        all_jobs_done = False
-        while not all_jobs_done:
-            all_status = []
-            for job_id in cluster_nodes:
-                all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
-                                                   job_id).value)
-            if all([status for status in all_status if status == "finished"]):
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
-                             }
+        if cluster_nodes:
+            all_jobs_done = False
+            while not all_jobs_done:
+                all_status = []
+                for job_id in cluster_nodes:
+                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                       job_id).value)
+                if all([status for status in all_status if status == "finished"]):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
+                                 }
+                        )
                     )
-                )
 
-                all_jobs_done = True
+                    all_jobs_done = True
                 
             
         # import cluster's run() should not return unless the new cluster entry
