@@ -234,7 +234,7 @@ class ImportCluster(flows.BaseFlow):
                     )
                 )
 
-                all_ssh_jobs_done = True
+                all_jobs_done = True
                 
             
         # import cluster's run() should not return unless the new cluster entry
