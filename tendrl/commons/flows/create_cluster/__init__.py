@@ -9,6 +9,7 @@ from tendrl.commons.message import Message
 from tendrl.commons.flows import utils
 from tendrl.commons.flows.create_cluster import ceph_help
 from tendrl.commons.flows.create_cluster import gluster_help
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.objects.job import Job
@@ -16,6 +17,24 @@ from tendrl.commons.objects.job import Job
 
 class CreateCluster(flows.BaseFlow):
     def run(self):
+        # Check if clusre name contains space char and fail if so
+        if ' ' in self.parameters['TendrlContext.cluster_name']:
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Space char not allowed in cluster name"
+                    },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id'],
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+            raise FlowExecutionFailedError(
+                "Space char not allowed in cluster name"
+            )
+
         integration_id = self.parameters['TendrlContext.integration_id']
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
