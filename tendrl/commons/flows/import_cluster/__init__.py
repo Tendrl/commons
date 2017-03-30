@@ -106,7 +106,7 @@ class ImportCluster(flows.BaseFlow):
                     Job(job_id=_job_id,
                         status="new",
                         payload=json.dumps(payload)).save()
-                     Event(
+                    Event(
                         Message(
                             job_id=self.job_id,
                             flow_id = self.parameters['flow_id'],
