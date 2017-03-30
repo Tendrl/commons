@@ -58,19 +58,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     raw_job['payload']['node_ids']:
                                 continue
 
-                        job.status = "processing"
-                        job.save()
-                        Event(
-                            Message(
-                                job_id=job.job_id,
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Processing Job %s" %
-                                         job.job_id
-                                         }
-                            )
-                        )
-                        job = job.load()
                         current_ns, flow_name, obj_name = \
                             self._extract_fqdn(raw_job['payload']['run'])
 
@@ -83,6 +70,20 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             
                             the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
                                                      job_id=job.job_id)
+                            job.status = "processing"
+                            job.save()
+                            Event(
+                                Message(
+                                    job_id=job.job_id,
+                                    flow_id = the_flow.parameters['flow_id'],
+                                    priority="info",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "Processing Job %s" %
+                                             job.job_id
+                                             }
+                                )
+                            )
+
                             Event(
                                 Message(
                                     job_id=job.job_id,
@@ -119,7 +120,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                              }
                                 )
                             )
-                            job = job.load()
                             job.status = "failed"
                             job.errors = str(e)
                             job.save()
