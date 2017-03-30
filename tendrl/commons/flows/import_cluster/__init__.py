@@ -191,7 +191,7 @@ class ImportCluster(flows.BaseFlow):
                             reqd_ceph_ver
                         )
                     )
-                import_ceph()
+                import_ceph(self.parameters)
         else:
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
@@ -238,7 +238,7 @@ class ImportCluster(flows.BaseFlow):
                         reqd_gluster_ver
                     )
                 )
-            import_gluster()
+            import_gluster(self.parameters)
 
         # import cluster's run() should not return unless the new cluster entry
         # is updated in etcd, as the job is marked as finished if this
