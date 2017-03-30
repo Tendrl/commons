@@ -18,6 +18,7 @@ class Job(objects.BaseObject):
         self._etcd_cls = _JobEtcd
 
     def save(self):
+        super(Job, self).save()
         payload = json.loads(self.payload)
         if "parent" in payload:
             # Load parent job
@@ -32,7 +33,6 @@ class Job(objects.BaseObject):
             _parent.children = list(set(_children))
             _parent.save()
         
-        super(Job, self).save()
              
 
 class _JobEtcd(etcdobj.EtcdObj):
