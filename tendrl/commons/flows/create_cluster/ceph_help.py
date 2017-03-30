@@ -9,10 +9,12 @@ def create_ceph(parameters):
     # install the packages
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Installing Ceph Packages %s" %
-                                parameters['TendrlContext.cluster_id']
+                                parameters['TendrlContext.integration_id']
                      }
         )
     )
@@ -20,10 +22,12 @@ def create_ceph(parameters):
     # Configure Mons
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Creating Ceph Monitors %s" %
-                                parameters['TendrlContext.cluster_id']
+                                parameters['TendrlContext.integration_id']
                      }
         )
     )
@@ -32,17 +36,21 @@ def create_ceph(parameters):
     # Configure osds
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Creating Ceph OSD %s" % parameters['TendrlContext.cluster_id']}
+            payload={"message": "Creating Ceph OSD %s" % parameters['TendrlContext.integration_id']}
         )
     )
     create_osds(parameters, created_mons)
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Created Ceph Cluster %s" % parameters['TendrlContext.cluster_id']}
+            payload={"message": "Created Ceph Cluster %s" % parameters['TendrlContext.integration_id']}
         )
     )
 
