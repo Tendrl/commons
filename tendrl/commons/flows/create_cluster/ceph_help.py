@@ -65,10 +65,34 @@ def install_packages(parameters):
             osd_ips.append(config["provisioning_ip"])
 
     task_id = plugin.install_mon(mon_ips)
+    Event(
+        Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Installing Ceph Packages on MONS [%s], ceph-installer task %s" %
+                                (" ".join(mon_ips), task_id)
+                     }
+        )
+    )
+
     status, err = sync_task_status(task_id)
     if not status:
         raise FlowExecutionFailedError(err)
     task_id = plugin.install_osd(osd_ips)
+    Event(
+        Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={"message": "Installing Ceph Packages on OSDS [%s], ceph-installer task %s" %
+                                (" ".join(osd_ips), task_id)
+                     }
+        )
+    )
+
     status, err = sync_task_status(task_id)
     if not status:
         raise FlowExecutionFailedError(err)
@@ -78,7 +102,7 @@ def create_mons(parameters, mon_ips):
     created_mons = []
     plugin = NS.ceph_provisioner.get_plugin()
     for mon_ip in mon_ips:
-            task_id = plugin.configure_mon(mon_ip,
+        task_id = plugin.configure_mon(mon_ip,
                                            parameters['TendrlContext.cluster_id'],
                                            parameters["TendrlContext.cluster_name"],
                                            mon_ip,
@@ -86,12 +110,24 @@ def create_mons(parameters, mon_ips):
                                            parameters["Cluster.public_network"],
                                            created_mons
                                            )
-            status, err = sync_task_status(task_id)
-            if not status:
-                raise FlowExecutionFailedError(err)
-            else:
-                # If success add the MON to the created list
-                created_mons.append({"address":mon_ip, "host": mon_ip})
+        Event(
+            Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Creating Ceph MON %s, ceph-installer task %s" %
+                                    (mon_ip, task_id)
+                         }
+            )
+        )
+
+        status, err = sync_task_status(task_id)
+        if not status:
+            raise FlowExecutionFailedError(err)
+        else:
+            # If success add the MON to the created list
+            created_mons.append({"address":mon_ip, "host": mon_ip})
     return created_mons
 
 
@@ -109,19 +145,31 @@ def create_osds(parameters, created_mons):
                     devices.append(device["device"])
                 else:
                     devices[device["device"]] = device["journal"]
-                task_id = plugin.configure_osd(
-                    config["provisioning_ip"],
-                    devices,
-                    parameters["TendrlContext.cluster_id"],
-                    parameters["TendrlContext.cluster_name"],
-                    config["journal_size"],
-                    parameters["Cluster.cluster_network"],
-                    parameters["Cluster.public_network"],
-                    created_mons
-                    )
-                status, err = sync_task_status(task_id)
-                if not status:
-                    raise FlowExecutionFailedError(err)
+            task_id = plugin.configure_osd(
+            config["provisioning_ip"],
+            devices,
+            parameters["TendrlContext.cluster_id"],
+            parameters["TendrlContext.cluster_name"],
+            config["journal_size"],
+            parameters["Cluster.cluster_network"],
+            parameters["Cluster.public_network"],
+            created_mons
+            )
+            Event(
+                Message(
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Creating Ceph OSD %s, ceph-installer task %s" %
+                                        (config["provisioning_ip"], task_id)
+                             }
+                )
+            )
+
+            status, err = sync_task_status(task_id)
+            if not status:
+                raise FlowExecutionFailedError(err)
 
 
 def sync_task_status(task_id):
