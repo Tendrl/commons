@@ -33,12 +33,45 @@ class CreateCluster(flows.BaseFlow):
                 all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
                                                    job_id).value)
             if all(status == "finished" for status in all_status):
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
+                             }
+                    )
+                )
+
                 all_ssh_jobs_done = True
 
         # SSH setup jobs finished above, now install sds bits and create cluster
         if "ceph" in self.parameters["TendrlContext.sds_name"]:
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Creating Ceph Storage Cluster %s" % integration_id
+                         }
+                )
+            )
+
             ceph_help.create_ceph(self.parameters)
         else:
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Creating Gluster Storage Cluster %s" % integration_id
+                         }
+                )
+            )
+
             gluster_help.create_gluster(self.parameters)
 
         # Start jobs for importing cluster
@@ -71,3 +104,15 @@ class CreateCluster(flows.BaseFlow):
         Job(job_id=str(uuid.uuid4()),
             status="new",
             payload=json.dumps(payload)).save()
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Importing newly created %s Storage Cluster %s" % (sds_pkg_name,
+                                                                                       integration_id)
+                     }
+            )
+        )
+

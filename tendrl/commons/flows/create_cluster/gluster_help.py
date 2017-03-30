@@ -16,10 +16,12 @@ def create_gluster(parameters):
 
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Setting up gluster nodes %s" %
-                                parameters['TendrlContext.cluster_id']
+                                parameters['TendrlContext.integration_id']
                      }
         )
     )
@@ -29,10 +31,12 @@ def create_gluster(parameters):
 
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Creating gluster cluster %s" %
-                                parameters['TendrlContext.cluster_id']
+                                parameters['TendrlContext.integration_id']
                      }
         )
     )
@@ -42,10 +46,12 @@ def create_gluster(parameters):
 
     Event(
         Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Created Gluster Cluster %s" %
-                                parameters['TendrlContext.cluster_id']
+                                parameters['TendrlContext.integration_id']
                      }
         )
     )

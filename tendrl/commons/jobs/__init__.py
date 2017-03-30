@@ -70,6 +70,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         raw_job['status'] = "processing"
                         Event(
                             Message(
+                                job_id=raw_job['job_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
                                 payload={"message": "Processing Job %s" %
@@ -91,8 +92,21 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         else:
                             runnable_flow = current_ns.ns.get_flow(flow_name)
                         try:
-                            runnable_flow(parameters=raw_job['payload'][
-                                'parameters'], job_id=raw_job['job_id']).run()
+                            
+                            the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
+                                                     job_id=raw_job['job_id'])
+                            Event(
+                                Message(
+                                    job_id=raw_job['job_id'],
+                                    flow_id = the_flow.parameters['flow_id'],
+                                    priority="info",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "Running Flow %s" %
+                                            raw_job['payload']['run']
+                                         }
+                                )
+                            )
+                            the_flow.run()
                             raw_job['status'] = "finished"
                             # TODO(team) replace below raw write with a
                             # "EtcdJobQueue" class
@@ -100,6 +114,18 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 status=raw_job['status'],
                                 payload=json.dumps(raw_job['payload']),
                                 errors=raw_job['errors']).save()
+                            Event(
+                                Message(
+                                    job_id=raw_job['job_id'],
+                                    flow_id = the_flow.parameters['flow_id'],
+                                    priority="info",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "Completed Flow %s" %
+                                            raw_job['payload']['run']
+                                         }
+                                )
+                            )
+
                         except FlowExecutionFailedError as e:
                             Event(
                                 ExceptionMessage(
