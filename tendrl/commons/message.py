@@ -87,7 +87,7 @@ class Message(object):
         check all the mandatory fields are present,
         check payload is in dict format,
         if payload contains job id then it is considered
-        as job_updates, job updates should have flow id,
+        as job_updates,
         Check priorities and publishers are correct
         """
 
@@ -99,10 +99,7 @@ class Message(object):
             self.node_id is None or
                 "message" not in self.payload):
             return False
-        if self.job_id is not None:
-            if self.flow_id is None:
-                return False
-
+        
         return True
 
 
