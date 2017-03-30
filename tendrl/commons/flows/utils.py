@@ -34,6 +34,8 @@ def ceph_create_ssh_setup_jobs(parameters):
                 ssh_job_ids.append(_job_id)
                 Event(
                     Message(
+                        job_id=parameters['job_id'],
+                        flow_id=parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={"message": "Created SSH setup job %s for node"
@@ -50,6 +52,8 @@ def gluster_create_ssh_setup_jobs(parameters):
     if err != "":
         Event(
             Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
                 priority="error",
                 publisher=NS.publisher_id,
                 payload={"message": "Error generating ssh key"
@@ -80,6 +84,8 @@ def gluster_create_ssh_setup_jobs(parameters):
         ssh_job_ids.append(_job_id)
         Event(
             Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": "Created SSH setup job %s for node %s" %
