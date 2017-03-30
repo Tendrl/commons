@@ -29,7 +29,7 @@ class Job(objects.BaseObject):
                 _children = json.loads(_parent.children)
                 
             _children += self.job_id
-            _parent.children = _children
+            _parent.children = list(set(_children))
             _parent.save()
         
         super(Job, self).save()
