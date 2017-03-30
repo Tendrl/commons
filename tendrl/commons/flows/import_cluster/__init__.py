@@ -86,6 +86,7 @@ class ImportCluster(flows.BaseFlow):
         )
 
         node_list = self.parameters['Node[]']
+        cluster_nodes = []
         if len(node_list) > 1:
             # This is the master node for this flow
             for node in node_list:
@@ -101,8 +102,9 @@ class ImportCluster(flows.BaseFlow):
                                "parent": self.parameters['job_id'],
                                "type": "node"
                                }
-
-                    Job(job_id=str(uuid.uuid4()),
+                    _job_id = str(uuid.uuid4())
+                    cluster_nodes.append(_job_id)
+                    Job(job_id=_job_id,
                         status="new",
                         payload=json.dumps(payload)).save()
 
@@ -211,6 +213,30 @@ class ImportCluster(flows.BaseFlow):
                 )
             import_gluster(self.parameters)
 
+            
+            
+        # Wait for all cluster nodes to finish their ImportCluster jobs
+        all_jobs_done = False
+        while not all_jobs_done:
+            all_status = []
+            for job_id in cluster_nodes:
+                all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                   job_id).value)
+            if all([status for status in all_status if status == "finished"]):
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
+                             }
+                    )
+                )
+
+                all_ssh_jobs_done = True
+                
+            
         # import cluster's run() should not return unless the new cluster entry
         # is updated in etcd, as the job is marked as finished if this
         # function is returned. This might lead to inconsistancy in the API
