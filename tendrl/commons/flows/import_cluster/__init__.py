@@ -21,41 +21,6 @@ class ImportCluster(flows.BaseFlow):
 
         integration_id = self.parameters['TendrlContext.integration_id']
 
-        # Check if cluster with given id already exists in central store
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Check integration %s does not exist" % integration_id
-                     }
-            )
-        )
-
-        try:
-            cluster = NS.etcd_orm.client.read(
-                'clusters/%s' % self.parameters['TendrlContext.integration_id']
-            )
-        except etcd.EtcdKeyNotFound:
-            # cluster doesnt exist, go ahead and import
-            pass
-        else:
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Error: Integration %s is already created/imported, stopping current cluster import" % integration_id
-                         }
-                )
-            )
-
-            raise FlowExecutionFailedError(
-                "Cluster with id %s already exists" % integration_id
-            )
-
         # Check if nodes participate in some existing cluster
         try:
             clusters = NS.etcd_orm.client.read('clusters')

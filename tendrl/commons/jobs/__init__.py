@@ -108,8 +108,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             )
                             the_flow.run()
                             raw_job['status'] = "finished"
-                            # TODO(team) replace below raw write with a
-                            # "EtcdJobQueue" class
                             Job(job_id=raw_job['job_id'],
                                 status=raw_job['status'],
                                 payload=json.dumps(raw_job['payload']),
@@ -126,7 +124,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 )
                             )
 
-                        except FlowExecutionFailedError as e:
+                        except (FlowExecutionFailedError, Exception) as e:
                             Event(
                                 ExceptionMessage(
                                     priority="error",
