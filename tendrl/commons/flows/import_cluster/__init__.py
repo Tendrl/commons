@@ -74,8 +74,9 @@ class ImportCluster(flows.BaseFlow):
                             flow_id = self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
-                            payload={"message": "Check: Node %s not part of any other cluster" % entry
-                                 }
+                            payload={
+                                "message": "Check: Node %s not part of any other cluster" % entry
+                            }
                         )
                     )
 
@@ -145,7 +146,10 @@ class ImportCluster(flows.BaseFlow):
             node_context = NS.node_context.load()
             is_mon = False
             for tag in json.loads(node_context.tags):
-                if "ceph/mon" in tag:
+                mon_tag = NS.compiled_definitions.get_parsed_defs()[
+                    'namespace.tendrl'
+                ]['tags']['ceph-mon']
+                if mon_tag in tag:
                     is_mon = True
             if is_mon:
                 # Check if minimum required version of underlying ceph
