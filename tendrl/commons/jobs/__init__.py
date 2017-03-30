@@ -35,7 +35,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                 for job in jobs.leaves:
                     try:
-                        jib = job.key.split('/')[-1]
+                        jid = job.key.split('/')[-1]
                         job = Job(job_id=jid).load()
                         raw_job = {}
                         raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
