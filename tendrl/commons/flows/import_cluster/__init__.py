@@ -68,16 +68,16 @@ class ImportCluster(flows.BaseFlow):
                     _integration_id = NS.etcd_orm.client.read(
                         'nodes/%s/TendrlContext/integration_id' % entry
                     )
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Check: Node %s not part of any other cluster" % entry
-                             }
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Check: Node %s not part of any other cluster" % entry
+                                 }
+                        )
                     )
-                )
 
                     if _integration_id.value != "":
                         Event(
