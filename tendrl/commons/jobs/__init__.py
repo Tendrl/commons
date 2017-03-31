@@ -35,7 +35,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                 for job in jobs.leaves:
                     try:
-                        jib = job.key.split('/')[-1]
+                        jid = job.key.split('/')[-1]
                         job = Job(job_id=jid).load()
                         raw_job = {}
                         raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
@@ -105,7 +105,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "JOB[%s]:  Finished Flow %s" %
-                                            (job_id=job.job_id, raw_job['payload']['run'])
+                                            (job.job_id, raw_job['payload']['run'])
                                          }
                                 )
                             )

@@ -63,32 +63,34 @@ class BaseObject(object):
                 sys.stdout.write(msg)
             raise Exception(msg)
 
-    def save(self):
-        try:
-            current_obj = self.load()
-            for attr, val in self.__dict__.iteritems():
-                if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
-                                  types.MethodType, types.BuiltinMethodType,
-                                  types.UnboundMethodType)):
-                    continue
-                if attr.startswith("_") or attr in ['value', 'list']:
-                    continue
-                if val is None:
-                    # Dont update attr if self.attr has None val
-                    setattr(current_obj, attr, getattr(current_obj, attr))
-                else:
-                    # Only update attr if self.attr has a new val
-                    setattr(current_obj, attr, val)
-                    
-            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
-        except etcd.EtcdKeyNotFound as ex:
-            # No need to log the error. This would keep happening
-            # till first cluster is imported/created or some data
-            # synchronized in central store.
-            # This un-necessarily hog the log as every few seconds
-            # these errors would be logged.
-            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
+    def save(self, update=True):
+        if update:
+            try:
+                current_obj = self.load()
+                for attr, val in self.__dict__.iteritems():
+                    if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
+                                      types.MethodType, types.BuiltinMethodType,
+                                      types.UnboundMethodType)):
+                        continue
+                    if attr.startswith("_") or attr in ['value', 'list']:
+                        continue
+                    if val is None:
+                        # Dont update attr if self.attr has None val
+                        setattr(current_obj, attr, getattr(current_obj, attr))
+                    else:
+                        # Only update attr if self.attr has a new val
+                        setattr(current_obj, attr, val)
 
+                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
+            except etcd.EtcdKeyNotFound as ex:
+                # No need to log the error. This would keep happening
+                # till first cluster is imported/created or some data
+                # synchronized in central store.
+                # This un-necessarily hog the log as every few seconds
+                # these errors would be logged.
+                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
+        else:
+            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
         getattr(NS.central_store_thread, "save_%s" %
                 self.__class__.__name__.lower())(cls_etcd())
 

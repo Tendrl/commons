@@ -32,6 +32,8 @@ A simplistic etcd orm.
 import json
 import sys
 
+import etcd
+
 from tendrl.commons.etcdobj import fields
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
@@ -121,15 +123,18 @@ class _Server(object):
                 )
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
-            etcd_resp = self.client.read(item['key'], quorum=True)
-            value = etcd_resp.value
+            try:
+                etcd_resp = self.client.read(item['key'], quorum=True)
+                value = etcd_resp.value
 
-            if item['dir']:
-                key = item['key'].split('/')[-1]
-                dct = getattr(obj, item['name'])
-                dct[key] = value
-            else:
-                setattr(obj, item['name'], value)
+                if item['dir']:
+                    key = item['key'].split('/')[-1]
+                    dct = getattr(obj, item['name'])
+                    dct[key] = value
+                else:
+                    setattr(obj, item['name'], value)
+            except etcd.EtcdKeyNotFound:
+                pass
         return obj
 
 
