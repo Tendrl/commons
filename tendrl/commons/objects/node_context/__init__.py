@@ -26,14 +26,18 @@ class NodeContext(objects.BaseObject):
         self.node_id = node_id or self._get_node_id() or self._create_node_id()
         self.fqdn = fqdn or socket.getfqdn()
 
-        _curr_node_context = self.load()
-        _tags = []
+        curr_tags = []
         try:
-            _tags = json.loads(_curr_node_context.tags)
-        except Valuerror:
+            curr_tags = NS.etcd_orm.client.read("/nodes/%s/NodeContext/tags" % self.node_id).value
+        except etcd.EtcdKeyNotFound:
+            pass
+        
+        try:
+            curr_tags = json.loads(curr_tags)
+        except (ValueError, TypeError):
             # No existing tags
             pass
-        self.tags = tags
+        self.tags = tags or []
         self.tags += NS.config.data['tags']
         self.tags += _tags
         self.tags = list(set(self.tags))
