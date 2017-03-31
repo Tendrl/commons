@@ -17,14 +17,6 @@ from tendrl.commons.objects.job import Job
 class CreateCluster(flows.BaseFlow):
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
-        _node_context = NS.node_context.load()
-        for tag in json.loads(_node_context.tags):
-            # Ceph Provisioner tendrl-node-agent should not participate in cluster, hence removed
-            provisioner_tag = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['tags']['ceph-provisioner']
-            if provisioner_tag in tag:
-                self.parameters['Node[]'].remove(_node_context.node_id)
-                
-            
         ssh_job_ids = []
         if "ceph" in self.parameters["TendrlContext.sds_name"]:
             ssh_job_ids = utils.ceph_create_ssh_setup_jobs(self.parameters)
