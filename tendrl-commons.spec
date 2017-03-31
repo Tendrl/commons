@@ -1,5 +1,5 @@
 Name: tendrl-commons
-Version: 1.2.1
+Version: 1.2.2
 Release: 2%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
