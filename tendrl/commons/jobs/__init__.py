@@ -75,7 +75,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             Event(
                                 Message(
                                     job_id=job.job_id,
-                                    flow_id = the_flow.parameters['flow_id'],
+                                    flow_id=the_flow.parameters['flow_id'],
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "Processing Job %s" %
@@ -129,7 +129,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "error traceback",
+                        payload={"message": "Job queue failure",
                                  "exception": ex
                                  }
                     )
