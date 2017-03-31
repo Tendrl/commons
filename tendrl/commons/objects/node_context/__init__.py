@@ -39,7 +39,7 @@ class NodeContext(objects.BaseObject):
             pass
         self.tags = tags or []
         self.tags += NS.config.data['tags']
-        self.tags += _tags
+        self.tags += curr_tags
         self.tags = list(set(self.tags))
         
         self.status = status or "UP"
