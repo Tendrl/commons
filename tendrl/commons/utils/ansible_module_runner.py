@@ -50,6 +50,8 @@ class AnsibleRunner(object):
             raise ValueError
         else:
             self.argument_dict = kwargs
+            self.argument_dict['_ansible_selinux_special_fs'] = \
+                ['nfs', 'vboxsf', 'fuse', 'ramfs']
 
     def __generate_executable_module(self):
         modname = os.path.basename(self.module_path)
