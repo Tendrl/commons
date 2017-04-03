@@ -9,6 +9,7 @@ from tendrl.commons.message import Message
 from tendrl.commons.flows import utils
 from tendrl.commons.flows.create_cluster import ceph_help
 from tendrl.commons.flows.create_cluster import gluster_help
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.objects.job import Job
@@ -17,6 +18,8 @@ from tendrl.commons.objects.job import Job
 class CreateCluster(flows.BaseFlow):
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
+        if integration_id is None:
+            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
         ssh_job_ids = []
         if "ceph" in self.parameters["TendrlContext.sds_name"]:
             ssh_job_ids = utils.ceph_create_ssh_setup_jobs(self.parameters)
