@@ -94,11 +94,13 @@ class Message(object):
         # Check payload type is dict
         if type(self.payload) != dict:
             return False
+        
         # Check mandatory fields
         if (self.priority not in priorities or
             self.node_id is None or
                 "message" not in self.payload):
             return False
+        
         if self.job_id is not None:
             if self.flow_id is None:
                 return False

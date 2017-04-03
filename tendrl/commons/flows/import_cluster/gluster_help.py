@@ -82,7 +82,7 @@ def import_gluster(parameters):
                                    logging_file_name,
                    "log_level": "DEBUG",
                     "logging_socket_path": "/var/run/tendrl/message.sock",
-                    "tags": json.dumps([gluster_integration_tag])}
+                    "tags": [gluster_integration_tag]}
     with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)

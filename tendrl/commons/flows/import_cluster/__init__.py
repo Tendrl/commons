@@ -21,41 +21,6 @@ class ImportCluster(flows.BaseFlow):
 
         integration_id = self.parameters['TendrlContext.integration_id']
 
-        # Check if cluster with given id already exists in central store
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Check integration %s does not exist" % integration_id
-                     }
-            )
-        )
-
-        try:
-            cluster = NS.etcd_orm.client.read(
-                'clusters/%s' % self.parameters['TendrlContext.integration_id']
-            )
-        except etcd.EtcdKeyNotFound:
-            # cluster doesnt exist, go ahead and import
-            pass
-        else:
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Error: Integration %s is already created/imported, stopping current cluster import" % integration_id
-                         }
-                )
-            )
-
-            raise FlowExecutionFailedError(
-                "Cluster with id %s already exists" % integration_id
-            )
-
         # Check if nodes participate in some existing cluster
         try:
             clusters = NS.etcd_orm.client.read('clusters')
@@ -70,7 +35,7 @@ class ImportCluster(flows.BaseFlow):
                     )
                     Event(
                         Message(
-                            job_id=self.parameters['job_id'],
+                            job_id=self.job_id,
                             flow_id = self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
@@ -83,7 +48,7 @@ class ImportCluster(flows.BaseFlow):
                     if _integration_id.value != "":
                         Event(
                             Message(
-                                job_id=self.parameters['job_id'],
+                                job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
@@ -110,17 +75,18 @@ class ImportCluster(flows.BaseFlow):
         NS.tendrl_context.save()
         Event(
             Message(
-                job_id=self.parameters['job_id'],
+                job_id=self.job_id,
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Register Node %s with cluster %s" % (NS.node_context.node_id,
+                payload={"message": "Registered Node %s with cluster %s" % (NS.node_context.node_id,
                                                                                 NS.tendrl_context.integration_id)
                      }
             )
         )
 
         node_list = self.parameters['Node[]']
+        cluster_nodes = []
         if len(node_list) > 1:
             # This is the master node for this flow
             for node in node_list:
@@ -128,18 +94,29 @@ class ImportCluster(flows.BaseFlow):
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
                     # create same flow for each node in node list except $this
-                    payload = {"integration_id": integration_id,
-                               "node_ids": [node],
+                    payload = {"node_ids": [node],
                                "run": "tendrl.flows.ImportCluster",
                                "status": "new",
                                "parameters": new_params,
-                               "parent": self.parameters['job_id'],
+                               "parent": self.job_id,
                                "type": "node"
                                }
-
-                    Job(job_id=str(uuid.uuid4()),
+                    _job_id = str(uuid.uuid4())
+                    cluster_nodes.append(_job_id)
+                    Job(job_id=_job_id,
                         status="new",
                         payload=json.dumps(payload)).save()
+                    Event(
+                        Message(
+                            job_id=self.job_id,
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Importing Node %s to cluster %s" % (node, integration_id)
+                                 }
+                        )
+                    )
+
 
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
@@ -246,6 +223,31 @@ class ImportCluster(flows.BaseFlow):
                 )
             import_gluster(self.parameters)
 
+            
+            
+        # Wait for all cluster nodes to finish their ImportCluster jobs
+        if cluster_nodes:
+            all_jobs_done = False
+            while not all_jobs_done:
+                all_status = []
+                for job_id in cluster_nodes:
+                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                       job_id).value)
+                if all([status for status in all_status if status == "finished"]):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
+                                 }
+                        )
+                    )
+
+                    all_jobs_done = True
+                
+            
         # import cluster's run() should not return unless the new cluster entry
         # is updated in etcd, as the job is marked as finished if this
         # function is returned. This might lead to inconsistancy in the API
