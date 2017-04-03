@@ -20,6 +20,8 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
 
         integration_id = self.parameters['TendrlContext.integration_id']
+        if integration_id is None:
+            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
 
         # Check if nodes participate in some existing cluster
         try:
