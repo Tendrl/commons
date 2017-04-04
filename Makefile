@@ -2,7 +2,7 @@ NAME=tendrl-commons
 VERSION := $(shell PYTHONPATH=. python -c \
              'import tendrl.commons; print tendrl.commons.__version__' \
              | sed 's/\.dev[0-9]*//')
-RELEASE=2
+RELEASE=1
 COMMIT := $(shell git rev-parse HEAD)
 SHORTCOMMIT := $(shell echo $(COMMIT) | cut -c1-7)
 GIT_RELEASE := $(shell git describe --tags --match 'v*' \
