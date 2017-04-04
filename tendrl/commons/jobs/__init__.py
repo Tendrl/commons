@@ -44,18 +44,23 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                     if raw_job['payload']["type"] == NS.type and \
                             job.status == "new":
+                        job.status = "processing"
+                        job.save()
 
                         # Job routing
                         if raw_job.get("payload", {}).get("tags", []):
                             NS.node_context = NS.node_context.load()
                             tags = json.loads(NS.node_context.tags)
-                            if set(tags).isdisjoint(
-                                raw_job['payload']['tags']):
+                            if set(tags).isdisjoint(raw_job['payload']['tags']):
+                                job.status = "new"
+                                job.save()
                                 continue
 
                         if raw_job.get("payload", {}).get("node_ids", []):
                             if NS.node_context.node_id not in \
                                     raw_job['payload']['node_ids']:
+                                job.status = "new"
+                                job.save()
                                 continue
 
                         current_ns, flow_name, obj_name = \
@@ -70,8 +75,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             
                             the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
                                                      job_id=job.job_id)
-                            job.status = "processing"
-                            job.save()
                             Event(
                                 Message(
                                     job_id=job.job_id,

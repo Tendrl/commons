@@ -45,7 +45,6 @@ rm -rf %{name}.egg-info
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %check
-py.test -v tendrl/commons/tests || :
 
 %files -f INSTALLED_FILES
 %doc README.rst
