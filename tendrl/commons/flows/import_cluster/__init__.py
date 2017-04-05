@@ -114,7 +114,7 @@ class ImportCluster(flows.BaseFlow):
                             flow_id = self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
-                            payload={"message": "Importing Node %s to cluster %s" % (node, integration_id)
+                            payload={"message": "Importing (job: %s) Node %s to cluster %s" % (_job_id, node, integration_id)
                                  }
                         )
                     )
