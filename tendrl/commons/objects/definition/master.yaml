@@ -1,5 +1,8 @@
 ---
 namespace.tendrl:
+  supported_sds:
+   - ceph
+   - gluster
   min_reqd_gluster_ver: 3.9.0
   min_reqd_ceph_ver: 10.2.5
   ceph_provisioner: CephInstallerPlugin
