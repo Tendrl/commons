@@ -7,6 +7,8 @@ import types
 from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
+from tendrl.commons.utils import time_utils
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
@@ -17,7 +19,7 @@ class BaseObject(object):
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Object must provide its own definition via '_defs' attr")
-
+        
     def load_definition(self):
         try:
             Event(
@@ -64,6 +66,7 @@ class BaseObject(object):
             raise Exception(msg)
 
     def save(self, update=True):
+        self.updated_at = str(time_utils.now())
         if update:
             try:
                 current_obj = self.load()
@@ -80,7 +83,6 @@ class BaseObject(object):
                     else:
                         # Only update attr if self.attr has a new val
                         setattr(current_obj, attr, val)
-
                 cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
             except etcd.EtcdKeyNotFound as ex:
                 # No need to log the error. This would keep happening
