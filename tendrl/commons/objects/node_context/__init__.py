@@ -89,7 +89,7 @@ class NodeContext(objects.BaseObject):
                     with open(local_node_id) as f:
                         node_id = f.read()
                         if node_id is None or node_id != last_node_id:
-                            raise Exception("Cannot run tendrl-node-agent, duplicate /etc/machine-id found, please re-generate /etc/machine-id")
+                            raise Exception("Cannot run tendrl-node-agent, machine-id (%s) in use by another node managed by Tendrl, please re-generate /etc/machine-id" % self.machine_id)
                         if node_id == last_node_id:
                             return last_node_id
             except (AttributeError, IOError):
