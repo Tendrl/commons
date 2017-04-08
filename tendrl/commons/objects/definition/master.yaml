@@ -19,6 +19,7 @@ namespace.tendrl:
     ceph-osd: "ceph/osd"
     gluster-provisioner: "provisioner/gluster"
     ceph-provisioner: "provisioner/ceph"
+    ceph-installer: "provisioner/ceph"
   flows:
     CreateCluster:
       help: "Create a cluster from scratch"
