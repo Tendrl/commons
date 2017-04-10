@@ -77,9 +77,7 @@ def install_packages(parameters):
         )
     )
 
-    status, err = sync_task_status(task_id)
-    if not status:
-        raise FlowExecutionFailedError(err)
+    wait_for_task(task_id)
     task_id = plugin.install_osd(osd_ips)
     Event(
         Message(
@@ -93,9 +91,7 @@ def install_packages(parameters):
         )
     )
 
-    status, err = sync_task_status(task_id)
-    if not status:
-        raise FlowExecutionFailedError(err)
+    wait_for_task(task_id)
     return mon_ips, osd_ips
 
 def create_mons(parameters, mon_ips):
@@ -122,9 +118,7 @@ def create_mons(parameters, mon_ips):
             )
         )
 
-        status, err = sync_task_status(task_id)
-        if not status:
-            raise FlowExecutionFailedError(err)
+        wait_for_task(task_id)
         else:
             # If success add the MON to the created list
             created_mons.append({"address":mon_ip, "host": mon_ip})
@@ -167,12 +161,9 @@ def create_osds(parameters, created_mons):
                 )
             )
 
-            status, err = sync_task_status(task_id)
-            if not status:
-                raise FlowExecutionFailedError(err)
+            wait_for_task(task_id)
 
-
-def sync_task_status(task_id):
+def wait_for_task(task_id):
     status = False
     count = 0
     plugin = NS.ceph_provisioner.get_plugin()
@@ -183,6 +174,7 @@ def sync_task_status(task_id):
         if resp:
             if resp["ended"]:
                 if resp["succeeded"]:
-                    return True, ""
-    return status, resp.get("stderr", "ceph-installer task_id %s timed out"
-                            % task_id)
+                    return
+    stderr = resp.get("stderr", "ceph-installer task_id %s timed out and did not complete" % task_id)
+    stdout = resp.get("stdout", "")
+    raise FlowExecutionFailedError(dict(stdout=stdout, stderr=stderr))

@@ -11,6 +11,7 @@ namespace.tendrl:
     tendrl-node-agent: "tendrl/node"
     etcd: "tendrl/central-store"
     tendrl-apid: "tendrl/server"
+    tendrl-monitor: "tendrl/monitor"
     tendrl-gluster-integration: "tendrl/integration/gluster"
     tendrl-ceph-integration: "tendrl/integration/ceph"
     glusterd: "gluster/server"
@@ -18,8 +19,10 @@ namespace.tendrl:
     ceph-osd: "ceph/osd"
     gluster-provisioner: "provisioner/gluster"
     ceph-provisioner: "provisioner/ceph"
+    ceph-installer: "provisioner/ceph"
   flows:
     CreateCluster:
+      tag: "provisioner/$TendrlContext.sds_name"
       help: "Create a cluster from scratch"
       enabled: true
       inputs:
