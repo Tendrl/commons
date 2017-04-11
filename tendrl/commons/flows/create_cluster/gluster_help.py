@@ -1,4 +1,3 @@
-
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -25,7 +24,17 @@ def create_gluster(parameters):
                      }
         )
     )
-    ret_val = plugin.setup_gluster_node(node_ips)
+
+    # Reimport the python-gdeploy module as it got installed just now
+    from python_gdeploy.actions import install_gluster
+    from python_gdeploy.actions import configure_gluster_service
+    from python_gdeploy.actions import configure_gluster_firewall
+    from python_gdeploy.actions import create_cluster
+
+    ret_val = plugin.setup_gluster_node(
+        node_ips,
+        repo=NS.config.data['glusterfs_repo']
+    )
     if ret_val is not True:
         raise FlowExecutionFailedError("Error setting up gluster node")
 
