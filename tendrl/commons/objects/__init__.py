@@ -100,6 +100,15 @@ class BaseObject(object):
         cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
         result = NS.etcd_orm.read(cls_etcd())
         return result.to_tendrl_obj()
+    
+    def exists(self):
+        _exists = False
+        try:
+            self.load()
+            _exists = True
+        except etcd.EtcdKeyNotFound:
+            pass
+        return _exists
 
 
 @six.add_metaclass(abc.ABCMeta)
