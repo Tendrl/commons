@@ -8,6 +8,6 @@ pyroma:
 vulture:
   run: true
 pylint:
-  options:
-    additional-builtins:
-     - NS
+    options:
+        additional-builtins:
+            - NS
