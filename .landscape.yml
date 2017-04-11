@@ -3,9 +3,11 @@ max-line-length: 79
 autodetect: false
 ignore-paths:
   - doc
-python-targets:
-  - 2
 pyroma:
   run: true
 vulture:
   run: true
+pylint:
+  options:
+    additional-builtins:
+     - NS
