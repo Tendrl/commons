@@ -17,6 +17,15 @@ from tendrl.commons.objects.job import Job
 
 class CreateCluster(flows.BaseFlow):
     def run(self):
+        integration_id = self.parameters['TendrlContext.integration_id']
+        if integration_id is None:
+            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
+        
+        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+        sds_name = self.parameters["TendrlContext.sds_name"]
+        if sds_name not in supported_sds:
+            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
+        
         # Check if clusre name contains space char and fail if so
         if ' ' in self.parameters['TendrlContext.cluster_name']:
             Event(
@@ -26,7 +35,7 @@ class CreateCluster(flows.BaseFlow):
                     payload={
                         "message": "Space char not allowed in cluster name"
                     },
-                    job_id=self.parameters['job_id'],
+                    job_id=self.job_id,
                     flow_id=self.parameters['flow_id'],
                     cluster_id=NS.tendrl_context.integration_id,
                 )
@@ -35,13 +44,6 @@ class CreateCluster(flows.BaseFlow):
                 "Space char not allowed in cluster name"
             )
 
-        integration_id = self.parameters['TendrlContext.integration_id']
-        if integration_id is None:
-            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
-        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
-        sds_name = self.parameters["TendrlContext.sds_name"]
-        if sds_name not in supported_sds:
-            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
         ssh_job_ids = []
         if "ceph" in sds_name:
             ssh_job_ids = utils.ceph_create_ssh_setup_jobs(self.parameters)
