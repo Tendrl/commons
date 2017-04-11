@@ -10,10 +10,11 @@ from tendrl.commons.objects.job import Job
 
 from tendrl.commons import flows
 from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
+from tendrl.commons.message import Message
 
 
 class ImportCluster(flows.BaseFlow):
@@ -87,6 +88,46 @@ class ImportCluster(flows.BaseFlow):
             )
         )
 
+        # check if gdeploy in already provisioned in this cluster
+        # if no it has to be provisioned here
+        if not self.parameters.get('gdeploy_provisioned', False):
+            create_cluster_utils.install_gdeploy()
+            create_cluster_utils.install_python_gdeploy()
+            ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
+                self.parameters
+            )
+
+            all_ssh_jobs_done = False
+            while not all_ssh_jobs_done:
+                all_status = []
+                for job_id in ssh_job_ids:
+                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                              job_id).value)
+                if all([status for status in all_status if status == "finished"]):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
+                                 }
+                        )
+                    )
+                    all_ssh_jobs_done = True
+
+                    # set this node as gluster provisioner
+                    tags = ["provisioner/%s" % integration_id]
+                    NS.node_context = NS.node_context.load()
+                    current_tags = json.loads(NS.node_context.tags)
+                    tags += current_tags
+                    NS.node_context.tags = list(set(tags))
+                    NS.node_context.save()
+
+                    # set gdeploy_provisioned to true so that no other nodes
+                    # tries to configure gdeploy
+                    self.parameters['gdeploy_provisioned'] = True
+
         node_list = self.parameters['Node[]']
         cluster_nodes = []
         if len(node_list) > 1:
@@ -114,7 +155,7 @@ class ImportCluster(flows.BaseFlow):
                             flow_id = self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
-                            payload={"message": "Importing Node %s to cluster %s" % (node, integration_id)
+                            payload={"message": "Importing (job: %s) Node %s to cluster %s" % (_job_id, node, integration_id)
                                  }
                         )
                     )

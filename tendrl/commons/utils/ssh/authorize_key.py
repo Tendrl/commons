@@ -40,13 +40,16 @@ class AuthorizeKey(object):
                 **self.attributes
             )
             result, err = runner.run()
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "Authorize key: %s" % result}
+            if 'failed' in result:
+               err = result
+            else:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher="commons",
+                        payload={"message": "Authorize key: %s" % result}
+                    )
                 )
-            )
         except AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
