@@ -119,9 +119,7 @@ def create_mons(parameters, mon_ips):
         )
 
         wait_for_task(task_id)
-        else:
-            # If success add the MON to the created list
-            created_mons.append({"address":mon_ip, "host": mon_ip})
+        created_mons.append({"address":mon_ip, "host": mon_ip})
     return created_mons
 
 
