@@ -1,0 +1,12 @@
+strictness: veryhigh
+max-line-length: 79
+autodetect: true
+ignore-paths:
+  - doc
+  - mypackage/vendor
+python-targets:
+  - 2
+pyroma:
+  run: true
+vulture:
+  run: true
