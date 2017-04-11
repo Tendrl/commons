@@ -10,3 +10,7 @@ pyroma:
   run: true
 vulture:
   run: true
+pylint:
+  options:
+    additional-builtins:
+     - NS
