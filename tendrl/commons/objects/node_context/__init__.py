@@ -72,11 +72,28 @@ class NodeContext(objects.BaseObject):
         )
         except KeyError:
             sys.stdout.write("message: Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id))
+        local_node_id = "/var/lib/tendrl/node_id"
+        if not os.path.exists(os.path.dirname(local_node_id)):
+            os.makedirs(os.path.dirname(local_node_id))
+        with open(local_node_id, 'wb+') as f:
+            f.write(node_id)
+
         return node_id
 
     def _get_node_id(self):
         try:
-            return NS.etcd_orm.client.read("/indexes/machine_id/%s" % self.machine_id).value
+            last_node_id =  NS.etcd_orm.client.read("/indexes/machine_id/%s" % self.machine_id).value
+            try:
+                local_node_id = "/var/lib/tendrl/node_id"
+                if os.path.isfile(local_node_id):
+                    with open(local_node_id) as f:
+                        node_id = f.read()
+                        if node_id is None or node_id != last_node_id:
+                            raise Exception("Cannot run tendrl-node-agent, machine-id (%s) in use by another node managed by Tendrl, please re-generate /etc/machine-id" % self.machine_id)
+                        if node_id == last_node_id:
+                            return last_node_id
+            except (AttributeError, IOError):
+                return None
 
         except etcd.EtcdKeyNotFound:
             try:
