@@ -63,7 +63,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         try:
                             lock_info = dict(node_id=NS.node_context.node_id, fqdn=NS.node_context.fqdn,
                                              tags=NS.node_context.tags)
-                            NS.etcd_orm.client.write(job_lock_key, json.dumps(lock_info), prevValue="")
+                            NS.etcd_orm.client.write(job_lock_key, json.dumps(lock_info))
                             NS.etcd_orm.client.write(job_status_key, "processing", prevValue="new")
                         except etcd.EtcdCompareFailed:
                             # job is already being processed by some tendrl agent
