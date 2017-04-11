@@ -37,6 +37,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     try:
                         jid = job.key.split('/')[-1]
                         job = Job(job_id=jid).load()
+                        if job.locked_by:
+                            continue
                         raw_job = {}
                         raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
                     except etcd.EtcdKeyNotFound:
