@@ -1,6 +1,6 @@
 strictness: veryhigh
 max-line-length: 79
-autodetect: true
+autodetect: false
 ignore-paths:
   - doc
 python-targets:
