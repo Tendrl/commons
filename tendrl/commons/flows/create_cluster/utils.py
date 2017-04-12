@@ -1,3 +1,4 @@
+import copy
 import json
 import uuid
 
@@ -69,7 +70,7 @@ def install_python_gdeploy():
         attributes["editable"] = "false"
         ansible_module_path = "core/packaging/language/pip.py"
     elif NS.config.data['package_source_type'] == 'rpm':
-        name = "tendrl-python-gdeploy"
+        name = "python-gdeploy"
         ansible_module_path = "core/packaging/os/yum.py"
         attributes["name"] = name
     else:
@@ -89,7 +90,7 @@ def install_python_gdeploy():
         )
 
 def gluster_create_ssh_setup_jobs(parameters):
-    node_list = parameters['Node[]']
+    node_list = copy.deepcopy(parameters['Node[]'])
 
     ssh_job_ids = []
     ssh_key, err = NS.gluster_provisioner.get_plugin().setup()
