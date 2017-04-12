@@ -48,6 +48,7 @@ namespace.tendrl:
       inputs:
         mandatory:
           - "Node[]"
+          - DetectedCluster.detected_cluster_id
           - DetectedCluster.sds_pkg_name
           - DetectedCluster.sds_pkg_version
           - TendrlContext.integration_id
