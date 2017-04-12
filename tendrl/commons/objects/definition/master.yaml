@@ -73,10 +73,10 @@ namespace.tendrl:
           help: Data Nework cidr of the cluster
         node_configuration:
           help: Node configuration for the cluster nodes
-          type: String
+          type: Dict[]
         conf_overrides:
           help: Configuration overrides for the cluster
-          type: String
+          type: Dict
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -463,7 +463,7 @@ namespace.tendrl:
           type: String
         tags:
           help: "The tags associated with this node"
-          type: String
+          type: List
         status:
           help: "Node status"
           type: String
@@ -485,7 +485,7 @@ namespace.tendrl:
           type: String
         tags:
           help: "The tags associated with this node"
-          type: String
+          type: List
         status:
           help: "Node status"
           type: String
@@ -510,7 +510,7 @@ namespace.tendrl:
           type: String
         children:
           help: "ID of child jobs created by this job"
-          type: String
+          type: List
       enabled: true
       list: /queue
       value: /queue
