@@ -148,7 +148,7 @@ class CreateCluster(flows.BaseFlow):
             sds_pkg_name
         new_params['DetectedCluster.sds_pkg_version'] = \
             sds_pkg_version
-        payload = {"tags": ["detected_cluster/%s" % detected_cluster_id]
+        payload = {"tags": ["detected_cluster/%s" % detected_cluster_id],
                    "run": "tendrl.flows.ImportCluster",
                    "status": "new",
                    "parameters": new_params,
