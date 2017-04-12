@@ -42,6 +42,7 @@ namespace.tendrl:
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
       version: 1
     ImportCluster:
+      tag: "detected_cluster/$DetectedCluster.detected_cluster_id"
       help: "Import existing Gluster Cluster"
       enabled: true
       inputs:
