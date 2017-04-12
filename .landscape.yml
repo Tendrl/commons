@@ -1,16 +1,16 @@
 strictness: veryhigh
+
 max-line-length: 79
-autodetect: true
+
+autodetect: false
+
 ignore-paths:
   - doc
-  - mypackage/vendor
-python-targets:
-  - 2
+
+pylint:
+    options:
+        additional-builtins:
+            - NS
+
 pyroma:
   run: true
-vulture:
-  run: true
-pylint:
-  options:
-    additional-builtins:
-     - NS
