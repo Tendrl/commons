@@ -126,14 +126,21 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             Event(
                                 ExceptionMessage(
                                     priority="error",
-                                    job_id=job.job_id,
-                                    flow_id = the_flow.parameters['flow_id'],
                                     publisher=NS.publisher_id,
                                     payload={"message": "error",
                                              "exception": e
                                              }
                                 )
                             )
+                            Event(
+                                Message(
+                                    job_id=job.job_id,
+                                    flow_id = the_flow.parameters['flow_id'],
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "Job failed"}
+                                )
+                            ) 
                             try:
                                 NS.etcd_orm.client.write(job_status_key, "failed", prevValue="processing")
                             except etcd.EtcdCompareFailed:
