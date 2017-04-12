@@ -138,7 +138,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     flow_id = the_flow.parameters['flow_id'],
                                     priority="error",
                                     publisher=NS.publisher_id,
-                                    payload={"message": "Job failed"}
+                                    payload={"message": "Job failed %s: %s" % (e, e.message)}
                                 )
                             ) 
                             try:
