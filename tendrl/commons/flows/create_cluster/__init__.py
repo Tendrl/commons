@@ -133,6 +133,9 @@ class CreateCluster(flows.BaseFlow):
         new_params['TendrlContext.integration_id'] = integration_id
 
         # Get node context for one of the nodes from list
+        detected_cluster_id = NS.etcd_orm.client.read(
+            "nodes/%s/DetectedCluster/detected_cluster_id" % self.parameters['Node[]'][0]
+        ).value
         sds_pkg_name = NS.etcd_orm.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node[]'][0]
         ).value
@@ -145,7 +148,7 @@ class CreateCluster(flows.BaseFlow):
             sds_pkg_name
         new_params['DetectedCluster.sds_pkg_version'] = \
             sds_pkg_version
-        payload = {"node_ids": self.parameters['Node[]'],
+        payload = {"tags": ["detected_cluster/%s" % detected_cluster_id]
                    "run": "tendrl.flows.ImportCluster",
                    "status": "new",
                    "parameters": new_params,
