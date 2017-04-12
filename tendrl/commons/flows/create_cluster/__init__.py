@@ -1,5 +1,6 @@
 # flake8: noqa
 
+import etcd
 import json
 import uuid
 
