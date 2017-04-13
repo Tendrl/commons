@@ -48,16 +48,41 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             job.status == "new":
 
                         # Job routing
+                        
+                        # Flows created by tendrl-api use 'tags' from flow definition to target jobs
+                        _tag_match = False
                         if raw_job.get("payload", {}).get("tags", []):
                             NS.node_context = NS.node_context.load()
                             tags = json.loads(NS.node_context.tags)
-                            if set(tags).isdisjoint(raw_job['payload']['tags']):
-                                continue
+                            for flow_tag in raw_job['payload']['tags']:
+                                if flow_tag in tags:
+                                    _tag_match = True
 
+                        # Flows created by tendrl backend use 'node_ids' to target jobs
+                        _node_id_match = False
                         if raw_job.get("payload", {}).get("node_ids", []):
-                            if NS.node_context.node_id not in \
+                            if NS.node_context.node_id in \
                                     raw_job['payload']['node_ids']:
-                                continue
+                                _node_id_match = True
+                        
+                        if not _tag_match and not _node_id_match:
+                            _job_node_ids = ", ".join(raw_job.get("payload", 
+                                                                  {}).get("node_ids",
+                                                                          []))
+                            _job_tags = ", ".join(raw_job.get("payload", {}).get("tags", []))
+                            _msg = "Node (%s)(tags: %s) will not process job-%s (node_ids: %s)(tags: %s)" % (NS.node_context.node_id,
+                                                                                                             json.loads(NS.node_context.tags),
+                                                                                                             _job_node_ids,
+                                                                                                             _job_tags)
+                            Event(
+                                Message(
+                                    priority="info",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg}
+                                )
+                            )
+                            continue
+
                         job_status_key = "/queue/%s/status" % job.job_id
                         job_lock_key = "/queue/%s/locked_by" % job.job_id
                         try:
