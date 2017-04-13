@@ -36,6 +36,14 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 for job in jobs.leaves:
                     try:
                         jid = job.key.split('/')[-1]
+                        _seen_by_key = "/queue/%s/seen_by_%s" % (job.job_id, NS.node_context.node_id)
+                        try:
+                            NS.etcd_orm.client.read(_seen_by_key)
+                            # Job already seen (could not match) by $this node
+                            continue
+                        except etcd.EtcdKeyNotFound:
+                            pass
+
                         job = Job(job_id=jid).load()
                         if job.locked_by:
                             continue
@@ -82,6 +90,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     payload={"message": _msg}
                                 )
                             )
+                            _seen_by_key = "/queue/%s/seen_by_%s" % (job.job_id, NS.node_context.node_id)
+                            NS.etcd_orm.client.write(_seen_by_key, True)
                             continue
 
                         job_status_key = "/queue/%s/status" % job.job_id
