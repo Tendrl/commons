@@ -72,6 +72,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             _job_tags = ", ".join(raw_job.get("payload", {}).get("tags", []))
                             _msg = "Node (%s)(tags: %s) will not process job-%s (node_ids: %s)(tags: %s)" % (NS.node_context.node_id,
                                                                                                              json.loads(NS.node_context.tags),
+                                                                                                             jid,
                                                                                                              _job_node_ids,
                                                                                                              _job_tags)
                             Event(
