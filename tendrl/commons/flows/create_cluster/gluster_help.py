@@ -25,12 +25,6 @@ def create_gluster(parameters):
         )
     )
 
-    # Reimport the python-gdeploy module as it got installed just now
-    from python_gdeploy.actions import install_gluster
-    from python_gdeploy.actions import configure_gluster_service
-    from python_gdeploy.actions import configure_gluster_firewall
-    from python_gdeploy.actions import create_cluster
-
     ret_val = plugin.setup_gluster_node(
         node_ips,
         repo=NS.config.data['glusterfs_repo']
