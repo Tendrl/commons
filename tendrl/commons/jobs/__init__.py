@@ -67,11 +67,11 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         
                         # Flows created by tendrl-api use 'tags' from flow definition to target jobs
                         _tag_match = False
+                        NS.node_context = NS.node_context.load()
+                        NS.node_context.tags = json.loads(NS.node_context.tags)
                         if raw_job.get("payload", {}).get("tags", []):
-                            NS.node_context = NS.node_context.load()
-                            tags = json.loads(NS.node_context.tags)
                             for flow_tag in raw_job['payload']['tags']:
-                                if flow_tag in tags:
+                                if flow_tag in NS.node_context.tags:
                                     _tag_match = True
 
                         # Flows created by tendrl backend use 'node_ids' to target jobs
@@ -87,7 +87,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                                                           []))
                             _job_tags = ", ".join(raw_job.get("payload", {}).get("tags", []))
                             _msg = "Node (%s)(tags: %s) will not process job-%s (node_ids: %s)(tags: %s)" % (NS.node_context.node_id,
-                                                                                                             json.loads(NS.node_context.tags),
+                                                                                                             json.dumps(NS.node_context.tags),
                                                                                                              jid,
                                                                                                              _job_node_ids,
                                                                                                              _job_tags)
