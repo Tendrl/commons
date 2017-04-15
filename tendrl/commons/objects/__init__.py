@@ -8,6 +8,7 @@ from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
 from tendrl.commons.utils import time_utils
+from tendrl.commons.utils import hash_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -66,6 +67,21 @@ class BaseObject(object):
             raise Exception(msg)
 
     def save(self, update=True):
+        if not "Message" in self.__class__.__name__:
+            try:
+                # Generate current in memory object hash
+                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)()
+                self.hash = hash_utils.generate_obj_hash(cls_etcd)
+                cls_etcd.render()
+                _hash_key = "%s/hash" % cls_etcd.__name__
+                _stored_hash = NS.etcd_orm.client.read(_hash_key).value
+                if self.hash == _stored_hash:
+                    # No changes in stored object and current object, dont save current object to central store
+                    return
+            except (TypeError, etcd.EtcdKeyNotFound):
+                # no hash for this object, save the current hash as is
+                pass
+        
         self.updated_at = str(time_utils.now())
         if update:
             try:
