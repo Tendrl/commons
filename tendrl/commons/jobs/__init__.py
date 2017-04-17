@@ -198,7 +198,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": ex.message,
+                        payload={"message": "Job /queue failure, error:" + ex.message,
                                  "exception": ex
                                  }
                     )
