@@ -162,7 +162,6 @@ def create_osds(parameters, created_mons):
             wait_for_task(task_id)
 
 def wait_for_task(task_id):
-    status = False
     count = 0
     plugin = NS.ceph_provisioner.get_plugin()
     resp = {}
