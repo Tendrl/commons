@@ -13,7 +13,7 @@ except ImportError:
 
 
 def read_module_contents():
-    with open('tendrl/commons/__init__.py') as app_init:
+    with open('version.py') as app_init:
         return app_init.read()
 
 
