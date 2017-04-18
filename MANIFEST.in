@@ -1,6 +1,7 @@
 include LICENSE
 include AUTHORS
 include ChangeLog
+include version.py
 exclude .gitignore
 exclude .gitreview
 graft docs
