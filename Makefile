@@ -1,5 +1,7 @@
 NAME=tendrl-commons
-VERSION := 1.2.3
+VERSION := $(shell PYTHONPATH=. python -c \
+             'import version; print version.__version__' \
+             | sed 's/\.dev[0-9]*//')
 RELEASE=1
 COMMIT := $(shell git rev-parse HEAD)
 SHORTCOMMIT := $(shell echo $(COMMIT) | cut -c1-7)
@@ -29,7 +31,7 @@ gitversion:
 	# Set version and release to the latest values from Git
 	$(eval VERSION := $(VERSION).dev$(GIT_RELEASE))
 	$(eval RELEASE := $(GIT_RELEASE).$(SHORTCOMMIT))
-	sed -i tendrl/commons/__init__.py \
+	sed -i version.py \
 	  -e "s/^__version__ = .*/__version__ = '$(VERSION)'/"
 	sed -i tendrl-commons.spec \
 	  -e "s/^Version: .*/Version: $(VERSION)/"
