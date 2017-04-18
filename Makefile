@@ -1,7 +1,5 @@
 NAME=tendrl-commons
-VERSION := $(shell PYTHONPATH=. python -c \
-             'import tendrl.commons; print tendrl.commons.__version__' \
-             | sed 's/\.dev[0-9]*//')
+VERSION := 1.2.3
 RELEASE=1
 COMMIT := $(shell git rev-parse HEAD)
 SHORTCOMMIT := $(shell echo $(COMMIT) | cut -c1-7)
