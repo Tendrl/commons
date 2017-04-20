@@ -31,7 +31,6 @@ namespace.tendrl:
           - "Node[]"
           - TendrlContext.cluster_name
           - TendrlContext.sds_name
-          - TendrlContext.sds_version
           - TendrlContext.cluster_id
           - Cluster.public_network
           - Cluster.cluster_network
