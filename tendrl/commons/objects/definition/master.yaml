@@ -510,6 +510,9 @@ namespace.tendrl:
         children:
           help: "ID of child jobs created by this job"
           type: List
+        output:
+          help: output of the job execution
+          type: dict
       enabled: true
       list: /queue
       value: /queue
