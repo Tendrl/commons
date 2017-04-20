@@ -55,6 +55,11 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             pass
 
                         job = Job(job_id=jid).load()
+
+                        # Set the empty dict as output for the job
+                        job.output = json.dumps({})
+                        job.save()
+
                         raw_job = {}
                         raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
                     except etcd.EtcdKeyNotFound:
