@@ -22,7 +22,6 @@ class Job(objects.BaseObject):
     def save(self):
         super(Job, self).save()
         payload = json.loads(self.payload)
-        output = json.loads(self.output)
         if "parent" in payload:
             # Load parent job
             _parent = Job(job_id=payload['parent']).load()
