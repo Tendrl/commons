@@ -123,6 +123,11 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             runnable_flow = current_ns.ns.get_flow(flow_name)
                         try:
                             
+                            # Set the empty dict as output for the job
+                            job = job.load()
+                            job.output = {"_None": "_None"}
+                            job.save()
+
                             the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
                                                      job_id=job.job_id)
                             Event(
