@@ -16,7 +16,7 @@ class Job(objects.BaseObject):
         self.errors = errors
         self.children = children
         self.locked_by = locked_by
-        self.output = output
+        self.output = output or {"_None":"_None"}
         self._etcd_cls = _JobEtcd
 
     def save(self):
