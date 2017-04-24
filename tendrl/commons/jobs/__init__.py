@@ -8,6 +8,7 @@ import gevent.event
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import Message, ExceptionMessage
+from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
 
 
@@ -169,7 +170,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                          }
                                 )
                             )
-                        except (FlowExecutionFailedError, Exception) as e:
+                        except (FlowExecutionFailedError, AtomExecutionFailedError,
+                                Exception) as e:
                             _msg = "Failure in Job %s Flow %s with error: " % (job.job_id,
                                                                          the_flow.parameters['flow_id'])
                             Event(
