@@ -157,8 +157,13 @@ class Server(_Server):
             etcd_kwargs = dict()
         etcd_kwargs["allow_reconnect"] = True
         etcd_kwargs["per_host_pool_size"] = 20
+        self.etcd_kwargs = etcd_kwargs
         super(Server, self).__init__(
-            etcd.Client(**etcd_kwargs))
+            etcd.Client(**self.etcd_kwargs))
+    
+    def reconnect(self):
+        import etcd
+        self.client = etcd.Client(**self.etcd_kwargs)
 
 
 class EtcdObj(object):
