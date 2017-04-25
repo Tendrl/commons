@@ -98,7 +98,13 @@ class _Server(object):
             except KeyError:
                 sys.stdout.write("Writing %s to %s" % (item['key'],
                                                        item['value']))
-            self.client.write(item['key'], item['value'], quorum=True)
+            try:
+                self.client.write(item['key'], item['value'], quorum=True)
+            except etcd.EtcdConnectionFailed:
+                # Retry write after etcd client reconnect
+                self.reconnect()
+                self.client.write(item['key'], item['value'], quorum=True)
+                pass
         # setting ttl after directory creation
         if ttl:
             self.client.refresh(obj.__name__, ttl=ttl)
@@ -124,7 +130,14 @@ class _Server(object):
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
             try:
-                etcd_resp = self.client.read(item['key'], quorum=True)
+                try:
+                    etcd_resp = self.client.read(item['key'], quorum=True)
+                except etcd.EtcdConnectionFailed:
+                    # Retry read after etcd client reconnect
+                    self.reconnect()
+                    etcd_resp = self.client.read(item['key'], quorum=True)
+                    pass
+                
                 value = etcd_resp.value
 
                 if item['dir']:
@@ -157,8 +170,13 @@ class Server(_Server):
             etcd_kwargs = dict()
         etcd_kwargs["allow_reconnect"] = True
         etcd_kwargs["per_host_pool_size"] = 20
+        self.etcd_kwargs = etcd_kwargs
         super(Server, self).__init__(
-            etcd.Client(**etcd_kwargs))
+            etcd.Client(**self.etcd_kwargs))
+    
+    def reconnect(self):
+        import etcd
+        self.client = etcd.Client(**self.etcd_kwargs)
 
 
 class EtcdObj(object):
