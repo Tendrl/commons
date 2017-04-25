@@ -98,7 +98,13 @@ class _Server(object):
             except KeyError:
                 sys.stdout.write("Writing %s to %s" % (item['key'],
                                                        item['value']))
-            self.client.write(item['key'], item['value'], quorum=True)
+            try:
+                self.client.write(item['key'], item['value'], quorum=True)
+            except etcd.EtcdConnectionFailed:
+                # Retry write after etcd client reconnect
+                self.reconnect()
+                self.client.write(item['key'], item['value'], quorum=True)
+                pass
         # setting ttl after directory creation
         if ttl:
             self.client.refresh(obj.__name__, ttl=ttl)
@@ -124,7 +130,14 @@ class _Server(object):
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
             try:
-                etcd_resp = self.client.read(item['key'], quorum=True)
+                try:
+                    etcd_resp = self.client.read(item['key'], quorum=True)
+                except etcd.EtcdConnectionFailed:
+                    # Retry read after etcd client reconnect
+                    self.reconnect()
+                    etcd_resp = self.client.read(item['key'], quorum=True)
+                    pass
+                
                 value = etcd_resp.value
 
                 if item['dir']:
