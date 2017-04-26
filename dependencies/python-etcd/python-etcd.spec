@@ -20,6 +20,9 @@ Url: http://github.com/jplana/python-etcd
 BuildRequires: pytest
 BuildRequires: python2-devel
 
+Requires: python-urllib3
+Requires: python-dns
+
 %description
 python-etcd documentation
 A python client for Etcd https://github.com/coreos/etcd
