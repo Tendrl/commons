@@ -1,7 +1,7 @@
 %define name python-etcd
-%define version 0.4.4
-%define unmangled_version 0.4.4
-%define unmangled_version 0.4.4
+%define version 0.4.5
+%define unmangled_version 0.4.5
+%define unmangled_version 0.4.5
 %define release 1
 
 Summary: A python client for etcd
@@ -19,6 +19,9 @@ Url: http://github.com/jplana/python-etcd
 
 BuildRequires: pytest
 BuildRequires: python2-devel
+
+Requires: python-urllib3
+Requires: python-dns
 
 %description
 python-etcd documentation
