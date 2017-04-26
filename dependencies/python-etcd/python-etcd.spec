@@ -1,7 +1,7 @@
 %define name python-etcd
-%define version 0.4.4
-%define unmangled_version 0.4.4
-%define unmangled_version 0.4.4
+%define version 0.4.5
+%define unmangled_version 0.4.5
+%define unmangled_version 0.4.5
 %define release 1
 
 Summary: A python client for etcd
