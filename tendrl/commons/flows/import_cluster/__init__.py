@@ -175,7 +175,9 @@ class ImportCluster(flows.BaseFlow):
                 # Check if minimum required version of underlying ceph
                 # cluster met. If not fail the import task
                 detected_cluster = NS.tendrl.objects.DetectedCluster().load()
-                maj_ver, min_ver, rel = detected_cluster.sds_pkg_version.split('.')
+                detected_cluster_ver = detected_cluster.sds_pkg_version.split('.')
+                maj_ver = detected_cluster_ver[0]
+                min_ver = detected_cluster_ver[1]
                 reqd_ceph_ver = NS.compiled_definitions.get_parsed_defs()[
                     'namespace.tendrl'
                 ]['min_reqd_ceph_ver']
@@ -222,7 +224,9 @@ class ImportCluster(flows.BaseFlow):
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
             detected_cluster = NS.tendrl.objects.DetectedCluster().load()
-            maj_ver, min_ver, rel = detected_cluster.sds_pkg_version.split('.')
+            detected_cluster_ver = detected_cluster.sds_pkg_version.split('.')
+            maj_ver = detected_cluster_ver[0]
+            min_ver = detected_cluster_ver[1]
             reqd_gluster_ver = NS.compiled_definitions.get_parsed_defs()[
                 'namespace.tendrl'
             ]['min_reqd_gluster_ver']
