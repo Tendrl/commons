@@ -12,7 +12,7 @@ def ceph_create_ssh_setup_jobs(parameters):
     node_list = parameters['Node[]']
     ssh_job_ids = []
     ssh_setup_script = NS.ceph_provisioner.get_plugin().setup()
-    if len(node_list) > 1:
+    if len(node_list) > 0:
         for node in node_list:
             if NS.node_context.node_id != node:
                 new_params = parameters.copy()
