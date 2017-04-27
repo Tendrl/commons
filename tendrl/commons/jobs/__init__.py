@@ -39,6 +39,10 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         jid = job.key.split('/')[-1]
                         
                         try:
+                            job_status_key = "/queue/%s/status" % jid
+                            _status = NS.etcd_orm.client.read(job_status_key).value
+                            if _status in ["finished", "processing"]:
+                                continue
                             _seen_by_key = "/queue/%s/_seen_by_%s" % (jid, NS.node_context.node_id)
                             NS.etcd_orm.client.read(_seen_by_key)
                             # Job already seen (could not match) by $this node
@@ -57,7 +61,21 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
 
                         job = Job(job_id=jid).load()
                         raw_job = {}
-                        raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
+                        try:
+                            raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
+                        except ValueError as ex:
+                            _msg = "Job (id %s) payload invalid:%s" % (jid, ex.message)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg ,
+                                             "exception": ex
+                                             }
+                                )
+                            )
+                            continue
+
                     except etcd.EtcdKeyNotFound:
                         continue
 
