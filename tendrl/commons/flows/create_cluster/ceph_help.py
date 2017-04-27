@@ -173,7 +173,10 @@ def wait_for_task(task_id):
                 if resp["succeeded"]:
                     return
                 else:
-                    raise FlowExecutionFailedError("Task: %s failed" % task_id)
+                    stderr = resp.get("stderr", "ceph-installer task_id %s failed and did not complete" % task_id)
+                    stdout = resp.get("stdout", "")
+                    raise FlowExecutionFailedError(dict(ceph_installer_task_id=task_id, ceph_installer_task_stdout=stdout,
+                                        ceph_installer_task_stderr=stderr))
         count = count + 1
     stderr = resp.get("stderr", "ceph-installer task_id %s timed out and did not complete" % task_id)
     stdout = resp.get("stdout", "")
