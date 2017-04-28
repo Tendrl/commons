@@ -20,6 +20,7 @@ SAFE_COMMAND_LIST = [
     "hwinfo",
     "ping",
     "lvm",
+    "gstatus"
 ]
 
 
