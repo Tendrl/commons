@@ -19,6 +19,7 @@ SAFE_COMMAND_LIST = [
     "systemctl",
     "hwinfo",
     "ping",
+    "lvm",
     "gstatus"
 ]
 
