@@ -18,7 +18,9 @@ SAFE_COMMAND_LIST = [
     "config_manager",
     "systemctl",
     "hwinfo",
-    "ping"
+    "ping",
+    "lvm",
+    "gstatus"
 ]
 
 
@@ -29,10 +31,10 @@ class UnsupportedCommandException(Exception):
 
 
 class Command(object):
-    def __init__(self, command):
+    def __init__(self, command, shell=False):
         if shlex.split(command)[0] not in SAFE_COMMAND_LIST:
             raise UnsupportedCommandException(command.split()[0])
-        self.attributes = {"_raw_params": command}
+        self.attributes = {"_raw_params": command, '_uses_shell': shell}
 
     def run(self):
         try:
