@@ -48,7 +48,8 @@ class Logger(object):
     def push_message(self):
         if self.message.priority not in ["info", "debug"]:
             # Storing messages cluster wise
-            if self.message.cluster_id is not None:
+            if (self.message.cluster_id is not None) and (
+                self.message.cluster_id != ""):
                 NS.node_agent.objects.ClusterMessage(
                     message_id=self.message.message_id,
                     timestamp=self.message.timestamp,
