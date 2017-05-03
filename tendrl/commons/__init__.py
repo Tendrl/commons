@@ -1,6 +1,7 @@
 import __builtin__
-from importlib import import_module
+import importlib
 import inspect
+<<<<<<< HEAD
 <<<<<<< HEAD
 import pkgutil
 
@@ -13,7 +14,13 @@ import time
 =======
 from pkgutil import walk_packages
 from maps import NamedDict
+=======
+import pkgutil
+
+import maps
+>>>>>>> Response to feedback
 import sys
+
 from tendrl.commons import etcdobj
 >>>>>>> Code optimization
 from tendrl.commons import flows
@@ -27,11 +34,15 @@ class TendrlNS(object):
         super(TendrlNS, self).__init__()
         if not hasattr(__builtin__, "NS"):
 <<<<<<< HEAD
+<<<<<<< HEAD
             setattr(__builtin__, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
 =======
             setattr(__builtin__, "NS", NamedDict())
 >>>>>>> Code optimization
+=======
+            setattr(__builtin__, "NS", maps.NamedDict())
+>>>>>>> Response to feedback
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
@@ -505,15 +516,15 @@ class TendrlNS(object):
             NS.tendrl_context = self.current_ns.tendrl_context
 
     def _create_ns(self):
-        ns_map = NamedDict(objects=NamedDict(),
-                                flows=NamedDict(),
+        ns_map = maps.NamedDict(objects=maps.NamedDict(),
+                                flows=maps.NamedDict(),
                                 ns=self)
         self.ns_str = self.ns_name.split(".")[-1]
 
         if 'integrations' in self.ns_name:
             if not hasattr(NS, "integrations"):
                 setattr(NS, "integrations",
-                        NamedDict())
+                        maps.NamedDict())
             setattr(NS.integrations, self.ns_str, ns_map)
         else:
             # Create the component namespace
@@ -534,13 +545,13 @@ class TendrlNS(object):
 
         # This is to link atoms and flows (insdie obj) to the obj ns
         private_name = "_" + name
-        self.current_ns.objects[private_name] = NamedDict()
+        self.current_ns.objects[private_name] = maps.NamedDict()
 
         if 'atoms' not in self._get_ns().objects[private_name]:
-            self.current_ns.objects[private_name]['atoms'] = NamedDict()
+            self.current_ns.objects[private_name]['atoms'] = maps.NamedDict()
 
         if "flows" not in self._get_ns().objects[private_name]:
-            self.current_ns.objects[private_name]['flows'] = NamedDict()
+            self.current_ns.objects[private_name]['flows'] = maps.NamedDict()
 
     def _get_object(self, name):
         return self.current_ns.objects[name]
@@ -595,7 +606,7 @@ class TendrlNS(object):
             raw_obj = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'objects'][obj_name]
 
-        return NamedDict(attrs=raw_obj['attrs'],
+        return maps.NamedDict(attrs=raw_obj['attrs'],
                               enabled=raw_obj['enabled'],
                               obj_list=raw_obj.get('list', ""),
                               obj_value=raw_obj['value'],
@@ -607,7 +618,7 @@ class TendrlNS(object):
     def get_obj_flow_definition(self, obj_name, flow_name):
         obj_def = self.get_obj_definition(obj_name)
         raw_flow = obj_def.flows[flow_name]
-        return NamedDict(atoms=raw_flow.get('atoms'),
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
@@ -616,10 +627,10 @@ class TendrlNS(object):
                               type=raw_flow['type'],
                               uuid=raw_flow['uuid'])
 
-        raw_atom = obj_def.atoms[atom_name]
     def get_atom_definition(self, obj_name, atom_name):
         obj_def = self.get_obj_definition(obj_name)
-        return NamedDict(help=raw_atom['help'],
+        raw_atom = obj_def.atoms[atom_name]
+        return maps.NamedDict(help=raw_atom['help'],
                               enabled=raw_atom['enabled'],
                               inputs=raw_atom.get('inputs').get('mandatory'),
                               outputs=raw_atom.get('outputs', []),
@@ -635,7 +646,7 @@ class TendrlNS(object):
         else:
             raw_flow = self.current_ns.definitions.get_parsed_defs()[raw_ns][
                 'flows'][flow_name]
-        return NamedDict(atoms=raw_flow.get('atoms'),
+        return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
                               inputs=raw_flow['inputs'],
@@ -661,7 +672,7 @@ class TendrlNS(object):
             sys.stdout.write("Finding objects in namespace.%s.objects\n" %
                              self.ns_name)
 
-        ns_root = import_module(self.ns_src).__path__[0]
+        ns_root = importlib.import_module(self.ns_src).__path__[0]
 
         # register objects and atoms, flows inside the objects
         ns_objects_path = ns_root + "/objects"
@@ -669,7 +680,7 @@ class TendrlNS(object):
         objs = self._list_modules_in_package_path(ns_objects_path,
                                                   ns_objects_prefix)
         for name, obj_fqdn in objs:
-            obj = import_module(obj_fqdn)
+            obj = importlib.import_module(obj_fqdn)
             for obj_cls in inspect.getmembers(obj, inspect.isclass):
                 if issubclass(obj_cls[1], objects.BaseObject):
                     obj_name = obj_cls[0]
@@ -714,7 +725,7 @@ class TendrlNS(object):
                         self._list_modules_in_package_path(
                             ns_object_atoms_path,
                             ns_object_atoms_prefix):
-                        atom = import_module(atom_fqdn)
+                        atom = importlib.import_module(atom_fqdn)
 
                         for atom_cls in inspect.getmembers(atom,
                                                            inspect.isclass):
@@ -772,7 +783,7 @@ class TendrlNS(object):
                         self._list_modules_in_package_path(
                             ns_object_flows_path,
                             ns_object_flows_prefix):
-                        flow = import_module(flow_fqdn)
+                        flow = importlib.import_module(flow_fqdn)
 
                         for flow_cls in inspect.getmembers(flow,
                                                            inspect.isclass):
@@ -824,7 +835,7 @@ class TendrlNS(object):
                              self.ns_name
                              )
         for name, flow_fqdn in flowz:
-            the_flow = import_module(flow_fqdn)
+            the_flow = importlib.import_module(flow_fqdn)
             for flow_cls in inspect.getmembers(the_flow, inspect.isclass):
                 if issubclass(flow_cls[1], flows.BaseFlow):
                     try:
@@ -851,16 +862,3 @@ class TendrlNS(object):
                 path=[package_path]):
             modules.append((name, prefix + name))
         return modules
-
-    def _log(self,ns_name,msg,log_priority):
-        try:
-            Event(
-                Message(
-                    priority=log_priority,
-                    publisher=NS.publisher_id,
-                    payload={"message": msg + ns_name
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write(msg + ns_name)
