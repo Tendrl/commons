@@ -17,12 +17,8 @@ BuildRequires: systemd
 Requires: ansible = 2.2.1.0
 Requires: python-maps
 Requires: python-dateutil
-Requires: python-dns
 Requires: python-etcd
-Requires: systemd-python
-Requires: python-urllib3
 Requires: python-six
-Requires: python-docutils
 Requires: python-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
