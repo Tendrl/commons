@@ -1,0 +1,11 @@
+--- python-etcd-0.4.5-orig/setup.py	2017-05-05 22:40:21.000000000 +0530
++++ python-etcd-0.4.5/setup.py	2017-05-05 22:49:31.797227518 +0530
+@@ -10,7 +10,7 @@
+ 
+ install_requires = [
+     'urllib3>=1.7.1',
+-    'dnspython>=1.13.0'
++    'dnspython'
+ ]
+ 
+ test_requires = [
