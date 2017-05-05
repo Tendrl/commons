@@ -172,7 +172,7 @@ class Server(_Server):
         etcd_kwargs["per_host_pool_size"] = 20
         self.etcd_kwargs = etcd_kwargs
         _client = None
-        while not _client
+        while not _client:
             try:
                 _client = etcd.Client(**self.etcd_kwargs)
             except etcd.EtcdException as ex:
@@ -182,7 +182,7 @@ class Server(_Server):
     
     def reconnect(self):
         _client = None
-        while not _client
+        while not _client:
             try:
                 _client = etcd.Client(**self.etcd_kwargs)
             except etcd.EtcdException as ex:
