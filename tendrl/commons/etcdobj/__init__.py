@@ -171,12 +171,25 @@ class Server(_Server):
         etcd_kwargs["allow_reconnect"] = True
         etcd_kwargs["per_host_pool_size"] = 20
         self.etcd_kwargs = etcd_kwargs
-        super(Server, self).__init__(
-            etcd.Client(**self.etcd_kwargs))
+        _client = None
+        while not _client
+            try:
+                _client = etcd.Client(**self.etcd_kwargs)
+            except etcd.EtcdException as ex:
+                sys.stdout.write("Error connecting to central store (etcd), trying again...")
+                sys.stdout.write(str(ex))
+        super(Server, self).__init__(_client)
     
     def reconnect(self):
-        import etcd
-        self.client = etcd.Client(**self.etcd_kwargs)
+        _client = None
+        while not _client
+            try:
+                _client = etcd.Client(**self.etcd_kwargs)
+            except etcd.EtcdException as ex:
+                sys.stdout.write("Error connecting to central store (etcd), trying again...")
+                sys.stdout.write(str(ex))
+
+        self.client = _client
 
 
 class EtcdObj(object):
