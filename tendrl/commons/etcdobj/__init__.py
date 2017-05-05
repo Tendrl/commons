@@ -33,7 +33,7 @@ import json
 import sys
 
 import etcd
-import gevent
+import time
 
 from tendrl.commons.etcdobj import fields
 from tendrl.commons.event import Event
@@ -178,7 +178,7 @@ class Server(_Server):
                 _client = etcd.Client(**self.etcd_kwargs)
             except etcd.EtcdException as ex:
                 sys.stdout.write("Error connecting to central store (etcd), trying again...")
-                gevent.sleep(2)
+                time.sleep(2)
         super(Server, self).__init__(_client)
     
     def reconnect(self):
@@ -188,7 +188,7 @@ class Server(_Server):
                 _client = etcd.Client(**self.etcd_kwargs)
             except etcd.EtcdException as ex:
                 sys.stdout.write("Error connecting to central store (etcd), trying again...")
-                gevent.sleep(2)
+                time.sleep(2)
 
         self.client = _client
 
