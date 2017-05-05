@@ -21,7 +21,7 @@ BuildRequires: pytest
 BuildRequires: python2-devel
 
 Requires: python-urllib3
-Requires: python-dns
+Requires: python-dns >= 1.13.0
 
 %description
 python-etcd documentation
