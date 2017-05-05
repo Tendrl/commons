@@ -89,7 +89,7 @@ def install_python_gdeploy():
             "Failed to install python-gdeploy"
         )
 
-def gluster_create_ssh_setup_jobs(parameters):
+def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
     node_list = copy.deepcopy(parameters['Node[]'])
 
     ssh_job_ids = []
@@ -107,22 +107,23 @@ def gluster_create_ssh_setup_jobs(parameters):
         )
         return ssh_job_ids
 
-    ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()
-    if ret_val is not True or err != "":
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="error",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Error adding authorized key"
-                }
+    if not skip_current_node:
+        ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()
+        if ret_val is not True or err != "":
+            Event(
+                Message(
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id'],
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Error adding authorized key"
+                    }
+                )
             )
-        )
-        return ssh_job_ids
+            return ssh_job_ids
+        node_list.remove(NS.node_context.node_id)
 
-    node_list.remove(NS.node_context.node_id)
     for node in node_list:
         new_params = parameters.copy()
         new_params['Node[]'] = [node]
