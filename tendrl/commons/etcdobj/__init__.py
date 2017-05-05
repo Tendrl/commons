@@ -33,6 +33,7 @@ import json
 import sys
 
 import etcd
+import time
 
 from tendrl.commons.etcdobj import fields
 from tendrl.commons.event import Event
@@ -171,12 +172,25 @@ class Server(_Server):
         etcd_kwargs["allow_reconnect"] = True
         etcd_kwargs["per_host_pool_size"] = 20
         self.etcd_kwargs = etcd_kwargs
-        super(Server, self).__init__(
-            etcd.Client(**self.etcd_kwargs))
+        _client = None
+        while not _client:
+            try:
+                _client = etcd.Client(**self.etcd_kwargs)
+            except etcd.EtcdException as ex:
+                sys.stdout.write("Error connecting to central store (etcd), trying again...")
+                time.sleep(2)
+        super(Server, self).__init__(_client)
     
     def reconnect(self):
-        import etcd
-        self.client = etcd.Client(**self.etcd_kwargs)
+        _client = None
+        while not _client:
+            try:
+                _client = etcd.Client(**self.etcd_kwargs)
+            except etcd.EtcdException as ex:
+                sys.stdout.write("Error connecting to central store (etcd), trying again...")
+                time.sleep(2)
+
+        self.client = _client
 
 
 class EtcdObj(object):
