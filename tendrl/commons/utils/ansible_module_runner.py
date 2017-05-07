@@ -21,6 +21,11 @@ class AnsibleExecutableGenerationFailed(Exception):
                            str(module_path), str(err))
 
 
+class AnsibleModuleNotFound(Exception):
+    def __init__(self, module_path=None):
+        self.message = "Ansible module %s not found" % str(module_path)
+
+
 class AnsibleRunner(object):
     """Class that can be used to run ansible modules
 
@@ -38,7 +43,7 @@ class AnsibleRunner(object):
                              }
                 )
             )
-            raise ValueError
+            raise AnsibleModuleNotFound(module_path=self.module_path)
         if kwargs == {}:
             Event(
                 Message(
@@ -76,8 +81,8 @@ class AnsibleRunner(object):
                 )
             )
             raise AnsibleExecutableGenerationFailed(
-                self.module_path,
-                str(e)
+                module_path=self.module_path,
+                err=str(e)
             )
         return module_data
 

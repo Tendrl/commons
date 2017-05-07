@@ -1,13 +1,12 @@
 import shlex
 import sys
 
-from ansible_module_runner import AnsibleExecutableGenerationFailed
-from ansible_module_runner import AnsibleRunner
-
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
+from tendrl.commons.utils import ansible_module_runner
 
-ANSIBLE_MODULE_PATH = "core/commands/command.py"
+
+ANSIBLE_MODULE_PATH = "commands/command.py"
 
 SAFE_COMMAND_LIST = [
     "lsblk",
@@ -38,10 +37,17 @@ class Command(object):
 
     def run(self):
         try:
-            runner = AnsibleRunner(
+            runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
                 **self.attributes
             )
+        except ansible_module_runner.AnsibleModuleNotFound:
+            # Backward compat ansible<=2.2
+            runner = ansible_module_runner.AnsibleRunner(
+                "core/" + ANSIBLE_MODULE_PATH,
+                **self.attributes
+            )
+        try:
             result, err = runner.run()
             try:
                 Event(
@@ -53,7 +59,7 @@ class Command(object):
                 )
             except KeyError:
                 sys.stdout.write("Command Execution: %s \n" % result)
-        except AnsibleExecutableGenerationFailed as e:
+        except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             try:
                 Event(
                     ExceptionMessage(

@@ -1,10 +1,8 @@
-from ansible_module_runner import AnsibleExecutableGenerationFailed
-from ansible_module_runner import AnsibleRunner
-
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
+from tendrl.commons.utils import ansible_module_runner
 
-ANSIBLE_MODULE_PATH = "core/system/service.py"
+ANSIBLE_MODULE_PATH = "system/service.py"
 
 
 class Service(object):
@@ -32,10 +30,17 @@ class Service(object):
 
     def __run_module(self, attr):
         try:
-            runner = AnsibleRunner(
+            runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
                 **attr
             )
+        except ansible_module_runner.AnsibleModuleNotFound:
+            # Backward compat ansible<=2.2
+            runner = ansible_module_runner.AnsibleRunner(
+                "core/" + ANSIBLE_MODULE_PATH,
+                **attr
+            )
+        try:
             result, err = runner.run()
             Event(
                 Message(
@@ -46,7 +51,7 @@ class Service(object):
                 ),
                 socket_path=self.socket_path
             )
-        except AnsibleExecutableGenerationFailed as e:
+        except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
                     priority="error",
