@@ -1,11 +1,9 @@
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
-from tendrl.commons.utils.ansible_module_runner import \
-    AnsibleExecutableGenerationFailed
-from tendrl.commons.utils.ansible_module_runner import \
-    AnsibleRunner
+from tendrl.commons.utils import ansible_module_runner
 
-ANSIBLE_MODULE_PATH = "core/system/authorized_key.py"
+
+ANSIBLE_MODULE_PATH = "system/authorized_key.py"
 
 
 class AuthorizeKey(object):
@@ -35,10 +33,17 @@ class AuthorizeKey(object):
             True/False, error
         """
         try:
-            runner = AnsibleRunner(
+            runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
                 **self.attributes
             )
+        except ansible_module_runner.AnsibleModuleNotFound:
+            # Backward compat ansible<=2.2
+            runner = ansible_module_runner.AnsibleRunner(
+                "core/" + ANSIBLE_MODULE_PATH,
+                **self.attributes
+            )
+        try:
             result, err = runner.run()
             if 'failed' in result:
                err = result
@@ -50,7 +55,7 @@ class AuthorizeKey(object):
                         payload={"message": "Authorize key: %s" % result}
                     )
                 )
-        except AnsibleExecutableGenerationFailed as e:
+        except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
                     priority="warning",

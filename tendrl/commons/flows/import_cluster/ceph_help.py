@@ -18,11 +18,11 @@ def import_ceph(parameters):
         name = "https://github.com/Tendrl/ceph-integration/archive/master.tar.gz"
         attributes["name"] = name
         attributes["editable"] = "false"
-        ansible_module_path = "core/packaging/language/pip.py"
+        ansible_module_path = "packaging/language/pip.py"
     elif NS.config.data['package_source_type'] == 'rpm':
         name = "tendrl-ceph-integration"
         _cmd = "systemctl restart %s" % name
-        ansible_module_path = "core/packaging/os/yum.py"
+        ansible_module_path = "packaging/os/yum.py"
         attributes["name"] = name
     else:
         return False
@@ -43,6 +43,13 @@ def import_ceph(parameters):
             ansible_module_path,
             **attributes
         )
+    except ansible_module_runner.AnsibleModuleNotFound:
+        # Backward compat ansible<=2.2
+        runner = ansible_module_runner.AnsibleRunner(
+            "core/" + ansible_module_path,
+            **attributes
+        )
+    try:
         runner.run()
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
         Event(
