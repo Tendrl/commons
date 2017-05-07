@@ -7,14 +7,13 @@ Source0: %{name}-%{version}.tar.gz
 License: LGPLv2+
 URL: https://github.com/Tendrl/commons
 
-BuildRequires: ansible = 2.2.1.0
 BuildRequires: pytest
 BuildRequires: python2-devel
 BuildRequires: python-mock
 BuildRequires: python-six
 BuildRequires: systemd
 
-Requires: ansible = 2.2.1.0
+Requires: ansible
 Requires: python-maps
 Requires: python-dateutil
 Requires: python-etcd
