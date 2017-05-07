@@ -1,5 +1,4 @@
-from ansible_module_runner import AnsibleExecutableGenerationFailed
-from ansible_module_runner import AnsibleRunner
+from tendrl.commons.utils import ansible_module_runner
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
@@ -12,11 +11,11 @@ class Installer(object):
 
         if package_type == "pip":
             self.attributes["editable"] = "false"
-            self.ansible_module_path = "core/packaging/language/pip.py"
+            self.ansible_module_path = "packaging/language/pip.py"
         elif package_type == "rpm":
-            self.ansible_module_path = "core/packaging/os/yum.py"
+            self.ansible_module_path = "packaging/os/yum.py"
         elif package_type == "deb":
-            self.ansible_module_path = "core/packaging/os/apt.py"
+            self.ansible_module_path = "packaging/os/apt.py"
         else:
             Event(
                 Message(
@@ -34,10 +33,19 @@ class Installer(object):
 
     def install(self):
         try:
-            runner = AnsibleRunner(
+            runner = ansible_module_runner.AnsibleRunner(
                 self.ansible_module_path,
                 **self.attributes
             )
+        except ansible_module_runner.AnsibleModuleNotFound:
+            # Backward compat ansible<=2.2
+            self.ansible_module_path = "core/" + self.ansible_module_path
+            runner = ansible_module_runner.AnsibleRunner(
+                self.ansible_module_path,
+                **self.attributes
+            )
+
+        try:
             result, err = runner.run()
             Event(
                 Message(
@@ -46,7 +54,7 @@ class Installer(object):
                     payload={"message": "INSTALLATION: %s" % result}
                 )
             )
-        except AnsibleExecutableGenerationFailed as e:
+        except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
                     priority="error",
