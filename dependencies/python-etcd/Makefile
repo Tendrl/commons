@@ -11,7 +11,8 @@ clean:
 
 dist:
 	git clone https://github.com/jplana/python-etcd $(NAME)-$(VERSION)
-	cd $(NAME)-$(VERSION); git checkout -b $(VERSION)
+	cd $(NAME)-$(VERSION); git checkout $(VERSION)
+	cd $(NAME)-$(VERSION); patch -p1 < ../001-dnspython.patch
 	tar -zcvf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	rm -fr $(NAME)-$(VERSION)
 
