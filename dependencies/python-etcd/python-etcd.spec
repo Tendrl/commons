@@ -9,7 +9,6 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: %{name}-%{unmangled_version}.tar.gz
-Patch0: 001-dnspython.patch
 License: MIT
 Group: Development/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -31,8 +30,6 @@ Official documentation: http://python-etcd.readthedocs.org/
 
 %prep
 %setup -n %{name}-%{unmangled_version} -n %{name}-%{unmangled_version}
-
-%patch0 -p1
 
 %build
 python setup.py build
