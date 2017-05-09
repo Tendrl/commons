@@ -24,8 +24,9 @@ class ImportCluster(flows.BaseFlow):
         if integration_id is None:
             raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
-        
-        if not self.parameters.get('import_after_expand', False):           
+        if not self.parameters.get('import_after_expand', False) and \
+            not self.parameters.get('import_after_create', False):
+
             # Check if nodes participate in some existing cluster
             try:
                 for entry in self.parameters["Node[]"]:

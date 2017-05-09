@@ -6,8 +6,10 @@ import uuid
 from tendrl.commons import flows
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
+from tendrl.commons.flows.create_cluster import \
+    utils as create_cluster_utils
+from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import gluster_help
-from tendrl.commons.flows.create_cluster import utils as expand_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
 
@@ -20,17 +22,18 @@ class ExpandCluster(flows.BaseFlow):
                 "TendrlContext.integration_id cannot be empty"
             )
 
-        tendrl_context = NS.tendrl.objects.TendrlContext(
-            integration_id=integration_id
-        ).load()
+        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+        sds_name = self.parameters["TendrlContext.sds_name"]
+        if sds_name not in supported_sds:
+            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
 
-        sds_name = tendrl_context.sds_name
         ssh_job_ids = []
         if "ceph" in sds_name:
-            # TODO (team)
-            pass
+            ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
+                self.parameters
+            )
         else:
-            ssh_job_ids = expand_cluster_utils.gluster_create_ssh_setup_jobs(
+            ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
                 self.parameters,
                 skip_current_node=True
             )
@@ -62,10 +65,19 @@ class ExpandCluster(flows.BaseFlow):
 
         # SSH setup jobs finished above, now install sds
         # bits and create cluster
-
         if "ceph" in sds_name:
-            # TODO (team)
-            pass
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Expanding ceph cluster %s" % integration_id
+                    }
+                )
+            )
+            ceph_help.expand_cluster(self.parameters)
         else:
             Event(
                 Message(
