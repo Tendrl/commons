@@ -247,7 +247,7 @@ namespace.tendrl:
           help: "sysfs bus id"
           type: String
         alignment:
-          help: "alignement"
+          help: "alignment"
           type: String
         read_only:
           help: "disk is read only or not"
@@ -289,7 +289,7 @@ namespace.tendrl:
           help: "discard max bytes"
           type: String
         discard_zeros_data:
-          help: "discard zeroes data"
+          help: "discard zeros data"
           type: String
         optimal_io_size:
           help: "optimal I/O size"
