@@ -174,7 +174,7 @@ namespace.tendrl:
         mount_point:
           help: "disk mount point"
           type: String
-        Model:
+        model:
           help: "disk model name"
           type: String
         vendor:
@@ -246,7 +246,7 @@ namespace.tendrl:
         sysfs_busid:
           help: "sysfs bus id"
           type: String
-        alignement:
+        alignment:
           help: "alignement"
           type: String
         read_only:
@@ -288,7 +288,7 @@ namespace.tendrl:
         discard_max_bytes:
           help: "discard max bytes"
           type: String
-        discard_zeroes_data:
+        discard_zeros_data:
           help: "discard zeroes data"
           type: String
         optimal_io_size:
