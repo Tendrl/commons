@@ -123,6 +123,7 @@ class ImportCluster(flows.BaseFlow):
                         # set gdeploy_provisioned to true so that no other nodes
                         # tries to configure gdeploy
                         self.parameters['gdeploy_provisioned'] = True
+                        gevent.sleep(3)
 
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
