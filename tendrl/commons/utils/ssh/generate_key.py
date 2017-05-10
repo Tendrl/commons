@@ -1,11 +1,9 @@
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
-from tendrl.commons.utils.ansible_module_runner import \
-    AnsibleExecutableGenerationFailed
-from tendrl.commons.utils.ansible_module_runner import \
-    AnsibleRunner
+from tendrl.commons.utils import ansible_module_runner
 
-ANSIBLE_MODULE_PATH = "core/system/user.py"
+
+ANSIBLE_MODULE_PATH = "system/user.py"
 
 
 class GenerateKey(object):
@@ -35,10 +33,17 @@ class GenerateKey(object):
     def run(self):
         result = None
         try:
-            runner = AnsibleRunner(
+            runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
                 **self.attributes
             )
+        except ansible_module_runner.AnsibleModuleNotFound:
+            # Backward compat ansible<=2.2
+            runner = ansible_module_runner.AnsibleRunner(
+                "core/" + ANSIBLE_MODULE_PATH,
+                **self.attributes
+            )
+        try:
             out, err = runner.run()
             Event(
                 Message(
@@ -47,7 +52,7 @@ class GenerateKey(object):
                     payload={"message": "SSH-key Generation: %s" % out}
                 )
             )
-        except AnsibleExecutableGenerationFailed as e:
+        except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             err = str(e.message)
             Event(
                 Message(
