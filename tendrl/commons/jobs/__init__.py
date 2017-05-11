@@ -309,7 +309,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     break
                 except etcd.EtcdWatchTimedOut:
                     continue
- 
 
     def stop(self):
         self._complete.set()
