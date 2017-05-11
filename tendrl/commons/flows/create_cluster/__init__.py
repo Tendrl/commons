@@ -1,6 +1,7 @@
 # flake8: noqa
 
 import etcd
+import gevent
 import json
 import uuid
 
@@ -84,7 +85,7 @@ class CreateCluster(flows.BaseFlow):
                     tags += current_tags
                     NS.node_context.tags = list(set(tags))
                     NS.node_context.save()
-
+                gevent.sleep(3)
 
         # SSH setup jobs finished above, now install sds bits and create cluster
         if "ceph" in sds_name:

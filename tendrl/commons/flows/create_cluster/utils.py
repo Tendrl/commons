@@ -120,7 +120,10 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
                          }
             )
         )
-        return ssh_job_ids
+        raise FlowExecutionFailedError(
+            "Failed to get ssh-key on node %s" %
+            NS.node_context.node_id
+        )
 
     if not skip_current_node:
         ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()
@@ -136,7 +139,10 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
                     }
                 )
             )
-            return ssh_job_ids
+            raise FlowExecutionFailedError(
+                "Failed to write authorized-key on node %s" %
+                NS.node_context.node_id
+            )
         node_list.remove(NS.node_context.node_id)
 
     for node in node_list:

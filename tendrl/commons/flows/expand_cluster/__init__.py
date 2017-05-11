@@ -1,4 +1,5 @@
 import etcd
+import gevent
 import json
 import uuid
 
@@ -57,6 +58,7 @@ class ExpandCluster(flows.BaseFlow):
                 )
 
                 all_ssh_jobs_done = True
+                gevent.sleep(3)
 
         # SSH setup jobs finished above, now install sds
         # bits and create cluster
