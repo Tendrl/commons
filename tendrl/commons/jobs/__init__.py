@@ -29,20 +29,21 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
+        _startup = True
         while not self._complete.is_set():
-            gevent.sleep(10)                
+            gevent.sleep(5)
+            if not _startup:
+                try:
+                    NS.etcd_orm.client.watch("/queue")
+                    _startup = False
+                except etcd.EtcdWatchTimedOut:
+                    pass
+
             try:
                 try:
                     jobs = NS.etcd_orm.client.read("/queue")
                 except etcd.EtcdKeyNotFound:
-                    while True:
-                        try:
-                            NS.etcd_orm.client.watch("/queue")
-                            break
-                        except etcd.EtcdWatchTimedOut:
-                            continue
                     continue
-
 
                 for job in jobs.leaves:
                     try:
@@ -303,12 +304,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                  }
                     )
                 )
-            while True:
-                try:
-                    NS.etcd_orm.client.watch("/queue")
-                    break
-                except etcd.EtcdWatchTimedOut:
-                    continue
 
     def stop(self):
         self._complete.set()
