@@ -215,9 +215,19 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             except etcd.EtcdCompareFailed:
                                 # This should not happen!
                                 raise FlowExecutionFailedError("Cannnot mark job as 'failed', current job status invalid")
-                            job = job.load()
-                            job.errors = str(e)
-                            job.save()
+                            else:
+                                job = job.load()
+                                job.errors = str(e)
+                                job.save()
+                                _parent_jid = raw_job.get("payload", {}).get("parent", "")
+                                if _parent_jid:
+                                    _pjob_status_key = "/queue/%s/status" % _parent_jid
+                                    try:
+                                        NS.etcd_orm.client.write(_pjob_status_key, "failed", prevValue="processing")
+                                    except etcd.EtcdCompareFailed:
+                                        raise FlowExecutionFailedError("Cannnot mark parent job as 'failed',"
+                                                                       "parent job status invalid")
+                                                          
             except Exception as ex:
                 Event(
                     ExceptionMessage(
