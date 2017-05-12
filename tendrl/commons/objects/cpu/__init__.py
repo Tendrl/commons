@@ -1,4 +1,3 @@
-from tendrl.commons import etcdobj
 from tendrl.commons import objects
 from tendrl.commons.utils import cmd_utils
 
@@ -10,7 +9,6 @@ class Cpu(objects.BaseObject):
                  *args, **kwargs):
         super(Cpu, self).__init__(*args, **kwargs)
         cpu = self._getNodeCpu()
-        self.value = 'nodes/%s/Cpu'
         self.architecture = architecture or cpu['Architecture']
         self.cores_per_socket = cores_per_socket or cpu["CoresPerSocket"]
         self.cpu_family = cpu_family or cpu["CPUFamily"]
@@ -18,7 +16,7 @@ class Cpu(objects.BaseObject):
         self.model = model or cpu["Model"]
         self.model_name = model_name or cpu["ModelName"]
         self.vendor_id = vendor_id or cpu["VendorId"]
-        self._etcd_cls = _CpuEtcd
+        self.value = 'nodes/{0}/Cpu'
 
     def _getNodeCpu(self):
         '''returns structure
@@ -66,13 +64,6 @@ class Cpu(objects.BaseObject):
         return cpuinfo
 
 
-class _CpuEtcd(etcdobj.EtcdObj):
-    """A table of the CPU, lazily updated
-
-    """
-    __name__ = 'nodes/%s/Cpu'
-    _tendrl_cls = Cpu
-
     def render(self):
-        self.__name__ = self.__name__ % NS.node_context.node_id
-        return super(_CpuEtcd, self).render()
+        self.value = self.value.format(NS.node_context.node_id)
+        return super(Cpu, self).render()

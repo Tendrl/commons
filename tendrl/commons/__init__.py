@@ -9,7 +9,6 @@ import sys
 
 import time
 
-from tendrl.commons import etcdobj
 from tendrl.commons import flows
 from tendrl.commons import objects
 from tendrl.commons.event import Event

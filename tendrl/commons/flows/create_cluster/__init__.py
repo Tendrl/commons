@@ -62,7 +62,7 @@ class CreateCluster(flows.BaseFlow):
         while not all_ssh_jobs_done:
             all_status = []
             for job_id in ssh_job_ids:
-                all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                all_status.append(NS._int.client.read("/queue/%s/status" %
                                                    job_id).value)
             if all([status for status in all_status if status == "finished"]):
                 Event(
@@ -122,7 +122,7 @@ class CreateCluster(flows.BaseFlow):
             all_status = []
             for node in self.parameters['Node[]']:
                 try:
-                    NS.etcd_orm.client.read("/nodes/%s/DetectedCluster" % node)
+                    NS._int.client.read("/nodes/%s/DetectedCluster" % node)
                     all_status.append(True)
                 except etcd.EtcdKeyNotFound:
                     all_status.append(False)
@@ -135,15 +135,15 @@ class CreateCluster(flows.BaseFlow):
         new_params['TendrlContext.integration_id'] = integration_id
 
         # Get node context for one of the nodes from list
-        detected_cluster_id = NS.etcd_orm.client.read(
+        detected_cluster_id = NS._int.client.read(
             "nodes/%s/DetectedCluster/detected_cluster_id" % self.parameters['Node[]'][0]
         ).value
-        sds_pkg_name = NS.etcd_orm.client.read(
+        sds_pkg_name = NS._int.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node[]'][0]
         ).value
         if "gluster" in sds_pkg_name:
             new_params['gdeploy_provisioned'] = True
-        sds_pkg_version = NS.etcd_orm.client.read(
+        sds_pkg_version = NS._int.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters['Node[]'][0]
         ).value
         new_params['DetectedCluster.sds_pkg_name'] = \

@@ -29,7 +29,7 @@ class ImportCluster(flows.BaseFlow):
             # Check if nodes participate in some existing cluster
             try:
                 for entry in self.parameters["Node[]"]:
-                    _integration_id = NS.etcd_orm.client.read(
+                    _integration_id = NS._int.client.read(
                         'nodes/%s/TendrlContext/integration_id' % entry
                     )
                     Event(
@@ -77,7 +77,7 @@ class ImportCluster(flows.BaseFlow):
                 while not all_ssh_jobs_done:
                     all_status = []
                     for job_id in ssh_job_ids:
-                        all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                        all_status.append(NS._int.client.read("/queue/%s/status" %
                                                                   job_id).value)
                     if all([status for status in all_status if status == "finished"]):
                         Event(
@@ -277,7 +277,7 @@ class ImportCluster(flows.BaseFlow):
             while not all_jobs_done:
                 all_status = []
                 for job_id in cluster_nodes:
-                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                    all_status.append(NS._int.client.read("/queue/%s/status" %
                                                        job_id).value)
                 if all([status for status in all_status if status == "finished"]):
                     Event(
@@ -302,7 +302,7 @@ class ImportCluster(flows.BaseFlow):
         while True:
             gevent.sleep(2)
             try:
-                NS.etcd_orm.client.read("/clusters/%s" % integration_id)
+                NS._int.client.read("/clusters/%s" % integration_id)
                 break
             except etcd.EtcdKeyNotFound:
                 continue

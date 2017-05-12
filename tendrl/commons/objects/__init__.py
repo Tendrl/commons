@@ -16,7 +16,7 @@ from tendrl.commons.utils import time_utils
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
