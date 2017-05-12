@@ -176,6 +176,8 @@ class ListField(Field):
         """
         super(ListField, self).__init__(name)
         self._value = value
+        if self._value:
+            self._value = list(set(self._value))
 
     @property
     def json(self):

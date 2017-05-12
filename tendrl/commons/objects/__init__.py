@@ -134,7 +134,7 @@ class BaseObject(object):
             NS._int.wclient.refresh(self.value, ttl=ttl)
 
     def load(self):
-        _copy = copy.deepcopy(self)
+        _copy = self._copy_vars()
         for item in _copy.render():
             try:
                 Event(
@@ -199,7 +199,7 @@ class BaseObject(object):
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
-            for name, field in _fields:
+            for name, field in _fields.iteritems():
                 items = field.render()
                 if type(items) != list:
                     items = [items]
@@ -238,6 +238,14 @@ class BaseObject(object):
         _obj_str = "".join(sorted(self.json))
         return hashlib.md5(_obj_str).hexdigest()
 
+    def _copy_vars(self):
+        # Creates a copy intance of $obj using it public vars
+        _public_vars = {}
+        for attr, value in vars(self).iteritems():
+            if attr.startswith("_"):
+                continue
+            _public_vars[attr] = value
+        return self.__class__(**_public_vars)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
