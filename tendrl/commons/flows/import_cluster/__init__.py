@@ -25,64 +25,44 @@ class ImportCluster(flows.BaseFlow):
             raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         
-        if not self.parameters.get('import_after_expand', False):
-            # check if user is passing the integration id that is
-            # already used by a cluster
-            try:
-                clusters = NS.etcd_orm.client.read('clusters/%s' % integration_id)
-            except etcd.EtcdKeyNotFound:
-                # no clusters imported yet, go ahead
-                pass
-            else:
-                raise FlowExecutionFailedError(
-                    "TendrlContext.integration_id cannot be an existing integration id."
-                    "%s already used for a cluster" % integration_id
-                )
-            
-            
+        if not self.parameters.get('import_after_expand', False):           
             # Check if nodes participate in some existing cluster
             try:
-                clusters = NS.etcd_orm.client.read('clusters')
-            except etcd.EtcdKeyNotFound:
-                # no clusters imported yet, go ahead
-                pass
-            else:
-                try:
-                    for entry in self.parameters["Node[]"]:
-                        _integration_id = NS.etcd_orm.client.read(
-                            'nodes/%s/TendrlContext/integration_id' % entry
+                for entry in self.parameters["Node[]"]:
+                    _integration_id = NS.etcd_orm.client.read(
+                        'nodes/%s/TendrlContext/integration_id' % entry
+                    )
+                    Event(
+                        Message(
+                            job_id=self.job_id,
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={
+                                "message": "Check: Node %s not part of any other cluster" % entry
+                            }
                         )
+                    )
+
+                    if _integration_id.value != "":
                         Event(
                             Message(
                                 job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
-                                priority="info",
+                                priority="error",
                                 publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Check: Node %s not part of any other cluster" % entry
-                                }
+                                payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
+                                     }
                             )
                         )
 
-                        if _integration_id.value != "":
-                            Event(
-                                Message(
-                                    job_id=self.job_id,
-                                    flow_id = self.parameters['flow_id'],
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
-                                         }
-                                )
-                            )
-
-                            raise FlowExecutionFailedError(
-                                "Nodes already participate in existing cluster"
-                            )
-                except etcd.EtcdKeyNotFound:
-                    raise FlowExecutionFailedError(
-                        "Error while checking pre-participation of nodes in any cluster"
-                    )
+                        raise FlowExecutionFailedError(
+                            "Nodes already participate in existing cluster"
+                        )
+            except etcd.EtcdKeyNotFound:
+                raise FlowExecutionFailedError(
+                    "Error while checking pre-participation of nodes in any cluster"
+                )
 
             # check if gdeploy in already provisioned in this cluster
             # if no it has to be provisioned here
