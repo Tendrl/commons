@@ -23,56 +23,113 @@ class ImportCluster(flows.BaseFlow):
         integration_id = self.parameters['TendrlContext.integration_id']
         if integration_id is None:
             raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
-
-        # Check if nodes participate in some existing cluster
-        try:
-            clusters = NS.etcd_orm.client.read('clusters')
-        except etcd.EtcdKeyNotFound:
-            # no clusters imported yet, go ahead
-            pass
-        else:
+        sds_name = self.parameters['DetectedCluster.sds_pkg_name']
+        
+        if not self.parameters.get('import_after_expand', False):
+            # check if user is passing the integration id that is
+            # already used by a cluster
             try:
-                for entry in self.parameters["Node[]"]:
-                    _integration_id = NS.etcd_orm.client.read(
-                        'nodes/%s/TendrlContext/integration_id' % entry
-                    )
-                    Event(
-                        Message(
-                            job_id=self.job_id,
-                            flow_id = self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={
-                                "message": "Check: Node %s not part of any other cluster" % entry
-                            }
+                clusters = NS.etcd_orm.client.read('clusters/%s' % integration_id)
+            except etcd.EtcdKeyNotFound:
+                # no clusters imported yet, go ahead
+                pass
+            else:
+                raise FlowExecutionFailedError(
+                    "TendrlContext.integration_id cannot be an existing integration id."
+                    "%s already used for a cluster" % integration_id
+                )
+            
+            
+            # Check if nodes participate in some existing cluster
+            try:
+                clusters = NS.etcd_orm.client.read('clusters')
+            except etcd.EtcdKeyNotFound:
+                # no clusters imported yet, go ahead
+                pass
+            else:
+                try:
+                    for entry in self.parameters["Node[]"]:
+                        _integration_id = NS.etcd_orm.client.read(
+                            'nodes/%s/TendrlContext/integration_id' % entry
                         )
-                    )
-
-                    if _integration_id.value != "":
                         Event(
                             Message(
                                 job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
-                                payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
-                                     }
+                                payload={
+                                    "message": "Check: Node %s not part of any other cluster" % entry
+                                }
                             )
                         )
 
-                        raise FlowExecutionFailedError(
-                            "Nodes already participate in existing cluster"
-                        )
-            except etcd.EtcdKeyNotFound:
-                raise FlowExecutionFailedError(
-                    "Error while checking pre-participation of nodes in any cluster"
+                        if _integration_id.value != "":
+                            Event(
+                                Message(
+                                    job_id=self.job_id,
+                                    flow_id = self.parameters['flow_id'],
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
+                                         }
+                                )
+                            )
+
+                            raise FlowExecutionFailedError(
+                                "Nodes already participate in existing cluster"
+                            )
+                except etcd.EtcdKeyNotFound:
+                    raise FlowExecutionFailedError(
+                        "Error while checking pre-participation of nodes in any cluster"
+                    )
+
+            # check if gdeploy in already provisioned in this cluster
+            # if no it has to be provisioned here
+            if not self.parameters.get('gdeploy_provisioned', False) and sds_name.find("gluster") > -1:
+                create_cluster_utils.install_gdeploy()
+                create_cluster_utils.install_python_gdeploy()
+                ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
+                    self.parameters
                 )
+
+                all_ssh_jobs_done = False
+                while not all_ssh_jobs_done:
+                    all_status = []
+                    for job_id in ssh_job_ids:
+                        all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
+                                                                  job_id).value)
+                    if all([status for status in all_status if status == "finished"]):
+                        Event(
+                            Message(
+                                job_id=self.parameters['job_id'],
+                                flow_id = self.parameters['flow_id'],
+                                priority="info",
+                                publisher=NS.publisher_id,
+                                payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
+                                     }
+                            )
+                        )
+                        all_ssh_jobs_done = True
+
+                        # set this node as gluster provisioner
+                        tags = ["provisioner/%s" % integration_id]
+                        NS.node_context = NS.node_context.load()
+                        current_tags = json.loads(NS.node_context.tags)
+                        tags += current_tags
+                        NS.node_context.tags = list(set(tags))
+                        NS.node_context.save()
+
+                        # set gdeploy_provisioned to true so that no other nodes
+                        # tries to configure gdeploy
+                        self.parameters['gdeploy_provisioned'] = True
+                        gevent.sleep(3)
+
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
         _detected_cluster = NS.tendrl.objects.DetectedCluster().load()
         NS.tendrl_context.cluster_id = _detected_cluster.detected_cluster_id
-        NS.tendrl_context.cluster_name =\
-            _detected_cluster.detected_cluster_name
+        NS.tendrl_context.cluster_name = _detected_cluster.detected_cluster_name
         NS.tendrl_context.sds_name = _detected_cluster.sds_pkg_name
         NS.tendrl_context.sds_version = _detected_cluster.sds_pkg_version
         NS.tendrl_context.save()
@@ -82,51 +139,14 @@ class ImportCluster(flows.BaseFlow):
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Registered Node %s with cluster %s" % (NS.node_context.node_id,
-                                                                                NS.tendrl_context.integration_id)
-                     }
+                payload={
+                    "message": "Registered Node %s with cluster %s" % (
+                        NS.node_context.node_id,
+                        NS.tendrl_context.integration_id
+                    )
+                }
             )
         )
-
-        # check if gdeploy in already provisioned in this cluster
-        # if no it has to be provisioned here
-        if not self.parameters.get('gdeploy_provisioned', False):
-            create_cluster_utils.install_gdeploy()
-            create_cluster_utils.install_python_gdeploy()
-            ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
-                self.parameters
-            )
-
-            all_ssh_jobs_done = False
-            while not all_ssh_jobs_done:
-                all_status = []
-                for job_id in ssh_job_ids:
-                    all_status.append(NS.etcd_orm.client.read("/queue/%s/status" %
-                                                              job_id).value)
-                if all([status for status in all_status if status == "finished"]):
-                    Event(
-                        Message(
-                            job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
-                                 }
-                        )
-                    )
-                    all_ssh_jobs_done = True
-
-                    # set this node as gluster provisioner
-                    tags = ["provisioner/%s" % integration_id]
-                    NS.node_context = NS.node_context.load()
-                    current_tags = json.loads(NS.node_context.tags)
-                    tags += current_tags
-                    NS.node_context.tags = list(set(tags))
-                    NS.node_context.save()
-
-                    # set gdeploy_provisioned to true so that no other nodes
-                    # tries to configure gdeploy
-                    self.parameters['gdeploy_provisioned'] = True
 
         node_list = self.parameters['Node[]']
         cluster_nodes = []
@@ -161,7 +181,6 @@ class ImportCluster(flows.BaseFlow):
                     )
 
 
-        sds_name = self.parameters['DetectedCluster.sds_pkg_name']
         if "ceph" in sds_name.lower():
             node_context = NS.node_context.load()
             is_mon = False
@@ -201,7 +220,7 @@ class ImportCluster(flows.BaseFlow):
                         Message(
                             job_id=self.parameters['job_id'],
                             flow_id = self.parameters['flow_id'],
-                            priority="info",
+                            priority="error",
                             publisher=NS.publisher_id,
                             payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Ceph Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                                 req_min_ver,
@@ -250,7 +269,7 @@ class ImportCluster(flows.BaseFlow):
                     Message(
                         job_id=self.parameters['job_id'],
                         flow_id = self.parameters['flow_id'],
-                        priority="info",
+                        priority="error",
                         publisher=NS.publisher_id,
                         payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Gluster Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                             req_min_ver,

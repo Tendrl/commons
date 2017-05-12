@@ -1,8 +1,11 @@
 import json
 import traceback
+import datetime
+
 
 import etcd
 import gevent.event
+from pytz import utc
 
 
 from tendrl.commons.event import Event
@@ -10,7 +13,7 @@ from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import Message, ExceptionMessage
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
-
+from tendrl.commons.utils import time_utils
 
 class JobConsumerThread(gevent.greenlet.Greenlet):
 
@@ -26,8 +29,16 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
+        _startup = True
         while not self._complete.is_set():
-            gevent.sleep(2)
+            gevent.sleep(5)
+            if not _startup:
+                try:
+                    NS.etcd_orm.client.watch("/queue")
+                    _startup = False
+                except etcd.EtcdWatchTimedOut:
+                    pass
+
             try:
                 try:
                     jobs = NS.etcd_orm.client.read("/queue")
@@ -37,9 +48,66 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 for job in jobs.leaves:
                     try:
                         jid = job.key.split('/')[-1]
+                        job_status_key = "/queue/%s/status" % jid
+                        NS.node_context = NS.node_context.load()
+                        NS.node_context.tags = json.loads(NS.node_context.tags)
+
+                        # tendrl-node-agent tagged as tendrl/monitor will ensure >5 mins old "new" jobs are timed out
+                        # and marked as "failed" (the parent job of these jobs will also be marked as "failed")
+                        if "tendrl/monitor" in NS.node_context.tags:
+                            try:
+                                _job_valid_until_key = "/queue/%s/valid_until" % jid
+                                _valid_until = None
+                                try:
+                                    _valid_until = NS.etcd_orm.client.read(_job_valid_until_key).value
+                                except etcd.EtcdKeyNotFound:
+                                    pass
+
+                                if _valid_until:
+                                    _now_epoch = (time_utils.now() - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds()
+                                    if int(_now_epoch) >= int(_valid_until):
+                                        # Job has "new" status since 5 minutes, mark status as "failed" and Job.error = "Timed out"
+                                        try:
+                                            NS.etcd_orm.client.write(job_status_key, "failed", prevValue="new")
+                                        except etcd.EtcdCompareFailed:
+                                            pass
+                                        else:
+                                            job = Job(job_id=jid).load()
+                                            job.errors = str("Timed-out (>5mins as 'new')")
+                                            job.save()
+                                            raw_job = {}
+                                            try:
+                                                raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
+                                            except ValueError as ex:
+                                                _msg = "Job (id %s) payload invalid:%s" % (jid, ex.message)
+                                                Event(
+                                                    ExceptionMessage(
+                                                        priority="error",
+                                                        publisher=NS.publisher_id,
+                                                        payload={"message": _msg ,
+                                                                 "exception": ex
+                                                                 }
+                                                    )
+                                                )
+                                                pass
+
+                                            _parent_jid = raw_job.get("payload", {}).get("parent", "")
+                                            if _parent_jid:
+                                                _pjob_status_key = "/queue/%s/status" % _parent_jid
+                                                try:
+                                                    NS.etcd_orm.client.write(_pjob_status_key, "failed", prevValue="processing")
+                                                except etcd.EtcdCompareFailed:
+                                                    pass
+                                            continue
+                                else:
+                                    _now_plus_5 = time_utils.now() + datetime.timedelta(minutes=5)
+                                    _now_plus_5_epoch = (_now_plus_5 - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds()
+                                    NS.etcd_orm.client.write(_job_valid_until_key, int(_now_plus_5_epoch))
+
+                            except etcd.EtcdException:
+                                pass
                         
                         try:
-                            job_status_key = "/queue/%s/status" % jid
                             _status = NS.etcd_orm.client.read(job_status_key).value
                             if _status in ["finished", "processing"]:
                                 continue
@@ -86,8 +154,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         
                         # Flows created by tendrl-api use 'tags' from flow definition to target jobs
                         _tag_match = False
-                        NS.node_context = NS.node_context.load()
-                        NS.node_context.tags = json.loads(NS.node_context.tags)
                         if raw_job.get("payload", {}).get("tags", []):
                             for flow_tag in raw_job['payload']['tags']:
                                 if flow_tag in NS.node_context.tags:
@@ -215,9 +281,19 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             except etcd.EtcdCompareFailed:
                                 # This should not happen!
                                 raise FlowExecutionFailedError("Cannnot mark job as 'failed', current job status invalid")
-                            job = job.load()
-                            job.errors = str(e)
-                            job.save()
+                            else:
+                                job = job.load()
+                                job.errors = str(e)
+                                job.save()
+                                _parent_jid = raw_job.get("payload", {}).get("parent", "")
+                                if _parent_jid:
+                                    _pjob_status_key = "/queue/%s/status" % _parent_jid
+                                    try:
+                                        NS.etcd_orm.client.write(_pjob_status_key, "failed", prevValue="processing")
+                                    except etcd.EtcdCompareFailed:
+                                        raise FlowExecutionFailedError("Cannnot mark parent job as 'failed',"
+                                                                       "parent job status invalid")
+                                                          
             except Exception as ex:
                 Event(
                     ExceptionMessage(

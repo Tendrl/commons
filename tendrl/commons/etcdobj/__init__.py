@@ -274,6 +274,8 @@ class EtcdObj(object):
         for field in self._fields:
             # FIXME: This is dumb :-)
             attribute = object.__getattribute__(self, field)
+            if "datetime.datetime" in str(type(attribute.value)):
+                attribute.value = attribute.value.isoformat()
             data[attribute.name] = json.loads(attribute.json)
             # Flatten if needed
             if attribute.name in data[attribute.name].keys():
