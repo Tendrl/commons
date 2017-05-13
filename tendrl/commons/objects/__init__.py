@@ -70,6 +70,7 @@ class BaseObject(object):
             raise Exception(msg)
 
     def save(self, update=True, ttl=None):
+        self.render()
         if not "Message" in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
@@ -170,6 +171,7 @@ class BaseObject(object):
         return _copy
 
     def exists(self):
+        self.render()
         _exists = False
         try:
             NS._int.client.read("/{0}".format(self.value))
