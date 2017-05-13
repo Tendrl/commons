@@ -1,4 +1,4 @@
-from tendrl.commons.etcdobj import EtcdObj
+
 from tendrl.commons import objects
 
 
@@ -11,7 +11,6 @@ class NodeNetwork(objects.BaseObject):
                  driver=None, drive=None, hw_address=None, link_detected=None,
                  *args, **kwargs):
         super(NodeNetwork, self).__init__(*args, **kwargs)
-        self.value = 'nodes/%s/Networks/%s'
         self.interface = interface
         self.interface_id = interface_id
         self.ipv4 = ipv4
@@ -28,18 +27,10 @@ class NodeNetwork(objects.BaseObject):
         self.driver = driver
         self.hw_address = hw_address
         self.link_detected = link_detected
-        self._etcd_cls = _NodeNetworkEtcd
-
-
-class _NodeNetworkEtcd(EtcdObj):
-    """A table of the Node Network, lazily updated
-
-    """
-    __name__ = 'nodes/%s/Networks/%s'
-    _tendrl_cls = NodeNetwork
+        self.value = 'nodes/{0}/Networks/{1}'
 
     def render(self):
-        self.__name__ = self.__name__ % (
-            NS.node_context.node_id, self.interface
-        )
-        return super(_NodeNetworkEtcd, self).render()
+        self.value = self.value.format(NS.node_context.node_id,
+                                       self.interface
+                                       )
+        return super(NodeNetwork, self).render()

@@ -1,6 +1,6 @@
 from tendrl.commons import objects
 
-from tendrl.commons.etcdobj import EtcdObj
+
 
 
 class ClusterTendrlContext(objects.BaseObject):
@@ -15,25 +15,14 @@ class ClusterTendrlContext(objects.BaseObject):
             *args, **kwargs):
 
         super(ClusterTendrlContext, self).__init__(*args, **kwargs)
-        
-        self.value = 'clusters/%s/TendrlContext'
-        
         # integration_id is the Tendrl generated cluster UUID
         self.integration_id = integration_id
         self.cluster_id=cluster_id
         self.cluster_name=cluster_name
         self.sds_name=sds_name
         self.sds_version=sds_version
-        self._etcd_cls = _ClusterTendrlContextEtcd
-
-
-class _ClusterTendrlContextEtcd(EtcdObj):
-    """A table of the cluster tendrl context, lazily updated
-
-    """
-    __name__ = 'clusters/%s/TendrlContext'
-    _tendrl_cls = ClusterTendrlContext
+        self.value = 'clusters/{0}/TendrlContext'
 
     def render(self):
-        self.__name__ = self.__name__ % NS.tendrl_context.integration_id
-        return super(_ClusterTendrlContextEtcd, self).render()
+        self.value = self.value.format(NS.tendrl_context.integration_id)
+        return super(ClusterTendrlContext, self).render()

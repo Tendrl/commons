@@ -3,10 +3,12 @@ import importlib
 import inspect
 import pkgutil
 
+import etcd
 import maps
 import sys
 
-from tendrl.commons import etcdobj
+import time
+
 from tendrl.commons import flows
 from tendrl.commons import objects
 from tendrl.commons.event import Event
@@ -18,6 +20,8 @@ class TendrlNS(object):
         super(TendrlNS, self).__init__()
         if not hasattr(__builtin__, "NS"):
             setattr(__builtin__, "NS", maps.NamedDict())
+            setattr(NS, "_int", maps.NamedDict())
+            setattr(NS, "etcd_orm", maps.NamedDict())
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
@@ -409,23 +413,58 @@ class TendrlNS(object):
             NS.config = self.current_ns.config
 
             # etcd_orm
-            etcd_kwargs = {'port': self.current_ns.config.data['etcd_port'],
-                           'host': self.current_ns.config.data[
-                               "etcd_connection"]}
+            NS._int.etcd_kwargs = {
+                'port': self.current_ns.config.data['etcd_port'],
+                'host': self.current_ns.config.data['etcd_connection'],
+                'allow_reconnect': True}
             try:
                 Event(
                     Message(
                         priority="info",
                         publisher=NS.publisher_id,
-                        payload={"message": "Setup Etcd Orm for namespace.%s" %
+                        payload={"message": "Setup central store clients for "
+                                            "namespace.%s" %
                                             self.ns_name
                                  }
                     )
                 )
             except KeyError:
-                sys.stdout.write("Setup Etcd Orm for namespace.%s" %
+                sys.stdout.write("Setup central store clients for "
+                                 "namespace.%s" %
                                  self.ns_name)
-            NS.etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
+
+            # Use this for central store writes, TTL refresh
+            NS._int.wclient = None
+            while not NS._int.wclient:
+                try:
+                    NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
+                except etcd.EtcdException:
+                    sys.stdout.write(
+                        "Error connecting to central store (etcd), trying "
+                        "again...")
+                    time.sleep(2)
+
+            # Use this for central store read, watch
+            NS._int.client = None
+            while not NS._int.client:
+                try:
+                    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+                except etcd.EtcdException:
+                    sys.stdout.write(
+                        "Error connecting to central store (etcd), trying "
+                        "again...")
+                    time.sleep(2)
+
+            # Backward compat with tendrl-commons, will be deprecated soon
+            NS.etcd_orm.client = None
+            while not NS.etcd_orm.client:
+                try:
+                    NS.etcd_orm.client = etcd.Client(**NS._int.etcd_kwargs)
+                except etcd.EtcdException:
+                    sys.stdout.write(
+                        "Error connecting to central store (etcd), trying "
+                        "again...")
+                    time.sleep(2)
 
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:

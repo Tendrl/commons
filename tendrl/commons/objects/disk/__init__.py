@@ -1,4 +1,4 @@
-from tendrl.commons.etcdobj import EtcdObj
+
 from tendrl.commons import objects
 
 
@@ -21,7 +21,6 @@ class Disk(objects.BaseObject):
                  optimal_io_size=None, log_sector_size=None, drive_status=None,
                  driver_modules=None, *args, **kwargs):
         super(Disk, self).__init__(*args, **kwargs)
-        self.value = 'nodes/%s/Disks/all/%s'
         self.disk_id = disk_id
         self.device_name = device_name
         self.disk_kernel_name = disk_kernel_name
@@ -72,18 +71,10 @@ class Disk(objects.BaseObject):
         self.optimal_io_size = optimal_io_size
         self.log_sector_size = log_sector_size
         self.driver_modules = driver_modules
-        self._etcd_cls = _DiskEtcd
-
-
-class _DiskEtcd(EtcdObj):
-    """A table of the service, lazily updated
-
-    """
-    __name__ = 'nodes/%s/Disks/all/%s'
-    _tendrl_cls = Disk
+        self.value = 'nodes/{0}/Disks/all/{1}'
 
     def render(self):
-        self.__name__ = self.__name__ % (
-            NS.node_context.node_id, self.disk_id
-        )
-        return super(_DiskEtcd, self).render()
+        self.value = self.value.format(NS.node_context.node_id,
+                                       self.disk_id
+                                       )
+        return super(Disk, self).render()

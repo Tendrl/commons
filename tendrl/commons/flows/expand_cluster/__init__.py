@@ -39,7 +39,7 @@ class ExpandCluster(flows.BaseFlow):
         while not all_ssh_jobs_done:
             all_status = []
             for job_id in ssh_job_ids:
-                all_status.append(NS.etcd_orm.client.read(
+                all_status.append(NS._int.client.read(
                     "/queue/%s/status" %
                     job_id
                 ).value)
@@ -90,7 +90,7 @@ class ExpandCluster(flows.BaseFlow):
             dc = ""
             for node in self.parameters['Node[]']:
                 try:
-                    dc = NS.etcd_orm.client.read(
+                    dc = NS._int.client.read(
                         "/nodes/%s/DetectedCluster/detected_cluster_id" % node
                     ).value
                     if not detected_cluster:
@@ -119,14 +119,14 @@ class ExpandCluster(flows.BaseFlow):
         new_params['TendrlContext.integration_id'] = integration_id
 
         # Get node context for one of the nodes from list
-        sds_pkg_name = NS.etcd_orm.client.read(
+        sds_pkg_name = NS._int.client.read(
             "nodes/%s/DetectedCluster/"
             "sds_pkg_name" % self.parameters['Node[]'][0]
         ).value
         new_params['import_after_expand'] = True
         if "gluster" in sds_pkg_name:
             new_params['gdeploy_provisioned'] = True
-        sds_pkg_version = NS.etcd_orm.client.read(
+        sds_pkg_version = NS._int.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_"
             "version" % self.parameters['Node[]'][0]
         ).value
