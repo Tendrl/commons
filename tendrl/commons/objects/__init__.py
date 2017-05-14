@@ -130,9 +130,23 @@ class BaseObject(object):
                                                        item['value']))
             NS._int.wclient.write(item['key'], item['value'],
                                       quorum=True)
-        # setting ttl after directory creation
+
+        # setting ttl after directory creation for tendrl messages
         if ttl:
             NS._int.wclient.refresh(self.value, ttl=ttl)
+
+        # set ttl=80 for detecting out of band changes to objects in /clusters,
+        # /nodes
+        #  No ttl is set for objects like "*context", "*config, "alert",
+        # "message", "definition", "queue", "detectedcluster
+
+        _value = self.value.lower().strip("/")
+        if _value.startswith("clusters") or _value.startswith("nodes"):
+            if "alert" in _value or "message" in _value or "context" in \
+            _value or "definition" in _value or "config" in _value or \
+             "detected" in _value:
+                return
+            NS._int.wclient.refresh(self.value, ttl=80)
 
     def load(self):
         _copy = self._copy_vars()
