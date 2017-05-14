@@ -134,7 +134,9 @@ class BaseObject(object):
         # setting ttl after directory creation for tendrl messages
         if ttl:
             NS._int.wclient.refresh(self.value, ttl=ttl)
-
+        
+        if hasattr(self, "internal"):
+            return
         # set ttl=80 for detecting out of band changes to objects in /clusters,
         # /nodes
         #  No ttl is set for objects like "*context", "*config, "alert",
