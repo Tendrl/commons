@@ -146,9 +146,9 @@ class BaseObject(object):
         if _value.startswith("clusters") or _value.startswith("nodes"):
             if "alert" in _value or "message" in _value or "context" in \
             _value or "definition" in _value or "config" in _value or \
-             "detected" in _value:
+             "detected" in _value or "util" in _value:
                 return
-            NS._int.wclient.refresh(self.value, ttl=80)
+            NS._int.wclient.refresh(self.value, ttl=90)
 
     def load(self):
         _copy = self._copy_vars()
