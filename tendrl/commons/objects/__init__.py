@@ -1,4 +1,8 @@
 import abc
+import copy
+import hashlib
+import json
+
 import etcd
 import six
 import sys
@@ -8,19 +12,18 @@ from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
 from tendrl.commons.utils import time_utils
-from tendrl.commons.utils import hash_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
                 raise Exception("Internal Object must provide its own definition via '_defs' attr")
-        
+
     def load_definition(self):
         try:
             Event(
@@ -66,15 +69,14 @@ class BaseObject(object):
                 sys.stdout.write(msg)
             raise Exception(msg)
 
-    def save(self, update=True):
+    def save(self, update=True, ttl=None):
+        self.render()
         if not "Message" in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
-                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)()
-                self.hash = hash_utils.generate_obj_hash(cls_etcd)
-                cls_etcd.render()
-                _hash_key = "%s/hash" % cls_etcd.__name__
-                _stored_hash = NS.etcd_orm.client.read(_hash_key).value
+                self.hash = self._hash()
+                _hash_key = "/{0}/hash".format(self.value)
+                _stored_hash = NS._int.client.read(_hash_key).value
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
                     return
@@ -86,7 +88,7 @@ class BaseObject(object):
         if update:
             try:
                 current_obj = self.load()
-                for attr, val in self.__dict__.iteritems():
+                for attr, val in vars(self).iteritems():
                     if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
                                       types.MethodType, types.BuiltinMethodType,
                                       types.UnboundMethodType)):
@@ -95,37 +97,172 @@ class BaseObject(object):
                         continue
                     if val is None:
                         # Dont update attr if self.attr has None val
-                        setattr(current_obj, attr, getattr(current_obj, attr))
-                    else:
-                        # Only update attr if self.attr has a new val
-                        setattr(current_obj, attr, val)
-                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, current_obj)
+                        setattr(self, attr, getattr(current_obj, attr))
             except etcd.EtcdKeyNotFound as ex:
                 # No need to log the error. This would keep happening
                 # till first cluster is imported/created or some data
                 # synchronized in central store.
                 # This un-necessarily hog the log as every few seconds
                 # these errors would be logged.
-                cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
-        else:
-            cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
-        getattr(NS.central_store_thread, "save_%s" %
-                self.__class__.__name__.lower())(cls_etcd())
+                pass
+
+        for item in self.render():
+            '''
+                Note: Log messages in this file have try-except
+                blocks to run
+                in the condition when the node_agent has not been
+                started and
+                name spaces are being created.
+            '''
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Writing %s to %s" %
+                                            (
+                                            item['key'], item['value'])
+                                 }
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Writing %s to %s" % (item['key'],
+                                                       item['value']))
+            NS._int.wclient.write(item['key'], item['value'],
+                                      quorum=True)
+
+        # setting ttl after directory creation for tendrl messages
+        if ttl:
+            NS._int.wclient.refresh(self.value, ttl=ttl)
+        
+        if hasattr(self, "internal"):
+            return
+        # set ttl=400 for detecting out of band changes to objects in /clusters,
+        #  No ttl is set for objects like "*context", "*config, "alert",
+        # "message", "definition", "queue", "detectedcluster
+
+        _value = self.value.lower().strip("/")
+        if _value.startswith("clusters"):
+            if "alert" in _value or "message" in _value or "context" in \
+            _value or "definition" in _value or "config" in _value or \
+             "detected" in _value or "util" in _value:
+                return
+            NS._int.wclient.refresh(self.value, ttl=400)
 
     def load(self):
-        cls_etcd = cs_utils.to_etcdobj(self._etcd_cls, self)
-        result = NS.etcd_orm.read(cls_etcd())
-        return result.to_tendrl_obj()
-    
+        _copy = self._copy_vars()
+        for item in _copy.render():
+            try:
+                Event(
+                    Message(
+                        priority="debug",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Reading %s" % item['key']}
+                    )
+                )
+            except KeyError:
+                sys.stdout.write("Reading %s" % item['key'])
+            try:
+                etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                value = etcd_resp.value
+
+                if item['dir']:
+                    key = item['key'].split('/')[-1]
+                    if item['name'] != "_None":
+                        dct = dict(key=value)
+                        if hasattr(_copy, item['name']):
+                            dct = getattr(_copy, item['name'])
+                            if type(dct) == dict:
+                                dct[key] = value
+                            else:
+                                setattr(_copy, item['name'], dct)
+                        else:
+                            setattr(_copy, item['name'], dct)
+
+                else:
+                    setattr(_copy, item['name'], value)
+            except etcd.EtcdKeyNotFound:
+                pass
+        return _copy
+
     def exists(self):
+        self.render()
         _exists = False
         try:
-            self.load()
+            NS._int.client.read("/{0}".format(self.value))
             _exists = True
         except etcd.EtcdKeyNotFound:
             pass
         return _exists
 
+    def _map_vars_to_tendrl_fields(self):
+        _fields = {}
+        for attr, value in vars(self).iteritems():
+            if value is None:
+                value = ""
+            if attr.startswith("_") or attr in ['value', 'list']:
+                continue
+            _fields[attr] = cs_utils.to_tendrl_field(attr, value)
+
+        return _fields
+
+    def render(self):
+        """Renders the instance into a structure for central store based on
+        its key (self.value)
+
+        :returns: The structure to use for setting.
+        :rtype: list(dict{key=str,value=any})
+        """
+        rendered = []
+        _fields = self._map_vars_to_tendrl_fields()
+        if _fields:
+            for name, field in _fields.iteritems():
+                items = field.render()
+                if type(items) != list:
+                    items = [items]
+                for i in items:
+                    i['key'] = '/{0}/{1}'.format(self.value, i['key'])
+                    rendered.append(i)
+        return rendered
+
+    @property
+    def json(self):
+        """Dumps the entire object as a json structure.
+
+        """
+        data = {}
+        _fields = self._map_vars_to_tendrl_fields()
+        if _fields:
+            for name, field in _fields.iteritems():
+                data[field.name] = json.loads(field.json)
+                # Flatten if needed
+                if field.name in data[field.name].keys():
+                    data[field.name] = data[field.name][field.name]
+
+        return json.dumps(data)
+
+    def _hash(self):
+        try:
+            self.hash = None
+        except AttributeError:
+            pass
+        try:
+            self.updated_at = None
+        except AttributeError:
+            pass
+
+        # Above items cant be part of hash
+        _obj_str = "".join(sorted(self.json))
+        return hashlib.md5(_obj_str).hexdigest()
+
+    def _copy_vars(self):
+        # Creates a copy intance of $obj using it public vars
+        _public_vars = {}
+        for attr, value in vars(self).iteritems():
+            if attr.startswith("_"):
+                continue
+            _public_vars[attr] = value
+        return self.__class__(**_public_vars)
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):

@@ -1,7 +1,7 @@
 import platform
 import socket
 
-from tendrl.commons import etcdobj
+
 from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects
@@ -13,12 +13,11 @@ class Os(objects.BaseObject):
                  *args, **kwargs):
         super(Os, self).__init__(*args, **kwargs)
         os_details = self._getNodeOs()
-        self.value = 'nodes/%s/Os'
         self.kernel_version = kernel_version or os_details["KernelVersion"]
         self.os = os or os_details["Name"]
         self.os_version = os_version or os_details["OSVersion"]
         self.selinux_mode = selinux_mode or os_details["SELinuxMode"]
-        self._etcd_cls = _OsEtcd
+        self.value = 'nodes/{0}/Os'
 
     def _getNodeOs(self):
         cmd = cmd_utils.Command("getenforce")
@@ -37,14 +36,6 @@ class Os(objects.BaseObject):
 
         return osinfo
 
-
-class _OsEtcd(etcdobj.EtcdObj):
-    """A table of the OS, lazily updated
-
-    """
-    __name__ = 'nodes/%s/Os'
-    _tendrl_cls = Os
-
     def render(self):
-        self.__name__ = self.__name__ % NS.node_context.node_id
-        return super(_OsEtcd, self).render()
+        self.value = self.value.format(NS.node_context.node_id)
+        return super(Os, self).render()
