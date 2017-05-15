@@ -138,12 +138,11 @@ class BaseObject(object):
         if hasattr(self, "internal"):
             return
         # set ttl=400 for detecting out of band changes to objects in /clusters,
-        # /nodes
         #  No ttl is set for objects like "*context", "*config, "alert",
         # "message", "definition", "queue", "detectedcluster
 
         _value = self.value.lower().strip("/")
-        if _value.startswith("clusters") or _value.startswith("nodes"):
+        if _value.startswith("clusters"):
             if "alert" in _value or "message" in _value or "context" in \
             _value or "definition" in _value or "config" in _value or \
              "detected" in _value or "util" in _value:
