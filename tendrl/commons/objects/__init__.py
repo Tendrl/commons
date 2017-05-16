@@ -183,21 +183,27 @@ class BaseObject(object):
                     # convert list, dict (json) to python based on definitions
                     _type = self._defs.get("attrs", {}).get(item['name'], {}).get("type")
                     if _type:
-                        if _type.lower() in ['dict', 'list'] and value:
-                            try:
-                                value = json.loads(value.decode('utf-8'))
-                            except ValueError as ex:
-                                _msg = "Error load() attr %s for object %s" % \
-                                       (item['name'], self.value)
-                                Event(
-                                    ExceptionMessage(
-                                        priority="error",
-                                        publisher=NS.publisher_id,
-                                        payload={"message": _msg,
-                                                 "exception": ex
-                                                 }
+                        if _type.lower() in ['dict', 'list']:
+                            if value:
+                                try:
+                                    value = json.loads(value.decode('utf-8'))
+                                except ValueError as ex:
+                                    _msg = "Error load() attr %s for object %s" % \
+                                           (item['name'], self.value)
+                                    Event(
+                                        ExceptionMessage(
+                                            priority="error",
+                                            publisher=NS.publisher_id,
+                                            payload={"message": _msg,
+                                                     "exception": ex
+                                                     }
+                                        )
                                     )
-                                )
+                            else:
+                                if _type.lower() == "list":
+                                    value = list()
+                                if _type.lower() == "dict":
+                                    value = dict()
 
                     setattr(_copy, item['name'], value)
             except etcd.EtcdKeyNotFound:
