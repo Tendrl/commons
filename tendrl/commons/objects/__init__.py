@@ -183,7 +183,7 @@ class BaseObject(object):
                     # convert list, dict (json) to python based on definitions
                     _type = self._defs.get("attrs", {}).get(item['name'], {}).get("type")
                     if _type:
-                        if _type.lower in ['dict', 'list'] and value:
+                        if _type.lower() in ['dict', 'list'] and value:
                             value = json.loads(value)
                     setattr(_copy, item['name'], value)
             except etcd.EtcdKeyNotFound:
