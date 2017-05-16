@@ -162,50 +162,59 @@ class BaseObject(object):
                 )
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
-            try:
-                etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                value = etcd_resp.value
 
-                if item['dir']:
-                    key = item['key'].split('/')[-1]
-                    if item['name'] != "_None":
-                        dct = dict(key=value)
-                        if hasattr(_copy, item['name']):
-                            dct = getattr(_copy, item['name'])
-                            if type(dct) == dict:
-                                dct[key] = value
+            try:
+                try:
+                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                    value = etcd_resp.value
+                    if item['dir']:
+                        key = item['key'].split('/')[-1]
+                        if item['name'] != "_None":
+                            dct = dict(key=value)
+                            if hasattr(_copy, item['name']):
+                                dct = getattr(_copy, item['name'])
+                                if type(dct) == dict:
+                                    dct[key] = value
+                                else:
+                                    setattr(_copy, item['name'], dct)
                             else:
                                 setattr(_copy, item['name'], dct)
-                        else:
-                            setattr(_copy, item['name'], dct)
+                        continue
 
-                else:
-                    # convert list, dict (json) to python based on definitions
-                    _type = self._defs.get("attrs", {}).get(item['name'], {}).get("type")
-                    if _type:
-                        if _type.lower() in ['dict', 'list']:
-                            if value:
-                                try:
-                                    value = json.loads(value.decode('utf-8'))
-                                except ValueError as ex:
-                                    _msg = "Error load() attr %s for object %s" % \
-                                           (item['name'], self.value)
-                                    Event(
-                                        ExceptionMessage(
-                                            priority="error",
-                                            publisher=NS.publisher_id,
-                                            payload={"message": _msg,
-                                                     "exception": ex
-                                                     }
-                                        )
+                except etcd.EtcdNotDir:
+                    # Handle nested dict (json dict) vs simple dict
+                    etcd_resp = NS._int.client.read("/".join(item['key'].split(
+                        "/")[:-1]), quorum=True)
+                    value = etcd_resp.value
+                    pass
+
+                # convert list, dict (json) to python based on definitions
+                _type = self._defs.get("attrs", {}).get(item['name'],
+                                                        {}).get("type")
+                if _type:
+                    if _type.lower() in ['dict', 'list']:
+                        if value:
+                            try:
+                                value = json.loads(value.decode('utf-8'))
+                            except ValueError as ex:
+                                _msg = "Error load() attr %s for object %s" % \
+                                       (item['name'], self.value)
+                                Event(
+                                    ExceptionMessage(
+                                        priority="error",
+                                        publisher=NS.publisher_id,
+                                        payload={"message": _msg,
+                                                 "exception": ex
+                                                 }
                                     )
-                            else:
-                                if _type.lower() == "list":
-                                    value = list()
-                                if _type.lower() == "dict":
-                                    value = dict()
+                                )
+                        else:
+                            if _type.lower() == "list":
+                                value = list()
+                            if _type.lower() == "dict":
+                                value = dict()
 
-                    setattr(_copy, item['name'], value)
+                setattr(_copy, item['name'], value)
             except etcd.EtcdKeyNotFound:
                 pass
         return _copy
