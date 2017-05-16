@@ -31,7 +31,7 @@ def ceph_create_ssh_setup_jobs(parameters):
                 _job_id = str(uuid.uuid4())
                 Job(job_id=_job_id,
                     status="new",
-                    payload=json.dumps(payload)).save()
+                    payload=payload).save()
                 ssh_job_ids.append(_job_id)
                 Event(
                     Message(
@@ -162,7 +162,7 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         Job(
             job_id=_job_id,
             status="new",
-            payload=json.dumps(payload)
+            payload=payload
         ).save()
         ssh_job_ids.append(_job_id)
         Event(
