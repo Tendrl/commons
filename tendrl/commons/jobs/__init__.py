@@ -50,7 +50,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         jid = job.key.split('/')[-1]
                         job_status_key = "/queue/%s/status" % jid
                         NS.node_context = NS.node_context.load()
-                        NS.node_context.tags = json.loads(NS.node_context.tags)
 
                         # tendrl-node-agent tagged as tendrl/monitor will ensure >5 mins old "new" jobs are timed out
                         # and marked as "failed" (the parent job of these jobs will also be marked as "failed")
