@@ -184,7 +184,7 @@ class BaseObject(object):
                     _type = self._defs.get("attrs", {}).get(item['name'], {}).get("type")
                     if _type:
                         if _type.lower() in ['dict', 'list'] and value:
-                            value = json.loads(value)
+                            value = json.loads(value.decode('utf-8'))
                     setattr(_copy, item['name'], value)
             except etcd.EtcdKeyNotFound:
                 pass
