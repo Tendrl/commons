@@ -516,8 +516,8 @@ namespace.tendrl:
           help: "job current status"
           type: String
         payload:
-          help: "dict"
-          type: Dict
+          help: "json"
+          type: Json
         errors:
           help: "any errors occured or not"
           type: String
