@@ -86,33 +86,19 @@ class BaseObject(object):
         
         self.updated_at = str(time_utils.now())
         if update:
-            try:
-                current_obj = self.load()
-                for attr, val in vars(self).iteritems():
-                    if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
-                                      types.MethodType, types.BuiltinMethodType,
-                                      types.UnboundMethodType)):
-                        continue
-                    if attr.startswith("_") or attr in ['value', 'list']:
-                        continue
-                    if val is None:
-                        # Dont update attr if self.attr has None val
-                        setattr(self, attr, getattr(current_obj, attr))
+            current_obj = self.load()
+            for attr, val in vars(self).iteritems():
+                if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
+                                  types.MethodType, types.BuiltinMethodType,
+                                  types.UnboundMethodType)) or \
+                        attr.startswith("_") or attr in ['value', 'list']:
+                    continue
 
-            except etcd.EtcdKeyNotFound as ex:
-                # No need to log the error. This would keep happening
-                # till first cluster is imported/created or some data
-                # synchronized in central store.
-                # This un-necessarily hog the log as every few seconds
-                # these errors would be logged.
-                pass
-
-        self._nested_key = None
+                if val is None:
+                    # Dont update attr if self.attr has None val
+                    setattr(self, attr, getattr(current_obj, attr))
 
         for item in self.render():
-            if self._nested_key:
-                if self._nested_key in item['key']:
-                    continue
             '''
                 Note: Log messages in this file have try-except
                 blocks to run
@@ -134,15 +120,28 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write("Writing %s to %s" % (item['key'],
                                                        item['value']))
-            try:
-                NS._int.wclient.write(item['key'], item['value'], quorum=True)
-            except etcd.EtcdNotDir:
-                # Handle nested dict (json dict) vs simple dict
-                self._nested_key = "/".join(item['key'].split("/")[:-1])
-                NS._int.wclient.write(self._nested_key,
-                                      json.dumps(item['value']),
-                                      quorum=True)
-                pass
+            # convert list, dict (json) to python based on definitions
+            _type = self._defs.get("attrs", {}).get(item['name'],
+                                                    {}).get("type")
+            if _type:
+                if _type.lower() in ['json', 'list']:
+                    if item['value']:
+                        try:
+                            item['value'] = json.dumps(item['value'])
+                        except ValueError as ex:
+                            _msg = "Error save() attr %s for object %s" % \
+                                   (item['name'], self.__name__)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg,
+                                             "exception": ex
+                                             }
+                                )
+                            )
+
+            NS._int.wclient.write(item['key'], item['value'], quorum=True)
 
         # setting ttl after directory creation for tendrl messages
         if ttl:
@@ -150,6 +149,7 @@ class BaseObject(object):
         
         if hasattr(self, "internal"):
             return
+
         # set ttl=400 for detecting out of band changes to objects in /clusters,
         #  No ttl is set for objects like "*context", "*config, "alert",
         # "message", "definition", "queue", "detectedcluster
@@ -164,12 +164,8 @@ class BaseObject(object):
 
     def load(self):
         _copy = self._copy_vars()
-        self._nested_key = None
-        for item in _copy.render():
-            if self._nested_key:
-                if self._nested_key in item['key']:
-                    continue
 
+        for item in _copy.render():
             try:
                 Event(
                     Message(
@@ -182,43 +178,34 @@ class BaseObject(object):
                 sys.stdout.write("Reading %s" % item['key'])
 
             try:
-                try:
+                etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                value = etcd_resp.value
 
-                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                    value = etcd_resp.value
-                    if item['dir']:
-                        key = item['key'].split('/')[-1]
-                        if item['name'] != "_None":
-                            dct = dict(key=value)
-                            if hasattr(_copy, item['name']):
-                                dct = getattr(_copy, item['name'])
-                                if type(dct) == dict:
-                                    dct[key] = value
-                                else:
-                                    setattr(_copy, item['name'], dct)
+                if item['dir']:
+                    key = item['key'].split('/')[-1]
+                    if key != "_None":
+                        dct = dict(key=value)
+                        if hasattr(_copy, item['name']):
+                            dct = getattr(_copy, item['name'])
+                            if type(dct) == dict:
+                                dct[key] = value
                             else:
                                 setattr(_copy, item['name'], dct)
-                        continue
-
-                except etcd.EtcdNotDir:
-                    # Handle nested dict (json dict) vs simple dict
-                    self._nested_key = "/".join(item['key'].split("/")[:-1])
-                    etcd_resp = NS._int.client.read(self._nested_key,
-                                                    quorum=True)
-                    value = etcd_resp.value
-                    pass
+                        else:
+                            setattr(_copy, item['name'], dct)
+                    continue
 
                 # convert list, dict (json) to python based on definitions
                 _type = self._defs.get("attrs", {}).get(item['name'],
                                                         {}).get("type")
                 if _type:
-                    if _type.lower() in ['dict', 'list']:
+                    if _type.lower() in ['json', 'list']:
                         if value:
                             try:
                                 value = json.loads(value.decode('utf-8'))
                             except ValueError as ex:
                                 _msg = "Error load() attr %s for object %s" % \
-                                       (item['name'], self.value)
+                                       (item['name'], self.__name__)
                                 Event(
                                     ExceptionMessage(
                                         priority="error",
@@ -231,7 +218,7 @@ class BaseObject(object):
                         else:
                             if _type.lower() == "list":
                                 value = list()
-                            if _type.lower() == "dict":
+                            if _type.lower() == "json":
                                 value = dict()
 
                 setattr(_copy, item['name'], value)
@@ -252,11 +239,16 @@ class BaseObject(object):
     def _map_vars_to_tendrl_fields(self):
         _fields = {}
         for attr, value in vars(self).iteritems():
+            _type = self._defs.get("attrs", {}).get(attr,
+                                                    {}).get("type")
+            if _type:
+                _type = _type.lower()
+
             if value is None:
                 value = ""
             if attr.startswith("_") or attr in ['value', 'list']:
                 continue
-            _fields[attr] = cs_utils.to_tendrl_field(attr, value)
+            _fields[attr] = cs_utils.to_tendrl_field(attr, value, _type)
 
         return _fields
 
@@ -317,6 +309,7 @@ class BaseObject(object):
                 continue
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
