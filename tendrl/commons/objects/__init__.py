@@ -106,7 +106,12 @@ class BaseObject(object):
                 # these errors would be logged.
                 pass
 
+        self._nested_key = None
+
         for item in self.render():
+            if self._nested_key:
+                if self._nested_key in item['key']:
+                    continue
             '''
                 Note: Log messages in this file have try-except
                 blocks to run
@@ -128,8 +133,14 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write("Writing %s to %s" % (item['key'],
                                                        item['value']))
-            NS._int.wclient.write(item['key'], item['value'],
+            try:
+                NS._int.wclient.write(item['key'], item['value'], quorum=True)
+            except etcd.EtcdNotDir:
+                # Handle nested dict (json dict) vs simple dict
+                self._nested_key = "/".join(item['key'].split("/")[:-1])
+                NS._int.wclient.write(self._nested_key, item['value'],
                                       quorum=True)
+                pass
 
         # setting ttl after directory creation for tendrl messages
         if ttl:
@@ -151,7 +162,12 @@ class BaseObject(object):
 
     def load(self):
         _copy = self._copy_vars()
+        self._nested_key = None
         for item in _copy.render():
+            if self._nested_key:
+                if self._nested_key in item['key']:
+                    continue
+
             try:
                 Event(
                     Message(
@@ -165,6 +181,7 @@ class BaseObject(object):
 
             try:
                 try:
+
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
                     value = etcd_resp.value
                     if item['dir']:
@@ -183,8 +200,9 @@ class BaseObject(object):
 
                 except etcd.EtcdNotDir:
                     # Handle nested dict (json dict) vs simple dict
-                    etcd_resp = NS._int.client.read("/".join(item['key'].split(
-                        "/")[:-1]), quorum=True)
+                    self._nested_key = "/".join(item['key'].split("/")[:-1])
+                    etcd_resp = NS._int.client.read(self._nested_key,
+                                                    quorum=True)
                     value = etcd_resp.value
                     pass
 
