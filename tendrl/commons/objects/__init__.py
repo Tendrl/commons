@@ -98,6 +98,7 @@ class BaseObject(object):
                     if val is None:
                         # Dont update attr if self.attr has None val
                         setattr(self, attr, getattr(current_obj, attr))
+
             except etcd.EtcdKeyNotFound as ex:
                 # No need to log the error. This would keep happening
                 # till first cluster is imported/created or some data
@@ -138,7 +139,8 @@ class BaseObject(object):
             except etcd.EtcdNotDir:
                 # Handle nested dict (json dict) vs simple dict
                 self._nested_key = "/".join(item['key'].split("/")[:-1])
-                NS._int.wclient.write(self._nested_key, item['value'],
+                NS._int.wclient.write(self._nested_key,
+                                      json.dumps(item['value']),
                                       quorum=True)
                 pass
 
