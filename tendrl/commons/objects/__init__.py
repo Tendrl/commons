@@ -305,7 +305,7 @@ class BaseObject(object):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
         for attr, value in vars(self).iteritems():
-            if attr.startswith("_"):
+            if attr.startswith("_") or attr in ['hash', 'updated_at']:
                 continue
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
