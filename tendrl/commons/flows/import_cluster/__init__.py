@@ -95,8 +95,7 @@ class ImportCluster(flows.BaseFlow):
                         # set this node as gluster provisioner
                         tags = ["provisioner/%s" % integration_id]
                         NS.node_context = NS.node_context.load()
-                        current_tags = json.loads(NS.node_context.tags)
-                        tags += current_tags
+                        tags += NS.node_context.tags
                         NS.node_context.tags = list(set(tags))
                         NS.node_context.save()
 
@@ -164,7 +163,7 @@ class ImportCluster(flows.BaseFlow):
         if "ceph" in sds_name.lower():
             node_context = NS.node_context.load()
             is_mon = False
-            for tag in json.loads(node_context.tags):
+            for tag in node_context.tags:
                 mon_tag = NS.compiled_definitions.get_parsed_defs()[
                     'namespace.tendrl'
                 ]['tags']['ceph-mon']
