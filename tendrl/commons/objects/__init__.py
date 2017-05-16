@@ -140,8 +140,7 @@ class BaseObject(object):
                 # Handle nested dict (json dict) vs simple dict
                 self._nested_key = "/".join(item['key'].split("/")[:-1])
                 NS._int.wclient.write(self._nested_key,
-                                      json.dumps(item['value'].decode(
-                                          "utf-8")),
+                                      json.dumps(item['value']),
                                       quorum=True)
                 pass
 
