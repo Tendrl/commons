@@ -35,10 +35,9 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             if not _startup:
                 try:
                     NS._int.wclient.watch("/queue")
-                    _startup = False
                 except etcd.EtcdWatchTimedOut:
                     pass
-
+            _startup = False
             try:
                 try:
                     jobs = NS._int.client.read("/queue")
@@ -272,6 +271,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                  }
                     )
                 )
+            pass
 
     def stop(self):
         self._complete.set()
