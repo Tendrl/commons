@@ -31,7 +31,7 @@ def ceph_create_ssh_setup_jobs(parameters):
                 _job_id = str(uuid.uuid4())
                 Job(job_id=_job_id,
                     status="new",
-                    payload=json.dumps(payload)).save()
+                    payload=payload).save()
                 ssh_job_ids.append(_job_id)
                 Event(
                     Message(
@@ -120,7 +120,10 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
                          }
             )
         )
-        return ssh_job_ids
+        raise FlowExecutionFailedError(
+            "Failed to get ssh-key on node %s" %
+            NS.node_context.node_id
+        )
 
     if not skip_current_node:
         ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()
@@ -136,7 +139,10 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
                     }
                 )
             )
-            return ssh_job_ids
+            raise FlowExecutionFailedError(
+                "Failed to write authorized-key on node %s" %
+                NS.node_context.node_id
+            )
         node_list.remove(NS.node_context.node_id)
 
     for node in node_list:
@@ -156,7 +162,7 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         Job(
             job_id=_job_id,
             status="new",
-            payload=json.dumps(payload)
+            payload=payload
         ).save()
         ssh_job_ids.append(_job_id)
         Event(

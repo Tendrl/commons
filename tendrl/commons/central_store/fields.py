@@ -29,12 +29,11 @@
 All fields.
 """
 
-import datetime
 import json
 
 
 class Field(object):
-    """Base class for all fields.
+    """Base class for all Tendrl central store fields.
 
     """
 
@@ -130,28 +129,14 @@ class DateTimeField(Field):
 
     """
 
-    def __init__(self, name, datefmt):
-        """Initializes an instance of DateTimeField.
+    def __init__(self, name, value):
+        """Initializes an instance of datetime.datetime UTC/isoformat.
 
         :param name: The name of the field
         :type name: str
-        :param datefmt: The datetime format to parse to/from.
-        :type datefmt: str
         """
         super(DateTimeField, self).__init__(name)
-        self._datefmt = datefmt
-
-    def _set_value(self, value):
-        """Internal method that sets the field value.
-
-        :param value: The value to use.
-        :type value: str or datetime.datetime
-        :raises: TypeError
-        """
-        if type(value) is datetime.datetime:
-            self._value = value
-        else:
-            self._value = datetime.datetime.strptime(value, self._datefmt)
+        self._value = value
 
     @property
     def json(self):
@@ -161,7 +146,7 @@ class DateTimeField(Field):
         :rtype: str
         """
         return json.dumps({
-            self.name: datetime.datetime.strftime(self._value, self._datefmt),
+            self.name: str(self._value.isoformat()),
         })
 
     def render(self):
@@ -173,7 +158,48 @@ class DateTimeField(Field):
         return {
             'name': self.name,
             'key': self.name,
-            'value': datetime.datetime.strftime(self._value, self._datefmt),
+            'value': str(self._value.isoformat()),
+            'dir': False,
+        }
+
+
+class ListField(Field):
+    """A list Field that forces a cast to json.dumps(list).
+
+    """
+
+    def __init__(self, name, value):
+        """Initializes an instance of list.
+
+        :param name: The name of the field
+        :type name: str
+        """
+        super(ListField, self).__init__(name)
+        self._value = value
+        if self._value:
+            self._value = list(set(self._value))
+
+    @property
+    def json(self):
+        """Returns a json version of the field.
+
+        :returns: JSON representation.
+        :rtype: str
+        """
+        return json.dumps({
+            self.name: json.dumps(self._value),
+        })
+
+    def render(self):
+        """Renders the field into a structure that can be persisted to etcd.
+
+        :returns: A structure to be used with etcd
+        :rtype: dict
+        """
+        return {
+            'name': self.name,
+            'key': self.name,
+            'value': self._value,
             'dir': False,
         }
 
@@ -183,15 +209,15 @@ class DictField(Field):
 
     """
 
-    def __init__(self, name, value, caster):
+    def __init__(self, name, value, caster=None):
         """Initializes an instance of DictField.
 
         :param caster: A caster structure for casting dictionary items.
         :type caster: dict
         """
         super(DictField, self).__init__(name)
-        self._caster = caster
-        self._value = value or {}
+        self._caster = caster or {'str': 'str'}
+        self._value = value
 
     @property
     def json(self):

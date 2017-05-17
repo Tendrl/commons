@@ -1,12 +1,15 @@
 import etcd
+import gevent
 import json
 import uuid
 
 from tendrl.commons import flows
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
+from tendrl.commons.flows.create_cluster import \
+    utils as create_cluster_utils
+from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import gluster_help
-from tendrl.commons.flows.create_cluster import utils as expand_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
 
@@ -19,17 +22,18 @@ class ExpandCluster(flows.BaseFlow):
                 "TendrlContext.integration_id cannot be empty"
             )
 
-        tendrl_context = NS.tendrl.objects.TendrlContext(
-            integration_id=integration_id
-        ).load()
+        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+        sds_name = self.parameters["TendrlContext.sds_name"]
+        if sds_name not in supported_sds:
+            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
 
-        sds_name = tendrl_context.sds_name
         ssh_job_ids = []
         if "ceph" in sds_name:
-            # TODO (team)
-            pass
+            ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
+                self.parameters
+            )
         else:
-            ssh_job_ids = expand_cluster_utils.gluster_create_ssh_setup_jobs(
+            ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
                 self.parameters,
                 skip_current_node=True
             )
@@ -38,7 +42,7 @@ class ExpandCluster(flows.BaseFlow):
         while not all_ssh_jobs_done:
             all_status = []
             for job_id in ssh_job_ids:
-                all_status.append(NS.etcd_orm.client.read(
+                all_status.append(NS._int.client.read(
                     "/queue/%s/status" %
                     job_id
                 ).value)
@@ -57,13 +61,23 @@ class ExpandCluster(flows.BaseFlow):
                 )
 
                 all_ssh_jobs_done = True
+                gevent.sleep(3)
 
         # SSH setup jobs finished above, now install sds
         # bits and create cluster
-
         if "ceph" in sds_name:
-            # TODO (team)
-            pass
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Expanding ceph cluster %s" % integration_id
+                    }
+                )
+            )
+            ceph_help.expand_cluster(self.parameters)
         else:
             Event(
                 Message(
@@ -88,7 +102,7 @@ class ExpandCluster(flows.BaseFlow):
             dc = ""
             for node in self.parameters['Node[]']:
                 try:
-                    dc = NS.etcd_orm.client.read(
+                    dc = NS._int.client.read(
                         "/nodes/%s/DetectedCluster/detected_cluster_id" % node
                     ).value
                     if not detected_cluster:
@@ -117,14 +131,14 @@ class ExpandCluster(flows.BaseFlow):
         new_params['TendrlContext.integration_id'] = integration_id
 
         # Get node context for one of the nodes from list
-        sds_pkg_name = NS.etcd_orm.client.read(
+        sds_pkg_name = NS._int.client.read(
             "nodes/%s/DetectedCluster/"
             "sds_pkg_name" % self.parameters['Node[]'][0]
         ).value
         new_params['import_after_expand'] = True
         if "gluster" in sds_pkg_name:
             new_params['gdeploy_provisioned'] = True
-        sds_pkg_version = NS.etcd_orm.client.read(
+        sds_pkg_version = NS._int.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_"
             "version" % self.parameters['Node[]'][0]
         ).value
@@ -143,7 +157,7 @@ class ExpandCluster(flows.BaseFlow):
         _job_id = str(uuid.uuid4())
         Job(job_id=_job_id,
             status="new",
-            payload=json.dumps(payload)).save()
+            payload=payload).save()
         Event(
             Message(
                 job_id=self.parameters['job_id'],

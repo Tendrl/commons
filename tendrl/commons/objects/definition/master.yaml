@@ -50,6 +50,11 @@ namespace.tendrl:
         mandatory:
           - "Node[]"
           - TendrlContext.integration_id
+          - TendrlContext.cluster_id
+          - TendrlContext.cluster_name
+          - TendrlContext.sds_name
+          - Cluster.cluster_network
+          - Cluster.node_identifier
           - Cluster.node_configuration
       run: tendrl.flows.ExpandCluster
       type: Create
@@ -188,7 +193,7 @@ namespace.tendrl:
         mount_point:
           help: "disk mount point"
           type: String
-        Model:
+        model:
           help: "disk model name"
           type: String
         vendor:
@@ -260,8 +265,8 @@ namespace.tendrl:
         sysfs_busid:
           help: "sysfs bus id"
           type: String
-        alignement:
-          help: "alignement"
+        alignment:
+          help: "alignment"
           type: String
         read_only:
           help: "disk is read only or not"
@@ -302,8 +307,8 @@ namespace.tendrl:
         discard_max_bytes:
           help: "discard max bytes"
           type: String
-        discard_zeroes_data:
-          help: "discard zeroes data"
+        discard_zeros_data:
+          help: "discard zeros data"
           type: String
         optimal_io_size:
           help: "optimal I/O size"
@@ -516,8 +521,8 @@ namespace.tendrl:
           help: "job current status"
           type: String
         payload:
-          help: "dict"
-          type: Dict
+          help: "json"
+          type: Json
         errors:
           help: "any errors occured or not"
           type: String
