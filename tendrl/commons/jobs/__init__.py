@@ -271,7 +271,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                  }
                     )
                 )
-            pass
+                pass
 
     def stop(self):
         self._complete.set()
