@@ -140,8 +140,12 @@ class BaseObject(object):
                                              }
                                 )
                             )
-
-            NS._int.wclient.write(item['key'], item['value'], quorum=True)
+            try:
+                NS._int.wclient.write(item['key'], item['value'], quorum=True)
+            except etcd.EtcdConnectionFailed:
+                NS._int.wreconnect()
+                NS._int.wclient.write(item['key'], item['value'], quorum=True)
+                pass
 
         # setting ttl after directory creation for tendrl messages
         if ttl:
@@ -178,7 +182,12 @@ class BaseObject(object):
                 sys.stdout.write("Reading %s" % item['key'])
 
             try:
-                etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                try:
+                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                except etcd.EtcdConnectionFailed:
+                    NS._int.reconnect()
+                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                    pass
                 value = etcd_resp.value
 
                 if item['dir']:
