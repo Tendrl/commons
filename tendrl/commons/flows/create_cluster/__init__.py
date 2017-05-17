@@ -81,8 +81,7 @@ class CreateCluster(flows.BaseFlow):
                 if "gluster" in self.parameters["TendrlContext.sds_name"]:
                     tags = ["provisioner/%s" % integration_id]
                     NS.node_context = NS.node_context.load()
-                    current_tags = json.loads(NS.node_context.tags)
-                    tags += current_tags
+                    tags += NS.node_context.tags
                     NS.node_context.tags = list(set(tags))
                     NS.node_context.save()
                 gevent.sleep(3)
@@ -162,7 +161,7 @@ class CreateCluster(flows.BaseFlow):
         _job_id = str(uuid.uuid4())
         Job(job_id=_job_id,
             status="new",
-            payload=json.dumps(payload)).save()
+            payload=payload).save()
         Event(
             Message(
                 job_id=self.parameters['job_id'],

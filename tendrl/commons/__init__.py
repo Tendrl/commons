@@ -21,7 +21,6 @@ class TendrlNS(object):
         if not hasattr(__builtin__, "NS"):
             setattr(__builtin__, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
-            setattr(NS, "etcd_orm", maps.NamedDict())
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
@@ -412,7 +411,6 @@ class TendrlNS(object):
             self.current_ns.config = self.current_ns.objects.Config()
             NS.config = self.current_ns.config
 
-            # etcd_orm
             NS._int.etcd_kwargs = {
                 'port': self.current_ns.config.data['etcd_port'],
                 'host': self.current_ns.config.data['etcd_connection'],
@@ -449,17 +447,6 @@ class TendrlNS(object):
             while not NS._int.client:
                 try:
                     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
-                except etcd.EtcdException:
-                    sys.stdout.write(
-                        "Error connecting to central store (etcd), trying "
-                        "again...")
-                    time.sleep(2)
-
-            # Backward compat with tendrl-commons, will be deprecated soon
-            NS.etcd_orm.client = None
-            while not NS.etcd_orm.client:
-                try:
-                    NS.etcd_orm.client = etcd.Client(**NS._int.etcd_kwargs)
                 except etcd.EtcdException:
                     sys.stdout.write(
                         "Error connecting to central store (etcd), trying "

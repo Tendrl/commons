@@ -11,5 +11,9 @@ PY_TO_TENDRL_TYPE_MAP = {dict: fields.DictField,
                          list: fields.ListField}
 
 
-def to_tendrl_field(name, value):
+def to_tendrl_field(name, value, tendrl_type=None):
+    if tendrl_type:
+        if tendrl_type in ['json' or 'list']:
+            return PY_TO_TENDRL_TYPE_MAP[str](name, value)
+
     return PY_TO_TENDRL_TYPE_MAP[type(value)](name, value)

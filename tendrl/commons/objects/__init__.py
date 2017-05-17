@@ -86,25 +86,17 @@ class BaseObject(object):
         
         self.updated_at = str(time_utils.now())
         if update:
-            try:
-                current_obj = self.load()
-                for attr, val in vars(self).iteritems():
-                    if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
-                                      types.MethodType, types.BuiltinMethodType,
-                                      types.UnboundMethodType)):
-                        continue
-                    if attr.startswith("_") or attr in ['value', 'list']:
-                        continue
-                    if val is None:
-                        # Dont update attr if self.attr has None val
-                        setattr(self, attr, getattr(current_obj, attr))
-            except etcd.EtcdKeyNotFound as ex:
-                # No need to log the error. This would keep happening
-                # till first cluster is imported/created or some data
-                # synchronized in central store.
-                # This un-necessarily hog the log as every few seconds
-                # these errors would be logged.
-                pass
+            current_obj = self.load()
+            for attr, val in vars(self).iteritems():
+                if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
+                                  types.MethodType, types.BuiltinMethodType,
+                                  types.UnboundMethodType)) or \
+                        attr.startswith("_") or attr in ['value', 'list']:
+                    continue
+
+                if val is None:
+                    # Dont update attr if self.attr has None val
+                    setattr(self, attr, getattr(current_obj, attr))
 
         for item in self.render():
             '''
@@ -128,30 +120,51 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write("Writing %s to %s" % (item['key'],
                                                        item['value']))
-            NS._int.wclient.write(item['key'], item['value'],
-                                      quorum=True)
+            # convert list, dict (json) to python based on definitions
+            _type = self._defs.get("attrs", {}).get(item['name'],
+                                                    {}).get("type")
+            if _type:
+                if _type.lower() in ['json', 'list']:
+                    if item['value']:
+                        try:
+                            item['value'] = json.dumps(item['value'])
+                        except ValueError as ex:
+                            _msg = "Error save() attr %s for object %s" % \
+                                   (item['name'], self.__name__)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg,
+                                             "exception": ex
+                                             }
+                                )
+                            )
+
+            NS._int.wclient.write(item['key'], item['value'], quorum=True)
 
         # setting ttl after directory creation for tendrl messages
         if ttl:
             NS._int.wclient.refresh(self.value, ttl=ttl)
         
-        #if hasattr(self, "internal"):
-        #    return
-        # set ttl=80 for detecting out of band changes to objects in /clusters,
-        # /nodes
+        if hasattr(self, "internal"):
+            return
+
+        # set ttl=400 for detecting out of band changes to objects in /clusters,
         #  No ttl is set for objects like "*context", "*config, "alert",
         # "message", "definition", "queue", "detectedcluster
 
-        #_value = self.value.lower().strip("/")
-        #if _value.startswith("clusters") or _value.startswith("nodes"):
-        #    if "alert" in _value or "message" in _value or "context" in \
-        #    _value or "definition" in _value or "config" in _value or \
-        #     "detected" in _value or "util" in _value:
-        #        return
-        #    NS._int.wclient.refresh(self.value, ttl=90)
+        _value = self.value.lower().strip("/")
+        if _value.startswith("clusters"):
+            if "alert" in _value or "message" in _value or "context" in \
+            _value or "definition" in _value or "config" in _value or \
+             "detected" in _value or "util" in _value:
+                return
+            NS._int.wclient.refresh(self.value, ttl=400)
 
     def load(self):
         _copy = self._copy_vars()
+
         for item in _copy.render():
             try:
                 Event(
@@ -163,13 +176,14 @@ class BaseObject(object):
                 )
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
+
             try:
                 etcd_resp = NS._int.client.read(item['key'], quorum=True)
                 value = etcd_resp.value
 
                 if item['dir']:
                     key = item['key'].split('/')[-1]
-                    if item['name'] != "_None":
+                    if key != "_None":
                         dct = dict(key=value)
                         if hasattr(_copy, item['name']):
                             dct = getattr(_copy, item['name'])
@@ -179,9 +193,35 @@ class BaseObject(object):
                                 setattr(_copy, item['name'], dct)
                         else:
                             setattr(_copy, item['name'], dct)
+                    continue
 
-                else:
-                    setattr(_copy, item['name'], value)
+                # convert list, dict (json) to python based on definitions
+                _type = self._defs.get("attrs", {}).get(item['name'],
+                                                        {}).get("type")
+                if _type:
+                    if _type.lower() in ['json', 'list']:
+                        if value:
+                            try:
+                                value = json.loads(value.decode('utf-8'))
+                            except ValueError as ex:
+                                _msg = "Error load() attr %s for object %s" % \
+                                       (item['name'], self.__name__)
+                                Event(
+                                    ExceptionMessage(
+                                        priority="error",
+                                        publisher=NS.publisher_id,
+                                        payload={"message": _msg,
+                                                 "exception": ex
+                                                 }
+                                    )
+                                )
+                        else:
+                            if _type.lower() == "list":
+                                value = list()
+                            if _type.lower() == "json":
+                                value = dict()
+
+                setattr(_copy, item['name'], value)
             except etcd.EtcdKeyNotFound:
                 pass
         return _copy
@@ -199,11 +239,16 @@ class BaseObject(object):
     def _map_vars_to_tendrl_fields(self):
         _fields = {}
         for attr, value in vars(self).iteritems():
+            _type = self._defs.get("attrs", {}).get(attr,
+                                                    {}).get("type")
+            if _type:
+                _type = _type.lower()
+
             if value is None:
                 value = ""
             if attr.startswith("_") or attr in ['value', 'list']:
                 continue
-            _fields[attr] = cs_utils.to_tendrl_field(attr, value)
+            _fields[attr] = cs_utils.to_tendrl_field(attr, value, _type)
 
         return _fields
 
@@ -260,10 +305,12 @@ class BaseObject(object):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
         for attr, value in vars(self).iteritems():
-            if attr.startswith("_"):
+            if attr.startswith("_") or attr in ['hash', 'updated_at',
+                                               'value', 'list']:
                 continue
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
