@@ -127,7 +127,7 @@ def create_mons(parameters, mon_ips):
 
     # Save the monitor secret for future reference
     if parameters.get('create_mon_secret', False):
-        NS.etcd_orm.client.write(
+        NS._int.wclient.write(
             "clusters/%s/_mon_key" % parameters['TendrlContext.integration_id'],
             plugin.monitor_secret
         )
@@ -175,7 +175,7 @@ def create_osds(parameters, created_mons):
 
             journal_details = {}
             try:
-                journal_details = json.loads(NS.etcd_orm.client.read(
+                journal_details = json.loads(NS._int.client.read(
                     'clusters/%s/JournalDetails/%s/data' % (
                         parameters['TendrlContext.integration_id'],
                         node
