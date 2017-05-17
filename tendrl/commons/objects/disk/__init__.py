@@ -3,75 +3,40 @@ from tendrl.commons import objects
 
 
 class Disk(objects.BaseObject):
-    def __init__(self, disk_id=None, device_name=None, disk_kernel_name=None,
-                 parent_id=None, parent_name=None, disk_type=None, fsuuid=None,
-                 mount_point=None, model=None, vendor=None, used=None,
-                 serial_no=None, rmversion=None, fstype=None, ssd=None,
-                 size=None, device_number=None, driver=None, group=None,
-                 device=None, bios_id=None, state=None, driver_status=None,
-                 label=None, req_queue_size=None,
-                 mode=None, owner=None, min_io_size=None,
-                 major_to_minor_no=None, device_files=None, sysfs_busid=None,
-                 alignment=None, read_only=None, read_ahead=None,
-                 removable_device=None, scheduler_name=None, sysfs_id=None,
-                 sysfs_device_link=None, geo_bios_edd=None,
-                 geo_bios_legacy=None, geo_logical=None, phy_sector_size=None,
-                 discard_granularity=None, discard_align_offset=None,
-                 discard_max_bytes=None, discard_zeros_data=None,
-                 optimal_io_size=None, log_sector_size=None, drive_status=None,
-                 driver_modules=None, *args, **kwargs):
+    def __init__(self, disk_id=None, hardware_id=None, disk_name=None,
+                 sysfs_id=None, sysfs_busid=None, sysfs_device_link=None,
+                 hardware_class=None, model=None, vendor=None, device=None,
+                 rmversion=None, serial_no=None, driver=None, driver_modules=None,
+                 device_files=None, device_number=None, bios_id=None,
+                 geo_bios_edd=None, geo_logical=None, size=None, size_bios_edd=None,
+                 geo_bios_legacy=None, config_status=None, partitions=None,
+                 *args, **kwargs):
         super(Disk, self).__init__(*args, **kwargs)
         self.disk_id = disk_id
-        self.device_name = device_name
-        self.disk_kernel_name = disk_kernel_name
-        self.parent_id = parent_id
-        self.parent_name = parent_name
-        self.disk_type = disk_type
-        self.fsuuid = fsuuid
-        self.mount_point = mount_point
+        self.hardware_id = hardware_id
+        self.disk_name = disk_name
+        self.sysfs_id = sysfs_id
+        self.sysfs_busid = sysfs_busid
+        self.sysfs_device_link = sysfs_device_link
+        self.hardware_class = hardware_class
         self.model = model
         self.vendor = vendor
-        self.used = used
-        self.serial_no = serial_no
-        self.rmversion = rmversion
-        self.fstype = fstype
-        self.ssd = ssd
-        self.size = size
-        self.device_number = device_number
-        self.driver = driver
-        self.drive_status = drive_status
-        self.group = group
         self.device = device
-        self.bios_id = bios_id
-        self.state = state
-        self.driver_status = driver_status
-        self.label = label
-        self.req_queue_size = req_queue_size
-        self.mode = mode
-        self.owner = owner
-        self.min_io_size = min_io_size
-        self.major_to_minor_no = major_to_minor_no
-        self.device_files = device_files
-        self.sysfs_busid = sysfs_busid
-        self.alignment = alignment
-        self.read_only = read_only
-        self.read_ahead = read_ahead
-        self.removable_device = removable_device
-        self.scheduler_name = scheduler_name
-        self.sysfs_id = sysfs_id
-        self.sysfs_device_link = sysfs_device_link
-        self.geo_bios_edd = geo_bios_edd
-        self.geo_bios_legacy = geo_bios_legacy
-        self.geo_logical = geo_logical
-        self.phy_sector_size = phy_sector_size
-        self.discard_granularity = discard_granularity
-        self.discard_align_offset = discard_align_offset
-        self.discard_max_bytes = discard_max_bytes
-        self.discard_zeros_data = discard_zeros_data
-        self.optimal_io_size = optimal_io_size
-        self.log_sector_size = log_sector_size
+        self.rmversion = rmversion
+        self.serial_no = serial_no
+        self.driver = driver
         self.driver_modules = driver_modules
-        self.value = 'nodes/{0}/Disks/all/{1}'
+        self.device_files = device_files
+        self.device_number = device_number 
+        self.bios_id = bios_id
+        self.geo_bios_edd = geo_bios_edd
+        self.geo_logical = geo_logical
+        self.size = size
+        self.size_bios_edd = size_bios_edd
+        self.geo_bios_legacy = geo_bios_legacy
+        self.config_status = config_status
+        self.partitions = partitions
+        self.value = 'nodes/{0}/Disks/{1}'
 
     def render(self):
         self.value = self.value.format(NS.node_context.node_id,
