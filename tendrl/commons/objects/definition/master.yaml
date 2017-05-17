@@ -95,6 +95,9 @@ namespace.tendrl:
         conf_overrides:
           help: Configuration overrides for the cluster
           type: Dict
+        node_identifier:
+          help: How nodes should be identified while create cluster
+          type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
