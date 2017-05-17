@@ -75,7 +75,7 @@ def expand_cluster(parameters):
 
 def create_mons(parameters, mon_ips, created_mons):
     plugin = NS.ceph_provisioner.get_plugin()
-    mon_secret = NS.etcd_orm.client.read(
+    mon_secret = NS._int.client.read(
         "clusters/%s/_mon_key" % parameters['TendrlContext.integration_id']
     ).value
     for mon_ip in mon_ips:
@@ -109,7 +109,7 @@ def create_mons(parameters, mon_ips, created_mons):
 
 
 def existing_mons(parameters):
-    mons = NS.etcd_orm.client.read(
+    mons = NS._int.client.read(
         "clusters/%s/maps/mon_map/data/mons" %\
         parameters["TendrlContext.integration_id"]
     ).value
