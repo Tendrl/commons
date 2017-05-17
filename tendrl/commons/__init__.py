@@ -10,6 +10,7 @@ import time
 
 from tendrl.commons import flows
 from tendrl.commons import objects
+from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.objects import BaseAtom
@@ -21,6 +22,8 @@ class TendrlNS(object):
         if not hasattr(__builtin__, "NS"):
             setattr(__builtin__, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
+            NS._int.wreconnect = cs_utils.wreconnect
+            NS._int.reconnect = cs_utils.reconnect
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
