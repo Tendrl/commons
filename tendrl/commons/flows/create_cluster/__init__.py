@@ -99,6 +99,7 @@ class CreateCluster(flows.BaseFlow):
                 )
             )
 
+            self.parameters.update({'create_mon_secret': True})
             ceph_help.create_ceph(self.parameters)
         else:
             Event(
@@ -149,6 +150,7 @@ class CreateCluster(flows.BaseFlow):
             sds_pkg_name
         new_params['DetectedCluster.sds_pkg_version'] = \
             sds_pkg_version
+        new_params['import_after_create'] = True
         payload = {"tags": ["detected_cluster/%s" % detected_cluster_id],
                    "run": "tendrl.flows.ImportCluster",
                    "status": "new",

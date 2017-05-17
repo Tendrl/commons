@@ -50,6 +50,11 @@ namespace.tendrl:
         mandatory:
           - "Node[]"
           - TendrlContext.integration_id
+          - TendrlContext.cluster_id
+          - TendrlContext.cluster_name
+          - TendrlContext.sds_name
+          - Cluster.cluster_network
+          - Cluster.node_identifier
           - Cluster.node_configuration
       run: tendrl.flows.ExpandCluster
       type: Create
