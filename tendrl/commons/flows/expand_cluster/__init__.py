@@ -38,14 +38,16 @@ class ExpandCluster(flows.BaseFlow):
                 skip_current_node=True
             )
 
-        all_ssh_jobs_done = False
-        while not all_ssh_jobs_done:
-            all_status = []
+        while True:
+            gevent.sleep(3)
+            all_status = {}
             for job_id in ssh_job_ids:
-                all_status.append(NS._int.client.read(
-                    "/queue/%s/status" %
-                    job_id
-                ).value)
+                all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                
+            _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+            if _failed:
+                raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                            integration_id
             if all([status for status in all_status if status == "finished"]):
                 Event(
                     Message(
@@ -60,8 +62,7 @@ class ExpandCluster(flows.BaseFlow):
                     )
                 )
 
-                all_ssh_jobs_done = True
-                gevent.sleep(3)
+                break
 
         # SSH setup jobs finished above, now install sds
         # bits and create cluster
@@ -94,8 +95,8 @@ class ExpandCluster(flows.BaseFlow):
             gluster_help.expand_gluster(self.parameters)
 
         # Wait till detected cluster in populated for nodes
-        all_nodes_have_detected_cluster = False
         while not all_nodes_have_detected_cluster:
+            gevent.sleep(3)
             all_status = []
             detected_cluster = ""
             different_cluster_id = False
@@ -123,7 +124,7 @@ class ExpandCluster(flows.BaseFlow):
                 )
 
             if all([status for status in all_status if status]):
-                all_nodes_have_detected_cluster = True
+                break
 
         # Create the params list for import cluster flow
         new_params = {}
