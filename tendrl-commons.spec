@@ -1,5 +1,5 @@
 Name: tendrl-commons
-Version: 1.2.3
+Version: 1.3.0
 Release: 1%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
@@ -46,6 +46,9 @@ rm -rf %{name}.egg-info
 %license LICENSE
 
 %changelog
+* Thu May 18 2017 Rohan Kanade <rkanade@redhat.com> - 1.3.0-1
+- Release tendrl-commons v1.3.0
+
 * Tue Apr 18 2017 Rohan Kanade <rkanade@redhat.com> - 1.2.3-1
 - Release tendrl-commons v1.2.3
 
