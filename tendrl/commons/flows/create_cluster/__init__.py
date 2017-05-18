@@ -199,14 +199,3 @@ class CreateCluster(flows.BaseFlow):
                      }
             )
         )
-
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Successfully Created and Imported Cluster (%s)" % integration_id}
-            )
-        )
-
