@@ -138,7 +138,7 @@ class CreateCluster(flows.BaseFlow):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": "SDS install and config completed, check if following nodes have detected sds details %s %s" % (integration_id,
-                                                                                                                       elf.parameters['Node[]'])
+                                                                                                                       self.parameters['Node[]'])
                      }
             )
         )
