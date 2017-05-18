@@ -75,10 +75,15 @@ class ImportCluster(flows.BaseFlow):
                 )
 
                 while True:
-                    all_status = []
+                    gevent.sleep(3)
+                    all_status = {}
                     for job_id in ssh_job_ids:
-                        all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                                  job_id).value)
+                        all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                        
+                    _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                    if _failed:
+                        raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                                    integration_id)
                     if all([status for status in all_status if status == "finished"]):
                         Event(
                             Message(
