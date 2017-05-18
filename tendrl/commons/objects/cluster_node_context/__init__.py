@@ -18,5 +18,5 @@ class ClusterNodeContext(objects.BaseObject):
 
     def render(self):
         self.value = self.value.format(NS.tendrl_context.integration_id,
-                                       NS.node_context.node_id)
+                                       self.node_id)
         return super(ClusterNodeContext, self).render()
