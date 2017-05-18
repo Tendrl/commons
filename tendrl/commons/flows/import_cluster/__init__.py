@@ -74,8 +74,7 @@ class ImportCluster(flows.BaseFlow):
                     self.parameters
                 )
 
-                all_ssh_jobs_done = False
-                while not all_ssh_jobs_done:
+                while True:
                     all_status = []
                     for job_id in ssh_job_ids:
                         all_status.append(NS._int.client.read("/queue/%s/status" %
@@ -91,8 +90,6 @@ class ImportCluster(flows.BaseFlow):
                                      }
                             )
                         )
-                        all_ssh_jobs_done = True
-
                         # set this node as gluster provisioner
                         tags = ["provisioner/%s" % integration_id]
                         NS.node_context = NS.node_context.load()
@@ -103,7 +100,7 @@ class ImportCluster(flows.BaseFlow):
                         # set gdeploy_provisioned to true so that no other nodes
                         # tries to configure gdeploy
                         self.parameters['gdeploy_provisioned'] = True
-                        gevent.sleep(3)
+                        break
 
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
@@ -273,46 +270,43 @@ class ImportCluster(flows.BaseFlow):
             
         # Wait for all cluster nodes to finish their ImportCluster jobs
         if cluster_nodes:
-            all_jobs_done = False
-            while not all_jobs_done:
+            while True:
+                gevent.sleep(2)
                 all_status = []
                 for job_id in cluster_nodes:
                     all_status.append(NS._int.client.read("/queue/%s/status" %
                                                        job_id).value)
                 if all([status for status in all_status if status == "finished"]):
-                    Event(
-                        Message(
-                            job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
-                                 }
-                        )
-                    )
-
-                    all_jobs_done = True
-                
-            
-        # import cluster's run() should not return unless the new cluster entry
-        # is updated in etcd, as the job is marked as finished if this
-        # function is returned. This might lead to inconsistancy in the API
-        # functionality. The below loop waits for the cluster details
-        # to be updated in etcd.
+                    break
+                                    
+        # An import is sucessfull once all Node[] register to /clusters/:integration_id/nodes/:node_id
         while True:
+            _all_node_status = []
             gevent.sleep(2)
-            try:
-                NS._int.client.read("/clusters/%s" % integration_id)
+            for node_id in self.parameters['Node[]']:
+                _status = NS.tendrl.objects.ClusterNodeContext(node_id=node_id).exists() and NS.tendrl.objects.ClusterTendrlContext(integration_id=integration_id).exists()
+                _all_node_status.append(_status)
+            if all(_all_node_status):
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={"message": "Import Cluster completed for all nodes in cluster %s" % integration_id
+                             }
+                    )
+                )
+
                 break
-            except etcd.EtcdKeyNotFound:
-                continue
+        
         Event(
             Message(
                 job_id=self.parameters['job_id'],
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Cluster successfully imported %s" % integration_id
+                payload={"message": "Sucessfully imported cluster %s" % integration_id
                      }
             )
         )
