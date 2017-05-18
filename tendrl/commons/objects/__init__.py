@@ -71,6 +71,13 @@ class BaseObject(object):
 
     def save(self, update=True, ttl=None):
         self.render()
+        # setting ttl after directory creation for tendrl messages
+        if ttl:
+            try:
+                NS._int.wclient.refresh(self.value, ttl=ttl)
+            except etcd.EtcdKeyNotFound:
+                pass
+
         if not "Message" in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
@@ -146,13 +153,6 @@ class BaseObject(object):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
                 pass
-
-        # setting ttl after directory creation for tendrl messages
-        if ttl:
-            NS._int.wclient.refresh(self.value, ttl=ttl)
-        
-        if hasattr(self, "internal"):
-            return
 
     def load(self):
         _copy = self._copy_vars()
