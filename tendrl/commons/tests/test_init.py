@@ -5,19 +5,42 @@ import importlib
 import inspect
 import yaml
 import __builtin__
+from etcd import Client
+import etcd
+import pkgutil
+
+from mock import MagicMock
 from tendrl.commons import objects
 from tendrl.commons import TendrlNS
+from mock import patch
+import tendrl.commons.objects.node_context as node
+from tendrl.commons.fixtures import config
 
-#__init__() testing
+@patch.object(etcd,"Client")
+@patch.object(Client,"read")
+@patch.object(node.NodeContext,'_get_node_id')
+def init(patch_get_node_id,patch_read,patch_client):
+    patch_get_node_id.return_value = 1
+    patch_read.return_value = etcd.Client()
+    patch_client.return_value = etcd.Client()
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.etcd_kwargs = {
+                'port': 1,
+                'host': 2,
+                'allow_reconnect': True}
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict()
+    NS.config.data['tags'] = "test"
+    tendrlNS = TendrlNS()
+    return tendrlNS
+
 def test_constructor():
 
-    '''
-    Testing for constructor involves checking if all needed variales are declared/
-    initialized
-    '''
-
-    tendrlNS = TendrlNS()
-
+    with patch.object(TendrlNS,'setup_common_objects',return_value=None) as mocked_method:
+           tendrlNS = TendrlNS()
+    tendrlNS = init()
     # Default Parameter Testing
     assert tendrlNS.ns_name == "tendrl"
     assert tendrlNS.ns_src == "tendrl.commons"
@@ -27,7 +50,7 @@ def test_constructor():
 #Testing _list_modules_in_package_path
 def test_list_modules_in_package_path():
 
-    tendrlNS = TendrlNS("tendrl","tendrl.commons")
+    tendrlNS = init()
     modules = [('cluster_node_context', 'tendrl.commons.objects.cluster_node_context'), ('cluster_tendrl_context', 'tendrl.commons.objects.cluster_tendrl_context'),\
               ('cpu', 'tendrl.commons.objects.cpu'),('definition', 'tendrl.commons.objects.definition'), ('detected_cluster', 'tendrl.commons.objects.detected_cluster'),\
               ('disk', 'tendrl.commons.objects.disk'), ('file','tendrl.commons.objects.file'), ('job','tendrl.commons.objects.job'),\
@@ -39,13 +62,13 @@ def test_list_modules_in_package_path():
     ret = tendrlNS._list_modules_in_package_path(ns_objects_path,ns_objects_prefix)
 
     #TO-DISCUSS : modules is hard coded and might change in future
-    assert ret == modules
+    assert len(ret) == len(modules)
     ret = tendrlNS._list_modules_in_package_path("test","test")
     assert len(ret) == 0
 
 #Testing _register_subclasses_to_ns
-def test_register_subclasses_to_ns():
-    tendrlNS = TendrlNS()
+def test_register_subclasses_to_ns(monkeypatch):
+    tendrlNS = init()
     tendrlNS._register_subclasses_to_ns()
     assert len(getattr(NS.tendrl,"objects")) > 0
     assert len(getattr(NS.tendrl,"flows")) > 0
@@ -54,26 +77,45 @@ def test_register_subclasses_to_ns():
     modules = tendrlNS._list_modules_in_package_path(ns_objects_path,ns_objects_prefix)
     for mode_name,mod_cls in modules:
         assert hasattr(NS.tendrl.objects,mode_name.title().replace('_','')) == True
+    def list_package(self_obj,package_path,prefix):
+        if "flows" in prefix:
+            return  [('ImportCluster','tendrl.commons.flows.import_cluster')]
+	
+        else:
+            modules = []
+            for importer, name, ispkg in pkgutil.walk_packages(path=[package_path]):
+                modules.append((name, prefix + name))
+        return modules
+
+    monkeypatch.setattr(TendrlNS, '_list_modules_in_package_path', list_package)
+    tendrlNS._register_subclasses_to_ns()
+    assert len(getattr(NS.tendrl,"objects")) > 0
+    #tendrlNS.current_ns.objects.pop("NodeContext")
 
 #Testing _add_object
 def test_add_object():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     obj_name = "test_obj"
     obj = importlib.import_module("tendrl.commons.objects.cluster_node_context")
 
     current_ns = tendrlNS._get_ns()
+    obj_cls = ""
     for obj_cls in inspect.getmembers(obj, inspect.isclass):
         tendrlNS._add_object(obj_name,obj_cls[1])
         break
 
     assert isinstance(getattr(current_ns.objects,"_test_obj")['atoms'],maps.NamedDict)
     assert isinstance(getattr(current_ns.objects,"_test_obj")['flows'],maps.NamedDict)
+    with patch.object(TendrlNS,"_get_ns",return_value = maps.NamedDict(objects=maps.NamedDict(_Service=maps.NamedDict(atoms = maps.NamedDict())))) as mock_add_obj:
+    	tendrlNS._add_object("Service",obj_cls[1])
+    with patch.object(TendrlNS,"_get_ns",return_value = maps.NamedDict(objects=maps.NamedDict(_Service=maps.NamedDict(flows = maps.NamedDict())))) as mock_add_obj:
+    	tendrlNS._add_object("Service",obj_cls[1])
 
 #Testing _get_objects
 def test_get_objects():
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"objects")
     objects_list = [d.title().replace('_','') for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS._get_objects()
     assert isinstance(objects_list,list)
     assert ret is not None
@@ -82,7 +124,7 @@ def test_get_objects():
 
 #Testing _get_object
 def test_get_object():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS._get_object("NodeNetwork")
     assert (inspect.isclass(ret)) == True
     assert (issubclass(ret, objects.BaseObject)) == True
@@ -98,13 +140,22 @@ def test_get_object():
 
 #Testing _get_ns():
 def test_get_ns():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
+    ret = tendrlNS._get_ns()
+    assert isinstance(ret,maps.NamedDict) == True
+    tendrlNS.ns_name = "integrations"
+    tendrlNS._create_ns()
     ret = tendrlNS._get_ns()
     assert isinstance(ret,maps.NamedDict) == True
 
 #Testing get_obj_definition
 def test_get_obj_definition():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
+    ret = tendrlNS.get_obj_definition("Service")
+    assert ret != None
+    assert isinstance(ret,maps.NamedDict) == True
+    assert hasattr(ret,"attrs") == True
+    NS["compiled_definitions"] = tendrlNS.current_ns.definitions
     ret = tendrlNS.get_obj_definition("Service")
     assert ret != None
     assert isinstance(ret,maps.NamedDict) == True
@@ -112,19 +163,26 @@ def test_get_obj_definition():
 
 #Testing get_obj_flow_definition
 def test_get_obj_flow_definition():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     with pytest.raises(KeyError):
         ret = tendrlNS.get_obj_flow_definition("Service","test")
+    '''obj = importlib.import_module("tendrl.commons.fixtures.test")
+    tendrlNS.current_ns.objects["_Service"]["flows"] = maps.NamedDict()
+    for obj_cls in inspect.getmembers(obj, inspect.isclass):
+        tendrlNS._add_obj_flow("Service","Test",obj_cls[1])
+    ret = tendrlNS.get_obj_flow_definition("Service","Test")'''
 
 #Testing get_flow_definiiton()
 def test_get_flow_definition():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     with pytest.raises(KeyError):
         ret = tendrlNS.get_flow_definition("BaseFlow")
+    NS["compiled_definitions"] = tendrlNS.current_ns.definitions
+    ret = tendrlNS.get_flow_definition("ImportCluster")
 
 #Testing get_atom_definition
 def test_get_atom_definition():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS.get_atom_definition("Service","CheckServiceStatus")
     assert ret != None
     assert isinstance(ret,maps.NamedDict) == True
@@ -132,7 +190,7 @@ def test_get_atom_definition():
 
 #Testing add_atom
 def test_add_atom():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     obj_name = "Service"
     current_ns = tendrlNS._get_ns()
     obj = importlib.import_module("tendrl.commons.objects.service.atoms.check_service_status")
@@ -146,14 +204,14 @@ def test_add_atom():
 
 #Testing setup_definitions
 def test_setup_definitions():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     tendrlNS.setup_definitions()
     assert tendrlNS.current_ns != None
     assert isinstance(tendrlNS.current_ns,maps.NamedDict) == True
 
 #Testing add_flow
 def test_add_flow():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     flow_class = ""
     flow = importlib.import_module("tendrl.commons.flows.create_cluster")
     for flow_cls in inspect.getmembers(flow, inspect.isclass):
@@ -166,13 +224,13 @@ def test_add_flow():
 
 #Testing get_flow
 def test_get_flow():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS.get_flow("ImportCluster")
     assert ret is not None
 
 #Testing add_obj_flow
 def test_add_obj_flow():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     flow = importlib.import_module("tendrl.commons.flows")
     for flow_cls in inspect.getmembers(flow,inspect.isclass):
         tendrlNS._add_obj_flow("Node","AtomExecutionFailedError",flow_cls[1])
@@ -183,7 +241,7 @@ def test_add_obj_flow():
 
 #Testing get_obj_flow
 def test_get_obj_flow():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     flow = importlib.import_module("tendrl.commons.flows")
     for flow_cls in inspect.getmembers(flow,inspect.isclass):
         tendrlNS._add_obj_flow("Node","AtomExecutionFailedError",flow_cls[1])
@@ -194,7 +252,7 @@ def test_get_obj_flow():
 
 #Testing get_obj_flows
 def test_get_obj_flows():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     flow = importlib.import_module("tendrl.commons.flows")
     for flow_cls in inspect.getmembers(flow,inspect.isclass):
         tendrlNS._add_obj_flow("Node","AtomExecutionFailedError",flow_cls[1])
@@ -205,26 +263,31 @@ def test_get_obj_flows():
 
 #Testing get_atom
 def test_get_atom():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS.get_atom("Node","Cmd")
     assert ret is not None
     assert (inspect.isclass(ret)) == True
 
 #Testing get_atoms
 def test_get_atoms():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     ret = tendrlNS._get_atoms("Node")
     assert ret is not None
     assert isinstance(ret,maps.NamedDict)
 
 #Testing _create_ns()
 def test_create_ns():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     assert getattr(NS, "tendrl")
+    tendrlNS.ns_name = "integrations"
+    tendrlNS._create_ns()
+    assert getattr(NS, "integrations")
+    tendrlNS._create_ns()
 
-#Testing_validate_ns_flow_definitions 
+
+#Testing_validate_ns_flow_definitions
 def test_validate_ns_flow_definitions():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     raw_ns = "namespace.tendrl"
     defs = tendrlNS.current_ns.definitions.get_parsed_defs()[raw_ns]
     defs["flows"]["test"] = maps.NamedDict()
@@ -233,10 +296,13 @@ def test_validate_ns_flow_definitions():
     tendrlNS.current_ns.flows["Test"] = "Test Flow"
     with pytest.raises(Exception):
         tendrlNS._validate_ns_flow_definitions(raw_ns,defs)
+    tendrlNS.current_ns.flows = None
+    defs = maps.NamedDict()
+    tendrlNS._validate_ns_flow_definitions(raw_ns,defs)
 
 #Testing _validate_ns_obj_definitions
 def test_validate_ns_obj_definitions():
-    tendrlNS = TendrlNS()
+    tendrlNS = init()
     raw_ns = "namespace.tendrl"
     defs = tendrlNS.current_ns.definitions.get_parsed_defs()[raw_ns]
     defs_temp = defs
@@ -245,34 +311,62 @@ def test_validate_ns_obj_definitions():
         tendrlNS._validate_ns_obj_definitions(raw_ns,defs_temp)
     tendrlNS.current_ns.objects["_Node"]["atoms"]["Test"] =  "Test atom class"
     with pytest.raises(Exception):
-        tendrlNS._validate_ns_obj_definitions(raw_ns,defs_temp)
-    tendrlNS_temp = TendrlNS()
+        tendrlNS._validate_ns_obj_definitions(raw_ns,defs)
+    tendrlNS_temp = init()
     tendrlNS_temp.current_ns.objects["_Node"]["flows"]["Test"] = "Test flow class"
     with pytest.raises(Exception):
-        tendrlNS_temp._validate_ns_obj_definitions(raw_ns,defs_temp)
+        tendrlNS_temp._validate_ns_obj_definitions(raw_ns,defs)
     tendrlNS.current_ns.objects["Test"] = "Test Object"
     with pytest.raises(Exception):
         tendrlNS._validate_ns_obj_definitions(raw_ns,defs)
+    tendrlNS_temp = init()
+    defs = tendrlNS_temp.current_ns.definitions.get_parsed_defs()[raw_ns]
+    defs["objects"]["Node"]["atoms"]["Test"] =  "Test atom class"
+    with pytest.raises(Exception):
+        tendrlNS_temp._validate_ns_obj_definitions(raw_ns,defs)
+    defs = tendrlNS_temp.current_ns.definitions.get_parsed_defs()[raw_ns]
+    defs["objects"]["Node"]["flows"] = maps.NamedDict()
+    defs["objects"]["Node"]["flows"]["Test"] =  "Test flow class"
+    with pytest.raises(Exception):
+        tendrlNS_temp._validate_ns_obj_definitions(raw_ns,defs)
+    defs = maps.NamedDict()
+    tendrlNS.current_ns.objects = None
+    tendrlNS._validate_ns_obj_definitions(raw_ns,defs)
 
-#Testing setup_comon_objects
-def test_setup_common_objects():
-    tendrlNS_config = TendrlNS()
+
+#Testing _validate_ns_definitions
+def test_validate_ns_definitions():
+    tendrlNS = init()
+    tendrlNS._validate_ns_obj_definitions = MagicMock(return_value=None)
+    tendrlNS._validate_ns_definitions()
+    raw_ns = "namespace.tendrl"
+    defs = tendrlNS.current_ns.definitions.get_parsed_defs()[raw_ns]
+    tendrlNS._validate_ns_obj_definitions.assert_called_with(raw_ns,defs)
+    tendrlNS._validate_ns_flow_definitions = MagicMock(return_value=None)
+    tendrlNS._validate_ns_definitions()
+    tendrlNS._validate_ns_flow_definitions.assert_called_with(raw_ns,defs)
+    tendrlNS.current_ns.definitions = maps.NamedDict()
+    with pytest.raises(Exception):
+        tendrlNS._validate_ns_definitions()
+
+#Testing setup_common_objects
+def test_setup_common_objects(monkeypatch):
+    tendrlNS = init()
     obj = importlib.import_module("tendrl.commons.fixtures.config")
     for obj_cls in inspect.getmembers(obj, inspect.isclass):
-        tendrlNS_config.current_ns.objects["Config"] = obj_cls[1]
-    with pytest.raises(AttributeError):
-        tendrlNS_config.setup_common_objects()
-    tendrlNS_NodeContext = TendrlNS()
-    obj = importlib.import_module("tendrl.commons.fixtures.nodecontext")
-    for obj_cls in inspect.getmembers(obj, inspect.isclass):
-        tendrlNS_NodeContext.current_ns.objects["NodeContext"] = obj_cls[1]
-    tendrlNS_NodeContext.setup_common_objects()
-    assert tendrlNS_NodeContext.current_ns.node_context is not None
-    assert isinstance(tendrlNS_NodeContext.current_ns.node_context,obj_cls[1])
-    tendrlNS_TendrlContext = TendrlNS()
-    obj = importlib.import_module("tendrl.commons.fixtures.tendrlcontext")
-    for obj_cls in inspect.getmembers(obj, inspect.isclass):
-        tendrlNS_TendrlContext.current_ns.objects["TendrlContext"] = obj_cls[1]
-    tendrlNS_TendrlContext.setup_common_objects()
-    assert tendrlNS_TendrlContext.current_ns.tendrl_context is not None
-    assert isinstance(tendrlNS_TendrlContext.current_ns.tendrl_context,obj_cls[1])
+        tendrlNS.current_ns.objects["Config"] = obj_cls[1]
+    with patch.object(etcd,"Client",return_value = etcd.Client()) as client:
+        tendrlNS.current_ns.objects.pop("NodeContext")
+        tendrlNS.setup_common_objects()
+        assert NS._int.client is not None
+        assert NS._int.wclient is not None
+        etcd.Client.assert_called_with(allow_reconnect=True, host=1, port=1)
+        tendrlNS.current_ns.objects.pop("TendrlContext")
+        tendrlNS.setup_common_objects()
+    def client(**param):
+       raise Exception
+    monkeypatch.setattr(etcd, 'Client', client)
+    #tendrlNS.current_ns.objects.pop("NodeContext")
+    with pytest.raises(Exception):
+        tendrlNS.setup_common_objects()
+

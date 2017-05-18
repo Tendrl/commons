@@ -1,8 +1,6 @@
 import __builtin__
 import importlib
 import inspect
-<<<<<<< HEAD
-<<<<<<< HEAD
 import pkgutil
 
 import etcd
@@ -10,19 +8,6 @@ import maps
 import sys
 
 import time
-
-=======
-from pkgutil import walk_packages
-from maps import NamedDict
-=======
-import pkgutil
-
-import maps
->>>>>>> Response to feedback
-import sys
-
-from tendrl.commons import etcdobj
->>>>>>> Code optimization
 from tendrl.commons import flows
 from tendrl.commons import objects
 from tendrl.commons.event import Event
@@ -33,16 +18,8 @@ class TendrlNS(object):
     def __init__(self, ns_name="tendrl", ns_src="tendrl.commons"):
         super(TendrlNS, self).__init__()
         if not hasattr(__builtin__, "NS"):
-<<<<<<< HEAD
-<<<<<<< HEAD
             setattr(__builtin__, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
-=======
-            setattr(__builtin__, "NS", NamedDict())
->>>>>>> Code optimization
-=======
-            setattr(__builtin__, "NS", maps.NamedDict())
->>>>>>> Response to feedback
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
@@ -862,3 +839,4 @@ class TendrlNS(object):
                 path=[package_path]):
             modules.append((name, prefix + name))
         return modules
+
