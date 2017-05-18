@@ -175,3 +175,26 @@ class CreateCluster(flows.BaseFlow):
             )
         )
 
+        # Wait for the import cluster job to finish or fail.
+        while True:
+            gevent.sleep(2)
+            try:
+                _resp = NS._int.client.read("/queue/{0}/status".format(_job_id))
+                _value = _resp.value
+                if _value == "finished":
+                    break
+                if _value == "failed":
+                    raise FlowExecutionFailedError("Error importing newly created cluster (%s), check ImportCluster job (%s) for more details" % (integration_id, _job_id))
+            except etcd.EtcdKeyNotFound:
+                continue
+
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Successfully Created and Imported Cluster (%s)" % integration_id}
+            )
+        )
+
