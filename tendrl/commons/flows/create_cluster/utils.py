@@ -146,6 +146,8 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         node_list.remove(NS.node_context.node_id)
 
     for node in node_list:
+        if node == NS.node_context.node_id:
+            continue
         new_params = parameters.copy()
         new_params['Node[]'] = [node]
         new_params['ssh_key'] = ssh_key
