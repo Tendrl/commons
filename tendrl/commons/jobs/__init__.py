@@ -73,14 +73,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                             job = Job(job_id=jid).load()
                                             job.errors = str("Timed-out (>5mins as 'new')")
                                             job.save()
-                                            _parent_jid = job.payload.get(
-                                                "parent", "")
-                                            if _parent_jid:
-                                                _pjob_status_key = "/queue/%s/status" % _parent_jid
-                                                try:
-                                                    NS._int.wclient.write(_pjob_status_key, "failed", prevValue="processing")
-                                                except etcd.EtcdCompareFailed:
-                                                    pass
                                             continue
                                 else:
                                     _now_plus_5 = time_utils.now() + datetime.timedelta(minutes=5)
@@ -252,14 +244,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 job = job.load()
                                 job.errors = str(e)
                                 job.save()
-                                _parent_jid = job.payload.get("parent", "")
-                                if _parent_jid:
-                                    _pjob_status_key = "/queue/%s/status" % _parent_jid
-                                    try:
-                                        NS._int.wclient.write(_pjob_status_key, "failed", prevValue="processing")
-                                    except etcd.EtcdCompareFailed:
-                                        raise FlowExecutionFailedError("Cannnot mark parent job as 'failed',"
-                                                                       "parent job status invalid")
                                                           
             except Exception as ex:
                 Event(

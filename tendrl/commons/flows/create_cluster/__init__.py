@@ -58,13 +58,17 @@ class CreateCluster(flows.BaseFlow):
                 self.parameters
             )
 
-        all_ssh_jobs_done = False
-        while not all_ssh_jobs_done:
-            all_status = []
+        while True:
+            gevent.sleep(3)
+            all_status = {}
             for job_id in ssh_job_ids:
-                all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                   job_id).value)
-            if all([status for status in all_status if status == "finished"]):
+                all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+            
+            _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+            if _failed:
+                raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                           integration_id)
+            if all([status for status in all_status.values() if status == "finished"]):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
@@ -75,8 +79,6 @@ class CreateCluster(flows.BaseFlow):
                              }
                     )
                 )
-
-                all_ssh_jobs_done = True
                 # set this node as gluster provisioner
                 if "gluster" in self.parameters["TendrlContext.sds_name"]:
                     tags = ["provisioner/%s" % integration_id]
@@ -84,7 +86,19 @@ class CreateCluster(flows.BaseFlow):
                     tags += NS.node_context.tags
                     NS.node_context.tags = list(set(tags))
                     NS.node_context.save()
-                gevent.sleep(3)
+                break
+
+                                               
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Starting SDS install and config %s" % integration_id
+                     }
+            )
+        )
 
         # SSH setup jobs finished above, now install sds bits and create cluster
         if "ceph" in sds_name:
@@ -117,8 +131,19 @@ class CreateCluster(flows.BaseFlow):
 
 
         # Wait till detected cluster in populated for nodes
-        all_nodes_have_detected_cluster = False
-        while not all_nodes_have_detected_cluster:
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "SDS install and config completed, check if following nodes have detected sds details %s %s" % (integration_id,
+                                                                                                                       self.parameters['Node[]'])
+                     }
+            )
+        )
+
+        while True:
             all_status = []
             for node in self.parameters['Node[]']:
                 try:
@@ -127,7 +152,7 @@ class CreateCluster(flows.BaseFlow):
                 except etcd.EtcdKeyNotFound:
                     all_status.append(False)
             if all([status for status in all_status if status]):
-                all_nodes_have_detected_cluster = True
+                break
 
         # Create the params list for import cluster flow
         new_params = {}
@@ -174,27 +199,3 @@ class CreateCluster(flows.BaseFlow):
                      }
             )
         )
-
-        # Wait for the import cluster job to finish or fail.
-        while True:
-            gevent.sleep(2)
-            try:
-                _resp = NS._int.client.read("/queue/{0}/status".format(_job_id))
-                _value = _resp.value
-                if _value == "finished":
-                    break
-                if _value == "failed":
-                    raise FlowExecutionFailedError("Error importing newly created cluster (%s), check ImportCluster job (%s) for more details" % (integration_id, _job_id))
-            except etcd.EtcdKeyNotFound:
-                continue
-
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Successfully Created and Imported Cluster (%s)" % integration_id}
-            )
-        )
-

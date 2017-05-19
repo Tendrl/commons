@@ -75,11 +75,16 @@ class ImportCluster(flows.BaseFlow):
                 )
 
                 while True:
-                    all_status = []
+                    gevent.sleep(3)
+                    all_status = {}
                     for job_id in ssh_job_ids:
-                        all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                                  job_id).value)
-                    if all([status for status in all_status if status == "finished"]):
+                        all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                        
+                    _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                    if _failed:
+                        raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                                    integration_id)
+                    if all([status for status in all_status.values() if status == "finished"]):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
@@ -272,11 +277,14 @@ class ImportCluster(flows.BaseFlow):
         if cluster_nodes:
             while True:
                 gevent.sleep(2)
-                all_status = []
+                all_status = {}
                 for job_id in cluster_nodes:
-                    all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                       job_id).value)
-                if all([status for status in all_status if status == "finished"]):
+                    all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                if _failed:
+                    raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                                integration_id)
+                if all([status for status in all_status.values() if status == "finished"]):
                     break
                                     
         # An import is sucessfull once all Node[] register to /clusters/:integration_id/nodes/:node_id
