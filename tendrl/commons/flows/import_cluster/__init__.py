@@ -204,7 +204,7 @@ class ImportCluster(flows.BaseFlow):
                             payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Ceph Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                                 req_min_ver,
                                                                                                                 req_rel,
-                                                                                                                maj_ver, min_ver, rel)
+                                                                                                                maj_ver, min_ver, 0)
                                  }
                         )
                     )
@@ -253,7 +253,7 @@ class ImportCluster(flows.BaseFlow):
                         payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Gluster Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                             req_min_ver,
                                                                                                             req_rel,
-                                                                                                            maj_ver, min_ver, rel)
+                                                                                                            maj_ver, min_ver, 0)
                              }
                     )
                 )
