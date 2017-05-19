@@ -1,9 +1,7 @@
-# flake8: noqa
+import uuid
 
 import etcd
 import gevent
-import json
-import uuid
 
 from tendrl.commons import flows
 from tendrl.commons.event import Event
@@ -12,8 +10,6 @@ from tendrl.commons.flows.create_cluster import ceph_help
 from tendrl.commons.flows.create_cluster import gluster_help
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
-from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.objects.job import Job
 
 
@@ -67,7 +63,7 @@ class CreateCluster(flows.BaseFlow):
             _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
             if _failed:
                 raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
-                                                                                           integration_id)
+                                                                                           integration_id))
             if all([status for status in all_status.values() if status == "finished"]):
                 Event(
                     Message(
