@@ -48,7 +48,7 @@ class ExpandCluster(flows.BaseFlow):
             if _failed:
                 raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
                                                                                             integration_id))
-            if all([status for status in all_status if status == "finished"]):
+            if all([status for status in all_status.values() if status == "finished"]):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
