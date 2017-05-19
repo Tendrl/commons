@@ -58,6 +58,7 @@ class CreateCluster(flows.BaseFlow):
             gevent.sleep(3)
             all_status = {}
             for job_id in ssh_job_ids:
+                # noinspection PyUnresolvedReferences
                 all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
             
             _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
@@ -133,17 +134,21 @@ class CreateCluster(flows.BaseFlow):
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "SDS install and config completed, check if following nodes have detected sds details %s %s" % (integration_id,
-                                                                                                                       self.parameters['Node[]'])
+                payload={"message": "SDS install and config completed, "
+                                    "checking following nodes for"
+                                    "detected sds details %s %s" % (integration_id,
+                                                                    self.parameters['Node[]'])
                      }
             )
         )
 
         while True:
+            gevent.sleep(3)
             all_status = []
             for node in self.parameters['Node[]']:
                 try:
-                    NS._int.client.read("/nodes/%s/DetectedCluster" % node)
+                    NS._int.client.read("/nodes/%s/DetectedCluster/detected_cluster_id" %
+                                        node)
                     all_status.append(True)
                 except etcd.EtcdKeyNotFound:
                     all_status.append(False)
