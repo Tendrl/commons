@@ -9,6 +9,7 @@ def get_node_ips(parameters):
         node_ips.append(config["provisioning_ip"])
     return node_ips
 
+
 def create_gluster(parameters):
     node_ips = get_node_ips(parameters)
     plugin = NS.gluster_provisioner.get_plugin()
