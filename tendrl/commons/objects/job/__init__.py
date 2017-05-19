@@ -34,7 +34,7 @@ class Job(objects.BaseObject):
             _parent.save()
 
         if self.status == "failed":
-            if "parent" in self.payload::
+            if "parent" in self.payload:
                 _parent = Job(job_id=self.payload['parent']).load()
                 _msg = "\n Child job %s failed" % self.job_id
                 if _parent.errors:
