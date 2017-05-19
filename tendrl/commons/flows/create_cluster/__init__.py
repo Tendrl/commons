@@ -75,14 +75,15 @@ class CreateCluster(flows.BaseFlow):
                         payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
                              }
                     )
+                )
                     # set this node as gluster provisioner
-                    if "gluster" in self.parameters["TendrlContext.sds_name"]:
-                        tags = ["provisioner/%s" % integration_id]
-                        NS.node_context = NS.node_context.load()
-                        tags += NS.node_context.tags
-                        NS.node_context.tags = list(set(tags))
-                        NS.node_context.save()
-                    break
+                if "gluster" in self.parameters["TendrlContext.sds_name"]:
+                    tags = ["provisioner/%s" % integration_id]
+                    NS.node_context = NS.node_context.load()
+                    tags += NS.node_context.tags
+                    NS.node_context.tags = list(set(tags))
+                    NS.node_context.save()
+                break
 
                                                
         Event(
