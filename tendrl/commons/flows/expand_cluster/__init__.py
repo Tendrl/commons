@@ -95,7 +95,7 @@ class ExpandCluster(flows.BaseFlow):
             gluster_help.expand_gluster(self.parameters)
 
         # Wait till detected cluster in populated for nodes
-        while not all_nodes_have_detected_cluster:
+        while True:
             gevent.sleep(3)
             all_status = []
             detected_cluster = ""
