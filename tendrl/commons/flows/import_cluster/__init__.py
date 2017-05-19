@@ -81,35 +81,28 @@ class ImportCluster(flows.BaseFlow):
                     if _failed:
                         raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
                                                                                                     integration_id))
-                    _finished = []
-                    for _status in all_status.values():
-                        if _status == "finished":
-                            _finished.append(True)
-                        else:
-                            _finished.append(False)
-                    if _finished:
-                        if all(_finished):
-                            Event(
-                                Message(
-                                    job_id=self.parameters['job_id'],
-                                    flow_id = self.parameters['flow_id'],
-                                    priority="info",
-                                    publisher=NS.publisher_id,
-                                    payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
-                                         }
-                                )
+                    if all([status == "finished" for status in all_status.values()]):
+                        Event(
+                            Message(
+                                job_id=self.parameters['job_id'],
+                                flow_id = self.parameters['flow_id'],
+                                priority="info",
+                                publisher=NS.publisher_id,
+                                payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
+                                     }
                             )
-                            # set this node as gluster provisioner
-                            tags = ["provisioner/%s" % integration_id]
-                            NS.node_context = NS.node_context.load()
-                            tags += NS.node_context.tags
-                            NS.node_context.tags = list(set(tags))
-                            NS.node_context.save()
+                        )
+                        # set this node as gluster provisioner
+                        tags = ["provisioner/%s" % integration_id]
+                        NS.node_context = NS.node_context.load()
+                        tags += NS.node_context.tags
+                        NS.node_context.tags = list(set(tags))
+                        NS.node_context.save()
 
-                            # set gdeploy_provisioned to true so that no other nodes
-                            # tries to configure gdeploy
-                            self.parameters['gdeploy_provisioned'] = True
-                            break
+                        # set gdeploy_provisioned to true so that no other nodes
+                        # tries to configure gdeploy
+                        self.parameters['gdeploy_provisioned'] = True
+                        break
 
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id

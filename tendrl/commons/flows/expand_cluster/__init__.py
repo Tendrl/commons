@@ -48,28 +48,21 @@ class ExpandCluster(flows.BaseFlow):
             if _failed:
                 raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
                                                                                             integration_id))
-            _finished = []
-            for _status in all_status:
-                if _status == "finished":
-                    _finished.append(True)
-                else:
-                    _finished.append(False)
-            if _finished:
-                if all(_finished):
-                    Event(
-                        Message(
-                            job_id=self.parameters['job_id'],
-                            flow_id=self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={
-                                "message": "SSH setup completed for all "
-                                "nodes in cluster %s" % integration_id
-                            }
-                        )
+            if all([status == "finished" for status in all_status.values()]):
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "SSH setup completed for all "
+                            "nodes in cluster %s" % integration_id
+                        }
                     )
+                )
 
-                    break
+                break
 
         # SSH setup jobs finished above, now install sds
         # bits and create cluster
