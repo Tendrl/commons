@@ -36,7 +36,7 @@ class AnsibleRunner(object):
         if not os.path.isfile(self.module_path):
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Module path: %s does not exist" %
                                         self.module_path
