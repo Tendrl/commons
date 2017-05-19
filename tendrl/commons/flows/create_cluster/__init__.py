@@ -65,25 +65,33 @@ class CreateCluster(flows.BaseFlow):
             if _failed:
                 raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
                                                                                            integration_id))
-            if all([status for status in all_status.values() if status == "finished"]):
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
-                             }
+
+            _finished = []
+            for _status in all_status.values():
+                if _status == "finished":
+                    _finished.append(True)
+                else:
+                    _finished.append(False)
+            if _finished:
+                if all(_finished):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id = self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
+                                 }
+                        )
                     )
-                )
-                # set this node as gluster provisioner
-                if "gluster" in self.parameters["TendrlContext.sds_name"]:
-                    tags = ["provisioner/%s" % integration_id]
-                    NS.node_context = NS.node_context.load()
-                    tags += NS.node_context.tags
-                    NS.node_context.tags = list(set(tags))
-                    NS.node_context.save()
-                break
+                    # set this node as gluster provisioner
+                    if "gluster" in self.parameters["TendrlContext.sds_name"]:
+                        tags = ["provisioner/%s" % integration_id]
+                        NS.node_context = NS.node_context.load()
+                        tags += NS.node_context.tags
+                        NS.node_context.tags = list(set(tags))
+                        NS.node_context.save()
+                    break
 
                                                
         Event(
@@ -152,8 +160,9 @@ class CreateCluster(flows.BaseFlow):
                     all_status.append(True)
                 except etcd.EtcdKeyNotFound:
                     all_status.append(False)
-            if all([status for status in all_status if status]):
-                break
+            if all_status:
+                if all(all_status):
+                    break
 
         # Create the params list for import cluster flow
         new_params = {}
