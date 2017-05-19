@@ -40,6 +40,6 @@ class Disk(objects.BaseObject):
 
     def render(self):
         self.value = self.value.format(NS.node_context.node_id,
-                                       self.disk_id
+                                       self.disk_id.replace('-', '_')
                                        )
         return super(Disk, self).render()
