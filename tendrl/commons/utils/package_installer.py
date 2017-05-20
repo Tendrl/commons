@@ -6,7 +6,7 @@ from tendrl.commons.message import Message
 
 class Installer(object):
     def __init__(self, package_name, package_type, package_version=None):
-        self.attributes = {}
+        self.attributes = dict()
         self.attributes["name"] = package_name
 
         if package_type == "pip":

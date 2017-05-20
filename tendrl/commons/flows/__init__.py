@@ -271,11 +271,12 @@ class BaseFlow(object):
                 return False
 
         except (KeyError, AttributeError) as ex:
+            _msg = "Error executing atom {0}".format(atom_fqdn)
             Event(
                 ExceptionMessage(
                     priority="error",
                     publisher=NS.publisher_id,
-                    payload={"message": "Error", "exception": ex}
+                    payload={"message": _msg, "exception": ex}
                 )
             )
 
