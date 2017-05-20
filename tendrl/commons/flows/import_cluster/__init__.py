@@ -43,20 +43,20 @@ class ImportCluster(flows.BaseFlow):
                     )
 
                     if _integration_id.value != "":
+                        _msg = "Error: Node %s is already part of other " \
+                               "cluster %s" % (entry, _integration_id.value)
                         Event(
                             Message(
                                 job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
                                 priority="error",
                                 publisher=NS.publisher_id,
-                                payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
+                                payload={"message": _msg
                                      }
                             )
                         )
 
-                        raise FlowExecutionFailedError(
-                            "Nodes already participate in existing cluster"
-                        )
+                        raise FlowExecutionFailedError(_msg)
             except etcd.EtcdKeyNotFound:
                 raise FlowExecutionFailedError(
                     "Error while checking pre-participation of nodes in any cluster"
