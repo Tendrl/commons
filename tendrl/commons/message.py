@@ -90,7 +90,9 @@ class Message(object):
         as job_updates, job updates should have flow id,
         Check priorities and publishers are correct
         """
-
+        # Check publisher is valid
+        if self.publisher is None:
+            return False
         # Check payload type is dict
         if type(self.payload) != dict:
             return False

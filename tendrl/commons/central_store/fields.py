@@ -199,7 +199,7 @@ class ListField(Field):
         return {
             'name': self.name,
             'key': self.name,
-            'value': json.dumps(self._value),
+            'value': self._value,
             'dir': False,
         }
 

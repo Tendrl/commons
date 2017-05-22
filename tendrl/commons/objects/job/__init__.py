@@ -20,19 +20,30 @@ class Job(objects.BaseObject):
 
     def save(self):
         super(Job, self).save()
-        payload = json.loads(self.payload)
-        if "parent" in payload:
+        if "parent" in self.payload:
             # Load parent job
-            _parent = Job(job_id=payload['parent']).load()
+            _parent = Job(job_id=self.payload['parent']).load()
             _children = []
             
             if _parent.children:
                 # Load existing child job ids
-                _children = json.loads(_parent.children)
+                _children = _parent.children
                 
             _children += [self.job_id]
             _parent.children = list(set(_children))
             _parent.save()
+
+        if self.status == "failed":
+            if "parent" in self.payload:
+                _parent = Job(job_id=self.payload['parent']).load()
+                _msg = "\n Child job %s failed" % self.job_id
+                if _parent.errors:
+                    _parent.errors += _msg
+                else:
+                    _parent.errors = _msg
+                _parent.status = "failed"
+                _parent.save()
+                
 
     def render(self):
         self.value = self.value.format(self.job_id)

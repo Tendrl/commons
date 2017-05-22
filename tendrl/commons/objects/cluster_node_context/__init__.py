@@ -12,11 +12,11 @@ class ClusterNodeContext(objects.BaseObject):
         self.machine_id = machine_id or _node_context.machine_id
         self.node_id = node_id or _node_context.node_id
         self.fqdn = fqdn or _node_context.fqdn
-        self.tags = tags or json.loads(_node_context.tags)
+        self.tags = tags or _node_context.tags
         self.status = status or _node_context.status
         self.value = 'clusters/{0}/nodes/{1}/NodeContext'
 
     def render(self):
         self.value = self.value.format(NS.tendrl_context.integration_id,
-                                       NS.node_context.node_id)
+                                       self.node_id)
         return super(ClusterNodeContext, self).render()

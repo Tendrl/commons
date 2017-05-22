@@ -6,13 +6,14 @@ import pkgutil
 import etcd
 import maps
 import sys
-
 import time
 from tendrl.commons import flows
 from tendrl.commons import objects
+from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.objects import BaseAtom
+from tendrl.commons.utils import log_utils as logger
 
 class TendrlNS(object):
     def __init__(self, ns_name="tendrl", ns_src="tendrl.commons"):
@@ -20,42 +21,24 @@ class TendrlNS(object):
         if not hasattr(__builtin__, "NS"):
             setattr(__builtin__, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
+            NS._int.wreconnect = cs_utils.wreconnect
+            NS._int.reconnect = cs_utils.reconnect
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
             spaces are being created.
         '''
-        try:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Creating namespace.%s from source %s"
-                                        % (ns_name, ns_src)
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write("Creating namespace.%s from source %s\n" % (
-                ns_name, ns_src))
-
+        logger.log("info", NS.get("publisher_id", None),
+                   {'message': "Creating namespace.%s from source %s"
+                    % (ns_name, ns_src)})
         self.ns_name = ns_name
         self.ns_src = ns_src
 
         self._create_ns()
 
         self.current_ns = self._get_ns()
-        try:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "namespace.%s created!" % self.ns_name
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write("namespace.%s created!\n" % self.ns_name)
+        logger.log("info", NS.get("publisher_id", None),
+                   {'message': "namespace.%s created!" % self.ns_name})
         self._register_subclasses_to_ns()
 
         self.setup_definitions()

@@ -36,7 +36,7 @@ class AnsibleRunner(object):
         if not os.path.isfile(self.module_path):
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Module path: %s does not exist" %
                                         self.module_path
@@ -74,7 +74,8 @@ class AnsibleRunner(object):
                 Message(
                     priority="error",
                     publisher=NS.publisher_id,
-                    payload={"message": "Could not generate executable data "
+                    payload={"message": "Could not generate ansible "
+                                        "executable data "
                                         "for module  : %s. Error: %s" %
                                         (self.module_path, str(e))
                              }

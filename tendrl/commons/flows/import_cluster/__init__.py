@@ -1,13 +1,9 @@
-# flake8: noqa
-
-import etcd
-import json
 import uuid
 
 import etcd
 import gevent
-from tendrl.commons.objects.job import Job
 
+from tendrl.commons.objects.job import Job
 from tendrl.commons import flows
 from tendrl.commons.event import Event
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
@@ -24,8 +20,10 @@ class ImportCluster(flows.BaseFlow):
         if integration_id is None:
             raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
-        
-        if not self.parameters.get('import_after_expand', False):           
+
+        if not self.parameters.get('import_after_expand', False) and \
+            not self.parameters.get('import_after_create', False):
+            # Above condition means, this is a fresh import
             # Check if nodes participate in some existing cluster
             try:
                 for entry in self.parameters["Node[]"]:
@@ -45,20 +43,20 @@ class ImportCluster(flows.BaseFlow):
                     )
 
                     if _integration_id.value != "":
+                        _msg = "Error: Node %s is already part of other " \
+                               "cluster %s" % (entry, _integration_id.value)
                         Event(
                             Message(
                                 job_id=self.job_id,
                                 flow_id = self.parameters['flow_id'],
                                 priority="error",
                                 publisher=NS.publisher_id,
-                                payload={"message": "Error: Node %s is part of other cluster %s" % (entry, _integration_id.value)
+                                payload={"message": _msg
                                      }
                             )
                         )
 
-                        raise FlowExecutionFailedError(
-                            "Nodes already participate in existing cluster"
-                        )
+                        raise FlowExecutionFailedError(_msg)
             except etcd.EtcdKeyNotFound:
                 raise FlowExecutionFailedError(
                     "Error while checking pre-participation of nodes in any cluster"
@@ -73,13 +71,17 @@ class ImportCluster(flows.BaseFlow):
                     self.parameters
                 )
 
-                all_ssh_jobs_done = False
-                while not all_ssh_jobs_done:
-                    all_status = []
+                while True:
+                    gevent.sleep(3)
+                    all_status = {}
                     for job_id in ssh_job_ids:
-                        all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                                  job_id).value)
-                    if all([status for status in all_status if status == "finished"]):
+                        all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                        
+                    _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                    if _failed:
+                        raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
+                                                                                                    integration_id))
+                    if all([status == "finished" for status in all_status.values()]):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
@@ -90,20 +92,17 @@ class ImportCluster(flows.BaseFlow):
                                      }
                             )
                         )
-                        all_ssh_jobs_done = True
-
                         # set this node as gluster provisioner
                         tags = ["provisioner/%s" % integration_id]
                         NS.node_context = NS.node_context.load()
-                        current_tags = json.loads(NS.node_context.tags)
-                        tags += current_tags
+                        tags += NS.node_context.tags
                         NS.node_context.tags = list(set(tags))
                         NS.node_context.save()
 
                         # set gdeploy_provisioned to true so that no other nodes
                         # tries to configure gdeploy
                         self.parameters['gdeploy_provisioned'] = True
-                        gevent.sleep(3)
+                        break
 
         NS.tendrl_context = NS.tendrl_context.load()
         NS.tendrl_context.integration_id = integration_id
@@ -148,7 +147,7 @@ class ImportCluster(flows.BaseFlow):
                     cluster_nodes.append(_job_id)
                     Job(job_id=_job_id,
                         status="new",
-                        payload=json.dumps(payload)).save()
+                        payload=payload).save()
                     Event(
                         Message(
                             job_id=self.job_id,
@@ -164,7 +163,7 @@ class ImportCluster(flows.BaseFlow):
         if "ceph" in sds_name.lower():
             node_context = NS.node_context.load()
             is_mon = False
-            for tag in json.loads(node_context.tags):
+            for tag in node_context.tags:
                 mon_tag = NS.compiled_definitions.get_parsed_defs()[
                     'namespace.tendrl'
                 ]['tags']['ceph-mon']
@@ -205,7 +204,7 @@ class ImportCluster(flows.BaseFlow):
                             payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Ceph Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                                 req_min_ver,
                                                                                                                 req_rel,
-                                                                                                                maj_ver, min_ver, rel)
+                                                                                                                maj_ver, min_ver, 0)
                                  }
                         )
                     )
@@ -254,7 +253,7 @@ class ImportCluster(flows.BaseFlow):
                         payload={"message": "Error: Minimum required version (%s.%s.%s) doesnt match that of detected Gluster Storage (%s.%s.%s)" % (req_maj_ver,
                                                                                                             req_min_ver,
                                                                                                             req_rel,
-                                                                                                            maj_ver, min_ver, rel)
+                                                                                                            maj_ver, min_ver, 0)
                              }
                     )
                 )
@@ -269,17 +268,27 @@ class ImportCluster(flows.BaseFlow):
                 )
             import_gluster(self.parameters)
 
-            
-            
-        # Wait for all cluster nodes to finish their ImportCluster jobs
-        if cluster_nodes:
-            all_jobs_done = False
-            while not all_jobs_done:
-                all_status = []
-                for job_id in cluster_nodes:
-                    all_status.append(NS._int.client.read("/queue/%s/status" %
-                                                       job_id).value)
-                if all([status for status in all_status if status == "finished"]):
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id = self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={"message": "Waiting for participant nodes %s to be "
+                                    "imported %s" % (node_list, integration_id)
+                     }
+            )
+        )
+
+        # An import is sucessfull once all Node[] register to /clusters/:integration_id/nodes/:node_id
+        while True:
+            _all_node_status = []
+            gevent.sleep(3)
+            for node_id in self.parameters['Node[]']:
+                _status = NS.tendrl.objects.ClusterNodeContext(node_id=node_id).exists() and NS.tendrl.objects.ClusterTendrlContext(integration_id=integration_id).exists()
+                _all_node_status.append(_status)
+            if _all_node_status:
+                if all(_all_node_status):
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
@@ -291,28 +300,16 @@ class ImportCluster(flows.BaseFlow):
                         )
                     )
 
-                    all_jobs_done = True
-                
-            
-        # import cluster's run() should not return unless the new cluster entry
-        # is updated in etcd, as the job is marked as finished if this
-        # function is returned. This might lead to inconsistancy in the API
-        # functionality. The below loop waits for the cluster details
-        # to be updated in etcd.
-        while True:
-            gevent.sleep(2)
-            try:
-                NS._int.client.read("/clusters/%s" % integration_id)
-                break
-            except etcd.EtcdKeyNotFound:
-                continue
+                    break
+
+
         Event(
             Message(
                 job_id=self.parameters['job_id'],
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Cluster successfully imported %s" % integration_id
+                payload={"message": "Sucessfully imported cluster %s" % integration_id
                      }
             )
         )

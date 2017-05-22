@@ -29,16 +29,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
-        _startup = True
         while not self._complete.is_set():
-            gevent.sleep(5)
-            if not _startup:
-                try:
-                    NS._int.wclient.watch("/queue")
-                    _startup = False
-                except etcd.EtcdWatchTimedOut:
-                    pass
-
+            gevent.sleep(10)
             try:
                 try:
                     jobs = NS._int.client.read("/queue")
@@ -50,7 +42,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         jid = job.key.split('/')[-1]
                         job_status_key = "/queue/%s/status" % jid
                         NS.node_context = NS.node_context.load()
-                        NS.node_context.tags = json.loads(NS.node_context.tags)
 
                         # tendrl-node-agent tagged as tendrl/monitor will ensure >5 mins old "new" jobs are timed out
                         # and marked as "failed" (the parent job of these jobs will also be marked as "failed")
@@ -75,29 +66,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                             job = Job(job_id=jid).load()
                                             job.errors = str("Timed-out (>5mins as 'new')")
                                             job.save()
-                                            raw_job = {}
-                                            try:
-                                                raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
-                                            except ValueError as ex:
-                                                _msg = "Job (id %s) payload invalid:%s" % (jid, ex.message)
-                                                Event(
-                                                    ExceptionMessage(
-                                                        priority="error",
-                                                        publisher=NS.publisher_id,
-                                                        payload={"message": _msg ,
-                                                                 "exception": ex
-                                                                 }
-                                                    )
-                                                )
-                                                pass
-
-                                            _parent_jid = raw_job.get("payload", {}).get("parent", "")
-                                            if _parent_jid:
-                                                _pjob_status_key = "/queue/%s/status" % _parent_jid
-                                                try:
-                                                    NS._int.wclient.write(_pjob_status_key, "failed", prevValue="processing")
-                                                except etcd.EtcdCompareFailed:
-                                                    pass
                                             continue
                                 else:
                                     _now_plus_5 = time_utils.now() + datetime.timedelta(minutes=5)
@@ -128,49 +96,33 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             pass
 
                         job = Job(job_id=jid).load()
-                        raw_job = {}
-                        try:
-                            raw_job["payload"] = json.loads(job.payload.decode('utf-8'))
-                        except ValueError as ex:
-                            _msg = "Job (id %s) payload invalid:%s" % (jid, ex.message)
-                            Event(
-                                ExceptionMessage(
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={"message": _msg ,
-                                             "exception": ex
-                                             }
-                                )
-                            )
-                            continue
 
                     except etcd.EtcdKeyNotFound:
                         continue
 
-                    if raw_job['payload']["type"] == NS.type and \
+                    if job.payload["type"] == NS.type and \
                             job.status == "new":
 
                         # Job routing
                         
                         # Flows created by tendrl-api use 'tags' from flow definition to target jobs
                         _tag_match = False
-                        if raw_job.get("payload", {}).get("tags", []):
-                            for flow_tag in raw_job['payload']['tags']:
+                        if job.payload.get("tags", []):
+                            for flow_tag in job.payload['tags']:
                                 if flow_tag in NS.node_context.tags:
                                     _tag_match = True
 
                         # Flows created by tendrl backend use 'node_ids' to target jobs
                         _node_id_match = False
-                        if raw_job.get("payload", {}).get("node_ids", []):
+                        if job.payload.get("node_ids", []):
                             if NS.node_context.node_id in \
-                                    raw_job['payload']['node_ids']:
+                                    job.payload['node_ids']:
                                 _node_id_match = True
                         
                         if not _tag_match and not _node_id_match:
-                            _job_node_ids = ", ".join(raw_job.get("payload", 
-                                                                  {}).get("node_ids",
+                            _job_node_ids = ", ".join(job.payload.get("node_ids",
                                                                           []))
-                            _job_tags = ", ".join(raw_job.get("payload", {}).get("tags", []))
+                            _job_tags = ", ".join(job.payload.get("tags", []))
                             _msg = "Node (%s)(tags: %s) will not process job-%s (node_ids: %s)(tags: %s)" % (NS.node_context.node_id,
                                                                                                              json.dumps(NS.node_context.tags),
                                                                                                              jid,
@@ -199,7 +151,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             continue
 
                         current_ns, flow_name, obj_name = \
-                            self._extract_fqdn(raw_job['payload']['run'])
+                            self._extract_fqdn(job.payload['run'])
 
                         if obj_name:
                             runnable_flow = current_ns.ns.get_obj_flow(
@@ -211,7 +163,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                             job.output = {"_None": "_None"}
                             job.save()
                             
-                            the_flow = runnable_flow(parameters=raw_job['payload']['parameters'],
+                            the_flow = runnable_flow(parameters=job.payload['parameters'],
                                                      job_id=job.job_id)
                             Event(
                                 Message(
@@ -232,7 +184,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "Running Flow %s" %
-                                            raw_job['payload']['run']
+                                                        job.payload['run']
                                          }
                                 )
                             )
@@ -250,7 +202,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={"message": "JOB[%s]:  Finished Flow %s" %
-                                            (job.job_id, raw_job['payload']['run'])
+                                            (job.job_id, job.payload['run'])
                                          }
                                 )
                             )
@@ -285,25 +237,19 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 job = job.load()
                                 job.errors = str(e)
                                 job.save()
-                                _parent_jid = raw_job.get("payload", {}).get("parent", "")
-                                if _parent_jid:
-                                    _pjob_status_key = "/queue/%s/status" % _parent_jid
-                                    try:
-                                        NS._int.wclient.write(_pjob_status_key, "failed", prevValue="processing")
-                                    except etcd.EtcdCompareFailed:
-                                        raise FlowExecutionFailedError("Cannnot mark parent job as 'failed',"
-                                                                       "parent job status invalid")
                                                           
             except Exception as ex:
                 Event(
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "Job /queue failure, error:" + ex.message,
+                        payload={"message": "Job processing failure, error:" +
+                                            ex.message,
                                  "exception": ex
                                  }
                     )
                 )
+                pass
 
     def stop(self):
         self._complete.set()

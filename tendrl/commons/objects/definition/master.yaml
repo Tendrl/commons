@@ -50,6 +50,11 @@ namespace.tendrl:
         mandatory:
           - "Node[]"
           - TendrlContext.integration_id
+          - TendrlContext.cluster_id
+          - TendrlContext.cluster_name
+          - TendrlContext.sds_name
+          - Cluster.cluster_network
+          - Cluster.node_identifier
           - Cluster.node_configuration
       run: tendrl.flows.ExpandCluster
       type: Create
@@ -90,6 +95,9 @@ namespace.tendrl:
         conf_overrides:
           help: Configuration overrides for the cluster
           type: Dict
+        node_identifier:
+          help: How nodes should be identified while create cluster
+          type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -167,155 +175,181 @@ namespace.tendrl:
         disk_id:
           help: "disk unique id"
           type: String
-        device_name:
+        hardware_id:
+          help: "hwinfo id"
+          type: String
+        disk_name:
           help: "disk name"
-          type: String
-        disk_kernel_name:
-          help: "disk internal kernel name"
-          type: String
-        parent_id:
-          help: "disk parent id"
-          type: String
-        parent_name:
-          help: "disk parent name"
-          type: String
-        disk_type:
-          help: "disk type"
-          type: String
-        fsuuid:
-          help: "file system uuid"
-          type: String
-        mount_point:
-          help: "disk mount point"
-          type: String
-        model:
-          help: "disk model name"
-          type: String
-        vendor:
-          help: "disk vendor name"
-          type: String
-        used:
-          help: "disk used or not True/False"
-          type: String
-        serial_no:
-          help: "disk serial number"
-          type: String
-        rmversion:
-          help: "disk firmeware version"
-          type: String
-        fstype:
-          help: "file system type"
-          type: String
-        ssd:
-          help: "ssd is true / not"
-          type: String
-        size:
-          help: "size of the disk"
-          type: Integer
-        device_number:
-          help: "device number"
-          type: String
-        driver:
-          help: "driver"
-          type: String
-        group:
-          help: "disk group"
-          type: String
-        device:
-          help: "device"
-          type: String
-        bios_id:
-          help: "Bios id"
-          type: String
-        state:
-          help: "disk state"
-          type: String
-        drive_status:
-          help: "disk status"
-          type: String
-        label:
-          help: "label"
-          type: String
-        req_queue_size:
-          help: "request queue size"
-          type: String
-        driver_modules:
-          help: "driver modules"
-          type: String
-        mode:
-          help: "driver mode"
-          type: String
-        owner:
-          help: "driver owner"
-          type: String
-        min_io_size:
-          help: "min I/O size"
-          type: String
-        major_to_minor_no:
-          help: "major to minor number"
-          type: String
-        device_files:
-          help: "device files"
-          type: String
-        sysfs_busid:
-          help: "sysfs bus id"
-          type: String
-        alignment:
-          help: "alignment"
-          type: String
-        read_only:
-          help: "disk is read only or not"
-          type: String
-        read_ahead:
-          help: "read ahead"
-          type: String
-        removable_device:
-          help: "removable device or not"
-          type: String
-        scheduler_name:
-          help: "scheduler_name"
           type: String
         sysfs_id:
           help: "sysfs id"
           type: String
+        sysfs_busid:
+          help: "sysfs bus id"
+          type: String
         sysfs_device_link:
           help: "sysfs device link"
+          type: String
+        hardware_class:
+          help: "type"
+          type: String
+        model:
+          help: "interface model"
+          type: String
+        vendor:
+          help: "disk vendor name"
+          type: String
+        device:
+          help: "device"
+          type: String
+        rmversion:
+          help: "disk firmeware version"
+          type: String
+        serial_no:
+          help: "disk serial number"
+          type: String
+        driver:
+          help: "driver"
+          type: String
+        driver_modules:
+          help: "driver modules"
+          type: String
+        device_files:
+          help: "device files"
+          type: String
+        device_number:
+          help: "device number"
+          type: String
+        bios_id:
+          help: "Bios id"
           type: String
         geo_bios_edd:
           help: "geometry bios edd"
           type: String
+        geo_logical:
+          help: "geometry logical"
+          type: String
+        size:
+          help: "size of the disk"
+          type: String
+        size_bios_edd:
+          help: "size of bios edd"
+          type: String
         geo_bios_legacy:
           help: "geometry bios legacy"
           type: String
-        geo_logical:
-          help: "geometry logical"
+        config_status:
+          help: "configuration status"
+          type: String
+        partitions:
+          help: "partitions details"
+          type: json
+      enabled: true
+      list: nodes/$NodeContext.node_id/Disks
+      value: nodes/$NodeContext.node_id/Disks
+      help: "Disk"
+    BlockDevice:
+      attrs:
+        device_name:
+          help: "block device name"
+          type: String
+        device_kernel_name:
+          help: "block device kernel name"
+          type: String
+        parent_name:
+          help: "block device parent name"
+          type: String
+        disk_id:
+          help: "disk id of block device"
+          type: String
+        major_to_minor_no:
+          help: "major:minor device number"
+          type: String
+        fstype:
+          help: "filesystem type"
+          type: String
+        mount_point:
+          help: "where the device is mounted"
+          type: String
+        label:
+          help: "filesystem LABEL"
+          type: String
+        fsuuid:
+          help: "filesystem UUID"
+          type: String
+        read_ahead:
+          help: "read-ahead of the device"
+          type: String
+        read_only:
+          help: "read-only device"
+          type: String
+        removable_device:
+          help: "removable device"
+          type: String
+        size:
+          help: "size of the device"
+          type: String
+        state:
+          help: "state of the device"
+          type: String
+        owner:
+          help: "user name"
+          type: String
+        group:
+          help: "group name"
+          type: String
+        mode:
+          help: "device node permissions"
+          type: String
+        alignment:
+          help: "alignment offset"
+          type: String
+        min_io_size:
+          help: "minimum I/O size"
+          type: String
+        optimal_io_size:
+          help: "optimal I/O size"
           type: String
         phy_sector_size:
           help: "physical sector size"
           type: String
-        discard_granularity:
-          help: "discard granularity"
+        log_sector_size:
+          help: "logical sector size"
+          type: String
+        device_type:
+          help: "device type"
+          type: String
+        scheduler_name:
+          help: "I/O scheduler name"
+          type: String
+        req_queue_size:
+          help: "request queue size"
           type: String
         discard_align_offset:
-          help: "discard align offset"
+          help: "discard alignment offset"
+          type: String
+        discard_granularity:
+          help: "discard granularity"
           type: String
         discard_max_bytes:
           help: "discard max bytes"
           type: String
         discard_zeros_data:
-          help: "discard zeros data"
+          help: "discard zeroes data"
           type: String
-        optimal_io_size:
-          help: "optimal I/O size"
+        used:
+          help: "device is free or used"
+          type: Boolean
+        rotational:
+          help: "device rotational flag"
           type: String
-        log_sector_size:
-          help: "logical sector size"
-          type: String
-
+        ssd:
+          help: "device is ssd or not"
+          type: Boolean
       enabled: true
-      list: nodes/$NodeContext.node_id/Disks
-      value: nodes/$NodeContext.node_id/Disks
-      help: "Disk"
+      list: nodes/$NodeContext.node_id/BlockDevice
+      value: nodes/$NodeContext.node_id/BlockDevice
+      help: "BlockDevice"
     Node:
       atoms:
         Cmd:
@@ -516,8 +550,8 @@ namespace.tendrl:
           help: "job current status"
           type: String
         payload:
-          help: "dict"
-          type: Dict
+          help: "json"
+          type: Json
         errors:
           help: "any errors occured or not"
           type: String

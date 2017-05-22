@@ -31,7 +31,7 @@ def ceph_create_ssh_setup_jobs(parameters):
                 _job_id = str(uuid.uuid4())
                 Job(job_id=_job_id,
                     status="new",
-                    payload=json.dumps(payload)).save()
+                    payload=payload).save()
                 ssh_job_ids.append(_job_id)
                 Event(
                     Message(
@@ -104,30 +104,31 @@ def install_python_gdeploy():
             "Failed to install python-gdeploy"
         )
 
+
 def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
     node_list = copy.deepcopy(parameters['Node[]'])
 
     ssh_job_ids = []
     ssh_key, err = NS.gluster_provisioner.get_plugin().setup()
     if err != "":
+        _msg = "Error generating ssh key on node %s" % NS.node_context.node_id
         Event(
             Message(
                 job_id=parameters['job_id'],
                 flow_id=parameters['flow_id'],
                 priority="error",
                 publisher=NS.publisher_id,
-                payload={"message": "Error generating ssh key"
+                payload={"message": _msg
                          }
             )
         )
-        raise FlowExecutionFailedError(
-            "Failed to get ssh-key on node %s" %
-            NS.node_context.node_id
-        )
+        raise FlowExecutionFailedError(_msg)
 
     if not skip_current_node:
         ret_val, err = authorize_key.AuthorizeKey(ssh_key).run()
         if ret_val is not True or err != "":
+            _msg = "Error adding authorized key for node %s" % \
+                   NS.node_context.node_id
             Event(
                 Message(
                     job_id=parameters['job_id'],
@@ -135,17 +136,16 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
                     priority="error",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "Error adding authorized key"
+                        "message": _msg
                     }
                 )
             )
-            raise FlowExecutionFailedError(
-                "Failed to write authorized-key on node %s" %
-                NS.node_context.node_id
-            )
+            raise FlowExecutionFailedError(_msg)
         node_list.remove(NS.node_context.node_id)
 
     for node in node_list:
+        if node == NS.node_context.node_id:
+            continue
         new_params = parameters.copy()
         new_params['Node[]'] = [node]
         new_params['ssh_key'] = ssh_key
@@ -162,7 +162,7 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         Job(
             job_id=_job_id,
             status="new",
-            payload=json.dumps(payload)
+            payload=payload
         ).save()
         ssh_job_ids.append(_job_id)
         Event(
