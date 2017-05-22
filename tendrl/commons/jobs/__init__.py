@@ -29,15 +29,8 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
-        _startup = True
         while not self._complete.is_set():
-            gevent.sleep(5)
-            if not _startup:
-                try:
-                    NS._int.wclient.watch("/queue")
-                except etcd.EtcdWatchTimedOut:
-                    pass
-            _startup = False
+            gevent.sleep(10)
             try:
                 try:
                     jobs = NS._int.client.read("/queue")
