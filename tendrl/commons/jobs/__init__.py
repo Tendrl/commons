@@ -29,7 +29,6 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
-        _startup = True
         while not self._complete.is_set():
             gevent.sleep(10)
             try:
