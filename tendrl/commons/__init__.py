@@ -7,6 +7,7 @@ import etcd
 import maps
 import sys
 import time
+
 from tendrl.commons import flows
 from tendrl.commons import objects
 from tendrl.commons.central_store import utils as cs_utils
@@ -822,4 +823,3 @@ class TendrlNS(object):
                 path=[package_path]):
             modules.append((name, prefix + name))
         return modules
-
