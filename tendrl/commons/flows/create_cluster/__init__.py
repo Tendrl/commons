@@ -135,8 +135,8 @@ class CreateCluster(flows.BaseFlow):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": "SDS install and config completed, "
-                                    "checking following nodes for"
-                                    "detected sds details %s %s" % (integration_id,
+                                    "Waiting for tendrl-node-agent to "
+                                    "detect newly installed sds details %s %s" % (integration_id,
                                                                     self.parameters['Node[]'])
                      }
             )
@@ -195,9 +195,8 @@ class CreateCluster(flows.BaseFlow):
                 flow_id = self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Importing (job_id: %s) newly created %s Storage Cluster %s" % (_job_id,
-                                                                                                   sds_pkg_name,
-                                                                                       integration_id)
+                payload={"message": "Please wait while Tendrl imports newly created %s SDS Cluster %s" 
+                         " Import job id :%s" % (sds_pkg_name, integration_id, _job_id)
                      }
             )
         )
