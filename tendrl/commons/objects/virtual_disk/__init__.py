@@ -2,7 +2,7 @@
 from tendrl.commons import objects
 
 
-class Disk(objects.BaseObject):
+class VirtualDisk(objects.BaseObject):
     def __init__(self, disk_id=None, hardware_id=None, disk_name=None,
                  sysfs_id=None, sysfs_busid=None, sysfs_device_link=None,
                  hardware_class=None, model=None, vendor=None, device=None,
@@ -11,7 +11,7 @@ class Disk(objects.BaseObject):
                  geo_bios_edd=None, geo_logical=None, size=None, size_bios_edd=None,
                  geo_bios_legacy=None, config_status=None, partitions=None,
                  *args, **kwargs):
-        super(Disk, self).__init__(*args, **kwargs)
+        super(VirtualDisk, self).__init__(*args, **kwargs)
         self.disk_id = disk_id
         self.hardware_id = hardware_id
         self.disk_name = disk_name
@@ -36,10 +36,15 @@ class Disk(objects.BaseObject):
         self.geo_bios_legacy = geo_bios_legacy
         self.config_status = config_status
         self.partitions = partitions
-        self.value = 'nodes/{0}/LocalStorage/Disks/{1}'
+        self.value = 'nodes/{0}/LocalStorage/Virtio/{1}'
 
     def render(self):
-        self.value = self.value.format(NS.node_context.node_id,
-                                       self.disk_id
-                                       )
-        return super(Disk, self).render()
+        if self.disk_id == self.disk_name:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id.replace('/', '_').replace("_", "", 1))
+        else:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id.replace('-', '_'))
+        return super(VirtualDisk, self).render()

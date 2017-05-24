@@ -245,9 +245,87 @@ namespace.tendrl:
           help: "partitions details"
           type: json
       enabled: true
-      list: nodes/$NodeContext.node_id/Disks
-      value: nodes/$NodeContext.node_id/Disks
+      list: nodes/$NodeContext.node_id/LocalStorage/Disks
+      value: nodes/$NodeContext.node_id/LocalStorage/Disks
       help: "Disk"
+    VirtualDisk:
+      attrs:
+        disk_id:
+          help: "disk unique id"
+          type: String
+        hardware_id:
+          help: "hwinfo id"
+          type: String
+        disk_name:
+          help: "disk name"
+          type: String
+        sysfs_id:
+          help: "sysfs id"
+          type: String
+        sysfs_busid:
+          help: "sysfs bus id"
+          type: String
+        sysfs_device_link:
+          help: "sysfs device link"
+          type: String
+        hardware_class:
+          help: "type"
+          type: String
+        model:
+          help: "interface model"
+          type: String
+        vendor:
+          help: "disk vendor name"
+          type: String
+        device:
+          help: "device"
+          type: String
+        rmversion:
+          help: "disk firmeware version"
+          type: String
+        serial_no:
+          help: "disk serial number"
+          type: String
+        driver:
+          help: "driver"
+          type: String
+        driver_modules:
+          help: "driver modules"
+          type: String
+        device_files:
+          help: "device files"
+          type: String
+        device_number:
+          help: "device number"
+          type: String
+        bios_id:
+          help: "Bios id"
+          type: String
+        geo_bios_edd:
+          help: "geometry bios edd"
+          type: String
+        geo_logical:
+          help: "geometry logical"
+          type: String
+        size:
+          help: "size of the disk"
+          type: String
+        size_bios_edd:
+          help: "size of bios edd"
+          type: String
+        geo_bios_legacy:
+          help: "geometry bios legacy"
+          type: String
+        config_status:
+          help: "configuration status"
+          type: String
+        partitions:
+          help: "partitions details"
+          type: json
+      enabled: true
+      list: nodes/$NodeContext.node_id/LocalStorage/Virtio
+      value: nodes/$NodeContext.node_id/LocalStorage/Virtio
+      help: "VirtualDisk"
     BlockDevice:
       attrs:
         device_name:
@@ -347,8 +425,8 @@ namespace.tendrl:
           help: "device is ssd or not"
           type: Boolean
       enabled: true
-      list: nodes/$NodeContext.node_id/BlockDevice
-      value: nodes/$NodeContext.node_id/BlockDevice
+      list: nodes/$NodeContext.node_id/LocalStorage/BlockDevice
+      value: nodes/$NodeContext.node_id/LocalStorage/BlockDevice
       help: "BlockDevice"
     Node:
       atoms:
