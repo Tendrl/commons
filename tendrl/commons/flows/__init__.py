@@ -167,35 +167,9 @@ class BaseFlow(object):
             )
         )
 
-        for atom_fqn in self._defs.get("atoms"):
-            msg = "Start atom : %s" % atom_fqn
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": msg}
-                )
-            )
-
-            ret_val = self._execute_atom(atom_fqn)
-
-            if not ret_val:
-                msg = "Failed atom: %s on flow: %s" % \
-                      (atom_fqn, self._defs['help'])
-                Event(
-                    Message(
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={"message": msg}
-                    )
-                )
-                raise AtomExecutionFailedError(
-                    "Error executing atom: %s on flow: %s" %
-                    (atom_fqn, self._defs['help'])
-                )
-            else:
-                msg = 'Finished atom %s for flow: %s' %\
-                      (atom_fqn, self._defs['help'])
+        if self._defs.get("atoms") is not None:
+            for atom_fqn in self._defs.get("atoms"):
+                msg = "Start atom : %s" % atom_fqn
                 Event(
                     Message(
                         priority="info",
@@ -203,6 +177,33 @@ class BaseFlow(object):
                         payload={"message": msg}
                     )
                 )
+
+                ret_val = self._execute_atom(atom_fqn)
+
+                if not ret_val:
+                    msg = "Failed atom: %s on flow: %s" % \
+                          (atom_fqn, self._defs['help'])
+                    Event(
+                        Message(
+                            priority="error",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
+                    raise AtomExecutionFailedError(
+                        "Error executing atom: %s on flow: %s" %
+                        (atom_fqn, self._defs['help'])
+                    )
+                else:
+                    msg = 'Finished atom %s for flow: %s' %\
+                          (atom_fqn, self._defs['help'])
+                    Event(
+                        Message(
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
+                    )
 
         # Execute the post runs for the flow
         msg = "Processing post-runs for flow: %s" % self._defs['help']
