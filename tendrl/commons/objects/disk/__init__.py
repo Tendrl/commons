@@ -39,7 +39,12 @@ class Disk(objects.BaseObject):
         self.value = 'nodes/{0}/LocalStorage/Disks/{1}'
 
     def render(self):
-        self.value = self.value.format(NS.node_context.node_id,
-                                       self.disk_id
-                                       )
+        if self.disk_id == self.disk_name:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id.replace('/', '_').replace("_", "", 1))
+        else:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id)
         return super(Disk, self).render()
