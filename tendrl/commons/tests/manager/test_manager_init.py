@@ -18,7 +18,6 @@ def test_constructor(monkeypatch):
         return "Thread Consuming Job"
     monkeypatch.setattr(jobs, 'JobConsumerThread', job_consume)
     manager = Manager("test")
-    assert manager._central_store_thread is None
     assert manager._sds_sync_thread is "test"
     assert manager._message_handler_thread is None
     assert manager._job_consumer_thread == "Thread Consuming Job"
@@ -42,12 +41,10 @@ def test_stop():
 
     # Testing to stop all threads
     sds_job = jobs.JobConsumerThread()
-    central_job = jobs.JobConsumerThread()
     message_job = jobs.JobConsumerThread()
-    manager = Manager(sds_job, central_job, message_job)
+    manager = Manager(sds_job, message_job)
     manager.stop()
     assert manager._sds_sync_thread._complete.is_set() and \
-        manager._central_store_thread._complete.is_set() and \
         manager._job_consumer_thread._complete.is_set() and \
         manager._message_handler_thread._complete.is_set()
     manager = Manager(None)
@@ -73,11 +70,10 @@ def test_start():
 
     # Testing to start all threads
     sds_job = jobs.JobConsumerThread()
-    central_job = jobs.JobConsumerThread()
     message_job = jobs.JobConsumerThread()
-    manager = Manager(sds_job, central_job, message_job)
+    manager = Manager(sds_job, message_job)
     manager.start()
-    assert manager._central_store_thread._complete.is_set() is False
+    assert manager._message_handler_thread._complete.is_set() is False
     # Testig with None Value
     manager = Manager(None)
     manager.start()
@@ -108,9 +104,8 @@ def test_join(mock_join):
     assert manager._sds_sync_thread._complete.is_set() is False
     # Testing to start all threads
     sds_job = jobs.JobConsumerThread()
-    central_job = jobs.JobConsumerThread()
     message_job = jobs.JobConsumerThread()
-    manager = Manager(sds_job, central_job, message_job)
+    manager = Manager(sds_job, message_job)
     manager.start()
     manager.join()
 
