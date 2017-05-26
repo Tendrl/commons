@@ -93,6 +93,18 @@ class ExpandCluster(flows.BaseFlow):
                 )
             )
             gluster_help.expand_gluster(self.parameters)
+        Event(
+            Message(
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "SDS install/config completed on newly expanded nodes, "
+                    "Please wait while tendrl-node-agents detect sds details on the newly expaned nodes %s" % self.parameters['Node[]']
+                }
+            )
+        )
 
         # Wait till detected cluster in populated for nodes
         while True:
@@ -167,8 +179,8 @@ class ExpandCluster(flows.BaseFlow):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Importing (job_id: %s) newly expanded "
-                    "%s Storage nodes %s" % (
+                    "message": "Please wait while Tendrl imports (job_id: %s) newly expanded "
+                    "%s storage nodes %s" % (
                         _job_id,
                         sds_pkg_name,
                         integration_id
