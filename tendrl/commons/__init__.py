@@ -10,7 +10,7 @@ import time
 
 from tendrl.commons import flows
 from tendrl.commons import objects
-from tendrl.commons.central_store import utils as cs_utils
+from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.objects import BaseAtom

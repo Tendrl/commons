@@ -8,7 +8,7 @@ import six
 import sys
 import types
 
-from tendrl.commons.central_store import utils as cs_utils
+from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
 from tendrl.commons.utils import time_utils

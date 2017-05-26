@@ -3,7 +3,7 @@ import time
 
 import etcd
 
-from tendrl.commons.central_store import fields
+from tendrl.commons.utils.central_store import fields
 
 PY_TO_TENDRL_TYPE_MAP = {dict: fields.DictField,
                          str: fields.StrField,
