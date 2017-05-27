@@ -70,8 +70,6 @@ def test_run():
                 ansible_obj.run()
 
 def test_module():
-    def json_fn():
-        raise ImportError
-    sys.modules['json'] = MagicMock(return_value=False)
+    sys.modules['json'] =  "jsons"
     module = importlib.import_module("tendrl.commons.utils.ansible_module_runner")
 
