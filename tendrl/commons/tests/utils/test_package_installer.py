@@ -2,7 +2,6 @@ import pytest
 from tendrl.commons.utils.package_installer import Installer
 from tendrl.commons.utils import ansible_module_runner
 import mock
-import pytest
 import __builtin__
 import maps
 from mock import patch
