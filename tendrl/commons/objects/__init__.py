@@ -75,6 +75,10 @@ class BaseObject(object):
         if ttl:
             try:
                 NS._int.wclient.refresh(self.value, ttl=ttl)
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException):
+                NS._int.wreconnect()
+                NS._int.wclient.refresh(self.value, ttl=ttl)
+                pass
             except etcd.EtcdKeyNotFound:
                 pass
 
@@ -83,7 +87,13 @@ class BaseObject(object):
                 # Generate current in memory object hash
                 self.hash = self._hash()
                 _hash_key = "/{0}/hash".format(self.value)
-                _stored_hash = NS._int.client.read(_hash_key).value
+                _stored_hash = None
+                try:
+                    _stored_hash = NS._int.client.read(_hash_key).value
+                except (etcd.EtcdConnectionFailed, etcd.EtcdException):
+                    NS._int.reconnect()
+                    _stored_hash = NS._int.client.read(_hash_key).value
+                    pass
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
                     return
@@ -149,7 +159,7 @@ class BaseObject(object):
                             )
             try:
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
-            except etcd.EtcdConnectionFailed:
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
                 pass
@@ -172,7 +182,7 @@ class BaseObject(object):
             try:
                 try:
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                except etcd.EtcdConnectionFailed:
+                except (etcd.EtcdConnectionFailed, etcd.EtcdException)::
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
                     pass
@@ -229,6 +239,11 @@ class BaseObject(object):
         try:
             NS._int.client.read("/{0}".format(self.value))
             _exists = True
+        except (etcd.EtcdConnectionFailed, etcd.EtcdException):
+            NS._int.reconnect()
+            NS._int.client.read("/{0}".format(self.value))
+            _exists = True
+            pass
         except etcd.EtcdKeyNotFound:
             pass
         return _exists
