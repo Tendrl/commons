@@ -7,12 +7,9 @@ import etcd
 import maps
 import sys
 import time
-
 from tendrl.commons import flows
 from tendrl.commons import objects
-from tendrl.commons.utils.central_store import utils as cs_utils
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.central_store import utils as cs_utils
 from tendrl.commons.objects import BaseAtom
 from tendrl.commons.utils import log_utils as logger
 
@@ -47,41 +44,21 @@ class TendrlNS(object):
         self.setup_common_objects()
 
     def setup_definitions(self):
-        try:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Setup Tendrl definitions (.yml) for namespace.%s" %
-                             self.ns_name
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write("Setup Tendrl definitions (.yml) for namespace.%s" %
-                             self.ns_name)
+        logger.log("debug", NS.get("publisher_id", None),
+                   {"message": "Setup Tendrl definitions (.yml)"
+                               "for namespace.%s" % self.ns_name})
         self.current_ns.definitions = self.current_ns.objects.Definition()
-    
+
     def _validate_ns_definitions(self):
         raw_ns = "namespace.%s" % self.ns_name
         try:
             defs = self.current_ns.definitions.get_parsed_defs()[raw_ns]
         except KeyError:
             msg = "%s definitions (.yml) not found" % raw_ns
-            try:
-                Event(
-                    Message(
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": msg
-                            }
-                    )
-                )
-            except KeyError:
-                sys.stderr.write(msg)
+            logger.log("error", NS.get("publisher_id", None),
+                       {"message": msg})
             raise Exception(msg)
-        
+
         '''
         Flow/Object/Atom classes with class variable "internal=True" will not
         be validated and have to define their own self._defs (i.e. definitions
@@ -89,26 +66,15 @@ class TendrlNS(object):
         '''
         self._validate_ns_flow_definitions(raw_ns, defs)
         self._validate_ns_obj_definitions(raw_ns, defs)
-    
+
     def _validate_ns_flow_definitions(self, raw_ns, defs):
         # TODO(rohan) Validate flow attributes too
         # Validate discovered/registered (.py) flows (non-internal) against
         # their definitions (.yml) (non-internal flows only)
         if self.current_ns.flows:
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Validating registered (.py) flows in"
-                                       " %s.flows" % raw_ns
-                            }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Validating registered (.py) flows in %s."
-                                 "flows" % raw_ns)
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Validating registered (.py) flows in"
+                                   " %s.flows" % raw_ns})
 
             defined_flows = defs.get("flows", {})
             regd_flows = [flow_name for flow_name in self.current_ns.flows
@@ -119,17 +85,8 @@ class TendrlNS(object):
                 msg = "Registered (.py) flows [%s] not found in definitions " \
                       "(.yml) for %s.flows" % (", ".join(undefined_flows),
                                                raw_ns)
-                try:
-                    Event(
-                        Message(
-                            priority="error",
-                            publisher=NS.publisher_id,
-                            payload={"message": msg
-                            }
-                        )
-                    )
-                except KeyError:
-                    sys.stderr.write(msg)
+                logger.log("debug", NS.get("publisher_id", None),
+                           {"message": msg})
                 raise Exception(msg)
         '''
         # Validate defined (.yml) flows against their discovered/registered
@@ -137,19 +94,9 @@ class TendrlNS(object):
         '''
 
         if defs.get("flows", {}):
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Validating defined (.yml) flows"
-                                            " in %s.flows" % raw_ns
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Validating defined (.yml) flows in "
-                                 "%s.flows" % raw_ns)
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Validating defined (.yml) flows"
+                                   " in %s.flows" % raw_ns})
             regd_flows = [flow_name for flow_name in self.current_ns.flows
                           if not hasattr(self.get_flow(flow_name), "internal")
                           and "BaseFlow" not in flow_name
@@ -159,18 +106,8 @@ class TendrlNS(object):
                 msg = "Defined (.yml) flows [%s] not found in registered " \
                       "(.py) flows for %s.flows" % (", ".join(unregd_flows),
                                                     raw_ns)
-                try:
-                    Event(
-                        Message(
-                            priority="error",
-                            publisher=NS.publisher_id,
-                            payload={
-                                "message": msg
-                                }
-                        )
-                    )
-                except KeyError:
-                    sys.stderr.write(msg)
+                logger.log("error", NS.get("publisher_id", None),
+                           {"message": msg})
                 raise Exception(msg)
 
     def _validate_ns_obj_definitions(self, raw_ns, defs):
@@ -181,19 +118,9 @@ class TendrlNS(object):
         defined_objs = defs.get("objects", {})
         defined_objs = {obj: val for obj, val in defined_objs.iteritems() if "internal" not in val}
         if self.current_ns.objects:
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Validating registered (.py) "
-                                            "objects in %s.objects" % raw_ns
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Validating registered (.py) objects in "
-                                 "%s.objects" % raw_ns)
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Validating registered (.py) "
+                       "objects in %s.objects" % raw_ns})
             regd_objs = [obj_name for obj_name in self._get_objects()
                          if not hasattr(self._get_object(obj_name), "internal")
                          and "BaseObject" not in obj_name]
@@ -203,17 +130,8 @@ class TendrlNS(object):
                 msg = "Registered (.py) objects [%s] not found in " \
                       "definitions (.yml) for %s.objects" % \
                       (", ".join(undefined_objs), raw_ns)
-                try:
-                    Event(
-                        Message(
-                            priority="error",
-                            publisher=NS.publisher_id,
-                            payload={"message": msg
-                                     }
-                        )
-                    )
-                except KeyError:
-                    sys.stderr.write(msg)
+                logger.log("error", NS.get("publisher_id", None),
+                           {"message": msg})
                 raise Exception(msg)
             for obj_name in regd_objs:
                 if self._get_atoms(obj_name):
@@ -230,18 +148,8 @@ class TendrlNS(object):
                         msg = "Registered (.py) atoms  [%s] not found in " \
                               "definitions (.yml) for %s.objects.%s.atoms" % \
                               (", ".join(undefined_atoms), raw_ns, obj_name)
-                        try:
-                            Event(
-                                Message(
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={
-                                        "message": msg
-                                        }
-                                )
-                            )
-                        except KeyError:
-                            sys.stderr.write(msg)
+                        logger.log("error", NS.get("publisher_id", None),
+                                   {"message": msg})
                         raise Exception(msg)
                 if self._get_obj_flows(obj_name):
                     defined_obj_flows = defined_objs.get(obj_name, {}).get(
@@ -259,39 +167,19 @@ class TendrlNS(object):
                               "definitions (.yml) for %s.objects.%s.flows" % \
                               (", ".join(undefined_obj_flows), raw_ns,
                                obj_name)
-                        try:
-                            Event(
-                                Message(
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={
-                                        "message": msg
-                                        }
-                                )
-                            )
-                        except KeyError:
-                            sys.stderr.write(msg)
+                        logger.log("error", NS.get("publisher_id", None),
+                                   {"message": msg})
                         raise Exception(msg)
-                        
+
         if defined_objs:
             '''
             Validate defined (.yml) objs and its atoms, flows against
             their discovered/registered (.py) counterparts (non-internal
             objs only)
             '''
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Validating defined (.yml) objects"
-                                            " in %s.objects" % raw_ns
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Validating defined (.yml) objects in %s."
-                                 "objects" % raw_ns)
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Validating defined (.yml) objects"
+                       " in %s.objects" % raw_ns})
             regd_objs = [obj_name for obj_name in self._get_objects()
                          if not hasattr(self._get_object(obj_name),
                                         "internal") and "BaseObject" not in
@@ -301,18 +189,8 @@ class TendrlNS(object):
                 msg = "Defined (.yaml) objects [%s] not found in registered " \
                       "(.py) objects for %s.objects" % (", ".join(unregd_objs),
                                                         raw_ns)
-                try:
-                    Event(
-                        Message(
-                            priority="error",
-                            publisher=NS.publisher_id,
-                            payload={
-                                "message": msg
-                            }
-                        )
-                    )
-                except KeyError:
-                    sys.stderr.write(msg)
+                logger.log("error", NS.get("publisher_id", None),
+                           {"message": msg})
                 raise Exception(msg)
             for obj_name in defined_objs:
                 if defined_objs.get(obj_name, {}).get("atoms", {}):
@@ -330,18 +208,8 @@ class TendrlNS(object):
                               "registered (.py) object for %s.objects.%s." \
                               "atoms" % (", ".join(unregd_atoms),
                                          raw_ns, obj_name)
-                        try:
-                            Event(
-                                Message(
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={
-                                        "message": msg
-                                    }
-                                )
-                            )
-                        except KeyError:
-                            sys.stderr.write(msg)
+                        logger.log("error", NS.get("publisher_id", None),
+                                   {"message": msg})
                         raise Exception(msg)
                 if defined_objs.get(obj_name, {}).get("flows", {}):
                     defined_obj_flows = defined_objs.get(obj_name, {}).get(
@@ -361,59 +229,26 @@ class TendrlNS(object):
                                          raw_ns,
                                          obj_name
                                          )
-                        try:
-                            Event(
-                                Message(
-                                    priority="error",
-                                    publisher=NS.publisher_id,
-                                    payload={
-                                        "message": msg
-                                    }
-                                )
-                            )
-                        except KeyError:
-                            sys.stderr.write(msg)
+                        logger.log("error", NS.get("publisher_id", None),
+                                   {"message": msg})
                         raise Exception(msg)
 
     def setup_common_objects(self):
         # Config, if the namespace has implemented its own Config object
         if "Config" in self.current_ns.objects:
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Setup Config for namespace.%s" %
-                                 self.ns_name
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Setup Config for namespace.%s" %
-                                 self.ns_name)
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Setup Config for namespace.%s" %
+                       self.ns_name})
             self.current_ns.config = self.current_ns.objects.Config()
             NS.config = self.current_ns.config
-
             NS._int.etcd_kwargs = {
                 'port': self.current_ns.config.data['etcd_port'],
                 'host': self.current_ns.config.data['etcd_connection'],
                 'allow_reconnect': True}
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Setup central store clients for "
-                                            "namespace.%s" %
-                                            self.ns_name
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Setup central store clients for "
-                                 "namespace.%s" %
-                                 self.ns_name)
 
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Setup central store clients for "
+                       "namespace.%s" % self.ns_name})
             # Use this for central store writes, TTL refresh
             NS._int.wclient = None
             while not NS._int.wclient:
@@ -438,40 +273,18 @@ class TendrlNS(object):
 
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Setup NodeContext for namespace."
-                                            "%s" % self.ns_name
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Setup NodeContext for namespace. %s" %
-                                 self.ns_name)
-
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Setup NodeContext for namespace."
+                                   "%s" % self.ns_name})
             self.current_ns.node_context = \
                 self.current_ns.objects.NodeContext()
             NS.node_context = self.current_ns.node_context
 
         # TendrlContext, if the namespace has implemented its own
         if "TendrlContext" in self.current_ns.objects:
-            try:
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Setup TendrlContext for namespace"
-                                            ".%s" % self.ns_name
-                                 }
-                    )
-                )
-            except KeyError:
-                sys.stdout.write("Setup TendrlContext for namespace.%s" %
-                                 self.ns_name)
-
+            logger.log("debug", NS.get("publisher_id", None),
+                       {"message": "Setup TendrlContext for namespace."
+                                   "%s" % self.ns_name})
             self.current_ns.tendrl_context = \
                 self.current_ns.objects.TendrlContext()
             NS.tendrl_context = self.current_ns.tendrl_context
@@ -516,15 +329,15 @@ class TendrlNS(object):
 
     def _get_object(self, name):
         return self.current_ns.objects[name]
-    
+
     def _get_objects(self):
         return [obj_name for obj_name in self.current_ns.objects
                 if not obj_name.startswith('_')]
-    
+
     def _get_atoms(self, obj_name):
         private_name = "_" + obj_name
         return self.current_ns.objects[private_name]['atoms']
-    
+
     def get_atom(self, obj_name, atom_name):
         private_name = "_" + obj_name
         return self.current_ns.objects[private_name]['atoms'][atom_name]
@@ -619,20 +432,9 @@ class TendrlNS(object):
     def _register_subclasses_to_ns(self):
         # registers all subclasses of BaseObject, BaseFlow, BaseAtom to
         # NS
-        try:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Finding objects in namespace.%s."
-                                        "objects" % self.ns_name
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write("Finding objects in namespace.%s.objects\n" %
-                             self.ns_name)
-
+        logger.log("debug", NS.get("publisher_id", None),
+                   {"message": "Finding objects in namespace.%s."
+                               "objects" % self.ns_name})
         ns_root = importlib.import_module(self.ns_src).__path__[0]
 
         # register objects and atoms, flows inside the objects
@@ -645,43 +447,18 @@ class TendrlNS(object):
             for obj_cls in inspect.getmembers(obj, inspect.isclass):
                 if issubclass(obj_cls[1], objects.BaseObject):
                     obj_name = obj_cls[0]
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Registering object namespace"
-                                               ".%s.objects.%s" % (
-                                        self.ns_name, obj_name)
-                                    }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Registering object namespace.%s."
-                                         "objects.%s\n" % (self.ns_name,
-                                                         obj_name)
-                                         )
+                    logger.log("debug", NS.get("publisher_id", None),
+                               {"message": "Registering object namespace"
+                                           ".%s.objects.%s" % (
+                                           self.ns_name, obj_name)})
                     self._add_object(obj_name, obj_cls[1])
 
                     ns_object_atoms_path = obj.__path__[0] + "/atoms"
                     ns_object_atoms_prefix = obj_fqdn + ".atoms."
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Finding atoms in namespace.%s."
-                                               "objects.%s.atoms" %
-                                               (self.ns_name, obj_name)
-                                }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Finding atoms in namespace.%s."
-                                         "objects.%s.atoms\n" %
-                                         (self.ns_name, obj_name))
+                    logger.log("debug", NS.get("publisher_id", None),
+                               {"message": "Finding atoms in namespace.%s."
+                                           "objects.%s.atoms" %
+                                           (self.ns_name, obj_name)})
                     for atom_name, atom_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_atoms_path,
@@ -691,31 +468,11 @@ class TendrlNS(object):
                         for atom_cls in inspect.getmembers(atom,
                                                            inspect.isclass):
                             if issubclass(atom_cls[1], BaseAtom):
-                                try:
-                                    Event(
-                                        Message(
-                                            priority="info",
-                                            publisher=NS.publisher_id,
-                                            payload={"message": "Registering "
-                                                                "atom "
-                                                                "namespace.%s."
-                                                                "objects.%s."
-                                                                "atoms.%s" %
-                                                                (self.ns_name,
-                                                                 obj_name,
-                                                                 atom_cls[1].
-                                                                 __name__)
-                                                     }
-                                        )
-                                    )
-                                except KeyError:
-                                    sys.stdout.write("Registering atom "
-                                                     "namespace.%s.objects.%s."
-                                                     "atoms.%s" %
-                                                     (self.ns_name,
-                                                      obj_name,
-                                                      atom_cls[1].__name__)
-                                                     )
+                                logger.log("debug", NS.get("publisher_id", None),
+                                           {"message": "Registering atom "
+                                                       "namespace.%s.objects.%s."
+                                                       "atoms.%s" % (self.ns_name,
+                                                       obj_name,atom_cls[1].__name__)})
 
                                 self._add_atom(obj_name,
                                                atom_cls[1].__name__,
@@ -723,23 +480,11 @@ class TendrlNS(object):
 
                     ns_object_flows_path = obj.__path__[0] + "/flows"
                     ns_object_flows_prefix = obj_fqdn + ".flows."
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={"message": "Finding flows in "
-                                                    "namespace.%s.objects.%s."
-                                                    "flows" % (self.ns_name,
-                                                               obj_name)
-                                         }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Finding flows in namespace.%s."
-                                         "objects.%s.flows\n" % (self.ns_name,
-                                                               obj_name))
-
+                    logger.log("debug", NS.get("publisher_id", None),
+                               {"message": "Finding flows in "
+                                           "namespace.%s.objects.%s."
+                                           "flows" % (self.ns_name,
+                                                      obj_name)})
                     for flow_name, flow_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_flows_path,
@@ -749,30 +494,11 @@ class TendrlNS(object):
                         for flow_cls in inspect.getmembers(flow,
                                                            inspect.isclass):
                             if issubclass(flow_cls[1], flows.BaseFlow):
-                                try:
-                                    Event(
-                                        Message(
-                                            priority="info",
-                                            publisher=NS.publisher_id,
-                                            payload={
-                                                "message": "Registering flow "
-                                                           "namespace.%s."
-                                                           "objects.%s.flow.%s"
-                                                           % (self.ns_name,
-                                                              obj_name,
-                                                              flow_cls[1].
-                                                              __name__)
-                                            }
-                                        )
-                                    )
-                                except KeyError:
-                                    sys.stdout.write("Registering flow "
-                                                     "namespace.%s.objects.%s."
-                                                     "flow.%s" %
-                                                     (self.ns_name,obj_name,
-                                                      flow_cls[1].__name__)
-                                                     )
-
+                                logger.log("debug", NS.get("publisher_id", None),
+                                           {"message": "Registering flow namespace.%s."
+                                           "objects.%s.flow.%s"
+                                           % (self.ns_name,obj_name,
+                                              flow_cls[1].__name__)})
                                 self._add_obj_flow(obj_name,
                                                    flow_cls[1].__name__,
                                                    flow_cls[1])
@@ -781,40 +507,16 @@ class TendrlNS(object):
         ns_flows_prefix = self.ns_src + ".flows."
         flowz = self._list_modules_in_package_path(ns_flows_path,
                                                    ns_flows_prefix)
-        try:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Finding flows in namespace.%s.flows" %
-                             self.ns_name
-                             }
-                )
-            )
-        except KeyError:
-            sys.stdout.write("Finding flows in namespace.%s.flows" %
-                             self.ns_name
-                             )
+        logger.log("debug", NS.get("publisher_id", None),
+                   {"message": "Finding flows in namespace.%s.flows"
+                   % self.ns_name})
         for name, flow_fqdn in flowz:
             the_flow = importlib.import_module(flow_fqdn)
             for flow_cls in inspect.getmembers(the_flow, inspect.isclass):
                 if issubclass(flow_cls[1], flows.BaseFlow):
-                    try:
-                        Event(
-                            Message(
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Registering flow namespace.%s."
-                                               "flows.%s" % (self.ns_name,
-                                                             flow_cls[0])
-                                }
-                            )
-                        )
-                    except KeyError:
-                        sys.stdout.write("Registering flow namespace.%s.flows."
-                                         "%s" % (self.ns_name,flow_cls[0])
-                                         )
+                    logger.log("debug", NS.get("publisher_id", None),
+                               {"message": "Registering flow namespace.%s."
+                               "flows.%s" % (self.ns_name,flow_cls[0])})
                     self._add_flow(flow_cls[0], flow_cls[1])
 
     def _list_modules_in_package_path(self, package_path, prefix):
