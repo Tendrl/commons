@@ -36,3 +36,9 @@ def test_find_status():
         sshd_status.find_status()
     with patch.object(cmd_utils.Command,"run",run) as mock_run:
         sshd_status.find_status()
+
+
+def test_find_pid():
+    cmd = cmd_utils.Command("systemctl show sshd.service")
+    out, err, rc = cmd.run()
+    sshd_status._find_pid(out)
