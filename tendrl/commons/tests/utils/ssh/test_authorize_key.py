@@ -37,6 +37,9 @@ def test_run():
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
             ret = authorize_key.run()
+    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+        ret = authorize_key.run()
+        assert ret[0] is False
     with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
         mock_run.return_value = ansible_run(True)
         ret = authorize_key.run()

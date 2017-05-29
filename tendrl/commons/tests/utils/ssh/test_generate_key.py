@@ -7,9 +7,9 @@ from mock import patch
 
 def ansible_run(*args):
     if args[0]:
-        return "Output",""
-    else:
-        return None,"Error"
+        return {"ssh_private_key":"test_ssh_private_key"},""
+    elif not args[0]:
+        return {"ssh_public_key":"test_ssh_public_key"},"Error"
 
 def run(*args):
     raise ansible_module_runner.AnsibleExecutableGenerationFailed("Error")
@@ -33,9 +33,14 @@ def test_constructor():
             mock.Mock(return_value=None))
 def test_run():
     generate_key = GenerateKey()
+    generate_key.attributes["_raw_params"] = "Error message"
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
             ret =generate_key.run()
     with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
         mock_run.return_value = ansible_run(True)
         ret = generate_key.run()
+    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+        mock_run.return_value = ansible_run(False)
+        ret = generate_key.run()
+    
