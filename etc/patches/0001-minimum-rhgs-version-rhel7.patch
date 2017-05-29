@@ -1,0 +1,27 @@
+From 6b509b919b480f3207d8bd789413db66ce68711d Mon Sep 17 00:00:00 2001
+From: Shubhendu <shtripat@redhat.com>
+Date: Tue, 23 May 2017 20:45:35 +0530
+Subject: [PATCH] Set the minimum required gluster version for downstream
+
+Bug-URL: https://bugzilla.redhat.com/1453102
+Signed-off-by: Shubhendu <shtripat@redhat.com>
+---
+ tendrl/commons/objects/definition/master.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tendrl/commons/objects/definition/master.yaml b/tendrl/commons/objects/definition/master.yaml
+index 9fffc18..bec33d4 100644
+--- a/tendrl/commons/objects/definition/master.yaml
++++ b/tendrl/commons/objects/definition/master.yaml
+@@ -3,7 +3,7 @@ namespace.tendrl:
+   supported_sds:
+    - ceph
+    - gluster
+-  min_reqd_gluster_ver: 3.9.0
++  min_reqd_gluster_ver: 3.8.4
+   min_reqd_ceph_ver: 10.2.5
+   ceph_provisioner: CephInstallerPlugin
+   gluster_provisioner: GdeployPlugin
+-- 
+2.5.5
+
