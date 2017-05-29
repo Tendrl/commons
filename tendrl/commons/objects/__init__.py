@@ -182,7 +182,7 @@ class BaseObject(object):
             try:
                 try:
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                except (etcd.EtcdConnectionFailed, etcd.EtcdException)::
+                except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
                     pass
