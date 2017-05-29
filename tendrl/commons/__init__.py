@@ -44,7 +44,7 @@ class TendrlNS(object):
         self.setup_common_objects()
 
     def setup_definitions(self):
-        logger.log("info", NS.get("publisher_id", None),
+        logger.log("debug", NS.get("publisher_id", None),
                    {"message": "Setup Tendrl definitions (.yml)"
                                "for namespace.%s" % self.ns_name})
         self.current_ns.definitions = self.current_ns.objects.Definition()
@@ -72,7 +72,7 @@ class TendrlNS(object):
         # Validate discovered/registered (.py) flows (non-internal) against
         # their definitions (.yml) (non-internal flows only)
         if self.current_ns.flows:
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating registered (.py) flows in"
                                    " %s.flows" % raw_ns})
 
@@ -85,7 +85,7 @@ class TendrlNS(object):
                 msg = "Registered (.py) flows [%s] not found in definitions " \
                       "(.yml) for %s.flows" % (", ".join(undefined_flows),
                                                raw_ns)
-                logger.log("info", NS.get("publisher_id", None),
+                logger.log("debug", NS.get("publisher_id", None),
                            {"message": msg})
                 raise Exception(msg)
         '''
@@ -94,7 +94,7 @@ class TendrlNS(object):
         '''
 
         if defs.get("flows", {}):
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating defined (.yml) flows"
                                    " in %s.flows" % raw_ns})
             regd_flows = [flow_name for flow_name in self.current_ns.flows
@@ -118,7 +118,7 @@ class TendrlNS(object):
         defined_objs = defs.get("objects", {})
         defined_objs = {obj: val for obj, val in defined_objs.iteritems() if "internal" not in val}
         if self.current_ns.objects:
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating registered (.py) "
                        "objects in %s.objects" % raw_ns})
             regd_objs = [obj_name for obj_name in self._get_objects()
@@ -177,7 +177,7 @@ class TendrlNS(object):
             their discovered/registered (.py) counterparts (non-internal
             objs only)
             '''
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating defined (.yml) objects"
                        " in %s.objects" % raw_ns})
             regd_objs = [obj_name for obj_name in self._get_objects()
@@ -236,7 +236,7 @@ class TendrlNS(object):
     def setup_common_objects(self):
         # Config, if the namespace has implemented its own Config object
         if "Config" in self.current_ns.objects:
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup Config for namespace.%s" %
                        self.ns_name})
             self.current_ns.config = self.current_ns.objects.Config()
@@ -246,7 +246,7 @@ class TendrlNS(object):
                 'host': self.current_ns.config.data['etcd_connection'],
                 'allow_reconnect': True}
 
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup central store clients for "
                        "namespace.%s" % self.ns_name})
             # Use this for central store writes, TTL refresh
@@ -273,7 +273,7 @@ class TendrlNS(object):
 
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup NodeContext for namespace."
                                    "%s" % self.ns_name})
             self.current_ns.node_context = \
@@ -282,7 +282,7 @@ class TendrlNS(object):
 
         # TendrlContext, if the namespace has implemented its own
         if "TendrlContext" in self.current_ns.objects:
-            logger.log("info", NS.get("publisher_id", None),
+            logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup TendrlContext for namespace."
                                    "%s" % self.ns_name})
             self.current_ns.tendrl_context = \
@@ -432,7 +432,7 @@ class TendrlNS(object):
     def _register_subclasses_to_ns(self):
         # registers all subclasses of BaseObject, BaseFlow, BaseAtom to
         # NS
-        logger.log("info", NS.get("publisher_id", None),
+        logger.log("debug", NS.get("publisher_id", None),
                    {"message": "Finding objects in namespace.%s."
                                "objects" % self.ns_name})
         ns_root = importlib.import_module(self.ns_src).__path__[0]
@@ -447,7 +447,7 @@ class TendrlNS(object):
             for obj_cls in inspect.getmembers(obj, inspect.isclass):
                 if issubclass(obj_cls[1], objects.BaseObject):
                     obj_name = obj_cls[0]
-                    logger.log("info", NS.get("publisher_id", None),
+                    logger.log("debug", NS.get("publisher_id", None),
                                {"message": "Registering object namespace"
                                            ".%s.objects.%s" % (
                                            self.ns_name, obj_name)})
@@ -455,7 +455,7 @@ class TendrlNS(object):
 
                     ns_object_atoms_path = obj.__path__[0] + "/atoms"
                     ns_object_atoms_prefix = obj_fqdn + ".atoms."
-                    logger.log("info", NS.get("publisher_id", None),
+                    logger.log("debug", NS.get("publisher_id", None),
                                {"message": "Finding atoms in namespace.%s."
                                            "objects.%s.atoms" %
                                            (self.ns_name, obj_name)})
@@ -468,7 +468,7 @@ class TendrlNS(object):
                         for atom_cls in inspect.getmembers(atom,
                                                            inspect.isclass):
                             if issubclass(atom_cls[1], BaseAtom):
-                                logger.log("info", NS.get("publisher_id", None),
+                                logger.log("debug", NS.get("publisher_id", None),
                                            {"message": "Registering atom "
                                                        "namespace.%s.objects.%s."
                                                        "atoms.%s" % (self.ns_name,
@@ -480,7 +480,7 @@ class TendrlNS(object):
 
                     ns_object_flows_path = obj.__path__[0] + "/flows"
                     ns_object_flows_prefix = obj_fqdn + ".flows."
-                    logger.log("info", NS.get("publisher_id", None),
+                    logger.log("debug", NS.get("publisher_id", None),
                                {"message": "Finding flows in "
                                            "namespace.%s.objects.%s."
                                            "flows" % (self.ns_name,
@@ -494,7 +494,7 @@ class TendrlNS(object):
                         for flow_cls in inspect.getmembers(flow,
                                                            inspect.isclass):
                             if issubclass(flow_cls[1], flows.BaseFlow):
-                                logger.log("info", NS.get("publisher_id", None),
+                                logger.log("debug", NS.get("publisher_id", None),
                                            {"message": "Registering flow namespace.%s."
                                            "objects.%s.flow.%s"
                                            % (self.ns_name,obj_name,
@@ -507,14 +507,14 @@ class TendrlNS(object):
         ns_flows_prefix = self.ns_src + ".flows."
         flowz = self._list_modules_in_package_path(ns_flows_path,
                                                    ns_flows_prefix)
-        logger.log("info", NS.get("publisher_id", None),
+        logger.log("debug", NS.get("publisher_id", None),
                    {"message": "Finding flows in namespace.%s.flows"
                    % self.ns_name})
         for name, flow_fqdn in flowz:
             the_flow = importlib.import_module(flow_fqdn)
             for flow_cls in inspect.getmembers(the_flow, inspect.isclass):
                 if issubclass(flow_cls[1], flows.BaseFlow):
-                    logger.log("info", NS.get("publisher_id", None),
+                    logger.log("debug", NS.get("publisher_id", None),
                                {"message": "Registering flow namespace.%s."
                                "flows.%s" % (self.ns_name,flow_cls[0])})
                     self._add_flow(flow_cls[0], flow_cls[1])
