@@ -65,6 +65,7 @@ class AuthorizeKey(object):
                                             str(e.message))}
                 )
             )
+            err = str(e.message)
         if err != "":
             Event(
                 Message(
