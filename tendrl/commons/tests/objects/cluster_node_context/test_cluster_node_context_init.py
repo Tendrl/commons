@@ -2,7 +2,7 @@ import pytest
 import maps
 import __builtin__
 from tendrl.commons.objects.cluster_node_context import ClusterNodeContext
-from tendrl.commons.fixtures.nodecontext import NodeContext
+from tendrl.commons.tests.fixtures.nodecontext import NodeContext
 
 
 def load(*args):

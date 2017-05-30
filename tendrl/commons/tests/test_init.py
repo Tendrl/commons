@@ -405,7 +405,7 @@ def test_validate_ns_definitions():
 # Testing setup_common_objects
 def test_setup_common_objects(monkeypatch):
     tendrlNS = init()
-    obj = importlib.import_module("tendrl.commons.fixtures.config")
+    obj = importlib.import_module("tendrl.commons.tests.fixtures.config")
     for obj_cls in inspect.getmembers(obj, inspect.isclass):
         tendrlNS.current_ns.objects["Config"]=obj_cls[1]
     with patch.object(etcd, "Client", return_value=etcd.Client()) as client:
