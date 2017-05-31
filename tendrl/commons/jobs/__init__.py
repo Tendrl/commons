@@ -53,7 +53,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         pass
 
                     # tendrl-node-agent tagged as tendrl/monitor will ensure
-                    # >5 min old "new" jobs are timed out and marked as
+                    # >10 min old "new" jobs are timed out and marked as
                     # "failed" (the parent job of these jobs will also be
                     # marked as "failed")
                     if "tendrl/monitor" in NS.node_context.tags:
