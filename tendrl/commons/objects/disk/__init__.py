@@ -36,10 +36,15 @@ class Disk(objects.BaseObject):
         self.geo_bios_legacy = geo_bios_legacy
         self.config_status = config_status
         self.partitions = partitions
-        self.value = 'nodes/{0}/Disks/{1}'
+        self.value = 'nodes/{0}/LocalStorage/Disks/{1}'
 
     def render(self):
-        self.value = self.value.format(NS.node_context.node_id,
-                                       self.disk_id.replace('-', '_')
-                                       )
+        if self.disk_id == self.disk_name:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id.replace('/', '_').replace("_", "", 1))
+        else:
+            self.value = self.value.format(
+                NS.node_context.node_id,
+                self.disk_id.replace('-', '_'))
         return super(Disk, self).render()
