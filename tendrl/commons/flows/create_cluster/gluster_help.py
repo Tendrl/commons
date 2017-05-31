@@ -28,7 +28,7 @@ def create_gluster(parameters):
 
     ret_val = plugin.setup_gluster_node(
         node_ips,
-        repo=NS.config.data['glusterfs_repo']
+        repo=NS.config.data.get('glusterfs_repo', None)
     )
     if ret_val is not True:
         raise FlowExecutionFailedError("Error setting up gluster node")
