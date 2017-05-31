@@ -24,7 +24,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
     def _run(self):
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s running" % self.__class__.__name__}
             )
