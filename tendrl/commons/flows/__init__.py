@@ -106,6 +106,8 @@ class BaseFlow(object):
         msg = "Processing pre-runs for flow: %s" % self.to_str
         Event(
             Message(
+                job_id=self.job_id,
+                flow_id=self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": msg}
@@ -124,6 +126,8 @@ class BaseFlow(object):
                 msg = "Start pre-run : %s" % atom_fqn
                 Event(
                     Message(
+                        job_id=self.job_id,
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
@@ -137,7 +141,9 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
-                            priority="info",
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
+                            priority="error",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
                         )
@@ -151,6 +157,8 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
@@ -161,6 +169,8 @@ class BaseFlow(object):
         msg = "Processing atoms for flow: %s" % self._defs['help']
         Event(
             Message(
+                job_id=self.job_id,
+                flow_id=self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": msg}
@@ -172,6 +182,8 @@ class BaseFlow(object):
                 msg = "Start atom : %s" % atom_fqn
                 Event(
                     Message(
+                        job_id=self.job_id,
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
@@ -185,6 +197,8 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
                             priority="error",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
@@ -199,6 +213,8 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
@@ -209,6 +225,8 @@ class BaseFlow(object):
         msg = "Processing post-runs for flow: %s" % self._defs['help']
         Event(
             Message(
+                job_id=self.job_id,
+                flow_id=self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={"message": msg}
@@ -219,6 +237,8 @@ class BaseFlow(object):
                 msg = "Start post-run : %s" % atom_fqn
                 Event(
                     Message(
+                        job_id=self.job_id,
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
@@ -232,6 +252,8 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
                             priority="error",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
@@ -245,6 +267,8 @@ class BaseFlow(object):
                           (atom_fqn, self._defs['help'])
                     Event(
                         Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
                             payload={"message": msg}
