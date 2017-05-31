@@ -4,7 +4,7 @@ import __builtin__
 from etcd import Client
 import etcd
 import pkgutil
-
+import json
 import mock
 from tendrl.commons import objects
 from tendrl.commons import TendrlNS
@@ -69,8 +69,16 @@ def init(patch_get_node_id, patch_read, patch_client):
     return tendrlNS
 
 
-def obj_definition(*args):
+def obj_definition(*args,**kwargs):
     return maps.NamedDict()
+
+
+def dumps(*args):
+    raise ValueError
+
+
+def write(*args,**kwargs):
+    raise etcd.EtcdConnectionFailed
 
 
 def test_constructor():
@@ -97,7 +105,12 @@ def test_load_definition():
         with pytest.raises(Exception):
             obj.load_definition()
 
-
+@mock.patch('tendrl.commons.event.Event.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.Message.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
+            mock.Mock(return_value=None))
 def test_save():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
@@ -121,10 +134,34 @@ def test_save():
                 with pytest.raises(etcd.EtcdConnectionFailed):
                     obj.save(True)
             hash_obj = obj._hash()
-            with patch.object(Client,"write",return_value = True) as mock_write:
+            with patch.object(Client,"write",return_value = None) as mock_write:
                 with patch.object(Client,"read") as mock_read:
                     mock_read.return_value = maps.NamedDict(value = hash_obj)
                     obj.save(True)
             with patch.object(Client,"write",return_value = True) as mock_write:
                 with patch.object(objects.BaseObject,"_hash",hash) as mock_hash:
                     obj.save(True)
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                with patch.object(objects.BaseObject,"_hash",return_value = None) as mock_hash:
+                    with patch.object(Client,"read") as mock_read:
+                        mock_read.return_value = maps.NamedDict(value="")
+                        with patch.object(objects.BaseObject,"load",return_value = maps.NamedDict(hash="")) as mock_load:
+                            obj.save(True)
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                with patch.object(Client,"read") as mock_read:
+                    mock_read.return_value = maps.NamedDict(value="")
+                    obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
+                    obj.save(False)
+            with patch.object(Client,"write",write) as mock_write:
+                with patch.object(Client,"read",return_value = maps.NamedDict(value="")) as mock_read:
+                    with patch.object(objects.BaseObject,"_hash",return_value = "hash") as mock_hash:
+                        with patch.object(json,"dumps",dumps) as mock_dumps:
+                            with pytest.raises(etcd.EtcdConnectionFailed):
+                                obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
+                                obj.__name__ = "Test"
+                                NS.publisher_id = "node_context"
+                                obj.save(False)
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                obj.__class__.__name__ = "Message"
+                obj.save()
+

@@ -8,6 +8,7 @@ import __builtin__
 from etcd import Client
 import etcd
 import pkgutil
+import sys
 
 from mock import MagicMock
 from tendrl.commons import objects
@@ -92,12 +93,17 @@ def test_register_subclasses_to_ns(monkeypatch):
     tendrlNS._register_subclasses_to_ns()
     assert len(getattr(NS.tendrl, "objects")) > 0
     assert len(getattr(NS.tendrl, "flows")) > 0
-    ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit('/',1)[0],
                                    "objects")
     ns_objects_prefix = "tendrl.commons.objects."
     modules = tendrlNS._list_modules_in_package_path(ns_objects_path,
                                                      ns_objects_prefix)
+    
+    sys.stdout.write(str(ns_objects_path)+"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    sys.stdout.write(str(modules))
     for mode_name, mod_cls in modules:
+        sys.stdout.write("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        sys.stdout.write(str(NS.tendrl.objects))
         assert hasattr(NS.tendrl.objects, mode_name.title().replace('_', '')) \
             is True
 
