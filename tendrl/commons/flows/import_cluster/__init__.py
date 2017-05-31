@@ -15,11 +15,18 @@ from tendrl.commons.message import Message
 
 class ImportCluster(flows.BaseFlow):
     def run(self):
-
         integration_id = self.parameters['TendrlContext.integration_id']
         if integration_id is None:
             raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
         sds_name = self.parameters['DetectedCluster.sds_pkg_name']
+
+        # Invoke the super run() for pre-runs execution
+        # Note: this super call would make execution of atom's pre_run, run and post_run
+        # Currently there is no atoms defined for import cluster flow.
+        # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
+        # run the pre_runs, atoms, post_runs respectively so run() simply calls
+        # run_pre(), run_atom(), run_post()
+        super(ImportCluster, self).run()
 
         if not self.parameters.get('import_after_expand', False) and \
             not self.parameters.get('import_after_create', False):

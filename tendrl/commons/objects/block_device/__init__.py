@@ -48,7 +48,7 @@ class BlockDevice(objects.BaseObject):
         self.used = used
         self.rotational = rotational
         self.ssd = ssd
-        self.value = 'nodes/{0}/BlockDevices/all/{1}'
+        self.value = 'nodes/{0}/LocalStorage/BlockDevices/all/{1}'
 
     def render(self):
         self.value = self.value.format(

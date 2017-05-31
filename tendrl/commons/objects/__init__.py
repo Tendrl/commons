@@ -1,5 +1,4 @@
 import abc
-import copy
 import hashlib
 import json
 
@@ -75,7 +74,10 @@ class BaseObject(object):
         if ttl:
             try:
                 NS._int.wclient.refresh(self.value, ttl=ttl)
-            except etcd.EtcdKeyNotFound:
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                if type(ex) != etcd.EtcdKeyNotFound:
+                    NS._int.wreconnect()
+                    NS._int.wclient.refresh(self.value, ttl=ttl)
                 pass
 
         if not "Message" in self.__class__.__name__:
@@ -83,11 +85,18 @@ class BaseObject(object):
                 # Generate current in memory object hash
                 self.hash = self._hash()
                 _hash_key = "/{0}/hash".format(self.value)
-                _stored_hash = NS._int.client.read(_hash_key).value
+                _stored_hash = None
+                try:
+                    _stored_hash = NS._int.client.read(_hash_key).value
+                except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                    if type(ex) != etcd.EtcdKeyNotFound:
+                        NS._int.reconnect()
+                        _stored_hash = NS._int.client.read(_hash_key).value
+                    pass
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
                     return
-            except (TypeError, etcd.EtcdKeyNotFound):
+            except TypeError:
                 # no hash for this object, save the current hash as is
                 pass
         
@@ -149,7 +158,7 @@ class BaseObject(object):
                             )
             try:
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
-            except etcd.EtcdConnectionFailed:
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
                 pass
@@ -169,58 +178,59 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
 
+            value = None
             try:
-                try:
-                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                except etcd.EtcdConnectionFailed:
+                etcd_resp = NS._int.client.read(item['key'], quorum=True)
+                value = etcd_resp.value
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                if type(ex) != etcd.EtcdKeyNotFound:
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                    pass
-                value = etcd_resp.value
+                    value = etcd_resp.value
 
-                if item['dir']:
-                    key = item['key'].split('/')[-1]
-                    if key != "_None":
-                        dct = dict(key=value)
-                        if hasattr(_copy, item['name']):
-                            dct = getattr(_copy, item['name'])
-                            if type(dct) == dict:
-                                dct[key] = value
-                            else:
-                                setattr(_copy, item['name'], dct)
+                pass
+
+            if item['dir']:
+                key = item['key'].split('/')[-1]
+                if key != "_None":
+                    dct = dict(key=value)
+                    if hasattr(_copy, item['name']):
+                        dct = getattr(_copy, item['name'])
+                        if type(dct) == dict:
+                            dct[key] = value
                         else:
                             setattr(_copy, item['name'], dct)
-                    continue
+                    else:
+                        setattr(_copy, item['name'], dct)
+                continue
 
-                # convert list, dict (json) to python based on definitions
-                _type = self._defs.get("attrs", {}).get(item['name'],
-                                                        {}).get("type")
-                if _type:
-                    if _type.lower() in ['json', 'list']:
-                        if value:
-                            try:
-                                value = json.loads(value.decode('utf-8'))
-                            except ValueError as ex:
-                                _msg = "Error load() attr %s for object %s" % \
-                                       (item['name'], self.__name__)
-                                Event(
-                                    ExceptionMessage(
-                                        priority="error",
-                                        publisher=NS.publisher_id,
-                                        payload={"message": _msg,
-                                                 "exception": ex
-                                                 }
-                                    )
+            # convert list, dict (json) to python based on definitions
+            _type = self._defs.get("attrs", {}).get(item['name'],
+                                                    {}).get("type")
+            if _type:
+                if _type.lower() in ['json', 'list']:
+                    if value:
+                        try:
+                            value = json.loads(value.decode('utf-8'))
+                        except ValueError as ex:
+                            _msg = "Error load() attr %s for object %s" % \
+                                   (item['name'], self.__name__)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg,
+                                             "exception": ex
+                                             }
                                 )
-                        else:
-                            if _type.lower() == "list":
-                                value = list()
-                            if _type.lower() == "json":
-                                value = dict()
+                            )
+                    else:
+                        if _type.lower() == "list":
+                            value = list()
+                        if _type.lower() == "json":
+                            value = dict()
 
-                setattr(_copy, item['name'], value)
-            except etcd.EtcdKeyNotFound:
-                pass
+            setattr(_copy, item['name'], value)
         return _copy
 
     def exists(self):
@@ -229,7 +239,11 @@ class BaseObject(object):
         try:
             NS._int.client.read("/{0}".format(self.value))
             _exists = True
-        except etcd.EtcdKeyNotFound:
+        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+            if type(ex) != etcd.EtcdKeyNotFound:
+                NS._int.reconnect()
+                NS._int.client.read("/{0}".format(self.value))
+                _exists = True
             pass
         return _exists
 
