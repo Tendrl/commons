@@ -37,6 +37,8 @@ namespace.tendrl:
           - TendrlContext.integration_id
           - Cluster.node_configuration
           - Cluster.conf_overrides
+      pre_run:
+        - tendrl.objects.Node.atoms.IsNodeTendrlManaged
       run: tendrl.flows.CreateCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
@@ -68,10 +70,10 @@ namespace.tendrl:
       inputs:
         mandatory:
           - "Node[]"
-          - DetectedCluster.detected_cluster_id
           - DetectedCluster.sds_pkg_name
-          - DetectedCluster.sds_pkg_version
           - TendrlContext.integration_id
+      pre_run:
+        - tendrl.objects.Node.atoms.IsNodeTendrlManaged
       run: tendrl.flows.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
@@ -352,6 +354,16 @@ namespace.tendrl:
       help: "BlockDevice"
     Node:
       atoms:
+        IsNodeTendrlManaged:
+          help: Check if a node is being managed by tendrl
+          enabled: true
+          inputs:
+            mandatory:
+              - "Node[]"
+          run: tendrl.objects.Node.atoms.IsNodeTendrlManaged
+          type: check
+          uuid: 2f94a48a-05d7-408c-b400-e27827f4edca
+          version: 1
         Cmd:
           enabled: true
           inputs:
