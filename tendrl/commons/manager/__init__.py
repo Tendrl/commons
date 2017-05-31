@@ -22,7 +22,7 @@ class Manager(object):
     def stop(self):
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s stopping" % self.__class__.__name__}
             )
@@ -36,7 +36,7 @@ class Manager(object):
     def start(self):
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s starting" % self.__class__.__name__}
             )
@@ -50,7 +50,7 @@ class Manager(object):
     def join(self):
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s joining" % self.__class__.__name__}
             )

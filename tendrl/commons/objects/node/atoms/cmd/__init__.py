@@ -43,7 +43,7 @@ class Cmd(BaseAtom):
         else:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Failed to execute %s on node %s."
