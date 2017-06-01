@@ -125,12 +125,12 @@ def test_save():
             obj.value = 1
             obj.save()
             NS._int.wclient = etcd.Client()
+            with patch.object(Client,"refresh",refresh_client) as mock_refresh_client:
+                with patch.object(Client,"write",return_value = True) as mock_write:
+                    obj.save(True,2)
             NS._int.wreconnect = type("Dummy",(object,),{})
             with patch.object(Client,"refresh",refresh) as mock_refresh:
                 with pytest.raises(etcd.EtcdConnectionFailed):
-                    obj.save(True,2)
-            with patch.object(Client,"refresh",refresh_client) as mock_refresh_client:
-                with patch.object(Client,"write",return_value = True) as mock_write:
                     obj.save(True,2)
             NS._int.client = etcd.Client()
             NS._int.reconnect = type("Dummy",(object,),{})
@@ -156,6 +156,16 @@ def test_save():
                     mock_read.return_value = maps.NamedDict(value="")
                     obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
                     obj.save(False)
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                with patch.object(Client,"read") as mock_read:
+                    mock_read.return_value = maps.NamedDict(value="")
+                    obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="string")))
+                    obj.save(False)
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                with patch.object(Client,"read") as mock_read:
+                    mock_read.return_value = maps.NamedDict(value="")
+                    with patch.object(objects.BaseObject,"render",return_value= [{'value':'' , 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
+                        obj.save(False)
             with patch.object(Client,"write",write) as mock_write:
                 with patch.object(Client,"read",return_value = maps.NamedDict(value="")) as mock_read:
                     with patch.object(objects.BaseObject,"_hash",return_value = "hash") as mock_hash:
@@ -259,4 +269,9 @@ def test_run():
 
 def test_constructor_AtomNotImplementedError():
     obj = objects.AtomNotImplementedError("Test Error")
+    assert obj.message == "Test Error"
+
+
+def test_constructor_AtomExecutionFailedError():
+    obj = objects.AtomExecutionFailedError("Test Error")
     assert obj.message == "Test Error"
