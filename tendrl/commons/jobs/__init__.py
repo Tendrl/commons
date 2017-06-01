@@ -35,16 +35,27 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             _job_sync_interval = 3
         while not self._complete.is_set():
             gevent.sleep(_job_sync_interval)
+            jid = None
             try:
                 try:
                     jobs = NS._int.client.read("/queue")
                 except etcd.EtcdKeyNotFound:
                     continue
-
+                
                 for job in jobs.leaves:
                     jid = job.key.split('/')[-1]
                     job_status_key = "/queue/%s/status" % jid
+                    job_lock_key = "/queue/%s/locked_by" % jid
                     NS.node_context = NS.node_context.load()
+                    # Check job not already locked by some agent
+                    try:
+                        _locked_by = NS._int.client.read(job_lock_key).value
+                        if _locked_by:
+                            continue
+                    except etcd.EtcdKeyNotFound:
+                        pass
+                    
+                    # Check job not already "finished", or "processing"
                     try:
                         _status = NS._int.client.read(job_status_key).value
                         if _status in ["finished", "processing"]:
@@ -145,8 +156,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                              tags=NS.node_context.tags,
                                              type=NS.type)
                             NS._int.wclient.write(job_lock_key,
-                                                  json.dumps(lock_info),
-                                                  prevExist=False)
+                                                  json.dumps(lock_info))
                             NS._int.wclient.write(job_status_key, "processing",
                                                   prevValue="new")
                         except etcd.EtcdCompareFailed:
@@ -251,12 +261,12 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 job.save()
                                                           
             except Exception as ex:
+                _msg = "Job (%s) processing failure, error:" % jid
                 Event(
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "Job processing failure, error:" +
-                                            ex.message,
+                        payload={"message": _msg + ex.message,
                                  "exception": ex
                                  }
                     )
