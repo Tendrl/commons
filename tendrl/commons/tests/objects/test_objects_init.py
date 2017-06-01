@@ -12,10 +12,24 @@ from mock import patch
 import tendrl.commons.objects.node_context as node
 from tendrl.commons.utils.central_store import utils as cs_utils
 
+''' Child Classes'''
 
 class TestBaseObject(objects.BaseObject):
     def __init__(self,*args,**kwargs):
+        if kwargs:
+            self.test = kwargs["test"]
         super(TestBaseObject,self).__init__(*args,**kwargs)
+
+
+class TestBaseAtom(objects.BaseAtom):
+    def __init__(self,parameter):
+        self.__class__.__name__ = "write" 
+        super(TestBaseAtom,self).__init__(parameter)
+    
+    def run(self	):
+        super(TestBaseAtom,self).run()
+
+''' Dummy Functions'''
 
 def hasattribute(*args):
     if args[0]:
@@ -37,18 +51,30 @@ def has_attr(*args):
             return True
 
 
-def read(*args):
+def read(*args,**kwargs):
     raise etcd.EtcdConnectionFailed
 
 
 def refresh(*args,**kwargs):
-    raise etcd.EtcdConnectionFailed	
+    raise etcd.EtcdConnectionFailed
 
 def hash(*args):
     raise TypeError
 
 def refresh_client(*args,**kwargs):
     raise etcd.EtcdKeyNotFound	
+
+
+def obj_definition(*args,**kwargs):
+    return maps.NamedDict()
+
+
+def dumps(*args):
+    raise ValueError
+
+
+def write(*args,**kwargs):
+    raise etcd.EtcdConnectionFailed
 
 
 @patch.object(etcd, "Client")
@@ -72,26 +98,14 @@ def init(patch_get_node_id, patch_read, patch_client):
     tendrlNS = TendrlNS()
     return tendrlNS
 
-
-def obj_definition(*args,**kwargs):
-    return maps.NamedDict()
-
-
-def dumps(*args):
-    raise ValueError
-
-
-def write(*args,**kwargs):
-    raise etcd.EtcdConnectionFailed
-
+'''Unit Test Cases for Base Object Class'''
 
 def test_constructor():
-    with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
-        with pytest.raises(Exception):
-            obj = TestBaseObject()
-            delattr(obj,"internal")
-            mock_hasattr.return_value = hasattribute(False)
-            obj.__init__()
+    with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load:
+        obj = TestBaseObject()
+        assert mock_load.called
+    with patch.object(__builtin__,'hasattr',return_value = True) as mock_hasattr:
+        obj = TestBaseObject()
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',
@@ -161,11 +175,6 @@ def test_save():
                     mock_read.return_value = maps.NamedDict(value="")
                     obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="string")))
                     obj.save(False)
-            with patch.object(Client,"write",return_value = True) as mock_write:
-                with patch.object(Client,"read") as mock_read:
-                    mock_read.return_value = maps.NamedDict(value="")
-                    with patch.object(objects.BaseObject,"render",return_value= [{'value':'' , 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
-                        obj.save(False)
             with patch.object(Client,"write",write) as mock_write:
                 with patch.object(Client,"read",return_value = maps.NamedDict(value="")) as mock_read:
                     with patch.object(objects.BaseObject,"_hash",return_value = "hash") as mock_hash:
@@ -175,6 +184,13 @@ def test_save():
                                 obj.__name__ = "Test"
                                 NS.publisher_id = "node_context"
                                 obj.save(False)
+            
+            with patch.object(Client,"write",return_value = True) as mock_write:
+                with patch.object(Client,"read") as mock_read:
+                    mock_read.return_value = maps.NamedDict(value="")
+                    obj.__class__.__name__ = "Message"
+                    with patch.object(objects.BaseObject,"render",return_value= [{'value':'' , 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
+                        obj.save(False)
             with patch.object(Client,"write",return_value = True) as mock_write:
                 obj.__class__.__name__ = "Message"
                 obj.save()
@@ -194,17 +210,44 @@ def test_load():
                         obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
                         with pytest.raises(TypeError):
                             obj.load()
+                NS._int.client = etcd.Client()
+                NS._int.reconnect = type("Dummy",(object,),{})
                 with patch.object(Client,"read",read) as mock_read:
                     with patch.object(objects.BaseObject,'render',return_value = [{'value': '9fb712695c0f42dbf2edf13e6c03a828', 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
                         obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
-                        with pytest.raises(TypeError):
+                        with pytest.raises(etcd.EtcdConnectionFailed):
                             obj.load()
+                        obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type='')))
+                        with pytest.raises(etcd.EtcdConnectionFailed):
+                            obj.load()
+                with patch.object(Client,"read",return_value = maps.NamedDict(value = "test_value")) as mock_read:
+                    with patch.object(objects.BaseObject,'render',return_value = [{'value': '9fb712695c0f42dbf2edf13e6c03a828', 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
+                        obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type='')))
+                        obj.load()
+                with patch.object(Client,"read",return_value = maps.NamedDict(value = "test_value")) as mock_read:
+                    with patch.object(objects.BaseObject,'render',return_value = [{'value': '9fb712695c0f42dbf2edf13e6c03a828', 'dir': False, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
+                        obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type='')))
+                        obj.load()
                 with patch.object(Client,"read",return_value = True) as mock_read:
-                    with patch.object(objects.BaseObject,'render',return_value = [{'value': '9fb712695c0f42dbf2edf13e6c03a828', 'dir': True, 'name': 'test', 'key': '/1/hash'}]) as mock_render:
+                    with patch.object(objects.BaseObject,'render',return_value = [{'value': 'test_val', 'dir': True, 'name': 'test', 'key': '/1/hash'}]) as mock_render:
                         with pytest.raises(AttributeError):
                             obj._defs = maps.NamedDict(attrs=maps.NamedDict(hash=maps.NamedDict(type="json")))
-                            obj.test = {"Test":"test_variable"}
+                            obj.test = {"test":"test_variable"}
                             obj.load()
+    with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load_defination:
+        obj = TestBaseObject()
+        with patch.object(objects.BaseObject,'render',return_value = [{'value': '9', 'dir': True, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
+            with patch.object(Client,"read",return_value = maps.NamedDict(value="Test")) as mock_read:
+                obj.load()
+    with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load_defination:
+        obj = TestBaseObject()
+        with patch.object(objects.BaseObject,'render',return_value = [{'value': '9', 'dir': True, 'name': 'test', 'key': '/1/hash'}]) as mock_render:
+            with patch.object(Client,"read",return_value = maps.NamedDict(value="Test")) as mock_read:
+                with patch.object(__builtin__,"hasattr",return_value = True) as mock_hasattr:
+                    obj.test = "test_variable"
+                    obj.load()
+                    obj.test = {"test":"test_var"}
+                    obj.load()
 
 def test_exists():
     tendrlNS = init()
@@ -222,15 +265,6 @@ def test_exists():
                 with patch.object(Client,"read",read) as mock_read:
                     with pytest.raises(etcd.EtcdConnectionFailed):
                         obj.exists()
-
-
-class TestBaseAtom(objects.BaseAtom):
-    def __init__(self,parameter):
-        self.__class__.__name__ = "write" 
-        super(TestBaseAtom,self).__init__(parameter)
-    
-    def run(self	):
-        super(TestBaseAtom,self).run()
 
 
 def test_constructor_BaseAtom():
