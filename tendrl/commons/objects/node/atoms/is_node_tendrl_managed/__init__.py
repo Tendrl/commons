@@ -50,31 +50,6 @@ class IsNodeTendrlManaged(objects.BaseAtom):
                     "Node doesnt have Memory details populated"
                 )
 
-            # Check if node has the block devices populated
-            try:
-                block_devices = NS._int.client.read("nodes/%s/BlockDevices" % node_id)
-                if block_devices.leaves is None:
-                    raise AtomExecutionFailedError(
-                        "Node doesnt have block device details populated"
-                    )
-            except etcd.EtcdKeyNotFound:
-                raise AtomExecutionFailedError(
-                    "Node doesnt have block device details populated"
-                )
-
-            # Check if node has the disks data populated
-            try:
-                disks = NS._int.client.read("nodes/%s/Disks" % node_id)
-                # If disks have no child nodes, error out
-                if disks.leaves is None:
-                    raise AtomExecutionFailedError(
-                        "Node doesnt have disks details populated"
-                    )
-            except etcd.EtcdKeyNotFound:
-                raise AtomExecutionFailedError(
-                    "Node doesnt have disks details populated"
-                )
-
             # Check if node has networks details populated
             try:
                 networks = NS._int.client.read("nodes/%s/Networks" % node_id)
