@@ -43,7 +43,7 @@ class CheckServiceStatus(BaseAtom):
         else:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Failed to check status of service %s on "

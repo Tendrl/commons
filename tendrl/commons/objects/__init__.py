@@ -1,4 +1,5 @@
 import abc
+import copy
 import hashlib
 import json
 
@@ -191,17 +192,19 @@ class BaseObject(object):
                 pass
 
             if item['dir']:
+                if value is None:
+                    setattr(_copy, item['name'], dict())
+                    continue
                 key = item['key'].split('/')[-1]
-                if key != "_None":
-                    dct = dict(key=value)
-                    if hasattr(_copy, item['name']):
-                        dct = getattr(_copy, item['name'])
-                        if type(dct) == dict:
-                            dct[key] = value
-                        else:
-                            setattr(_copy, item['name'], dct)
+                dct = dict(key=value)
+                if hasattr(_copy, item['name']):
+                    dct = getattr(_copy, item['name'])
+                    if type(dct) == dict:
+                        dct[key] = value
                     else:
                         setattr(_copy, item['name'], dct)
+                else:
+                    setattr(_copy, item['name'], dct)
                 continue
 
             # convert list, dict (json) to python based on definitions
@@ -313,6 +316,8 @@ class BaseObject(object):
             if attr.startswith("_") or attr in ['hash', 'updated_at',
                                                'value', 'list']:
                 continue
+            if type(value) in [dict,list]:
+                value = copy.deepcopy(value)
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
 

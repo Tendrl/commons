@@ -28,7 +28,7 @@ class CreateCluster(flows.BaseFlow):
         if ' ' in self.parameters['TendrlContext.cluster_name']:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Space char not allowed in cluster name"

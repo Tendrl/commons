@@ -39,7 +39,7 @@ class CheckNodeUp(BaseAtom):
         else:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Failed to ping %s. Error %s" % (
