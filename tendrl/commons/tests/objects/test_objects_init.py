@@ -269,9 +269,9 @@ def test_run():
 
 def test_constructor_AtomNotImplementedError():
     obj = objects.AtomNotImplementedError("Test Error")
-    assert obj.message == "Test Error"
+    assert obj.message == "run function not implemented. Test Error"
 
 
 def test_constructor_AtomExecutionFailedError():
     obj = objects.AtomExecutionFailedError("Test Error")
-    assert obj.message == "Test Error"
+    assert obj.message == "Atom Execution failed. Error: Test Error"

@@ -298,14 +298,8 @@ class BaseObject(object):
         return json.dumps(data)
 
     def _hash(self):
-        try:
-            self.hash = None
-        except AttributeError:
-            pass
-        try:
-            self.updated_at = None
-        except AttributeError:
-            pass
+        self.hash = None
+        self.updated_at = None
 
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
@@ -391,11 +385,11 @@ class BaseAtom(object):
         )
 
 class AtomNotImplementedError(NotImplementedError):
-    def __init___(self, err):
-        self.message = "run function not implemented. %s".format(err)
+    def __init__(self, err):
+        self.message = "run function not implemented. {}".format(err)
 
 
 class AtomExecutionFailedError(Exception):
-    def __init___(self, err):
+    def __init__(self, err):
         self.message = "Atom Execution failed. Error:" + \
-                       " %s".format(err)
+                       " {}".format(err)
