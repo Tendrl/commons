@@ -179,22 +179,18 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write("Reading %s" % item['key'])
 
-            value = None
             try:
                 etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                value = etcd_resp.value
             except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                if type(ex) != etcd.EtcdKeyNotFound:
+                if type(ex) == etcd.EtcdKeyNotFound:
+                    continue
+                else:
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                    value = etcd_resp.value
-
                 pass
-
+            
+            value = etcd_resp.value
             if item['dir']:
-                if value is None:
-                    setattr(_copy, item['name'], dict())
-                    continue
                 key = item['key'].split('/')[-1]
                 dct = dict(key=value)
                 if hasattr(_copy, item['name']):
