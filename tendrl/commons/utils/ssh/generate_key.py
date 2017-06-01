@@ -32,6 +32,7 @@ class GenerateKey(object):
 
     def run(self):
         result = None
+        out = None
         try:
             runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
@@ -64,6 +65,15 @@ class GenerateKey(object):
                 )
             )
             out = "Ansible Executable Generation Failed"
+        if out is None:
+            Event(
+                Message(
+                    priority="error",
+                    publisher="commons",
+                    payload={"message": "No output after Ansible Executable Generation"}
+                )
+            )
+            return None,"No Output"
         if out is not None and "ssh_public_key" not in out:
             err = out
             Event(
