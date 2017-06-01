@@ -68,9 +68,9 @@ class GenerateKey(object):
         if out is None:
             Event(
                 Message(
-                    priority="Error",
+                    priority="error",
                     publisher="commons",
-                    payload={"message": "No output"}
+                    payload={"message": "No output after Ansible Executable Generation"}
                 )
             )
             return None,"No Output"
