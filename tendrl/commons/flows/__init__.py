@@ -115,9 +115,20 @@ class BaseFlow(object):
         if 'mandatory' in self._defs.get('inputs', {}):
             for item in self._defs['inputs']['mandatory']:
                 if item not in self.parameters:
-                    raise FlowExecutionFailedError(
-                        "Mandatory parameter %s not provided" % item
+                    msg = "Mandatory parameter %s not provided" % item
+                    Event(
+                    Message(
+                        job_id=self.job_id,
+                        flow_id=self.parameters['flow_id'],
+                        priority="warning",
+                        publisher=NS.publisher_id,
+                        payload={"message": msg}
                     )
+                )
+
+                    #raise FlowExecutionFailedError(
+                    #    "Mandatory parameter %s not provided" % item
+                    #)
 
         if self._defs.get("pre_run") is not None:
             for atom_fqn in self._defs.get("pre_run"):
