@@ -47,6 +47,7 @@ class NodeContext(objects.BaseObject):
         self.value = 'nodes/{0}/NodeContext'
 
     def _get_machine_id(self):
+        global MACHINE_ID
         if MACHINE_ID:
             return MACHINE_ID
         
@@ -54,7 +55,6 @@ class NodeContext(objects.BaseObject):
         try:
             with open('/etc/machine-id') as f:
                 out = f.read().strip('\n')
-                global MACHINE_ID
                 MACHINE_ID = out
         except IOError as ex:
             exc_type, exc_value, exc_tb = sys.exc_info()
@@ -71,7 +71,7 @@ class NodeContext(objects.BaseObject):
         try:
             Event(
                 Message(
-                    priority="info",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id)
                          }
@@ -109,7 +109,7 @@ class NodeContext(objects.BaseObject):
             try:
                 Event(
                     Message(
-                        priority="info",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Unregistered Node found with machine_id==%s" % self.machine_id
                                 }

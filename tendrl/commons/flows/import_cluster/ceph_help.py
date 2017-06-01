@@ -55,7 +55,7 @@ def import_ceph(parameters):
             Message(
             job_id=parameters['job_id'],
             flow_id = parameters['flow_id'],
-            priority="info",
+            priority="error",
             publisher=NS.publisher_id,
             payload={"message": "Error: Could not install tendrl-ceph-integration on Node %s" % NS.node_context.node_id
                  }

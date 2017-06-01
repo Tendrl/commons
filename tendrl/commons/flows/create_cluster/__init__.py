@@ -24,11 +24,11 @@ class CreateCluster(flows.BaseFlow):
         if sds_name not in supported_sds:
             raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
         
-        # Check if clusre name contains space char and fail if so
+        # Check if cluster name contains space char and fail if so
         if ' ' in self.parameters['TendrlContext.cluster_name']:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Space char not allowed in cluster name"
@@ -41,6 +41,14 @@ class CreateCluster(flows.BaseFlow):
             raise FlowExecutionFailedError(
                 "Space char not allowed in cluster name"
             )
+
+        # Execute super run() to execute pre-runs
+        # Note: this super call would make execution of atom's pre_run, run and post_run
+        # Currently there is no atoms defined for create cluster flow.
+        # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
+        # run the pre_runs, atoms, post_runs respectively so run() simply calls
+        # run_pre(), run_atom(), run_post()
+        super(CreateCluster, self).run()
 
         ssh_job_ids = []
         if "ceph" in sds_name:
@@ -85,7 +93,6 @@ class CreateCluster(flows.BaseFlow):
                     NS.node_context.save()
                 break
 
-                                               
         Event(
             Message(
                 job_id=self.parameters['job_id'],

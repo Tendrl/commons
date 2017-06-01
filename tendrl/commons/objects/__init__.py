@@ -75,7 +75,10 @@ class BaseObject(object):
         if ttl:
             try:
                 NS._int.wclient.refresh(self.value, ttl=ttl)
-            except etcd.EtcdKeyNotFound:
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                if type(ex) != etcd.EtcdKeyNotFound:
+                    NS._int.wreconnect()
+                    NS._int.wclient.refresh(self.value, ttl=ttl)
                 pass
 
         if not "Message" in self.__class__.__name__:
@@ -83,11 +86,18 @@ class BaseObject(object):
                 # Generate current in memory object hash
                 self.hash = self._hash()
                 _hash_key = "/{0}/hash".format(self.value)
-                _stored_hash = NS._int.client.read(_hash_key).value
+                _stored_hash = None
+                try:
+                    _stored_hash = NS._int.client.read(_hash_key).value
+                except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                    if type(ex) != etcd.EtcdKeyNotFound:
+                        NS._int.reconnect()
+                        _stored_hash = NS._int.client.read(_hash_key).value
+                    pass
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
                     return
-            except (TypeError, etcd.EtcdKeyNotFound):
+            except TypeError:
                 # no hash for this object, save the current hash as is
                 pass
         
@@ -149,7 +159,7 @@ class BaseObject(object):
                             )
             try:
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
-            except etcd.EtcdConnectionFailed:
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
                 pass
@@ -170,57 +180,56 @@ class BaseObject(object):
                 sys.stdout.write("Reading %s" % item['key'])
 
             try:
-                try:
-                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                except etcd.EtcdConnectionFailed:
+                etcd_resp = NS._int.client.read(item['key'], quorum=True)
+            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                if type(ex) == etcd.EtcdKeyNotFound:
+                    continue
+                else:
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                    pass
-                value = etcd_resp.value
-
-                if item['dir']:
-                    key = item['key'].split('/')[-1]
-                    if key != "_None":
-                        dct = dict(key=value)
-                        if hasattr(_copy, item['name']):
-                            dct = getattr(_copy, item['name'])
-                            if type(dct) == dict:
-                                dct[key] = value
-                            else:
-                                setattr(_copy, item['name'], dct)
-                        else:
-                            setattr(_copy, item['name'], dct)
-                    continue
-
-                # convert list, dict (json) to python based on definitions
-                _type = self._defs.get("attrs", {}).get(item['name'],
-                                                        {}).get("type")
-                if _type:
-                    if _type.lower() in ['json', 'list']:
-                        if value:
-                            try:
-                                value = json.loads(value.decode('utf-8'))
-                            except ValueError as ex:
-                                _msg = "Error load() attr %s for object %s" % \
-                                       (item['name'], self.__name__)
-                                Event(
-                                    ExceptionMessage(
-                                        priority="error",
-                                        publisher=NS.publisher_id,
-                                        payload={"message": _msg,
-                                                 "exception": ex
-                                                 }
-                                    )
-                                )
-                        else:
-                            if _type.lower() == "list":
-                                value = list()
-                            if _type.lower() == "json":
-                                value = dict()
-
-                setattr(_copy, item['name'], value)
-            except etcd.EtcdKeyNotFound:
                 pass
+            
+            value = etcd_resp.value
+            if item['dir']:
+                key = item['key'].split('/')[-1]
+                dct = dict(key=value)
+                if hasattr(_copy, item['name']):
+                    dct = getattr(_copy, item['name'])
+                    if type(dct) == dict:
+                        dct[key] = value
+                    else:
+                        setattr(_copy, item['name'], dct)
+                else:
+                    setattr(_copy, item['name'], dct)
+                continue
+
+            # convert list, dict (json) to python based on definitions
+            _type = self._defs.get("attrs", {}).get(item['name'],
+                                                    {}).get("type")
+            if _type:
+                if _type.lower() in ['json', 'list']:
+                    if value:
+                        try:
+                            value = json.loads(value.decode('utf-8'))
+                        except ValueError as ex:
+                            _msg = "Error load() attr %s for object %s" % \
+                                   (item['name'], self.__name__)
+                            Event(
+                                ExceptionMessage(
+                                    priority="error",
+                                    publisher=NS.publisher_id,
+                                    payload={"message": _msg,
+                                             "exception": ex
+                                             }
+                                )
+                            )
+                    else:
+                        if _type.lower() == "list":
+                            value = list()
+                        if _type.lower() == "json":
+                            value = dict()
+
+            setattr(_copy, item['name'], value)
         return _copy
 
     def exists(self):
@@ -229,7 +238,11 @@ class BaseObject(object):
         try:
             NS._int.client.read("/{0}".format(self.value))
             _exists = True
-        except etcd.EtcdKeyNotFound:
+        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+            if type(ex) != etcd.EtcdKeyNotFound:
+                NS._int.reconnect()
+                NS._int.client.read("/{0}".format(self.value))
+                _exists = True
             pass
         return _exists
 
@@ -285,14 +298,8 @@ class BaseObject(object):
         return json.dumps(data)
 
     def _hash(self):
-        try:
-            self.hash = None
-        except AttributeError:
-            pass
-        try:
-            self.updated_at = None
-        except AttributeError:
-            pass
+        self.hash = None
+        self.updated_at = None
 
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
@@ -305,6 +312,8 @@ class BaseObject(object):
             if attr.startswith("_") or attr in ['hash', 'updated_at',
                                                'value', 'list']:
                 continue
+            if type(value) in [dict,list]:
+                value = copy.deepcopy(value)
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
 
@@ -376,11 +385,12 @@ class BaseAtom(object):
         )
 
 class AtomNotImplementedError(NotImplementedError):
-    def __init___(self, err):
-        self.message = "run function not implemented. %s".format(err)
-
+    def __init__(self, err):
+        self.message = "run function not implemented. {}".format(err)
+        super(AtomNotImplementedError,self).__init__(self.message)
 
 class AtomExecutionFailedError(Exception):
-    def __init___(self, err):
+    def __init__(self, err):
         self.message = "Atom Execution failed. Error:" + \
-                       " %s".format(err)
+                       " {}".format(err)
+        super(AtomExecutionFailedError,self).__init__(self.message)
