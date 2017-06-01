@@ -13,6 +13,10 @@ import tendrl.commons.objects.node_context as node
 from tendrl.commons.utils.central_store import utils as cs_utils
 
 
+class TestBaseObject(objects.BaseObject):
+    def __init__(self,*args,**kwargs):
+        super(TestBaseObject,self).__init__(*args,**kwargs)
+
 def hasattribute(*args):
     if args[0]:
         if args[1] == "internal":
@@ -84,7 +88,7 @@ def write(*args,**kwargs):
 def test_constructor():
     with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
         with pytest.raises(Exception):
-            obj = objects.BaseObject()
+            obj = TestBaseObject()
             delattr(obj,"internal")
             mock_hasattr.return_value = hasattribute(False)
             obj.__init__()
@@ -98,9 +102,9 @@ def test_load_definition():
      tendrlNS = init()
      with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
         with pytest.raises(Exception):
-            obj = objects.BaseObject()
+            obj = TestBaseObject()
      with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = objects.BaseObject()
+        obj = TestBaseObject()
         obj._ns = tendrlNS
         with pytest.raises(Exception):
             obj.load_definition()
@@ -114,7 +118,7 @@ def test_load_definition():
 def test_save():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = objects.BaseObject()
+        obj = TestBaseObject()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -169,7 +173,7 @@ def test_save():
 def test_load():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = objects.BaseObject()
+        obj = TestBaseObject()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -195,7 +199,7 @@ def test_load():
 def test_exists():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = objects.BaseObject()
+        obj = TestBaseObject()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -208,3 +212,51 @@ def test_exists():
                 with patch.object(Client,"read",read) as mock_read:
                     with pytest.raises(etcd.EtcdConnectionFailed):
                         obj.exists()
+
+
+class TestBaseAtom(objects.BaseAtom):
+    def __init__(self,parameter):
+        self.__class__.__name__ = "write" 
+        super(TestBaseAtom,self).__init__(parameter)
+    
+    def run(self	):
+        super(TestBaseAtom,self).run()
+
+
+def test_constructor_BaseAtom():
+    tendrlNS = init()
+    with patch.object(TendrlNS,'get_atom_definition',return_value = True) as mock_atm_def:
+        obj = TestBaseAtom(1)
+    with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
+        obj = TestBaseAtom(1)
+    with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
+        with pytest.raises(Exception):
+            obj = TestBaseAtom(1)
+            assert obj.parameters == 1
+
+
+@mock.patch('tendrl.commons.event.Event.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.Message.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
+            mock.Mock(return_value=None))
+def test_load_definition_BaseAtom():
+    tendrlNS = init()
+    with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
+        obj = TestBaseAtom(1)
+        obj._ns = tendrlNS
+        with pytest.raises(Exception):
+            obj._defs = obj.load_definition()
+
+
+def test_run():
+    with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
+        obj = TestBaseAtom(1)
+        with pytest.raises(objects.AtomNotImplementedError):
+            obj.run()
+
+
+def test_constructor_AtomNotImplementedError():
+    obj = objects.AtomNotImplementedError("Test Error")
+    assert obj.message == "Test Error"
