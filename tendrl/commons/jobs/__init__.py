@@ -35,12 +35,13 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             _job_sync_interval = 3
         while not self._complete.is_set():
             gevent.sleep(_job_sync_interval)
+            jid = None
             try:
                 try:
                     jobs = NS._int.client.read("/queue")
                 except etcd.EtcdKeyNotFound:
                     continue
-
+                
                 for job in jobs.leaves:
                     jid = job.key.split('/')[-1]
                     job_status_key = "/queue/%s/status" % jid
@@ -146,7 +147,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                              type=NS.type)
                             NS._int.wclient.write(job_lock_key,
                                                   json.dumps(lock_info),
-                                                  prevExist=False)
+                                                  prevValue="")
                             NS._int.wclient.write(job_status_key, "processing",
                                                   prevValue="new")
                         except etcd.EtcdCompareFailed:
@@ -251,12 +252,12 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 job.save()
                                                           
             except Exception as ex:
+                _msg = "Job (%s) processing failure, error:" % jid
                 Event(
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "Job processing failure, error:" +
-                                            ex.message,
+                        payload={"message": _msg + ex.message,
                                  "exception": ex
                                  }
                     )
