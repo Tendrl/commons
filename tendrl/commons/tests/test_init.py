@@ -74,7 +74,8 @@ def test_list_modules_in_package_path():
         ('platform', 'tendrl.commons.objects.platform'),
         ('service', 'tendrl.commons.objects.service'),
         ('tendrl_context', 'tendrl.commons.objects.tendrl_context'),
-        ('block_device', 'tendrl.commons.objects.block_device')]
+        ('block_device', 'tendrl.commons.objects.block_device'),
+        ('virtual_disk', 'tendrl.commons.objects.virtual_disk')]
     ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)).
                                    rsplit('/', 1)[0], "objects")
     ns_objects_prefix = "tendrl.commons.objects."

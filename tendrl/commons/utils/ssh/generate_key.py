@@ -63,6 +63,7 @@ class GenerateKey(object):
                                  self.attributes["_raw_params"], err)}
                 )
             )
+            out = "Ansible Executable Generation Failed"
         if out is not None and "ssh_public_key" not in out:
             err = out
             Event(

@@ -71,7 +71,7 @@ class NodeContext(objects.BaseObject):
         try:
             Event(
                 Message(
-                    priority="info",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Registered Node (%s) with machine_id==%s" % (node_id, self.machine_id)
                          }
@@ -109,7 +109,7 @@ class NodeContext(objects.BaseObject):
             try:
                 Event(
                     Message(
-                        priority="info",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Unregistered Node found with machine_id==%s" % self.machine_id
                                 }

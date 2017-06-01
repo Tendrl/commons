@@ -24,7 +24,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
     def _run(self):
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s running" % self.__class__.__name__}
             )
@@ -53,7 +53,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         pass
 
                     # tendrl-node-agent tagged as tendrl/monitor will ensure
-                    # >5 min old "new" jobs are timed out and marked as
+                    # >10 min old "new" jobs are timed out and marked as
                     # "failed" (the parent job of these jobs will also be
                     # marked as "failed")
                     if "tendrl/monitor" in NS.node_context.tags:
@@ -71,7 +71,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                                             1).replace(
                                               tzinfo=utc)).total_seconds()
                             if int(_now_epoch) >= int(_valid_until):
-                                # Job has "new" status since 5 minutes,
+                                # Job has "new" status since 10 minutes,
                                 # mark status as "failed" and Job.error =
                                 # "Timed out"
                                 try:
@@ -82,22 +82,22 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     pass
                                 else:
                                     job = Job(job_id=jid).load()
-                                    _msg = str("Timed-out (>5min as 'new')")
+                                    _msg = str("Timed-out (>10min as 'new')")
                                     job.errors = _msg
                                     job.save()
                                     continue
                         else:
-                            _now_plus_5 = time_utils.now() + \
-                                          datetime.timedelta(minutes=5)
+                            _now_plus_10 = time_utils.now() + \
+                                          datetime.timedelta(minutes=10)
                             _epoch_start = datetime.datetime(1970, 1,
                                                              1).replace(
                                 tzinfo=utc)
 
                             # noinspection PyTypeChecker
-                            _now_plus_5_epoch = (_now_plus_5 -
+                            _now_plus_10_epoch = (_now_plus_10 -
                                                  _epoch_start).total_seconds()
                             NS._int.wclient.write(_job_valid_until_key,
-                                                  int(_now_plus_5_epoch))
+                                                  int(_now_plus_10_epoch))
 
                     job = Job(job_id=jid).load()
                     if job.payload["type"] == NS.type and \

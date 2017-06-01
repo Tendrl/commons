@@ -3,6 +3,7 @@ from tendrl.commons.utils import import_utils
 import importlib
 from mock import patch
 import mock
+import inspect
 
 def test_load_abs_module():
     obj = importlib.import_module("tendrl.commons.tests.fixtures.config")
@@ -10,5 +11,5 @@ def test_load_abs_module():
     assert obj == module
 
 def test_load_abs_class():
-    with pytest.raises(TypeError):
-        obj = import_utils.load_abs_class("tendrl.commons.tests.fixtures.config.Config")
+    obj = import_utils.load_abs_class("tendrl.commons.tests.fixtures.config.Config")
+    assert inspect.isclass(obj)
