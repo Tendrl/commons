@@ -15,7 +15,7 @@ class Job(objects.BaseObject):
         self.errors = errors
         self.children = children
         self.locked_by = locked_by
-        self.output = output or {"_None":"_None"}
+        self.output = output or {}
         self.value = 'queue/{0}'
 
     def save(self):
