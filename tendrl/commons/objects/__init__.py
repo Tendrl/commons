@@ -299,14 +299,8 @@ class BaseObject(object):
         return json.dumps(data)
 
     def _hash(self):
-        try:
-            self.hash = None
-        except AttributeError:
-            pass
-        try:
-            self.updated_at = None
-        except AttributeError:
-            pass
+        self.hash = None
+        self.updated_at = None
 
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
