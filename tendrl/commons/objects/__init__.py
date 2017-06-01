@@ -389,11 +389,12 @@ class BaseAtom(object):
         )
 
 class AtomNotImplementedError(NotImplementedError):
-    def __init___(self, err):
-        self.message = "run function not implemented. %s".format(err)
-
+    def __init__(self, err):
+        self.message = "run function not implemented. {}".format(err)
+        super(AtomNotImplementedError,self).__init__(self.message)
 
 class AtomExecutionFailedError(Exception):
-    def __init___(self, err):
+    def __init__(self, err):
         self.message = "Atom Execution failed. Error:" + \
-                       " %s".format(err)
+                       " {}".format(err)
+        super(AtomExecutionFailedError,self).__init__(self.message)
