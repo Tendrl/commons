@@ -141,9 +141,8 @@ class ExceptionMessage(Message):
                 err = "Exception field is not found in payload"
                 sys.stderr.write(err)
         else:
-            err = "Given exception %s is not a subclass of " \
-                "Exception class \n" % (str(payload["exception"]))
-            sys.stderr.write(err)
+            err = "Given exception  is not a subclass of " \
+                "Exception class \n" % sys.stderr.write(err)
     
 
     def format_exception(self, formatted_stack):
