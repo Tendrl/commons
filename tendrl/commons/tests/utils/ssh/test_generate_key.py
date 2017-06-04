@@ -19,6 +19,10 @@ def ansible(*args,**kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
 
+@mock.patch('tendrl.commons.event.Event.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.Message.__init__',
+            mock.Mock(return_value=None))
 def test_constructor():
     generate_key = GenerateKey()
     assert generate_key.attributes["name"] == "root"
@@ -43,4 +47,8 @@ def test_run():
     with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
         mock_run.return_value = ansible_run(False)
         ret = generate_key.run()
-    
+    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+        ret = generate_key.run()
+    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+        mock_run.return_value = None, "Test error"
+        ret = generate_key.run()

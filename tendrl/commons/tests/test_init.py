@@ -99,12 +99,8 @@ def test_register_subclasses_to_ns(monkeypatch):
     ns_objects_prefix = "tendrl.commons.objects."
     modules = tendrlNS._list_modules_in_package_path(ns_objects_path,
                                                      ns_objects_prefix)
-    
-    sys.stdout.write(str(ns_objects_path)+"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-    sys.stdout.write(str(modules))
+
     for mode_name, mod_cls in modules:
-        sys.stdout.write("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        sys.stdout.write(str(NS.tendrl.objects))
         assert hasattr(NS.tendrl.objects, mode_name.title().replace('_', '')) \
             is True
 

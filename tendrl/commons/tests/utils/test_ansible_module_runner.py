@@ -3,6 +3,7 @@ import __builtin__
 from tendrl.commons.utils.ansible_module_runner import AnsibleExecutableGenerationFailed
 from tendrl.commons.utils.ansible_module_runner import AnsibleModuleNotFound
 from tendrl.commons.utils.ansible_module_runner import AnsibleRunner
+from tendrl.commons.utils import ansible_module_runner
 from mock import patch
 import mock
 import maps
@@ -10,6 +11,7 @@ import os
 import ansible.executor.module_common as module_common
 import importlib
 import sys
+import json
 from mock import MagicMock
 
 def system(*args):
@@ -70,6 +72,7 @@ def test_run():
                 ansible_obj.run()
 
 def test_module():
-    sys.modules['json'] =  "jsons"
     module = importlib.import_module("tendrl.commons.utils.ansible_module_runner")
-
+    with mock.patch.dict('sys.modules', {'json': None}):
+        with mock.patch.dict('sys.modules', {'simplejson': json}):
+            reload(ansible_module_runner)
