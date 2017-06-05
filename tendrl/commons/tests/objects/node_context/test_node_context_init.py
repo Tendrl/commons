@@ -6,6 +6,8 @@ from mock import patch
 import mock
 import etcd
 import os
+import tempfile
+
 
 
 def read(*args):
@@ -126,18 +128,19 @@ def test_create_node_id(patch_write,patch_read, patch_client):
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
     node_context=NodeContext(machine_id="Test_Machine_id", node_id="Test_Node_id", fqdn="Test_fqdn")
-    f = open('temp.txt','wb+')
+    f = tempfile.TemporaryFile()
     with patch.object(__builtin__,"open") as mock_open:
         mock_open.return_value = f
         with patch.object(os,"makedirs",return_value = True) as mock_makedirs:
             node_context._create_node_id()
+    f.close()
     with pytest.raises(IOError):
         with patch.object(os,"makedirs",return_value = True) as mock_makedirs:
             node_context._create_node_id()
-    f = open('temp.txt','wb+')
+    f = tempfile.TemporaryFile()
     with patch.object(__builtin__,"open") as mock_open:
         mock_open.return_value = f
         with patch.object(os.path,"exists",return_value = False) as mock_exists:
             with patch.object(os,"makedirs",return_value = True) as mock_makedirs:     
                 node_context._create_node_id()
-
+    f.close()
