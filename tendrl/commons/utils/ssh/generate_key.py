@@ -57,7 +57,7 @@ class GenerateKey(object):
             err = str(e.message)
             Event(
                 Message(
-                    priority="warning",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": "SSH-Key Genertion failed %s. "
                              "Error: %s" % (
@@ -68,7 +68,7 @@ class GenerateKey(object):
         if out is None:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": "No output after Ansible Executable Generation"}
                 )
@@ -78,7 +78,7 @@ class GenerateKey(object):
             err = out
             Event(
                 Message(
-                    priority="warning",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": "Unable to generate ssh-key .err: "
                                         "%s" % err}

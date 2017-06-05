@@ -54,7 +54,7 @@ class Service(object):
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=self.publisher_id,
                     payload={"message": "Error switching the service: "
                                         "%s to %s state. Error: %s" %

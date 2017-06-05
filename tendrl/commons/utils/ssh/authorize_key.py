@@ -58,7 +58,7 @@ class AuthorizeKey(object):
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
-                    priority="warning",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": "Copying authorize key failed %s. "
                              "Error: %s" % (self.attributes["_raw_params"],
@@ -69,7 +69,7 @@ class AuthorizeKey(object):
         if err != "":
             Event(
                 Message(
-                    priority="warning",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": "Unable to copy authorize key "
                                         ".err:%s" % err}

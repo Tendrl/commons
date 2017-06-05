@@ -32,7 +32,7 @@ class Memory(objects.BaseObject):
         except IOError as ex:
             Event(
                 ExceptionMessage(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Unable to find memory details",
                              "exception": ex

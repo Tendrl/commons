@@ -19,7 +19,7 @@ class Installer(object):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Unsupported package type: %s" %
                                         package_type
@@ -57,7 +57,7 @@ class Installer(object):
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Could not install package: %s. Error:"
                                         " %s" %
