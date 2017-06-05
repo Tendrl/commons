@@ -48,14 +48,14 @@ class BaseFlow(object):
                                                             cls_name)
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
@@ -84,14 +84,14 @@ class BaseFlow(object):
                       (self._ns.ns_src, cls_name)
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
