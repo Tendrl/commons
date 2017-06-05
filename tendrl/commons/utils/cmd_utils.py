@@ -64,7 +64,7 @@ class Command(object):
             try:
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "could not run the command %s. " %
                                             self.attributes["_raw_params"],

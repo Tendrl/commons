@@ -35,10 +35,10 @@ def find_status():
                 sshd["port"] = int(result[0].laddr[1])
                 sshd["status"] = result[0].status
             else:
-                err = "Unable to find port number"
+                err = "Unable to find ssh port number"
                 Event(
                     Message(
-                        priority="warning",
+                        priority="debug",
                         publisher="commons",
                         payload={"message": err}
                     )
@@ -47,7 +47,7 @@ def find_status():
             err = "sshd service is not running"
             Event(
                 Message(
-                    priority="warning",
+                    priority="debug",
                     publisher="commons",
                     payload={"message": err}
                 )
@@ -56,7 +56,7 @@ def find_status():
     else:
         Event(
             Message(
-                priority="warning",
+                priority="debug",
                 publisher="commons",
                 payload={"message": err}
             )
