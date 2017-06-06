@@ -49,7 +49,7 @@ class BaseObject(object):
             try:
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "error",
                                  "exception": ex}
@@ -60,7 +60,7 @@ class BaseObject(object):
             try:
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
@@ -148,7 +148,7 @@ class BaseObject(object):
                                    (item['name'], self.__name__)
                             Event(
                                 ExceptionMessage(
-                                    priority="error",
+                                    priority="debug",
                                     publisher=NS.publisher_id,
                                     payload={"message": _msg,
                                              "exception": ex
@@ -212,7 +212,7 @@ class BaseObject(object):
                                    (item['name'], self.__name__)
                             Event(
                                 ExceptionMessage(
-                                    priority="error",
+                                    priority="debug",
                                     publisher=NS.publisher_id,
                                     payload={"message": _msg,
                                              "exception": ex
@@ -316,7 +316,7 @@ class BaseObject(object):
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
     def __init__(self, parameters=None):
-        self.parameters = parameters
+        self.parameters = parameters or dict()
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):
@@ -354,7 +354,7 @@ class BaseAtom(object):
             try:
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Error", "exception": ex}
                     )
@@ -364,7 +364,7 @@ class BaseAtom(object):
             try:
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )

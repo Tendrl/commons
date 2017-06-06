@@ -32,12 +32,18 @@ class Service(object):
         try:
             runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
+                publisher_id=self.publisher_id,
+                node_id=self.node_id,
+                socket_path=self.socket_path,
                 **attr
             )
         except ansible_module_runner.AnsibleModuleNotFound:
             # Backward compat ansible<=2.2
             runner = ansible_module_runner.AnsibleRunner(
                 "core/" + ANSIBLE_MODULE_PATH,
+                publisher_id=self.publisher_id,
+                node_id=self.node_id,
+                socket_path=self.socket_path,
                 **attr
             )
         try:
