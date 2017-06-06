@@ -321,7 +321,7 @@ class BaseObject(object):
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
     def __init__(self, parameters=None):
-        self.parameters = parameters
+        self.parameters = parameters or dict()
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):
