@@ -28,7 +28,7 @@ def test_run(mock_read,mock_client):
     mock_read.return_value = read()
     mock_client.return_value=etcd.Client()
     obj = IsNodeTendrlManaged()
-    assert obj.parameters is None
+    assert obj.parameters is not None
     obj.parameters = maps.NamedDict()
     obj.parameters["Node[]"] = []
     with pytest.raises(AtomExecutionFailedError):
