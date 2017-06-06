@@ -32,12 +32,18 @@ class Service(object):
         try:
             runner = ansible_module_runner.AnsibleRunner(
                 ANSIBLE_MODULE_PATH,
+                publisher_id=self.publisher_id,
+                node_id=self.node_id,
+                socket_path=self.socket_path,
                 **attr
             )
         except ansible_module_runner.AnsibleModuleNotFound:
             # Backward compat ansible<=2.2
             runner = ansible_module_runner.AnsibleRunner(
                 "core/" + ANSIBLE_MODULE_PATH,
+                publisher_id=self.publisher_id,
+                node_id=self.node_id,
+                socket_path=self.socket_path,
                 **attr
             )
         try:
@@ -54,7 +60,7 @@ class Service(object):
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             Event(
                 Message(
-                    priority="debug",
+                    priority="error",
                     publisher=self.publisher_id,
                     payload={"message": "Error switching the service: "
                                         "%s to %s state. Error: %s" %
