@@ -47,7 +47,7 @@ class AnsibleRunner(object):
         if kwargs == {}:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Empty argument dictionary"}
                 )
@@ -72,7 +72,7 @@ class AnsibleRunner(object):
         except Exception as e:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={"message": "Could not generate ansible "
                                         "executable data "

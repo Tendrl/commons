@@ -18,7 +18,7 @@ class BaseFlow(object):
                 raise Exception("Internal Flow must provide its own definition"
                                 " via '_defs' attr")
 
-        self.parameters = parameters
+        self.parameters = parameters or dict()
         self.job_id = job_id
         self.parameters.update({'job_id': self.job_id})
         self.parameters.update({'flow_id': self._defs['uuid']})
@@ -48,14 +48,14 @@ class BaseFlow(object):
                                                             cls_name)
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )
@@ -84,14 +84,14 @@ class BaseFlow(object):
                       (self._ns.ns_src, cls_name)
                 Event(
                     ExceptionMessage(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Error", "exception": ex}
                     )
                 )
                 Event(
                     Message(
-                        priority="error",
+                        priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": msg}
                     )

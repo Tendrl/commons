@@ -9,9 +9,12 @@ import importlib
 import gevent.event
 import datetime
 from tendrl.commons.tests.fixtures.client import Client
+import pytest
 from tendrl.commons.objects import BaseObject
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import time_utils
+from tendrl.commons.tests.fixtures.ns import NameSpace
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from pytz import utc
 
 test_job = JobConsumerThread()
@@ -55,13 +58,39 @@ def _read(*args,**kwargs):
 def load(*args):
     obj = importlib.import_module("tendrl.commons.tests.fixtures.client")
     obj = obj.Client()
-    obj.payload=maps.NamedDict(type = "Test_type")
+    if args[0] == "tag":
+        obj.payload=maps.NamedDict(type = "Test_type",tags = ["Test_tag"],run="tendrl.commons.objects.node.flows.test_flow",parameters = "Test_param")
+    elif args[0] == "node":
+        obj.payload=maps.NamedDict(type = "Test_type",tags = ["Test_tag"],node_ids = ["Test_node"],
+run="tendrl.commons.objects.node.flows.test_flow",parameters = "Test_param")
+    elif args[0] == "no_obj_name":
+        obj.payload=maps.NamedDict(type = "Test_type",tags = ["Test_tag"],
+run="tendrl.commons.flows.test_flow",parameters = "Test_param")
+    else:
+        obj.payload=maps.NamedDict(type = "Test_type")
     obj.status = "new"
-    obj.tags = ["test_tag"]
-    obj.node_ids=["1"]
     obj.job_id = 1
     return obj
-   
+
+def write(*args,**kwargs):
+    raise etcd.EtcdCompareFailed
+
+def run(*args,**kwargs):
+    raise Exception
+
+def status_write(*args,**kwargs):
+    if args[1] == "/queue/1/status" and args[2] == "finished" :
+        raise etcd.EtcdCompareFailed
+    else:
+        return True
+
+def failed_write(*args,**kwargs):
+    if args[0] == "no_err":
+        return True
+    if args[1] == "/queue/1/status" and args[2] == "failed" :
+        raise etcd.EtcdCompareFailed
+    else:
+        return True
 
 
 def init():
@@ -95,7 +124,10 @@ def test_constructor():
             mock.Mock(return_value=True))
 def test_run():
     init()
+    NS.node_context.fqdn = "Test"
     NS.node_context.node_id = "1"
+    obj = importlib.import_module("tendrl.commons.tests.fixtures.ns")
+    NS.commons = maps.NamedDict(ns = obj.NameSpace())
     with patch.object(Client,'read',read_value) as mock_read:
          global test_job
          test_job._run()
@@ -128,10 +160,59 @@ def test_run():
              NS.node_context.tags = "tendrl/monitor"
              test_job._run()
              test_job._complete._flag = False
+    with patch.object(Job,"load",load) as mock_load:
+        with patch.object(Client,'read',_read) as mock_read:
+             global test_job
+             NS.node_context.tags = "tendrl/monitor"
+             test_job._run()
+             test_job._complete._flag = False
+             with patch.object(Client,'write',write) as mock_read:
+                 test_job._run()
+                 test_job._complete._flag = False
+             NS.node_context.tags = ""
+             NS.type = "Test"
+             test_job._run()
+             test_job._complete._flag = False
+    with patch.object(Job,"load") as mock_load:
+        mock_load.return_value = load("tag")
+        with patch.object(Client,'read',_read) as mock_read:
+            global test_job
+            NS.type = "Test_type"
+            NS.node_context.tags = "No_tag"
+            test_job._run()
+            test_job._complete._flag = False
+            NS.node_context.tags = "Test_tag"
+            test_job._run()
+            test_job._complete._flag = False
+            mock_load.return_value = load("node")
+            NS.node_context.node_id = "Test_node"
+            test_job._run()
+            test_job._complete._flag = False
+            mock_load.return_value = load("no_obj_name")
+            test_job._run()
+            test_job._complete._flag = False
+            with patch.object(Client,"write",write) as mock_write:
+                test_job._run()
+                test_job._complete._flag = False
+            with patch.object(Client,"write",status_write) as mock_write:
+                test_job._run()
+                test_job._complete._flag = False
+            with patch.object(Client,"write",failed_write) as mock_write:
+                with patch.object(NameSpace,"run",run) as mock_run:
+                    test_job._run()
+                    test_job._complete._flag = False
+            with patch.object(Client,"write",failed_write("no_err")) as mock_write:
+                with patch.object(NameSpace,"run",run) as mock_run:
+                    test_job._run()
+                    test_job._complete._flag = False
     test_job = JobConsumerThread()
     test_job._complete._flag = True
     test_job._run()
     NS.node_context.tags = "tendrl/monitor"
     test_job._complete._flag = True
     test_job._run()
-    
+
+def test_stop():
+    test_job = JobConsumerThread()
+    test_job.stop()
+    assert test_job._complete._flag
