@@ -19,6 +19,6 @@ class VirtualDisk(Disk):
             sysfs_device_link, hardware_class, model, vendor, device,
             rmversion, serial_no, driver, driver_modules, device_files,
             device_number, bios_id, geo_bios_edd, geo_logical, size,
-            size_bios_edd, geo_bios_legacy, config_status, partitions, ssd
+            size_bios_edd, geo_bios_legacy, config_status, partitions, ssd,
             *args, **kwargs)
         self.value = 'nodes/{0}/LocalStorage/Virtio/{1}'
