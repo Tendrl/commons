@@ -27,7 +27,11 @@ def conn(*args):
             mock.Mock(return_value=None))
 def test_find_status():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id = "node_context"
+    NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     with patch.object(psutil.Process,'connections') as mock_connections:
         mock_connections.return_value = conn(True)
         sshd_status.find_status()
@@ -47,7 +51,11 @@ def test_find_status():
             mock.Mock(return_value=None))
 def test_find_pid():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id = "node_context"
+    NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     cmd = cmd_utils.Command("systemctl show sshd.service")
     out, err, rc = cmd.run()
     sshd_status._find_pid(out)

@@ -16,7 +16,9 @@ def run(*args):
             mock.Mock(return_value=None))
 def test_run():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id =1
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     check_node_up = CheckNodeUp()

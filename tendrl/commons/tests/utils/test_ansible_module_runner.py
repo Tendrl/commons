@@ -41,7 +41,11 @@ def test_AnsibleModuleNotFound_constructor():
             mock.Mock(return_value=None))
 def test_AnsibleRunner_constructor():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id =1
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     with patch.object(os.path,'isfile',return_value = False) as mock_isfile:
         with pytest.raises(AnsibleModuleNotFound):
             ansible_obj = AnsibleRunner("Test_module")
@@ -58,7 +62,11 @@ def test_AnsibleRunner_constructor():
             mock.Mock(return_value=None))
 def test_run():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id =1
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     with patch.object(os.path,'isfile',return_value = True) as mock_isfile:
         ansible_obj = AnsibleRunner("path\\to\\test\\module",ansible="test_ansible")
         with pytest.raises(AnsibleExecutableGenerationFailed):
