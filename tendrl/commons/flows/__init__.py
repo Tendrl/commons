@@ -18,7 +18,7 @@ class BaseFlow(object):
                 raise Exception("Internal Flow must provide its own definition"
                                 " via '_defs' attr")
 
-        self.parameters = parameters
+        self.parameters = parameters or dict()
         self.job_id = job_id
         self.parameters.update({'job_id': self.job_id})
         self.parameters.update({'flow_id': self._defs['uuid']})
