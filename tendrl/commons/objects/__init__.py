@@ -79,7 +79,6 @@ class BaseObject(object):
                 if type(ex) != etcd.EtcdKeyNotFound:
                     NS._int.wreconnect()
                     NS._int.wclient.refresh(self.value, ttl=ttl)
-                pass
 
         if not "Message" in self.__class__.__name__:
             try:
@@ -93,7 +92,6 @@ class BaseObject(object):
                     if type(ex) != etcd.EtcdKeyNotFound:
                         NS._int.reconnect()
                         _stored_hash = NS._int.client.read(_hash_key).value
-                    pass
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
                     return
@@ -162,7 +160,6 @@ class BaseObject(object):
             except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
-                pass
 
     def load(self):
         _copy = self._copy_vars()
@@ -187,7 +184,6 @@ class BaseObject(object):
                 else:
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-                pass
             
             value = etcd_resp.value
             if item['dir']:
@@ -243,7 +239,6 @@ class BaseObject(object):
                 NS._int.reconnect()
                 NS._int.client.read("/{0}".format(self.value))
                 _exists = True
-            pass
         return _exists
 
     def _map_vars_to_tendrl_fields(self):
@@ -321,7 +316,7 @@ class BaseObject(object):
 @six.add_metaclass(abc.ABCMeta)
 class BaseAtom(object):
     def __init__(self, parameters=None):
-        self.parameters = parameters
+        self.parameters = parameters or dict()
 
         # Tendrl internal atoms should populate their own self._defs
         if not hasattr(self, "internal"):

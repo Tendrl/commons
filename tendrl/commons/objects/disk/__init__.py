@@ -10,7 +10,7 @@ class Disk(objects.BaseObject):
                  device_files=None, device_number=None, bios_id=None,
                  geo_bios_edd=None, geo_logical=None, size=None, size_bios_edd=None,
                  geo_bios_legacy=None, config_status=None, partitions=None,
-                 *args, **kwargs):
+                 ssd=None, *args, **kwargs):
         super(Disk, self).__init__(*args, **kwargs)
         self.disk_id = disk_id
         self.hardware_id = hardware_id
@@ -36,6 +36,7 @@ class Disk(objects.BaseObject):
         self.geo_bios_legacy = geo_bios_legacy
         self.config_status = config_status
         self.partitions = partitions
+        self.ssd = ssd
         self.value = 'nodes/{0}/LocalStorage/Disks/{1}'
 
     def render(self):

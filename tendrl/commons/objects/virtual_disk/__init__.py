@@ -12,13 +12,13 @@ class VirtualDisk(Disk):
                  device_number=None, bios_id=None,
                  geo_bios_edd=None, geo_logical=None, size=None,
                  size_bios_edd=None, geo_bios_legacy=None,
-                 config_status=None, partitions=None,
+                 config_status=None, partitions=None, ssd=None,
                  *args, **kwargs):
         super(VirtualDisk, self).__init__(
             disk_id, hardware_id, disk_name, sysfs_id, sysfs_busid,
             sysfs_device_link, hardware_class, model, vendor, device,
             rmversion, serial_no, driver, driver_modules, device_files,
             device_number, bios_id, geo_bios_edd, geo_logical, size,
-            size_bios_edd, geo_bios_legacy, config_status, partitions,
+            size_bios_edd, geo_bios_legacy, config_status, partitions, ssd,
             *args, **kwargs)
         self.value = 'nodes/{0}/LocalStorage/Virtio/{1}'
