@@ -57,8 +57,7 @@ def test_validate():
 
 def test_contructor_ExceptionMessage():
     init()
-    with pytest.raises(Exception):
-        ex_msg = ExceptionMessage(priority = "info",publisher = "node_context", payload = {"message":"Test Exception Message"})
+    ex_msg = ExceptionMessage(priority = "info",publisher = "node_context", payload = {"message":"Test Exception Message"})
     ex = Exception("Test Exception")
     ex_msg = ExceptionMessage(priority = "info",publisher = "node_context", payload = {"message":"Test Exception Message","exception":ex})
     
