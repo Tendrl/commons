@@ -29,11 +29,12 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                 payload={"message": "%s running" % self.__class__.__name__}
             )
         )
-        _job_sync_interval = 10
-        NS.node_context = NS.node_context.load()
-        if "tendrl/monitor" in NS.node_context.tags:
-            _job_sync_interval = 3
         while not self._complete.is_set():
+            _job_sync_interval = 5
+            NS.node_context = NS.node_context.load()
+            if "tendrl/monitor" in NS.node_context.tags:
+                _job_sync_interval = 3
+
             gevent.sleep(_job_sync_interval)
             jid = None
             try:
