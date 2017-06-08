@@ -21,6 +21,7 @@ import sys
 internal_flag = 1
 obj_flag = 1
 obj = None
+def_flag = 1
 
 ''' Child Classes'''
 
@@ -46,7 +47,9 @@ def has_attr(*args):
         return True
 
 def mock_hasattr(*args,**kwargs):
-    if args[1] == "_defs":
+    global def_flag
+    if args[1] == "_defs" and def_flag == 1:
+        def_flag = 2
         return False
     return True
 
@@ -155,31 +158,30 @@ def test_run():
         flow_obj.run()
         flow_obj._defs['pre_run'] = None
         flow_obj.run()
-        flow_obj._defs['pre_run'] = ["tendrl.commons.objects.node.atoms.cmd"]
-        NS["commons"] = NS.tendrl
+        flow_obj._defs['pre_run'] = ["tendrl.objects.node.atoms.cmd"]
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
-        flow_obj._defs['pre_run'] = ["tendrl.commons.objects.Node.atoms.Cmd"]
+        flow_obj._defs['pre_run'] = ["tendrl.objects.Node.atoms.Cmd"]
         with patch.object(Cmd,'run',return_value = True) as mock_run:
             flow_obj.run()
         flow_obj._defs['pre_run'] = None
         flow_obj._defs['atoms'] = None
         flow_obj.run()
-        flow_obj._defs['atoms'] = ["tendrl.commons.objects.node.atoms.cmd"]
+        flow_obj._defs['atoms'] = ["tendrl.objects.node.atoms.cmd"]
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
-        flow_obj._defs['atoms'] = ["tendrl.commons.objects.Node.atoms.Cmd"]
+        flow_obj._defs['atoms'] = ["tendrl.objects.Node.atoms.Cmd"]
         with patch.object(Cmd,'run',return_value = True) as mock_run:
             flow_obj.run()
         flow_obj._defs['atoms'] = None
         flow_obj._defs['post_run'] = None
         flow_obj.run()
-        flow_obj._defs['post_run'] = ["tendrl.commons.objects.node.atoms.cmd"]
+        flow_obj._defs['post_run'] = ["tendrl.objects.node.atoms.cmd"]
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
-        flow_obj._defs['post_run'] = ["tendrl.commons.objects.Node.atoms.Cmd"]
+        flow_obj._defs['post_run'] = ["tendrl.objects.Node.atoms.Cmd"]
         with patch.object(Cmd,'run',return_value = True) as mock_run:
             flow_obj.run()
-        flow_obj._defs['post_run'] = ["tendrl.commons.integrations.objects.Node.atoms.Cmd"]
+        flow_obj._defs['post_run'] = ["tendrl.integrations.objects.Node.atoms.Cmd"]
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
