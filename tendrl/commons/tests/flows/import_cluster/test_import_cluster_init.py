@@ -2,6 +2,7 @@ import maps
 import mock
 import pytest
 from mock import patch
+import subprocess
 import etcd
 import __builtin__
 from tendrl.commons.flows.import_cluster import gluster_help 
@@ -72,9 +73,8 @@ def open(*args,**kwargs):
     f = tempfile.TemporaryFile()
     return f
 
-def gluster(*args):
-    raise Exception
-    return True
+def run(*args):
+    raise ansible_module_runner.AnsibleExecutableGenerationFailed
 
 
 def load_trendrl_context(*args):
@@ -173,7 +173,7 @@ def test_run():
             mock.Mock(return_value=None)):
                         with mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None)):
-                            with patch.object(__builtin__,'open',open) as mock_gluster_help:
+                            with patch.object(__builtin__,'open',return_value = False) as mock_open:
                                 cluster_obj.run()
         param['DetectedCluster.sds_pkg_name'] = "ceph"
         param['Node[]'] = ["TestNode"]
@@ -187,7 +187,7 @@ def test_run():
             mock.Mock(return_value=None)):
                         with mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None)):
-                            with patch.object(__builtin__,'open',open) as mock_gluster_help:
+                            with patch.object(__builtin__,'open',open) as mock_open:
                                 with pytest.raises(FlowExecutionFailedError):
                                     cluster_obj.run()
         param['DetectedCluster.sds_pkg_name'] = "ceph"
@@ -202,7 +202,7 @@ def test_run():
             mock.Mock(return_value=None)):
                         with mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None)):
-                            with patch.object(__builtin__,'open',open) as mock_gluster_help:
+                            with patch.object(__builtin__,'open',return_value = False) as mock_open:
                                 cluster_obj.run()
         param['Node[]'] = ["TestNode"]
         param["import_after_expand"] = False
@@ -214,5 +214,7 @@ def test_run():
                     NS.config.data['package_source_type'] = 'rpm'
                     with patch.object(ansible_module_runner.AnsibleRunner,'run',ansible_run) as mock_run:
                         with patch.object(create_cluster_utils,'gluster_create_ssh_setup_jobs',return_value = [1,2]) as mock_create_ssh:
-                            with patch.object(__builtin__,'open',open) as mock_gluster_help:
-                                    import_cluster.run()
+                            with patch.object(ansible_module_runner.AnsibleRunner,'run',run):
+                                with patch.object(create_cluster_utils,'install_gdeploy',return_value = False):
+                                    with patch.object(create_cluster_utils,'install_python_gdeploy',return_value = False):
+                                        import_cluster.run()

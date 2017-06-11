@@ -1,6 +1,6 @@
 Name: tendrl-commons
 Version: 1.4.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
 Source0: %{name}-%{version}.tar.gz
@@ -46,6 +46,9 @@ rm -rf %{name}.egg-info
 %license LICENSE
 
 %changelog
+* Sun Jun 11 2017 Rohan Kanade <rkanade@redhat.com> - 1.4.1-2
+- Fixes https://github.com/Tendrl/commons/issues/587
+
 * Thu Jun 08 2017 Rohan Kanade <rkanade@redhat.com> - 1.4.1-1
 - Release tendrl-commons v1.4.1
 
