@@ -6,6 +6,9 @@ import tempfile
 from mock import patch
 
 
+'''Unit Test Cases'''
+
+
 def test_constructor():
     setup_ssh = SetupSsh()
     assert setup_ssh._defs is not None

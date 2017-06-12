@@ -10,6 +10,8 @@ import tempfile
 import etcd
 import tendrl.commons.objects.node_context as node
 
+'''Dummy Functions'''
+
 
 def run(*args):
     raise ansible_module_runner.AnsibleExecutableGenerationFailed
@@ -18,9 +20,14 @@ def run(*args):
 def ansible(*args,**kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
+
 def open(*args,**kwargs):
     f = tempfile.TemporaryFile()
     return f
+
+
+'''Unit Test Cases'''
+
 
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")

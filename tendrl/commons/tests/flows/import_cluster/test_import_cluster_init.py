@@ -16,9 +16,88 @@ from tendrl.commons.objects.job import Job
 from tendrl.commons import TendrlNS
 import importlib
 from tendrl.commons.utils import ansible_module_runner
-import sys
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 import tempfile
+
+
+'''Dummy Functions'''
+
+
+def ansible_run(*args):
+    if args[0]:
+        return {"msg":"test_msg","rc":0},"Error"
+    else:
+        return {"msg":"test_msg","rc":1},"Error"
+
+
+def read_failed(*args,**kwargs):
+    if args[0]:
+        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
+            return maps.NamedDict(value = "")
+        else:
+            return maps.NamedDict(value = "failed")
+
+
+def read_passed(*args,**kwargs):
+    if args[0]:
+        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
+            return maps.NamedDict(value = "")
+        else:
+            return maps.NamedDict(value = "finished")
+
+
+def read(*args,**kwargs):
+    raise etcd.EtcdKeyNotFound
+
+
+def open(*args,**kwargs):
+    f = tempfile.TemporaryFile()
+    return f
+
+
+def run(*args):
+    raise ansible_module_runner.AnsibleExecutableGenerationFailed
+
+
+def load_trendrl_context(*args):
+    ret = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
+    ret.detected_cluster_id = 'Test Cluster Id'
+    ret.sds_pkg_version= '9.9'
+    ret.detected_cluster_name = "Test Cluster name"
+    ret.sds_pkg_name = "Test/package/name"
+    ret.machine_id = "Test_machine_id"
+    ret.fqdn = "fqdn"
+    ret.tags = ["Test tag","ceph/mon"]
+    ret.status = True
+    ret.node_id = 1
+    return ret
+
+
+def load_trendrl_context_high_version(*args):
+    ret = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
+    ret.detected_cluster_id = 'Test Cluster Id'
+    ret.sds_pkg_version= '10.10'
+    ret.detected_cluster_name = "Test Cluster name"
+    ret.sds_pkg_name = "Test/package/name"
+    ret.machine_id = "Test_machine_id"
+    ret.fqdn = "fqdn"
+    ret.tags = ["Test tag","ceph/mon"]
+    ret.status = True
+    ret.node_id = 1
+    return ret
+
+
+def get_obj_definition(*args,**kwargs):
+    ret = maps.NamedDict({'attrs': {'integration_id': {'type': 'String', 'help': 'Tendrl managed/generated cluster id for the sds being managed by Tendrl'}, 'cluster_name': {'type': 'String', 'help': 'Name of the cluster'}, 'node_id': {'type': 'String', 'help': 'Tendrl ID for the managed node'}, 'cluster_id': {'type': 'String', 'help': 'UUID of the cluster'}, 'sds_version': {'type': 'String', 'help': "Version of the Tendrl managed sds, eg: '3.2.1'"}, 'sds_name': {'type': 'String', 'help': "Name of the Tendrl managed sds, eg: 'gluster'"}}, 'help': 'Tendrl context', 'obj_list': '', 'enabled': True, 'obj_value': 'nodes/$NodeContext.node_id/TendrlContext', 'flows': {}, 'atoms': {}})
+    ret.flows["ImportCluster"] = {'help': 'Tendrl context', 'enabled': True, 'type': 'test_type', 'flows': {}, 'atoms': {},'inputs':'test_input','uuid':'test_uuid'}
+    return ret
+
+
+def save(*args):
+    raise Exception
+
+
+'''Unit Test Cases'''
 
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
@@ -41,77 +120,8 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.publisher_id = "node_context"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
-    
     tendrlNS = TendrlNS()
     return tendrlNS
-
-def ansible_run(*args):
-    if args[0]:
-        return {"msg":"test_msg","rc":0},"Error"
-    else:
-        return {"msg":"test_msg","rc":1},"Error"
-
-def read_failed(*args,**kwargs):
-    if args[0]:
-        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value = "")
-        else:
-            return maps.NamedDict(value = "failed")
-
-def read_passed(*args,**kwargs):
-    if args[0]:
-        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value = "")
-        else:
-            return maps.NamedDict(value = "finished")
-
-
-def read(*args,**kwargs):
-    raise etcd.EtcdKeyNotFound
-
-def open(*args,**kwargs):
-    f = tempfile.TemporaryFile()
-    return f
-
-def run(*args):
-    raise ansible_module_runner.AnsibleExecutableGenerationFailed
-
-
-def load_trendrl_context(*args):
-    ret = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
-    ret.detected_cluster_id = 'Test Cluster Id'
-    ret.sds_pkg_version= '9.9'
-    ret.detected_cluster_name = "Test Cluster name"
-    ret.sds_pkg_name = "Test/package/name"
-    ret.machine_id = "Test_machine_id"
-    ret.fqdn = "fqdn"
-    ret.tags = ["Test tag","ceph/mon"]
-    ret.status = True
-    ret.node_id = 1
-    return ret
-
-def load_trendrl_context_high_version(*args):
-    ret = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
-    ret.detected_cluster_id = 'Test Cluster Id'
-    ret.sds_pkg_version= '10.10'
-    ret.detected_cluster_name = "Test Cluster name"
-    ret.sds_pkg_name = "Test/package/name"
-    ret.machine_id = "Test_machine_id"
-    ret.fqdn = "fqdn"
-    ret.tags = ["Test tag","ceph/mon"]
-    ret.status = True
-    ret.node_id = 1
-    return ret
-
-
-def get_obj_definition(*args,**kwargs):
-    ret = maps.NamedDict({'attrs': {'integration_id': {'type': 'String', 'help': 'Tendrl managed/generated cluster id for the sds being managed by Tendrl'}, 'cluster_name': {'type': 'String', 'help': 'Name of the cluster'}, 'node_id': {'type': 'String', 'help': 'Tendrl ID for the managed node'}, 'cluster_id': {'type': 'String', 'help': 'UUID of the cluster'}, 'sds_version': {'type': 'String', 'help': "Version of the Tendrl managed sds, eg: '3.2.1'"}, 'sds_name': {'type': 'String', 'help': "Name of the Tendrl managed sds, eg: 'gluster'"}}, 'help': 'Tendrl context', 'obj_list': '', 'enabled': True, 'obj_value': 'nodes/$NodeContext.node_id/TendrlContext', 'flows': {}, 'atoms': {}})
-    ret.flows["ImportCluster"] = {'help': 'Tendrl context', 'enabled': True, 'type': 'test_type', 'flows': {}, 'atoms': {},'inputs':'test_input','uuid':'test_uuid'}
-    return ret
-
-def save(*args):
-    raise Exception
-
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))

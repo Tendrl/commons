@@ -1,7 +1,5 @@
 import platform
 import socket
-
-
 from tendrl.commons.utils import cmd_utils
 
 from tendrl.commons import objects

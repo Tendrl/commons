@@ -1,4 +1,3 @@
-
 from tendrl.commons.objects.disk import Disk
 
 

@@ -14,22 +14,24 @@ from tendrl.commons.utils.central_store import utils as cs_utils
 
 ''' Child Classes'''
 
-class TestBaseObject(objects.BaseObject):
+class BaseObject_Child(objects.BaseObject):
     def __init__(self,*args,**kwargs):
         if kwargs:
             self.test = kwargs["test"]
-        super(TestBaseObject,self).__init__(*args,**kwargs)
+        super(BaseObject_Child,self).__init__(*args,**kwargs)
 
 
-class TestBaseAtom(objects.BaseAtom):
+class BaseAtom_Child(objects.BaseAtom):
     def __init__(self,parameter):
         self.__class__.__name__ = "write" 
-        super(TestBaseAtom,self).__init__(parameter)
+        super(BaseAtom_Child,self).__init__(parameter)
     
-    def run(self	):
-        super(TestBaseAtom,self).run()
+    def run(self):
+        super(BaseAtom_Child,self).run()
+
 
 ''' Dummy Functions'''
+
 
 def hasattribute(*args):
     if args[0]:
@@ -102,10 +104,10 @@ def init(patch_get_node_id, patch_read, patch_client):
 
 def test_constructor():
     with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load:
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         assert mock_load.called
     with patch.object(__builtin__,'hasattr',return_value = True) as mock_hasattr:
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',
@@ -116,9 +118,9 @@ def test_load_definition():
      tendrlNS = init()
      with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
         with pytest.raises(Exception):
-            obj = TestBaseObject()
+            obj = BaseObject_Child()
      with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         obj._ns = tendrlNS
         with pytest.raises(Exception):
             obj.load_definition()
@@ -132,7 +134,7 @@ def test_load_definition():
 def test_save():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -199,7 +201,7 @@ def test_save():
 def test_load():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -235,12 +237,12 @@ def test_load():
                             obj.test = {"test":"test_variable"}
                             obj.load()
     with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load_defination:
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         with patch.object(objects.BaseObject,'render',return_value = [{'value': '9', 'dir': True, 'name': 'hash', 'key': '/1/hash'}]) as mock_render:
             with patch.object(Client,"read",return_value = maps.NamedDict(value="Test")) as mock_read:
                 obj.load()
     with patch.object(objects.BaseObject,'load_definition',return_value = maps.NamedDict()) as mock_load_defination:
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         with patch.object(objects.BaseObject,'render',return_value = [{'value': '9', 'dir': True, 'name': 'test', 'key': '/1/hash'}]) as mock_render:
             with patch.object(Client,"read",return_value = maps.NamedDict(value="Test")) as mock_read:
                 with patch.object(__builtin__,"hasattr",return_value = True) as mock_hasattr:
@@ -252,7 +254,7 @@ def test_load():
 def test_exists():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseObject()
+        obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS,'get_obj_definition',obj_definition) as mock_obj_definition:
             obj._defs = obj.load_definition()
@@ -270,12 +272,12 @@ def test_exists():
 def test_constructor_BaseAtom():
     tendrlNS = init()
     with patch.object(TendrlNS,'get_atom_definition',return_value = True) as mock_atm_def:
-        obj = TestBaseAtom(1)
+        obj = BaseAtom_Child(1)
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseAtom(1)
+        obj = BaseAtom_Child(1)
     with patch.object(__builtin__,'hasattr',hasattribute) as mock_hasattr:
         with pytest.raises(Exception):
-            obj = TestBaseAtom(1)
+            obj = BaseAtom_Child(1)
             assert obj.parameters == 1
 
 
@@ -288,7 +290,7 @@ def test_constructor_BaseAtom():
 def test_load_definition_BaseAtom():
     tendrlNS = init()
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseAtom(1)
+        obj = BaseAtom_Child(1)
         obj._ns = tendrlNS
         with pytest.raises(Exception):
             obj._defs = obj.load_definition()
@@ -296,7 +298,7 @@ def test_load_definition_BaseAtom():
 
 def test_run():
     with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
-        obj = TestBaseAtom(1)
+        obj = BaseAtom_Child(1)
         with pytest.raises(objects.AtomNotImplementedError):
             obj.run()
 

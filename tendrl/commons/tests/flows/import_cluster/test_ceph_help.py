@@ -11,6 +11,8 @@ import etcd
 import tendrl.commons.objects.node_context as node
 
 
+'''Dummy Functions'''
+
 def run(*args):
     raise ansible_module_runner.AnsibleExecutableGenerationFailed
 
@@ -21,6 +23,10 @@ def ansible(*args,**kwargs):
 def open(*args,**kwargs):
     f = tempfile.TemporaryFile()
     return f
+
+
+'''Unit Test Cases'''
+
 
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
@@ -72,4 +78,3 @@ def test_import_ceph():
     with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:	
         ret = ceph_help.import_ceph(parameters)
         assert ret is False
-    
