@@ -25,7 +25,7 @@ Builds
 Code Coverage
 -------------
 
-.. image:: https://codecov.io/gh/Tendrl/commons/branch/develop/graph/badge.svg
+.. image:: https://codecov.io/gh/Tendrl/commons/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/Tendrl/commons
 
 Release process
