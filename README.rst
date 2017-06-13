@@ -20,7 +20,7 @@ Builds
 ------
 
 .. image:: https://travis-ci.org/Tendrl/commons.svg?branch=master
-:target: https://travis-ci.org/Tendrl/commons
+  :target: https://travis-ci.org/Tendrl/commons
 
 Code Coverage
 -------------
