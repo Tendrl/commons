@@ -1,4 +1,3 @@
-
 from tendrl.commons import objects
 
 

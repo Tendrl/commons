@@ -1,4 +1,3 @@
-# flake8: noqa
 import etcd
 import gevent
 import json

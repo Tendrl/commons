@@ -2,6 +2,8 @@ import pytest
 from tendrl.commons.utils.ssh.authorize_key import AuthorizeKey
 from tendrl.commons.utils import ansible_module_runner
 import mock
+import maps
+import __builtin__
 from mock import patch
 
 
@@ -32,6 +34,12 @@ def test_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     authorize_key = AuthorizeKey("ssh-rsa","user_name")
     authorize_key.attributes["_raw_params"] = "test_params"
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:

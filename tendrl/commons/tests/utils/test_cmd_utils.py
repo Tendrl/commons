@@ -34,6 +34,10 @@ def test_Command_constructor():
 def test_run():
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     cmd_obj = cmd_utils.Command("ls -a")
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):

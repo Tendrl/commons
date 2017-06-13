@@ -20,13 +20,13 @@ Builds
 ------
 
 .. image:: https://travis-ci.org/Tendrl/commons.svg?branch=master
-:target: https://travis-ci.org/Tendrl/commons
+  :target: https://travis-ci.org/Tendrl/commons
 
 Code Coverage
 -------------
 
-.. image:: https://coveralls.io/repos/github/Tendrl/commons/badge.svg
-:target: https://coveralls.io/github/Tendrl/commons
+.. image:: https://codecov.io/gh/Tendrl/commons/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/Tendrl/commons
 
 Release process
 ---------------

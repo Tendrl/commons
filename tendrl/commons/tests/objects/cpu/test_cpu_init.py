@@ -30,6 +30,12 @@ def test_constructor():
 
 # Testing _getNodeCpu()
 def test_getNodeCpu():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     cpu = Cpu()
     ret = cpu._getNodeCpu()
     assert ret is not None
@@ -40,6 +46,9 @@ def test_getNodeCpu():
 # Testing render
 def test_render():
     setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     cpu = Cpu()

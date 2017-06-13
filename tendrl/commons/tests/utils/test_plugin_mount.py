@@ -7,9 +7,12 @@ from mock import patch
 def test_constructor():
     plugin_mount = PluginMount("Test_class",(object,),{})
     assert hasattr(plugin_mount, 'plugins')
+    plugin_mount.__init__('Dummy', (object,), {})
     cls_body = dict(__doc__='docstring', __name__='Dummy class', __module__='modname')
     with patch.object(__builtin__,'hasattr',return_value = True)as mock_hasattr:
-        plugin_mount.__init__('Dummy', (object,), cls_body)
+        with patch.object(PluginMount,'register_plugin',return_value = True)as mock_reg_plugin:
+            plugin_mount = PluginMount("Test_class",(object,),cls_body)
+    
 
 
 def test_register_plugin():

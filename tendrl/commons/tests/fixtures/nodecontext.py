@@ -1,7 +1,7 @@
 class NodeContext():
 
     def __init__(self, *args):
-        pass
+        self.tags = ""
 
-    def load():
-        pass
+    def load(self):
+        return self
