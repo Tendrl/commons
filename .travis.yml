@@ -25,3 +25,9 @@ python:
 # All CI checks are executed via tox, one tox run for each env (see below).
 script:
   - tox
+
+env:
+  - TOXENV=pep8
+  - TOXENV=vulture
+  - TOXENV=chec_commit_msg
+  - TOXENV=codecov
