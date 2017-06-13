@@ -33,7 +33,4 @@ env:
   - TOXENV=vulture
   - TOXENV=pep8
   - TOXENV=check_commit_msg
-  - TOXENV=py26-cover
-  - TOXENV=py27-cover
-  - TOXENV=py34-cover
   - TOXENV=docs
