@@ -9,6 +9,12 @@ def test_constructor():
     Testing for constructor involves checking if all needed
     variales are declared initialized
     '''
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     os = Os()
     assert os is not None
     os = Os(kernel_version=1.1, os="Centos",
@@ -16,12 +22,21 @@ def test_constructor():
     assert os.selinux_mode == "Test"
 
 def test_getNodeOs():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     os = Os()
     assert os._getNodeOs() is not None
 
 # Testing render
 def test_render():
     setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = 1
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     os = Os()

@@ -2,6 +2,8 @@ import pytest
 from tendrl.commons.utils.ssh.generate_key import GenerateKey
 from tendrl.commons.utils import ansible_module_runner
 import mock
+import maps
+import __builtin__
 from mock import patch
 
 
@@ -19,6 +21,10 @@ def ansible(*args,**kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
 
+@mock.patch('tendrl.commons.event.Event.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.Message.__init__',
+            mock.Mock(return_value=None))
 def test_constructor():
     generate_key = GenerateKey()
     assert generate_key.attributes["name"] == "root"
@@ -32,6 +38,12 @@ def test_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     generate_key = GenerateKey()
     generate_key.attributes["_raw_params"] = "Error message"
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
@@ -43,4 +55,8 @@ def test_run():
     with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
         mock_run.return_value = ansible_run(False)
         ret = generate_key.run()
-    
+    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+        ret = generate_key.run()
+    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+        mock_run.return_value = None, "Test error"
+        ret = generate_key.run()

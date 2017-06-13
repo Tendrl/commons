@@ -1,6 +1,4 @@
-
 from tendrl.commons.utils import service_status
-
 from tendrl.commons import objects
 
 

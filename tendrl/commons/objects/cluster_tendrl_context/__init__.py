@@ -1,8 +1,6 @@
 from tendrl.commons import objects
 
 
-
-
 class ClusterTendrlContext(objects.BaseObject):
 
     def __init__(

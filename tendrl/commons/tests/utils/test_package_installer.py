@@ -29,7 +29,11 @@ def run(*args):
             mock.Mock(return_value=None))
 def test_constructor():
     setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id = 1
+    NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     obj_installer = Installer("mock","pip","1.1")
     assert isinstance(obj_installer.attributes,dict)
     assert obj_installer.attributes["name"] == "mock-1.1"
@@ -49,6 +53,10 @@ def test_constructor():
 def test_install():
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
     obj_installer = Installer("mock","pip","1.1")
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
