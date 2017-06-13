@@ -29,5 +29,5 @@ script:
 env:
   - TOXENV=pep8
   - TOXENV=vulture
-  - TOXENV=chec_commit_msg
+  - TOXENV=check_commit_msg
   - TOXENV=codecov
