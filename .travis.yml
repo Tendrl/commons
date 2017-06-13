@@ -18,7 +18,9 @@ install:
 
 language: python
 python:
+  - "2.6"
   - "2.7"
+  - "3.4"
 
 # All CI checks are executed via tox, one tox run for each env (see below).
 script:
