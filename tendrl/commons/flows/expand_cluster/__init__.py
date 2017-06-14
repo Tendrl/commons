@@ -26,29 +26,65 @@ class ExpandCluster(flows.BaseFlow):
         sds_name = self.parameters["TendrlContext.sds_name"]
         if sds_name not in supported_sds:
             raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
+        # Lock nodes
+        create_cluster_utils.accuire_node_lock(
+            self.parameters, self.__class__.__name__
+        )
 
-        ssh_job_ids = []
-        if "ceph" in sds_name:
-            ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
-                self.parameters
-            )
-        else:
-            ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
-                self.parameters,
-                skip_current_node=True
-            )
+        try:  
+            ssh_job_ids = []
+            if "ceph" in sds_name:
+                ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
+                    self.parameters
+                )
+            else:
+                ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
+                    self.parameters,
+                    skip_current_node=True
+                )
 
-        while True:
-            gevent.sleep(3)
-            all_status = {}
-            for job_id in ssh_job_ids:
-                all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+            while True:
+                gevent.sleep(3)
+                all_status = {}
+                for job_id in ssh_job_ids:
+                    all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
                 
-            _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
-            if _failed:
-                raise FlowExecutionFailedError("SSH setup failed for jobs %s cluster %s" % (str(_failed),
-                                                                                            integration_id))
-            if all([status == "finished" for status in all_status.values()]):
+                _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                if _failed:
+                    raise FlowExecutionFailedError(
+                        "SSH setup failed for jobs %s cluster %s" % (str(_failed), integration_id))
+                if all([status == "finished" for status in all_status.values()]):
+                    Event(
+                        Message(
+                            job_id=self.parameters['job_id'],
+                            flow_id=self.parameters['flow_id'],
+                            priority="info",
+                            publisher=NS.publisher_id,
+                            payload={
+                                "message": "SSH setup completed for all "
+                                "nodes in cluster %s" % integration_id
+                            }
+                        )
+                    )
+
+                    break
+
+            # SSH setup jobs finished above, now install sds
+            # bits and create cluster
+            if "ceph" in sds_name:
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id = self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "Expanding ceph cluster %s" % integration_id
+                        }
+                    )
+                )
+                ceph_help.expand_cluster(self.parameters)
+            else:
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
@@ -56,30 +92,12 @@ class ExpandCluster(flows.BaseFlow):
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "SSH setup completed for all "
-                            "nodes in cluster %s" % integration_id
+                            "message": "Expanding Gluster Storage"
+                            " Cluster %s" % integration_id
                         }
                     )
                 )
-
-                break
-
-        # SSH setup jobs finished above, now install sds
-        # bits and create cluster
-        if "ceph" in sds_name:
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Expanding ceph cluster %s" % integration_id
-                    }
-                )
-            )
-            ceph_help.expand_cluster(self.parameters)
-        else:
+                gluster_help.expand_gluster(self.parameters)
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
@@ -87,58 +105,65 @@ class ExpandCluster(flows.BaseFlow):
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "Expanding Gluster Storage"
-                        " Cluster %s" % integration_id
+                        "message": "SDS install/config completed on newly expanded nodes, "
+                        "Please wait while tendrl-node-agents detect sds details on the newly expaned nodes %s" % self.parameters['Node[]']
                     }
                 )
             )
-            gluster_help.expand_gluster(self.parameters)
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "SDS install/config completed on newly expanded nodes, "
-                    "Please wait while tendrl-node-agents detect sds details on the newly expaned nodes %s" % self.parameters['Node[]']
-                }
+
+            # Wait till detected cluster in populated for nodes
+            while True:
+                gevent.sleep(3)
+                all_status = []
+                detected_cluster = ""
+                different_cluster_id = False
+                dc = ""
+                for node in self.parameters['Node[]']:
+                    try:
+                        dc = NS._int.client.read(
+                            "/nodes/%s/DetectedCluster/detected_cluster_id" % node
+                        ).value
+                        if not detected_cluster:
+                            detected_cluster = dc
+                        else:
+                            if detected_cluster != dc:
+                                all_status.append(False)
+                                different_cluster_id = True
+                                break
+                        all_status.append(True)
+                    except etcd.EtcdKeyNotFound:
+                        all_status.append(False)
+                if different_cluster_id:
+                    raise FlowExecutionFailedError(
+                        "Seeing different detected cluster id in"
+                        " different nodes. %s and %s" % (
+                            detected_cluster, dc)
+                    )
+
+                if all_status:
+                    if all(all_status):
+                        break
+        except Exception as ex:
+            # releasing nodes if any exception came
+            create_cluster_utils.release_node_lock(
+                self.parameters
             )
-        )
-
-        # Wait till detected cluster in populated for nodes
-        while True:
-            gevent.sleep(3)
-            all_status = []
-            detected_cluster = ""
-            different_cluster_id = False
-            dc = ""
-            for node in self.parameters['Node[]']:
-                try:
-                    dc = NS._int.client.read(
-                        "/nodes/%s/DetectedCluster/detected_cluster_id" % node
-                    ).value
-                    if not detected_cluster:
-                        detected_cluster = dc
-                    else:
-                        if detected_cluster != dc:
-                            all_status.append(False)
-                            different_cluster_id = True
-                            break
-                    all_status.append(True)
-                except etcd.EtcdKeyNotFound:
-                    all_status.append(False)
-            if different_cluster_id:
-                raise FlowExecutionFailedError(
-                    "Seeing different detected cluster id in"
-                    " different nodes. %s and %s" % (
-                        detected_cluster, dc)
+            # For traceback
+            Event(
+                ExceptionMessage(
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={"message": ex.message,
+                             "exception": ex
+                             }
                 )
-
-            if all_status:
-                if all(all_status):
-                    break
-
+            )
+            # raising exception to mark job as failed
+            raise ex(ex.message)
+        # release lock
+        create_cluster_utils.release_node_lock(
+            self.parameters
+        )
         # Create the params list for import cluster flow
         new_params = {}
         new_params['Node[]'] = self.parameters['Node[]']
