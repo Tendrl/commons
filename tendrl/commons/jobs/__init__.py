@@ -227,14 +227,14 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         except (FlowExecutionFailedError,
                                 AtomExecutionFailedError,
                                 Exception) as e:
-                            _trace = str(traceback.format_exc(ex))
+                            _trace = str(traceback.format_exc(e))
                             _msg = "Failure in Job %s Flow %s with error:" % \
                                 (job.job_id, the_flow.parameters['flow_id'])
                             Event(
                                 ExceptionMessage(
                                     priority="error",
                                     publisher=NS.publisher_id,
-                                    payload={"message": _msg + str(e.message),
+                                    payload={"message": _msg + _trace,
                                              "exception": e
                                              }
                                 )
