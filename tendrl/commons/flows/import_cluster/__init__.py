@@ -18,9 +18,7 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
         try:
             # Lock nodes
-            create_cluster_utils.acquire_node_lock(
-                self.parameters, self.__class__.__name__
-            )
+            create_cluster_utils.acquire_node_lock(self.parameters)
             integration_id = self.parameters['TendrlContext.integration_id']
             if integration_id is None:
                 raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
@@ -314,10 +312,6 @@ class ImportCluster(flows.BaseFlow):
 
                         break
     
-            # release lock
-            create_cluster_utils.release_node_lock(
-                self.parameters
-            )
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
@@ -329,12 +323,6 @@ class ImportCluster(flows.BaseFlow):
                 )
             )
         except Exception as ex:
-            # release lock if any exception came
-            if not ("locked by other jobs" in ex.message):
-                # release lock if any exception came
-                create_cluster_utils.release_node_lock(
-                    self.parameters
-                )
             # For traceback
             Event(
                 ExceptionMessage(
@@ -347,3 +335,6 @@ class ImportCluster(flows.BaseFlow):
             )
             # raising exception to mark job as failed
             raise ex
+        finally:
+            # release lock
+            create_cluster_utils.release_node_lock(self.parameters)
