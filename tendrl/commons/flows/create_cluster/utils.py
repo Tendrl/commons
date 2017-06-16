@@ -197,7 +197,7 @@ def acquire_node_lock(parameters):
             if p_job_id == lock_owner_job:
                 continue
             else:
-                raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job)
+                raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job))
         except EtcdKeyNotFound:
             # To check what are all the nodes are already locked
             continue
