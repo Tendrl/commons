@@ -168,11 +168,6 @@ class CreateCluster(flows.BaseFlow):
                     if all(all_status):
                         break
 
-            # release lock before import cluster
-            create_cluster_utils.release_node_lock(
-                self.parameters
-            )
-
             # Create the params list for import cluster flow
             new_params = {}
             new_params['Node[]'] = self.parameters['Node[]']
@@ -203,6 +198,12 @@ class CreateCluster(flows.BaseFlow):
                        "type": "node"
                       }
             _job_id = str(uuid.uuid4())
+            
+            # release lock before import cluster
+            create_cluster_utils.release_node_lock(
+                self.parameters
+            )
+
             Job(job_id=_job_id,
                 status="new",
                 payload=payload).save()
@@ -218,12 +219,6 @@ class CreateCluster(flows.BaseFlow):
                 )
             )
         except Exception as ex:
-            # release lock if any exception came
-            if not ("locked by other jobs" in ex.message):
-                # release lock if any exception came
-                create_cluster_utils.release_node_lock(
-                    self.parameters
-                )
             # For traceback
             Event(
                 ExceptionMessage(
