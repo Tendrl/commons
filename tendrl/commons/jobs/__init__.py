@@ -1,5 +1,6 @@
 import json
 import datetime
+import traceback
 
 
 import etcd
@@ -226,13 +227,14 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                         except (FlowExecutionFailedError,
                                 AtomExecutionFailedError,
                                 Exception) as e:
+                            _trace = str(traceback.format_exc(e))
                             _msg = "Failure in Job %s Flow %s with error:" % \
                                 (job.job_id, the_flow.parameters['flow_id'])
                             Event(
                                 ExceptionMessage(
                                     priority="error",
                                     publisher=NS.publisher_id,
-                                    payload={"message": _msg + str(e.message),
+                                    payload={"message": _msg + _trace,
                                              "exception": e
                                              }
                                 )
@@ -243,8 +245,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     flow_id=the_flow.parameters['flow_id'],
                                     priority="error",
                                     publisher=NS.publisher_id,
-                                    payload={"message": "Job failed %s: %s"
-                                                        % (str(e), str(e.message))}
+                                    payload={"message": "Job failed %s" % _trace}
                                 )
                             ) 
                             try:
@@ -258,16 +259,17 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 raise FlowExecutionFailedError(_msg)
                             else:
                                 job = job.load()
-                                job.errors = str(e)
+                                job.errors = _trace
                                 job.save()
                                                           
             except Exception as ex:
+                _trace = str(traceback.format_exc(ex))
                 _msg = "Job (%s) processing failure, error:" % jid
                 Event(
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": _msg + str(ex.message),
+                        payload={"message": _msg + _trace,
                                  "exception": ex
                                  }
                     )
