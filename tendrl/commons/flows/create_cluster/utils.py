@@ -197,43 +197,32 @@ def acquire_node_lock(parameters):
             if p_job_id == lock_owner_job:
                 continue
             else:
-                raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job))
+                raise FlowExecutionFailedError("Cannot proceed further, Node (%s) is already locked by Job (%s)" % (node, lock_owner_job))
         except EtcdKeyNotFound:
             # To check what are all the nodes are already locked
             continue
     
-    newly_locked = []
     for node in parameters['Node[]']:
-        lock_owner_job = str(parameters["job_id"])
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Trying to acquire lock (job_id: %s) for Node %s" % (lock_owner_job,
-                                                                                    node)
-                }
+        try:
+            lock_owner_job = NS._int.client.read(key).value
+            if p_job_id == lock_owner_job:
+                continue
+        except EtcdKeyNotFound:
+            lock_owner_job = str(parameters["job_id"])
+            key = "nodes/%s/locked_by" % node
+            NS._int.client.write(key, lock_owner_job)
+            Event(
+                Message(
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Acquired lock (%s) for Node (%s)" % (lock_owner_job,
+                                                                                        node)
+                    }
+                )
             )
-        )
-        key = "nodes/%s/locked_by" % node
-        NS._int.client.write(key, lock_owner_job)
-        newly_locked.append(node)
-
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={
-                "message": "Job %s acquired lock for nodes %s" % (
-                    parameters['job_id'], newly_locked)
-            }
-        )
-    )
-
 
 def release_node_lock(parameters):
     for node in parameters['Node[]']:
@@ -249,7 +238,7 @@ def release_node_lock(parameters):
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Releasing lock (job_id: %s) for Node %s" % (lock_owner_job,
+                            "message": "Released lock (%s) for Node (%s)" % (lock_owner_job,
                                                                                   node)
                         }
                     )
