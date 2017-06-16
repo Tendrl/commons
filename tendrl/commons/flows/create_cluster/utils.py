@@ -202,9 +202,7 @@ def acquire_node_lock(parameters):
             # To check what are all the nodes are already locked
             continue
     
-    newly_locked = []
     for node in parameters['Node[]']:
-        lock_owner_job = None
         try:
             lock_owner_job = NS._int.client.read(key).value
             if p_job_id == lock_owner_job:
