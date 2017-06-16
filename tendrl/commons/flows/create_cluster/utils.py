@@ -2,12 +2,15 @@ import copy
 import json
 import uuid
 
+from etcd import EtcdKeyNotFound
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils.ssh import authorize_key
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects.job import Job
+
 
 def ceph_create_ssh_setup_jobs(parameters):
     node_list = parameters['Node[]']
@@ -178,3 +181,78 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         )
     return ssh_job_ids
 
+
+def acquire_node_lock(parameters):
+    # check job is parent or child
+    job = Job(job_id=parameters['job_id']).load()
+    p_job_id = None
+    if "parent" in job.payload:
+        p_job_id = job.payload['parent']
+
+    for node in parameters['Node[]']:
+        key = "/nodes/%s/locked_by" % node
+        try:
+            lock_owner_job = NS._int.client.read(key).value            
+            # If the parent job has aquired lock on participating nodes, dont you worry child job :)
+            if p_job_id == lock_owner_job:
+                continue
+            else:
+                raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job)
+        except EtcdKeyNotFound:
+            # To check what are all the nodes are already locked
+            continue
+    
+    newly_locked = []
+    for node in parameters['Node[]']:
+        lock_owner_job = str(parameters["job_id"])
+        Event(
+            Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "Trying to acquire lock (job_id: %s) for Node %s" % (lock_owner_job,
+                                                                                    node)
+                }
+            )
+        )
+        key = "nodes/%s/locked_by" % node
+        NS._int.client.write(key, lock_owner_job)
+        newly_locked.append(node)
+
+    Event(
+        Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={
+                "message": "Job %s acquired lock for nodes %s" % (
+                    parameters['job_id'], newly_locked)
+            }
+        )
+    )
+
+
+def release_node_lock(parameters):
+    for node in parameters['Node[]']:
+        key = "/nodes/%s/locked_by" % node
+        try:
+            lock_owner_job = NS._int.client.read(key).value
+            if lock_owner_job == parameters['job_id']:
+                NS._int.client.delete(key)
+                Event(
+                    Message(
+                        job_id=parameters['job_id'],
+                        flow_id=parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "Releasing lock (job_id: %s) for Node %s" % (lock_owner_job,
+                                                                                  node)
+                        }
+                    )
+                )
+        except EtcdKeyNotFound:
+            continue
