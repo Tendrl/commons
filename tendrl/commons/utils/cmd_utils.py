@@ -20,7 +20,8 @@ SAFE_COMMAND_LIST = [
     "ping",
     "lvm",
     "gstatus",
-    "ls"
+    "ls",
+    "df"
 ]
 
 

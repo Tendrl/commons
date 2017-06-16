@@ -21,7 +21,8 @@ NODE_ID = None
 class NodeContext(objects.BaseObject):
 
     def __init__(self, machine_id=None, node_id=None, fqdn=None,
-                 tags=None, status=None, *args, **kwargs):
+                 tags=None, status=None, sync_status=None, last_sync=None,
+                 *args, **kwargs):
         super(NodeContext, self).__init__(*args, **kwargs)
         self.machine_id = machine_id or self._get_machine_id()
         self.node_id = node_id or self._get_node_id() or self._create_node_id()
@@ -44,6 +45,8 @@ class NodeContext(objects.BaseObject):
         self.tags = list(set(self.tags))
         
         self.status = status or "UP"
+        self.sync_status = sync_status
+        self.last_sync = last_sync
         self.value = 'nodes/{0}/NodeContext'
 
     def _get_machine_id(self):

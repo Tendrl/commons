@@ -6,7 +6,8 @@ from tendrl.commons import objects
 class ClusterNodeContext(objects.BaseObject):
 
     def __init__(self, machine_id=None, node_id=None, fqdn=None,
-                 tags=None, status=None, *args, **kwargs):
+                 tags=None, status=None, sync_status=None,
+                 last_sync=None, *args, **kwargs):
         super(ClusterNodeContext, self).__init__(*args, **kwargs)
         _node_context = NS.node_context.load()
         self.machine_id = machine_id or _node_context.machine_id
@@ -14,6 +15,8 @@ class ClusterNodeContext(objects.BaseObject):
         self.fqdn = fqdn or _node_context.fqdn
         self.tags = tags or _node_context.tags
         self.status = status or _node_context.status
+        self.sync_status = sync_status or _node_context.sync_status
+        self.last_sync = last_sync or _node_context.last_sync
         self.value = 'clusters/{0}/nodes/{1}/NodeContext'
 
     def render(self):

@@ -232,7 +232,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                 ExceptionMessage(
                                     priority="error",
                                     publisher=NS.publisher_id,
-                                    payload={"message": _msg + e.message,
+                                    payload={"message": _msg + str(e.message),
                                              "exception": e
                                              }
                                 )
@@ -244,7 +244,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                                     priority="error",
                                     publisher=NS.publisher_id,
                                     payload={"message": "Job failed %s: %s"
-                                                        % (e, e.message)}
+                                                        % (str(e), str(e.message))}
                                 )
                             ) 
                             try:
@@ -267,7 +267,7 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": _msg + ex.message,
+                        payload={"message": _msg + str(ex.message),
                                  "exception": ex
                                  }
                     )
