@@ -189,14 +189,13 @@ def acquire_node_lock(parameters, flow_name):
     if "parent" in job.payload:
         p_job_id = job.payload['parent']
 
-    fail = False
     for node in parameters['Node[]']:
         key = "/nodes/%s/locked_by" % node
         try:
             lock_owner_job = NS._int.client.read(key).value            
-            # Do not fail since the parent job has locked the node
-            if p_job_id == job_info:
-                fail = False
+            # If the parent job has aquired lock on participating nodes, dont you worry child job :)
+            if p_job_id == lock_owner_job:
+                continue
             else:
                 raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job)
         except EtcdKeyNotFound:
