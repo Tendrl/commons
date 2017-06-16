@@ -18,7 +18,7 @@ class CreateCluster(flows.BaseFlow):
     def run(self):
         try:
             # Locking nodes
-            create_cluster_utils.acquire_node_lock(self.parameters['Node[]'])
+            create_cluster_utils.acquire_node_lock(self.parameters)
             integration_id = self.parameters['TendrlContext.integration_id']
             if integration_id is None:
                 raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
@@ -231,4 +231,4 @@ class CreateCluster(flows.BaseFlow):
             raise ex
         finally:
             # releasing nodes if any exception came
-            create_cluster_utils.release_node_lock(self.parameters['Node[]'])
+            create_cluster_utils.release_node_lock(self.parameters)
