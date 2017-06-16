@@ -19,9 +19,7 @@ class ExpandCluster(flows.BaseFlow):
     def run(self):
         try:
             # Lock nodes
-            create_cluster_utils.acquire_node_lock(
-                self.parameters, self.__class__.__name__
-            )
+            create_cluster_utils.acquire_node_lock(self.parameters)
             integration_id = self.parameters['TendrlContext.integration_id']
             if integration_id is None:
                 raise FlowExecutionFailedError(
@@ -145,10 +143,6 @@ class ExpandCluster(flows.BaseFlow):
                     if all(all_status):
                         break
 
-            # release lock before import cluster
-            create_cluster_utils.release_node_lock(
-                self.parameters
-            )
 
             # Create the params list for import cluster flow
             new_params = {}
@@ -180,6 +174,9 @@ class ExpandCluster(flows.BaseFlow):
                 "type": "node"
             }
             _job_id = str(uuid.uuid4())
+            # release lock before import cluster
+            create_cluster_utils.release_node_lock(self.parameters)
+
             Job(job_id=_job_id,
                 status="new",
                 payload=payload).save()
@@ -200,13 +197,6 @@ class ExpandCluster(flows.BaseFlow):
                 )
             )
         except Exception as ex:
-            # release lock if any exception came
-            if not ("locked by other jobs" in ex.message):
-                # release lock if any exception came
-                create_cluster_utils.release_node_lock(
-                    self.parameters
-                )
-            # For traceback
             Event(
                 ExceptionMessage(
                     priority="error",
@@ -218,3 +208,6 @@ class ExpandCluster(flows.BaseFlow):
             )
             # raising exception to mark job as failed
             raise ex
+        finally:
+            # release lock if any exception came
+            create_cluster_utils.release_node_lock(self.parameters)
