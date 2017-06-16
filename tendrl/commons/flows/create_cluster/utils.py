@@ -185,65 +185,42 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
 def acquire_node_lock(parameters, flow_name):
     # check job is parent or child
     job = Job(job_id=parameters['job_id']).load()
+    p_job_id = None
     if "parent" in job.payload:
-        # child job not required node lock
-        return
+        p_job_id = job.payload['parent']
 
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={
-                "message": "Check nodes not locked by other Job"
-            }
-        )
-    )
     fail = False
-    locked_nodes = []
     for node in parameters['Node[]']:
         key = "/nodes/%s/locked_by" % node
         try:
-            job_info = NS._int.client.read(key).value
-            fail = True
-            locked_nodes.append(node)
-            job_info = job_info.encode('utf8').replace("'", "\"")
-            job_info = json.loads(job_info)
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Node %s is already locked by a job %s" % \
-                            (
-                                node,
-                                job_info['job_id']
-                            )
-                    }
-                )
-            )
+            lock_owner_job = NS._int.client.read(key).value            
+            # Do not fail since the parent job has locked the node
+            if p_job_id == job_info:
+                fail = False
+            else:
+                raise FlowExecutionFailedError("Node %s is already locked by a job %s" % (node, lock_owner_job)
         except EtcdKeyNotFound:
             # To check what are all the nodes are already locked
             continue
-
+    
     newly_locked = []
-    if not fail:
-        for node in parameters['Node[]']:
-            key = "/nodes/%s/locked_by" % node
-            lock_info = dict(
-                job_id = str(parameters["job_id"]),
-                flow = flow_name
+    for node in parameters['Node[]']:
+        lock_owner_job = str(parameters["job_id"])
+        Event(
+            Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "Trying to acquire lock (job_id: %s) for Node %s" % (lock_owner_job,
+                                                                                    node)
+                }
             )
-            NS._int.client.write(key, lock_info)
-            newly_locked.append(node)
-    else:
-        # Fail cluster creation flow
-        raise FlowExecutionFailedError(
-            "Nodes %s are locked by other jobs" % locked_nodes
         )
+        key = "nodes/%s/locked_by" % node
+        NS._int.client.write(key, lock_owner_job)
+        newly_locked.append(node)
 
     Event(
         Message(
@@ -260,20 +237,23 @@ def acquire_node_lock(parameters, flow_name):
 
 
 def release_node_lock(parameters):
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={
-                "message": "Releasing node locks"
-            }
-        )
-    )
     for node in parameters['Node[]']:
         key = "/nodes/%s/locked_by" % node
         try:
-            NS._int.client.delete(key)
+            lock_owner_job = NS._int.client.read(key).value
+            if lock_owner_job == parameters['job_id']:
+                NS._int.client.delete(key)
+                Event(
+                    Message(
+                        job_id=parameters['job_id'],
+                        flow_id=parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "Releasing lock (job_id: %s) for Node %s" % (lock_owner_job,
+                                                                                  node)
+                        }
+                    )
+                )
         except EtcdKeyNotFound:
             continue
