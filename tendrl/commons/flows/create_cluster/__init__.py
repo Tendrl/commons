@@ -7,8 +7,8 @@ from tendrl.commons import flows
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.flows.create_cluster import ceph_help
-from tendrl.commons.flows.create_cluster import gluster_help
+from tendrl.commons.flows.create_cluster.ceph_help import create_ceph
+from tendrl.commons.flows.create_cluster.gluster_help import create_gluster
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
@@ -122,7 +122,7 @@ class CreateCluster(flows.BaseFlow):
                 )
 
                 self.parameters.update({'create_mon_secret': True})
-                ceph_help.create_ceph(self.parameters)
+                create_ceph(self.parameters)
             else:
                 Event(
                     Message(
@@ -135,7 +135,7 @@ class CreateCluster(flows.BaseFlow):
                     )
                 )
 
-                gluster_help.create_gluster(self.parameters)
+                create_gluster(self.parameters)
 
             # Wait till detected cluster in populated for nodes
             Event(
