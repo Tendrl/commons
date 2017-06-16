@@ -11,27 +11,28 @@ from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.message import Message
+from tendrl.commons.message import ExceptionMessage
 
 
 class ImportCluster(flows.BaseFlow):
     def run(self):
-        integration_id = self.parameters['TendrlContext.integration_id']
-        if integration_id is None:
-            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
-        sds_name = self.parameters['DetectedCluster.sds_pkg_name']
-
-        # Invoke the super run() for pre-runs execution
-        # Note: this super call would make execution of atom's pre_run, run and post_run
-        # Currently there is no atoms defined for import cluster flow.
-        # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
-        # run the pre_runs, atoms, post_runs respectively so run() simply calls
-        # run_pre(), run_atom(), run_post()
-        super(ImportCluster, self).run()
-        # Lock nodes
-        create_cluster_utils.accuire_node_lock(
-            self.parameters, self.__class__.__name__
-        )
         try:
+            # Lock nodes
+            create_cluster_utils.acquire_node_lock(
+                self.parameters, self.__class__.__name__
+            )
+            integration_id = self.parameters['TendrlContext.integration_id']
+            if integration_id is None:
+                raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
+            sds_name = self.parameters['DetectedCluster.sds_pkg_name']
+
+            # Invoke the super run() for pre-runs execution
+            # Note: this super call would make execution of atom's pre_run, run and post_run
+            # Currently there is no atoms defined for import cluster flow.
+            # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
+            # run the pre_runs, atoms, post_runs respectively so run() simply calls
+            # run_pre(), run_atom(), run_post()
+            super(ImportCluster, self).run()
             if not self.parameters.get('import_after_expand', False) and \
                 not self.parameters.get('import_after_create', False):
                 # Above condition means, this is a fresh import
@@ -313,11 +314,27 @@ class ImportCluster(flows.BaseFlow):
 
                         break
     
-        except Exception as ex:
-            # release lock if any exception came
+            # release lock
             create_cluster_utils.release_node_lock(
                 self.parameters
             )
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Sucessfully imported cluster %s" % integration_id
+                        }
+                )
+            )
+        except Exception as ex:
+            # release lock if any exception came
+            if not ("locked by other jobs" in ex.message):
+                # release lock if any exception came
+                create_cluster_utils.release_node_lock(
+                    self.parameters
+                )
             # For traceback
             Event(
                 ExceptionMessage(
@@ -329,19 +346,4 @@ class ImportCluster(flows.BaseFlow):
                 )
             )
             # raising exception to mark job as failed
-            raise ex(ex.message)
-
-        # release lock
-        create_cluster_utils.release_node_lock(
-            self.parameters
-        )
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Sucessfully imported cluster %s" % integration_id
-                     }
-            )
-        )
+            raise ex

@@ -9,6 +9,7 @@ from tendrl.commons.objects.job import Job
 from tendrl.commons.utils.ssh import authorize_key
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects.job import Job
 
 
 def ceph_create_ssh_setup_jobs(parameters):
@@ -181,7 +182,13 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
     return ssh_job_ids
 
 
-def accuire_node_lock(parameters, flow_name):
+def acquire_node_lock(parameters, flow_name):
+    # check job is parent or child
+    job = Job(job_id=parameters['job_id']).load()
+    if "parent" in job.payload:
+        # child job not required node lock
+        return
+
     Event(
         Message(
             job_id=parameters['job_id'],
@@ -189,16 +196,18 @@ def accuire_node_lock(parameters, flow_name):
             priority="info",
             publisher=NS.publisher_id,
             payload={
-                "message": "Checking if nodes are not locked already"
+                "message": "Check nodes not locked by other Job"
             }
         )
     )
     fail = False
+    locked_nodes = []
     for node in parameters['Node[]']:
         key = "/nodes/%s/locked_by" % node
         try:
             job_info = NS._int.client.read(key).value
             fail = True
+            locked_nodes.append(node)
             job_info = job_info.encode('utf8').replace("'", "\"")
             job_info = json.loads(job_info)
             Event(
@@ -217,29 +226,37 @@ def accuire_node_lock(parameters, flow_name):
                 )
             )
         except EtcdKeyNotFound:
+            # To check what are all the nodes are already locked
+            continue
+
+    newly_locked = []
+    if not fail:
+        for node in parameters['Node[]']:
+            key = "/nodes/%s/locked_by" % node
             lock_info = dict(
                 job_id = str(parameters["job_id"]),
                 flow = flow_name
             )
             NS._int.client.write(key, lock_info)
-
-    if fail:
+            newly_locked.append(node)
+    else:
         # Fail cluster creation flow
         raise FlowExecutionFailedError(
-            "Few nodes are already locked by some job"
+            "Nodes %s are locked by other jobs" % locked_nodes
         )
-    else:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "All nodes are locked for cluster creation successfully"
-                }
-            )
+
+    Event(
+        Message(
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
+            priority="info",
+            publisher=NS.publisher_id,
+            payload={
+                "message": "Job %s acquired lock for nodes %s" % (
+                    parameters['job_id'], newly_locked)
+            }
         )
+    )
 
 
 def release_node_lock(parameters):

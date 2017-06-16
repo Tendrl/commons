@@ -16,46 +16,46 @@ from tendrl.commons.objects.job import Job
 
 class CreateCluster(flows.BaseFlow):
     def run(self):
-        integration_id = self.parameters['TendrlContext.integration_id']
-        if integration_id is None:
-            raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
-        
-        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
-        sds_name = self.parameters["TendrlContext.sds_name"]
-        if sds_name not in supported_sds:
-            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
-        
-        # Check if cluster name contains space char and fail if so
-        if ' ' in self.parameters['TendrlContext.cluster_name']:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Space char not allowed in cluster name"
-                    },
-                    job_id=self.job_id,
-                    flow_id=self.parameters['flow_id'],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
-            )
-            raise FlowExecutionFailedError(
-                "Space char not allowed in cluster name"
-            )
-
-        # Execute super run() to execute pre-runs
-        # Note: this super call would make execution of atom's pre_run, run and post_run
-        # Currently there is no atoms defined for create cluster flow.
-        # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
-        # run the pre_runs, atoms, post_runs respectively so run() simply calls
-        # run_pre(), run_atom(), run_post()
-        super(CreateCluster, self).run()
-
-        # Locking nodes
-        create_cluster_utils.accuire_node_lock(
-                self.parameters, self.__class__.__name__
-        )
         try:
+            # Locking nodes
+            create_cluster_utils.acquire_node_lock(
+                self.parameters, self.__class__.__name__
+            )
+            integration_id = self.parameters['TendrlContext.integration_id']
+            if integration_id is None:
+                raise FlowExecutionFailedError("TendrlContext.integration_id cannot be empty")
+        
+            supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+            sds_name = self.parameters["TendrlContext.sds_name"]
+            if sds_name not in supported_sds:
+                raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
+        
+            # Check if cluster name contains space char and fail if so
+            if ' ' in self.parameters['TendrlContext.cluster_name']:
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "Space char not allowed in cluster name"
+                        },
+                        job_id=self.job_id,
+                        flow_id=self.parameters['flow_id'],
+                        cluster_id=NS.tendrl_context.integration_id,
+                    )
+                )
+                raise FlowExecutionFailedError(
+                    "Space char not allowed in cluster name"
+                )
+
+            # Execute super run() to execute pre-runs
+            # Note: this super call would make execution of atom's pre_run, run and post_run
+            # Currently there is no atoms defined for create cluster flow.
+            # TODO (team): break down run() into run_pre(), run_atom(), run_post() where we
+            # run the pre_runs, atoms, post_runs respectively so run() simply calls
+            # run_pre(), run_atom(), run_post()
+            super(CreateCluster, self).run()
+
             ssh_job_ids = []
             if "ceph" in sds_name:
                 ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
@@ -167,11 +167,63 @@ class CreateCluster(flows.BaseFlow):
                 if all_status:
                     if all(all_status):
                         break
-        except Exception as ex:
-            # releasing nodes if any exception came
+
+            # release lock before import cluster
             create_cluster_utils.release_node_lock(
                 self.parameters
             )
+
+            # Create the params list for import cluster flow
+            new_params = {}
+            new_params['Node[]'] = self.parameters['Node[]']
+            new_params['TendrlContext.integration_id'] = integration_id
+
+            # Get node context for one of the nodes from list
+            detected_cluster_id = NS._int.client.read(
+                "nodes/%s/DetectedCluster/detected_cluster_id" % self.parameters['Node[]'][0]
+            ).value
+            sds_pkg_name = NS._int.client.read(
+                "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node[]'][0]
+            ).value
+            if "gluster" in sds_pkg_name:
+                new_params['gdeploy_provisioned'] = True
+            sds_pkg_version = NS._int.client.read(
+                "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters['Node[]'][0]
+            ).value
+            new_params['DetectedCluster.sds_pkg_name'] = \
+                sds_pkg_name
+            new_params['DetectedCluster.sds_pkg_version'] = \
+                sds_pkg_version
+            new_params['import_after_create'] = True
+            payload = {"tags": ["detected_cluster/%s" % detected_cluster_id],
+                       "run": "tendrl.flows.ImportCluster",
+                       "status": "new",
+                       "parameters": new_params,
+                       "parent": self.parameters['job_id'],
+                       "type": "node"
+                      }
+            _job_id = str(uuid.uuid4())
+            Job(job_id=_job_id,
+                status="new",
+                payload=payload).save()
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id = self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={"message": "Please wait while Tendrl imports newly created %s SDS Cluster %s" 
+                             " Import job id :%s" % (sds_pkg_name, integration_id, _job_id)
+                         }
+                )
+            )
+        except Exception as ex:
+            # release lock if any exception came
+            if not ("locked by other jobs" in ex.message):
+                # release lock if any exception came
+                create_cluster_utils.release_node_lock(
+                    self.parameters
+                )
             # For traceback
             Event(
                 ExceptionMessage(
@@ -181,56 +233,11 @@ class CreateCluster(flows.BaseFlow):
                              "exception": ex
                              }
                 )
-            )
+            )	
             # raising exception to mark job as failed
-            raise ex(ex.message)
-
-        # release lock
-        create_cluster_utils.release_node_lock(
-            self.parameters
-        )
-
-        # Create the params list for import cluster flow
-        new_params = {}
-        new_params['Node[]'] = self.parameters['Node[]']
-        new_params['TendrlContext.integration_id'] = integration_id
-
-        # Get node context for one of the nodes from list
-        detected_cluster_id = NS._int.client.read(
-            "nodes/%s/DetectedCluster/detected_cluster_id" % self.parameters['Node[]'][0]
-        ).value
-        sds_pkg_name = NS._int.client.read(
-            "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node[]'][0]
-        ).value
-        if "gluster" in sds_pkg_name:
-            new_params['gdeploy_provisioned'] = True
-        sds_pkg_version = NS._int.client.read(
-            "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters['Node[]'][0]
-        ).value
-        new_params['DetectedCluster.sds_pkg_name'] = \
-            sds_pkg_name
-        new_params['DetectedCluster.sds_pkg_version'] = \
-            sds_pkg_version
-        new_params['import_after_create'] = True
-        payload = {"tags": ["detected_cluster/%s" % detected_cluster_id],
-                   "run": "tendrl.flows.ImportCluster",
-                   "status": "new",
-                   "parameters": new_params,
-                   "parent": self.parameters['job_id'],
-                   "type": "node"
-                  }
-        _job_id = str(uuid.uuid4())
-        Job(job_id=_job_id,
-            status="new",
-            payload=payload).save()
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Please wait while Tendrl imports newly created %s SDS Cluster %s" 
-                         " Import job id :%s" % (sds_pkg_name, integration_id, _job_id)
-                     }
+            raise ex
+        finally:
+            # releasing nodes if any exception came
+            create_cluster_utils.release_node_lock(
+                self.parameters
             )
-        )

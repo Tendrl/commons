@@ -6,6 +6,7 @@ import uuid
 from tendrl.commons import flows
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
+from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.flows.create_cluster import \
     utils as create_cluster_utils
 from tendrl.commons.flows.expand_cluster import ceph_help
@@ -16,22 +17,22 @@ from tendrl.commons.objects.job import Job
 
 class ExpandCluster(flows.BaseFlow):
     def run(self):
-        integration_id = self.parameters['TendrlContext.integration_id']
-        if integration_id is None:
-            raise FlowExecutionFailedError(
-                "TendrlContext.integration_id cannot be empty"
+        try:
+            # Lock nodes
+            create_cluster_utils.acquire_node_lock(
+                self.parameters, self.__class__.__name__
             )
+            integration_id = self.parameters['TendrlContext.integration_id']
+            if integration_id is None:
+                raise FlowExecutionFailedError(
+                    "TendrlContext.integration_id cannot be empty"
+                )
 
-        supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
-        sds_name = self.parameters["TendrlContext.sds_name"]
-        if sds_name not in supported_sds:
-            raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
-        # Lock nodes
-        create_cluster_utils.accuire_node_lock(
-            self.parameters, self.__class__.__name__
-        )
+            supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+            sds_name = self.parameters["TendrlContext.sds_name"]
+            if sds_name not in supported_sds:
+                raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
 
-        try:  
             ssh_job_ids = []
             if "ceph" in sds_name:
                 ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
@@ -143,11 +144,68 @@ class ExpandCluster(flows.BaseFlow):
                 if all_status:
                     if all(all_status):
                         break
-        except Exception as ex:
-            # releasing nodes if any exception came
+
+            # release lock before import cluster
             create_cluster_utils.release_node_lock(
                 self.parameters
             )
+
+            # Create the params list for import cluster flow
+            new_params = {}
+            new_params['Node[]'] = self.parameters['Node[]']
+            new_params['TendrlContext.integration_id'] = integration_id
+
+            # Get node context for one of the nodes from list
+            sds_pkg_name = NS._int.client.read(
+                "nodes/%s/DetectedCluster/"
+                "sds_pkg_name" % self.parameters['Node[]'][0]
+            ).value
+            new_params['import_after_expand'] = True
+            if "gluster" in sds_pkg_name:
+                new_params['gdeploy_provisioned'] = True
+            sds_pkg_version = NS._int.client.read(
+                "nodes/%s/DetectedCluster/sds_pkg_"
+                "version" % self.parameters['Node[]'][0]
+            ).value
+            new_params['DetectedCluster.sds_pkg_name'] = \
+                sds_pkg_name
+            new_params['DetectedCluster.sds_pkg_version'] = \
+                sds_pkg_version
+            payload = {
+                "node_ids": self.parameters['Node[]'],
+                "run": "tendrl.flows.ImportCluster",
+                "status": "new",
+                "parameters": new_params,
+                "parent": self.parameters['job_id'],
+                "type": "node"
+            }
+            _job_id = str(uuid.uuid4())
+            Job(job_id=_job_id,
+                status="new",
+                payload=payload).save()
+            Event(
+                Message(
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id'],
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Please wait while Tendrl imports (job_id: %s) newly expanded "
+                        "%s storage nodes %s" % (
+                            _job_id,
+                            sds_pkg_name,
+                            integration_id
+                        )
+                    }
+                )
+            )
+        except Exception as ex:
+            # release lock if any exception came
+            if not ("locked by other jobs" in ex.message):
+                # release lock if any exception came
+                create_cluster_utils.release_node_lock(
+                    self.parameters
+                )
             # For traceback
             Event(
                 ExceptionMessage(
@@ -159,57 +217,4 @@ class ExpandCluster(flows.BaseFlow):
                 )
             )
             # raising exception to mark job as failed
-            raise ex(ex.message)
-        # release lock
-        create_cluster_utils.release_node_lock(
-            self.parameters
-        )
-        # Create the params list for import cluster flow
-        new_params = {}
-        new_params['Node[]'] = self.parameters['Node[]']
-        new_params['TendrlContext.integration_id'] = integration_id
-
-        # Get node context for one of the nodes from list
-        sds_pkg_name = NS._int.client.read(
-            "nodes/%s/DetectedCluster/"
-            "sds_pkg_name" % self.parameters['Node[]'][0]
-        ).value
-        new_params['import_after_expand'] = True
-        if "gluster" in sds_pkg_name:
-            new_params['gdeploy_provisioned'] = True
-        sds_pkg_version = NS._int.client.read(
-            "nodes/%s/DetectedCluster/sds_pkg_"
-            "version" % self.parameters['Node[]'][0]
-        ).value
-        new_params['DetectedCluster.sds_pkg_name'] = \
-            sds_pkg_name
-        new_params['DetectedCluster.sds_pkg_version'] = \
-            sds_pkg_version
-        payload = {
-            "node_ids": self.parameters['Node[]'],
-            "run": "tendrl.flows.ImportCluster",
-            "status": "new",
-            "parameters": new_params,
-            "parent": self.parameters['job_id'],
-            "type": "node"
-        }
-        _job_id = str(uuid.uuid4())
-        Job(job_id=_job_id,
-            status="new",
-            payload=payload).save()
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Please wait while Tendrl imports (job_id: %s) newly expanded "
-                    "%s storage nodes %s" % (
-                        _job_id,
-                        sds_pkg_name,
-                        integration_id
-                    )
-                }
-            )
-        )
+            raise ex
