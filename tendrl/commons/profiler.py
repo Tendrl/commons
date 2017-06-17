@@ -1,6 +1,6 @@
 import sys
 
-def initiate():
+def start():
   import atexit
   import GreenletProfiler
   
@@ -9,7 +9,7 @@ def initiate():
   sys.stdout.write("Started Tendrl profiling...")
 
   @atexit.register
-  def finish_yappi():
+  def finish():
     GreenletProfiler.stop()
     sys.stdout.write("Stopped Tendrl profiling...")
     stats = GreenletProfiler.get_func_stats()
