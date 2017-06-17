@@ -15,7 +15,7 @@ def start():
     stats = GreenletProfiler.get_func_stats()
 
     for stat_type in ['pstat', 'callgrind', 'ystat']:
-        _stat_path = "/var/lib/tendrl/profiling/{0}/last_run_func_stat.{1}".formant(NS.publisher_id,
+        _stat_path = "/var/lib/tendrl/profiling/{0}/last_run_func_stat.{1}".format(NS.publisher_id,
                                                                                     stat_type)
         stats.save(_stat_path, type=stat_type)
         
