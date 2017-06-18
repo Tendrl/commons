@@ -40,7 +40,7 @@ class NodeContext(objects.BaseObject):
             # No existing tags
             pass
         self.tags = tags or []
-        self.tags += NS.config.data['tags']
+        self.tags += NS.config.data.get('tags', [])
         self.tags += curr_tags
         self.tags = list(set(self.tags))
         
