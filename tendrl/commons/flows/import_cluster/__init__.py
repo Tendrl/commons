@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import etcd
@@ -15,6 +16,27 @@ from tendrl.commons.message import ExceptionMessage
 
 
 class ImportCluster(flows.BaseFlow):
+    def _probe_and_mark_provisioner(self, node_list, integration_id):
+        try:
+            gluster_prov_nodes = json.loads(
+                NS._int.client.read("indexes/tags/provisioner/gluster").value
+            )
+            if gluster_prov_nodes and gluster_prov_nodes[0] in node_list:
+                # Ideally only one node would be present in this list
+                # Even if more than one in the list, mark one of them
+                # with tag `provisioner/{integration-id}` for further
+                # cluster operations
+                nc = NS.tendrl.objects.NodeContext(
+                    node_id=gluster_prov_nodes[0]
+                ).load()
+                tags = nc.tags
+                tags += ["provisioner/%s" % integration_id]
+                nc.tags = list(set(tags))
+                nc.save()
+                return True
+        except etcd.EtcdKyNotFound:
+            return False
+
     def run(self):
         try:
             # Lock nodes
@@ -74,7 +96,9 @@ class ImportCluster(flows.BaseFlow):
 
                 # check if gdeploy in already provisioned in this cluster
                 # if no it has to be provisioned here
-                if not self.parameters.get('gdeploy_provisioned', False) and sds_name.find("gluster") > -1:
+                if sds_name.find("gluster") > -1 and \
+                    not self.parameters.get("gdeploy_provisioned", False) and \
+                    not self._probe_and_mark_provisioner(self.parameters["Node[]"], integration_id):
                     create_cluster_utils.install_gdeploy()
                     create_cluster_utils.install_python_gdeploy()
                     ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
