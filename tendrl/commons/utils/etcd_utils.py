@@ -45,6 +45,8 @@ def write(key,value,quorum = True):
         if type(ex) != etcd.EtcdKeyNotFound:
             NS._int.wreconnect()
             NS._int.wclient.write(key,value,quorum = quorum)
+        else:
+            raise etcd.EtcdKeyNotFound
 
 
 '''
@@ -66,3 +68,5 @@ def refresh(value,ttl):
         if type(ex) != etcd.EtcdKeyNotFound:
             NS._int.wreconnect()
             NS._int.wclient.refresh(value, ttl=ttl)
+        else:
+            raise etcd.EtcdKeyNotFound

@@ -76,10 +76,14 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.flows.create_cluster.utils.acquire_node_lock',
+            mock.Mock(return_value=None))
 def test_create_cluster():
     create_cluster = CreateCluster()
     param = maps.NamedDict()
     param['TendrlContext.integration_id'] = None
+    param['Node[]'] = []
+    param["job_id"] = ""
     create_cluster.parameters = param
     with pytest.raises(FlowExecutionFailedError):
         create_cluster.run()
