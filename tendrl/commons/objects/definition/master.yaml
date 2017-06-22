@@ -59,7 +59,7 @@ namespace.tendrl:
           - Cluster.node_identifier
           - Cluster.node_configuration
       run: tendrl.flows.ExpandCluster
-      type: Create
+      type: Update
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
       version: 1
     ImportCluster:
