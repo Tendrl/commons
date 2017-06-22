@@ -87,6 +87,7 @@ def import_ceph(parameters):
                    "log_cfg_path": logging_config_file_path + logging_file_name,
                    "log_level": "DEBUG",
                     "logging_socket_path": "/var/run/tendrl/message.sock",
+                    "sync_interval": 10,
                     "tags": [ceph_integration_tag]}
     with open("/etc/tendrl/ceph-integration/ceph-integration.conf.yaml",
               'w') as outfile:
