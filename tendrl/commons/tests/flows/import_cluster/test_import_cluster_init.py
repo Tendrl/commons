@@ -70,6 +70,8 @@ def load_trendrl_context(*args):
     ret.tags = ["Test tag","ceph/mon"]
     ret.status = True
     ret.node_id = 1
+    ret.sync_status = True
+    ret.last_sync= "test_last_sync"
     return ret
 
 
@@ -129,10 +131,15 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('gevent.sleep',
             mock.Mock(return_value=True))
+@mock.patch('tendrl.commons.flows.create_cluster.utils.acquire_node_lock',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.flows.create_cluster.utils.release_node_lock',
+            mock.Mock(return_value=None))
 def test_run():
     tendrlNS = init()
     param= maps.NamedDict()
     param['TendrlContext.integration_id'] = None
+    param['Node[]'] = []
     with patch.object(TendrlNS,'get_obj_definition',get_obj_definition) as mock_fn:
         import_cluster = ImportCluster(parameters = param)
     with pytest.raises(FlowExecutionFailedError):
@@ -200,20 +207,7 @@ def test_run():
                             with patch.object(__builtin__,'open',open) as mock_open:
                                 with pytest.raises(FlowExecutionFailedError):
                                     cluster_obj.run()
-        param['DetectedCluster.sds_pkg_name'] = "ceph"
-        param['Node[]'] = ["TestNode"]
-        with patch.object(TendrlNS,'get_obj_definition',get_obj_definition) as mock_fn:
-            cluster_obj = ImportCluster(parameters = param)
-        with patch.object(TendrlNS,'get_atom_definition',get_obj_definition) as mock_fn:
-            cluster_obj._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
-            with patch.object(Client,'load',load_trendrl_context_high_version) as mock_fn:
-                with patch.object(objects.BaseObject,'load',load_trendrl_context_high_version) as mock_fn:
-                    with mock.patch('tendrl.commons.objects.__init__',
-            mock.Mock(return_value=None)):
-                        with mock.patch('tendrl.commons.objects.job.Job.save',
-            mock.Mock(return_value=None)):
-                            with patch.object(__builtin__,'open',return_value = False) as mock_open:
-                                cluster_obj.run()
+        
         param['Node[]'] = ["TestNode"]
         param["import_after_expand"] = False
         param['DetectedCluster.sds_pkg_name'] = "gluster"

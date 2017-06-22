@@ -12,6 +12,8 @@ def load(*args):
     node_context.fqdn = "Test fqdn"
     node_context.tags = ["test_tag1","test_tag2"]
     node_context.status = True
+    node_context.sync_status = True
+    node_context.last_sync= "test_last_sync"
     return node_context
 
 

@@ -18,6 +18,9 @@ class BaseObject_Child(objects.BaseObject):
     def __init__(self,*args,**kwargs):
         if kwargs:
             self.test = kwargs["test"]
+        self.value = "nodes/Test_object"
+        self.updated_at = "latest"
+        self._defs = maps.NamedDict(attrs=maps.NamedDict(value=maps.NamedDict(type="string"),updated_at=maps.NamedDict(type="string")))
         super(BaseObject_Child,self).__init__(*args,**kwargs)
 
 
@@ -160,7 +163,8 @@ def test_save():
                     obj.save(True)
             with patch.object(Client,"write",return_value = True) as mock_write:
                 with patch.object(objects.BaseObject,"_hash",hash) as mock_hash:
-                    obj.save(True)
+                    with patch.object(Client,"read",return_value = maps.NamedDict(value = "")) as mock_read:
+                        obj.save(True)
             with patch.object(Client,"write",return_value = True) as mock_write:
                 with patch.object(objects.BaseObject,"_hash",return_value = None) as mock_hash:
                     with patch.object(Client,"read") as mock_read:
@@ -195,7 +199,8 @@ def test_save():
                         obj.save(False)
             with patch.object(Client,"write",return_value = True) as mock_write:
                 obj.__class__.__name__ = "Message"
-                obj.save()
+                with patch.object(Client,"read",return_value = maps.NamedDict(value = "")) as mock_read:
+                    obj.save()
 
 
 def test_load():
