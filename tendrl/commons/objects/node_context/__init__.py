@@ -125,5 +125,5 @@ class NodeContext(objects.BaseObject):
             return None
 
     def render(self):
-        self.value = self.value.format(NS.node_context.node_id)
+        self.value = self.value.format(self.node_id or NS.node_context.node_id)
         return super(NodeContext, self).render()
