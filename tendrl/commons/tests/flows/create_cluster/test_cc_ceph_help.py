@@ -55,6 +55,7 @@ def test_install_packages():
     param = maps.NamedDict()
     param["job_id"] = "test_id"
     param["flow_id"] = "test_flow_id"
+    param["TendrlContext.integration_id"] = ""
     param["Cluster.node_configuration"] = {"test_node": maps.NamedDict(role="osd",provisioning_ip="test_ip")}
     NS.ceph_provisioner = importlib.import_module("tendrl.commons.tests.fixtures.plugin").Plugin()
     ceph_help.install_packages(param)
