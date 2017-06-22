@@ -20,7 +20,7 @@ def read(key):
             NS._int.reconnect()
             return NS._int.client.read(key)
         else:
-            return None
+            raise etcd.EtcdKeyNotFound
 
 
 '''
