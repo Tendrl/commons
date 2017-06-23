@@ -1,5 +1,4 @@
 import etcd
-import __builtin__
 
 '''
    Read from etcd
@@ -11,7 +10,8 @@ import __builtin__
        dict - > if read is successful
        None - > if key is not found
 '''
- 
+
+
 def read(key):
     try:
         return NS._int.client.read(key)
@@ -38,13 +38,14 @@ def read(key):
        None
 '''
 
-def write(key,value,quorum = True):
+
+def write(key, value, quorum=True):
     try:
-        NS._int.wclient.write(key,value,quorum = quorum)
+        NS._int.wclient.write(key, value, quorum=quorum)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
         if type(ex) != etcd.EtcdKeyNotFound:
             NS._int.wreconnect()
-            NS._int.wclient.write(key,value,quorum = quorum)
+            NS._int.wclient.write(key, value, quorum=quorum)
         else:
             raise etcd.EtcdKeyNotFound
 
@@ -61,7 +62,8 @@ def write(key,value,quorum = True):
        None
 '''
 
-def refresh(value,ttl):
+
+def refresh(value, ttl):
     try:
         NS._int.wclient.refresh(value, ttl=ttl)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
