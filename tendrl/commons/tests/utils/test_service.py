@@ -32,6 +32,7 @@ def init():
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = 1
 
+
 def test_constructor():
     service = Service("Test_service","node_context",1,"/path/to/socket/",True)
     assert service.publisher_id == "node_context"
@@ -43,8 +44,8 @@ def test_constructor():
     assert service.node_id == 1
 
 
-    init()
 def test_start():
+    init()
     service = Service("Test_service")
     service.start()
     with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
@@ -59,6 +60,7 @@ def test_start():
         assert ret[1] is True
         assert ret[0] == "test_msg"
 
+
 def test_stop():
     init()
     service = Service("Test_service")
@@ -67,6 +69,7 @@ def test_stop():
         mock_run.return_value = ansible_run(False)
         ret = service.stop()
         assert ret[1] is True
+
 
 def test_reload():
     init()
