@@ -162,6 +162,23 @@ class BaseObject(object):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
 
+    def load_all(self):
+        value = '/'.join(self.value.split('/')[:-1])
+        try:
+            etcd_resp = NS._int.client.read(value)
+        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+                    if type(ex) != etcd.EtcdKeyNotFound:
+                        NS._int.reconnect()
+                        etcd_resp = NS._int.client.read(value)
+                    else:
+                        return None
+        ins = []
+        for item in etcd_resp.leaves:
+            self.value = item.key
+            ins.append(self.load())
+        return ins
+
+
     def load(self):
         if not "Message" in self.__class__.__name__:
             try:
