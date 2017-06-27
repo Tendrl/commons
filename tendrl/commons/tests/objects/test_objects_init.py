@@ -9,6 +9,8 @@ import mock
 from tendrl.commons import objects
 from tendrl.commons import TendrlNS
 from mock import patch
+import importlib
+from tendrl.commons.tests.fixtures.client import Client as dummy_client
 import tendrl.commons.objects.node_context as node
 from tendrl.commons.utils.central_store import utils as cs_utils
 
@@ -60,11 +62,17 @@ def read(*args,**kwargs):
     raise etcd.EtcdConnectionFailed
 
 
+def read_fn(*args,**kwargs):
+    raise etcd.EtcdKeyNotFound
+
+
 def refresh(*args,**kwargs):
     raise etcd.EtcdConnectionFailed
 
+
 def hash(*args):
     raise TypeError
+
 
 def refresh_client(*args,**kwargs):
     raise etcd.EtcdKeyNotFound	
@@ -273,6 +281,26 @@ def test_exists():
                     with pytest.raises(etcd.EtcdConnectionFailed):
                         obj.exists()
 
+
+def test_load_all():
+    tendrlNS = init()
+    NS._int.reconnect = type("Dummy",(object,),{})
+    NS._int.client = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
+    with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:    
+        obj = BaseObject_Child()
+        obj._ns = tendrlNS
+        with patch.object(dummy_client,"read",return_value = maps.NamedDict(leaves = {})) as mock_read:
+            obj.load_all()
+        with patch.object(dummy_client,"read",return_value = maps.NamedDict(leaves = [maps.NamedDict(key = 'test_value')])) as mock_read:
+            with patch.object(BaseObject_Child,'load',return_value = "tst"):
+                ret = obj.load_all()
+                assert isinstance(ret,list)
+        with patch.object(dummy_client,"read",read) as mock_read:
+            with pytest.raises(etcd.EtcdConnectionFailed):
+                obj.load_all()
+        with patch.object(dummy_client,"read",read_fn) as mock_read:
+                ret = obj.load_all()
+                assert ret is None
 
 def test_constructor_BaseAtom():
     tendrlNS = init()
