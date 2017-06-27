@@ -46,6 +46,7 @@ namespace.tendrl:
     ExpandCluster:
       tags: 
         - "provisioner/$TendrlContext.integration_id"
+        - "provisioner/ceph"
       help: "expanding an existing cluster"
       enabled: true
       inputs:
@@ -55,6 +56,7 @@ namespace.tendrl:
           - TendrlContext.cluster_id
           - TendrlContext.cluster_name
           - TendrlContext.sds_name
+          - Cluster.public_network
           - Cluster.cluster_network
           - Cluster.node_identifier
           - Cluster.node_configuration
