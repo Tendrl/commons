@@ -83,16 +83,20 @@ namespace.tendrl:
 
   objects:
     Cluster:
-      internal: True
       enabled: True
       help: "Represents a cluster"
       list: /clusters
+      value: clusters/$TendrlContext.integration_id
       attrs:
+        integration_id:
+          help: integration id
+          type: String
         public_network:
           help: Public Network cidr of the cluster
           type: String
         cluster_network:
           help: Data Nework cidr of the cluster
+          type: String
         node_configuration:
           help: Node configuration for the cluster nodes
           type: Dict[]
@@ -101,7 +105,7 @@ namespace.tendrl:
           type: Dict
         node_identifier:
           help: How nodes should be identified while create cluster
-          type: String
+          type: list
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
