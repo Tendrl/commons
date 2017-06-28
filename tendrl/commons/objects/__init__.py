@@ -12,6 +12,7 @@ from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage, Message
 from tendrl.commons.utils import time_utils
+from tendrl.commons.utils import etcd_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -71,15 +72,6 @@ class BaseObject(object):
 
     def save(self, update=True, ttl=None):
         self.render()
-        # setting ttl after directory creation for tendrl messages
-        if ttl:
-            try:
-                NS._int.wclient.refresh(self.value, ttl=ttl)
-            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                if type(ex) != etcd.EtcdKeyNotFound:
-                    NS._int.wreconnect()
-                    NS._int.wclient.refresh(self.value, ttl=ttl)
-
         if not "Message" in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
@@ -94,6 +86,8 @@ class BaseObject(object):
                         _stored_hash = NS._int.client.read(_hash_key).value
                 if self.hash == _stored_hash:
                     # No changes in stored object and current object, dont save current object to central store
+                    if ttl:
+                        etcd_utils.refresh(self.value, ttl)
                     return
             except TypeError:
                 # no hash for this object, save the current hash as is
@@ -161,6 +155,9 @@ class BaseObject(object):
             except (etcd.EtcdConnectionFailed, etcd.EtcdException):
                 NS._int.wreconnect()
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
+        if ttl:
+            etcd_utils.refresh(self.value, ttl)
+
 
     def load_all(self):
         value = '/'.join(self.value.split('/')[:-1])
