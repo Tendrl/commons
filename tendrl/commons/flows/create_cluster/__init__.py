@@ -202,6 +202,13 @@ class CreateCluster(flows.BaseFlow):
                 self.parameters
             )
 
+            # Persist the cluster's extra details
+            NS.tendrl.objects.Cluster(
+                integration_id=self.parameters['TendrlContext.integration_id'],
+                public_network=self.parameters.get('Cluster.public_network'),
+                cluster_network=self.parameters.get('Cluster.cluster_network')
+            ).save()
+
             Job(job_id=_job_id,
                 status="new",
                 payload=payload).save()
