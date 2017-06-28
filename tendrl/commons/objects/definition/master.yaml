@@ -46,6 +46,7 @@ namespace.tendrl:
     ExpandCluster:
       tags: 
         - "provisioner/$TendrlContext.integration_id"
+        - "provisioner/ceph"
       help: "expanding an existing cluster"
       enabled: true
       inputs:
@@ -55,11 +56,12 @@ namespace.tendrl:
           - TendrlContext.cluster_id
           - TendrlContext.cluster_name
           - TendrlContext.sds_name
+          - Cluster.public_network
           - Cluster.cluster_network
           - Cluster.node_identifier
           - Cluster.node_configuration
       run: tendrl.flows.ExpandCluster
-      type: Create
+      type: Update
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
       version: 1
     ImportCluster:
@@ -81,16 +83,20 @@ namespace.tendrl:
 
   objects:
     Cluster:
-      internal: True
       enabled: True
       help: "Represents a cluster"
       list: /clusters
+      value: clusters/$TendrlContext.integration_id
       attrs:
+        integration_id:
+          help: integration id
+          type: String
         public_network:
           help: Public Network cidr of the cluster
           type: String
         cluster_network:
           help: Data Nework cidr of the cluster
+          type: String
         node_configuration:
           help: Node configuration for the cluster nodes
           type: Dict[]
@@ -99,7 +105,7 @@ namespace.tendrl:
           type: Dict
         node_identifier:
           help: How nodes should be identified while create cluster
-          type: String
+          type: list
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"

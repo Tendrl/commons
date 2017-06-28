@@ -66,7 +66,11 @@ def install_gdeploy():
             **attributes
         )
     try:
-        runner.run()
+        result, err = runner.run()
+        if result['failed']:
+            raise FlowExecutionFailedError(
+                "Failed to install gdeploy. %s" % result['msg']
+            )
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
         raise FlowExecutionFailedError(
             "Failed to install gdeploy"
@@ -101,7 +105,11 @@ def install_python_gdeploy():
             **attributes
         )
     try:
-        runner.run()
+        result, err = runner.run()
+        if result['failed']:
+            raise FlowExecutionFailedError(
+                "Failed to install python-gdeploy. %s" % result['msg']
+            )
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
         raise FlowExecutionFailedError(
             "Failed to install python-gdeploy"
