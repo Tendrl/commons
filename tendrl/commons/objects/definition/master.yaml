@@ -32,10 +32,11 @@ namespace.tendrl:
           - TendrlContext.cluster_name
           - TendrlContext.sds_name
           - TendrlContext.cluster_id
-          - Cluster.public_network
-          - Cluster.cluster_network
           - TendrlContext.integration_id
           - Cluster.node_configuration
+        optional:
+          - Cluster.public_network
+          - Cluster.cluster_network
           - Cluster.conf_overrides
       pre_run:
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
