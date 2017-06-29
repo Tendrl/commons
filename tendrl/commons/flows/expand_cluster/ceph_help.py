@@ -109,13 +109,15 @@ def create_mons(parameters, mon_ips, created_mons):
 
 
 def existing_mons(parameters):
-    mons = NS._int.client.read(
-        "clusters/%s/maps/mon_map/data/mons" %\
-        parameters["TendrlContext.integration_id"]
-    ).value
+    mons = json.loads(
+        NS._int.client.read(
+            "clusters/%s/maps/mon_map/data" %\
+            parameters["TendrlContext.integration_id"]
+        ).value
+    )['mons']
 
     created_mons = []
-    for mon in json.loads(mons.replace("'", '"')):
+    for mon in mons:
         mon_ip = mon['addr'].split(':')[0]
         mon_host_name = socket.gethostbyaddr(mon_ip)[0]
         created_mons.append(
