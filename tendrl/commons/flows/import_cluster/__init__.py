@@ -170,7 +170,7 @@ class ImportCluster(flows.BaseFlow):
                         new_params = self.parameters.copy()
                         new_params['Node[]'] = [node]
                         # create same flow for each node in node list except $this
-                        payload = {"node_ids": [node],
+                        payload = {"tags": ["tendrl/node_%s" % node],
                                    "run": "tendrl.flows.ImportCluster",
                                    "status": "new",
                                    "parameters": new_params,

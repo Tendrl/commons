@@ -165,8 +165,12 @@ class ExpandCluster(flows.BaseFlow):
                 sds_pkg_name
             new_params['DetectedCluster.sds_pkg_version'] = \
                 sds_pkg_version
+
+            tags = []
+            for node in self.parameters['Node[]']:
+                tags.append("tendrl/node_%s" % node)
             payload = {
-                "node_ids": self.parameters['Node[]'],
+                "tags": tags,
                 "run": "tendrl.flows.ImportCluster",
                 "status": "new",
                 "parameters": new_params,
