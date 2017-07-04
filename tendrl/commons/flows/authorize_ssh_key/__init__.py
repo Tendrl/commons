@@ -1,5 +1,3 @@
-import logging
-
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.utils.ssh import authorize_key

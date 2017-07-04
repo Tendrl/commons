@@ -5,11 +5,12 @@ class Disk(objects.BaseObject):
     def __init__(self, disk_id=None, hardware_id=None, disk_name=None,
                  sysfs_id=None, sysfs_busid=None, sysfs_device_link=None,
                  hardware_class=None, model=None, vendor=None, device=None,
-                 rmversion=None, serial_no=None, driver=None, driver_modules=None,
-                 device_files=None, device_number=None, bios_id=None,
-                 geo_bios_edd=None, geo_logical=None, size=None, size_bios_edd=None,
-                 geo_bios_legacy=None, config_status=None, partitions=None,
-                 ssd=None, *args, **kwargs):
+                 rmversion=None, serial_no=None, driver=None,
+                 driver_modules=None, device_files=None, device_number=None,
+                 bios_id=None, geo_bios_edd=None, geo_logical=None, size=None,
+                 size_bios_edd=None, geo_bios_legacy=None,
+                 config_status=None, partitions=None, ssd=None, *args,
+                 **kwargs):
         super(Disk, self).__init__(*args, **kwargs)
         self.disk_id = disk_id
         self.hardware_id = hardware_id
@@ -26,7 +27,7 @@ class Disk(objects.BaseObject):
         self.driver = driver
         self.driver_modules = driver_modules
         self.device_files = device_files
-        self.device_number = device_number 
+        self.device_number = device_number
         self.bios_id = bios_id
         self.geo_bios_edd = geo_bios_edd
         self.geo_logical = geo_logical

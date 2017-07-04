@@ -7,7 +7,7 @@ class Cluster(objects.BaseObject):
                  conf_overrides=None, node_identifier=None, sync_status=None,
                  last_sync=None, *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
-        self.integration_id=integration_id
+        self.integration_id = integration_id
         self.public_network = public_network
         self.cluster_network = cluster_network
         self.node_configuration = node_configuration

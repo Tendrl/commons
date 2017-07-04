@@ -1,6 +1,6 @@
 from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.message import Message
 
 
 def get_node_ips(parameters):

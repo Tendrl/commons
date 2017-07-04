@@ -10,10 +10,11 @@ import mock
 
 # Testing __init
 def test_constructor(monkeypatch):
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
-    '''
+    """Testing for constructor involves checking if all needed
+
+    variables are declared initialized
+    """
+
     def job_consume():
         return "Thread Consuming Job"
     monkeypatch.setattr(jobs, 'JobConsumerThread', job_consume)

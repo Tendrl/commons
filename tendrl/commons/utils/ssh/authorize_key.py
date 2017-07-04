@@ -46,7 +46,7 @@ class AuthorizeKey(object):
         try:
             result, err = runner.run()
             if 'failed' in result:
-               err = result
+                err = result
             else:
                 Event(
                     Message(

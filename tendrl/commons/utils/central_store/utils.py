@@ -1,7 +1,7 @@
 import datetime
-import time
-import sys
 import etcd
+import sys
+import time
 
 from tendrl.commons.utils.central_store import fields
 
@@ -21,6 +21,7 @@ def to_tendrl_field(name, value, tendrl_type=None):
 
     return PY_TO_TENDRL_TYPE_MAP[type(value)](name, value)
 
+
 def wreconnect():
     NS._int.wclient = None
     while not NS._int.wclient:
@@ -31,6 +32,7 @@ def wreconnect():
                 "Error connecting to central store (etcd), trying "
                 "again...")
             time.sleep(2)
+
 
 def reconnect():
     NS._int.client = None

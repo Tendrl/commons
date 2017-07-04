@@ -40,7 +40,8 @@ class IsNodeTendrlManaged(objects.BaseAtom):
 
             # Check if node has the Memory populated
             try:
-                memory_details = NS._int.client.read("nodes/%s/Memory" % node_id)
+                memory_details = NS._int.client.read("nodes/%s/Memory" %
+                                                     node_id)
                 if memory_details.leaves is None:
                     raise AtomExecutionFailedError(
                         "Node doesnt have Memory details populated"

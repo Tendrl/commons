@@ -2,7 +2,8 @@ import shlex
 import sys
 
 from tendrl.commons.event import Event
-from tendrl.commons.message import ExceptionMessage, Message
+from tendrl.commons.message import ExceptionMessage
+from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
 
 

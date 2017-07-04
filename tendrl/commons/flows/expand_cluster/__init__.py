@@ -1,17 +1,17 @@
 import etcd
 import gevent
-import json
+
 import uuid
 
-from tendrl.commons import flows
 from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-from tendrl.commons.message import ExceptionMessage
+from tendrl.commons import flows
 from tendrl.commons.flows.create_cluster import \
     utils as create_cluster_utils
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import gluster_help
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.message import ExceptionMessage
+from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
 
 
@@ -26,10 +26,12 @@ class ExpandCluster(flows.BaseFlow):
                     "TendrlContext.integration_id cannot be empty"
                 )
 
-            supported_sds = NS.compiled_definitions.get_parsed_defs()['namespace.tendrl']['supported_sds']
+            supported_sds = NS.compiled_definitions.get_parsed_defs()[
+                'namespace.tendrl']['supported_sds']
             sds_name = self.parameters["TendrlContext.sds_name"]
             if sds_name not in supported_sds:
-                raise FlowExecutionFailedError("SDS (%s) not supported" % sds_name)
+                raise FlowExecutionFailedError("SDS (%s) not supported" %
+                                               sds_name)
 
             ssh_job_ids = []
             if "ceph" in sds_name:
@@ -37,22 +39,27 @@ class ExpandCluster(flows.BaseFlow):
                     self.parameters
                 )
             else:
-                ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
-                    self.parameters,
-                    skip_current_node=True
-                )
+                ssh_job_ids = \
+                    create_cluster_utils.gluster_create_ssh_setup_jobs(
+                        self.parameters,
+                        skip_current_node=True
+                    )
 
             while True:
                 gevent.sleep(3)
                 all_status = {}
                 for job_id in ssh_job_ids:
-                    all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
-                
-                _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                    all_status[job_id] = NS._int.client.read(
+                        "/queue/%s/status" % job_id).value
+
+                _failed = {_jid: status for _jid, status in
+                           all_status.iteritems() if status == "failed"}
                 if _failed:
                     raise FlowExecutionFailedError(
-                        "SSH setup failed for jobs %s cluster %s" % (str(_failed), integration_id))
-                if all([status == "finished" for status in all_status.values()]):
+                        "SSH setup failed for jobs %s cluster %s" % (str(
+                            _failed), integration_id))
+                if all([status == "finished" for status in
+                        all_status.values()]):
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
@@ -74,11 +81,12 @@ class ExpandCluster(flows.BaseFlow):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Expanding ceph cluster %s" % integration_id
+                            "message": "Expanding ceph cluster %s" %
+                                       integration_id
                         }
                     )
                 )
@@ -104,8 +112,10 @@ class ExpandCluster(flows.BaseFlow):
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "SDS install/config completed on newly expanded nodes, "
-                        "Please wait while tendrl-node-agents detect sds details on the newly expaned nodes %s" % self.parameters['Node[]']
+                        "message": "SDS install/config completed on newly "
+                        "expanded nodes, Please wait while "
+                        "tendrl-node-agents detect sds details on the newly "
+                        "expanded nodes %s" % self.parameters['Node[]']
                     }
                 )
             )
@@ -120,7 +130,8 @@ class ExpandCluster(flows.BaseFlow):
                 for node in self.parameters['Node[]']:
                     try:
                         dc = NS._int.client.read(
-                            "/nodes/%s/DetectedCluster/detected_cluster_id" % node
+                            "/nodes/%s/DetectedCluster/detected_cluster_id"
+                            % node
                         ).value
                         if not detected_cluster:
                             detected_cluster = dc
@@ -143,9 +154,8 @@ class ExpandCluster(flows.BaseFlow):
                     if all(all_status):
                         break
 
-
             # Create the params list for import cluster flow
-            new_params = {}
+            new_params = dict()
             new_params['Node[]'] = self.parameters['Node[]']
             new_params['TendrlContext.integration_id'] = integration_id
 
@@ -191,7 +201,8 @@ class ExpandCluster(flows.BaseFlow):
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "Please wait while Tendrl imports (job_id: %s) newly expanded "
+                        "message": "Please wait while Tendrl imports ("
+                                   "job_id: %s) newly expanded "
                         "%s storage nodes %s" % (
                             _job_id,
                             sds_pkg_name,

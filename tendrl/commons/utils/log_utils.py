@@ -1,16 +1,16 @@
 """Handles logging functionality."""
-
-import sys
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from inspect import getframeinfo
 from inspect import stack
+import sys
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 
 def log(log_priority, publisher_id, log_payload, job_id=None,
         flow_id=None, parent_id=None, cluster_id=None):
-    """
-    Function used for logging errors/output/info.
+    """Function used for logging errors/output/info.
+
     Args:
         log_priority [Type : String]: Priority of the Log Message (error/info)
         publisher_id [Type : Integer] : Id of publisher (mandatory)
@@ -29,7 +29,7 @@ def log(log_priority, publisher_id, log_payload, job_id=None,
                 caller=caller_details
             )
         )
-    except:
+    except Exception:
             if log_priority.lower() == "error":
                 sys.stderr.write(log_payload.get("message"))
             else:
