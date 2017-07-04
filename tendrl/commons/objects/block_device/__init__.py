@@ -55,4 +55,3 @@ class BlockDevice(objects.BaseObject):
             NS.node_context.node_id,
             self.device_name.replace("/", "_").replace("_", "", 1))
         return super(BlockDevice, self).render()
-

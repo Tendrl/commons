@@ -66,14 +66,15 @@ class GenerateKey(object):
             )
             out = "Ansible Executable Generation Failed"
         if out is None:
+            _msg = "No output after Ansible Executable Generation"
             Event(
                 Message(
                     priority="debug",
                     publisher="commons",
-                    payload={"message": "No output after Ansible Executable Generation"}
+                    payload={"message": _msg}
                 )
             )
-            return None,"No Output"
+            return None, "No Output"
         if out is not None and "ssh_public_key" not in out:
             err = out
             Event(

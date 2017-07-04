@@ -1,18 +1,19 @@
+import etcd
+
 import abc
 import copy
 import hashlib
 import json
-
-import etcd
 import six
 import sys
 import types
 
-from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.event import Event
-from tendrl.commons.message import ExceptionMessage, Message
-from tendrl.commons.utils import time_utils
+from tendrl.commons.message import ExceptionMessage
+from tendrl.commons.message import Message
+from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import time_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -23,7 +24,8 @@ class BaseObject(object):
             self._defs = BaseObject.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
-                raise Exception("Internal Object must provide its own definition via '_defs' attr")
+                raise Exception("Internal Object must provide its own "
+                                "definition via '_defs' attr")
 
     def load_definition(self):
         try:
@@ -45,7 +47,8 @@ class BaseObject(object):
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
-            msg = "Could not find definitions (.yml) for namespace.%s.objects.%s" %\
+            msg = "Could not find definitions (.yml) for " \
+                  "namespace.%s.objects.%s" %\
                   (self._ns.ns_name, self.__class__.__name__)
             try:
                 Event(
@@ -72,7 +75,7 @@ class BaseObject(object):
 
     def save(self, update=True, ttl=None):
         self.render()
-        if not "Message" in self.__class__.__name__:
+        if "Message" not in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
                 self.hash = self._hash()
@@ -85,28 +88,31 @@ class BaseObject(object):
                         NS._int.reconnect()
                         _stored_hash = NS._int.client.read(_hash_key).value
                 if self.hash == _stored_hash:
-                    # No changes in stored object and current object, dont save current object to central store
+                    # No changes in stored object and current object,
+                    # dont save current object to central store
                     if ttl:
                         etcd_utils.refresh(self.value, ttl)
                     return
             except TypeError:
                 # no hash for this object, save the current hash as is
                 pass
-        
+
         if update:
             current_obj = self.load()
             for attr, val in vars(self).iteritems():
-                if isinstance(val, (types.FunctionType, types.BuiltinFunctionType,
-                                  types.MethodType, types.BuiltinMethodType,
-                                  types.UnboundMethodType)) or \
+                if isinstance(val, (types.FunctionType,
+                                    types.BuiltinFunctionType,
+                                    types.MethodType, types.BuiltinMethodType,
+                                    types.UnboundMethodType)) or \
                         attr.startswith("_") or attr in ['value', 'list']:
                     continue
 
                 if val is None and hasattr(current_obj, attr):
-                    # if self.attr is None, use attr value from central store (i.e. current_obj.attr)
+                    # if self.attr is None, use attr value from central
+                    # store (i.e. current_obj.attr)
                     if getattr(current_obj, attr):
                         setattr(self, attr, getattr(current_obj, attr))
-                    
+
         self.updated_at = str(time_utils.now())
         for item in self.render():
             '''
@@ -122,8 +128,7 @@ class BaseObject(object):
                         priority="debug",
                         publisher=NS.publisher_id,
                         payload={"message": "Writing %s to %s" %
-                                            (
-                                            item['key'], item['value'])
+                                            (item['key'], item['value'])
                                  }
                     )
                 )
@@ -158,7 +163,6 @@ class BaseObject(object):
         if ttl:
             etcd_utils.refresh(self.value, ttl)
 
-
     def load_all(self):
         value = '/'.join(self.value.split('/')[:-1])
         try:
@@ -175,9 +179,8 @@ class BaseObject(object):
             ins.append(self.load())
         return ins
 
-
     def load(self):
-        if not "Message" in self.__class__.__name__:
+        if "Message" not in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
                 self.hash = self._hash()
@@ -190,7 +193,8 @@ class BaseObject(object):
                         NS._int.reconnect()
                         _stored_hash = NS._int.client.read(_hash_key).value
                 if self.hash == _stored_hash:
-                    # No changes in stored object and current object, dont save current object to central store
+                    # No changes in stored object and current object,
+                    # dont save current object to central store
                     return self
             except TypeError:
                 # no hash for this object, save the current hash as is
@@ -218,7 +222,7 @@ class BaseObject(object):
                 else:
                     NS._int.reconnect()
                     etcd_resp = NS._int.client.read(item['key'], quorum=True)
-            
+
             value = etcd_resp.value
             if item['dir']:
                 key = item['key'].split('/')[-1]
@@ -293,11 +297,13 @@ class BaseObject(object):
 
     def render(self):
         """Renders the instance into a structure for central store based on
+
         its key (self.value)
 
         :returns: The structure to use for setting.
         :rtype: list(dict{key=str,value=any})
         """
+
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
@@ -339,9 +345,9 @@ class BaseObject(object):
         _public_vars = {}
         for attr, value in vars(self).iteritems():
             if attr.startswith("_") or attr in ['hash', 'updated_at',
-                                               'value', 'list']:
+                                                'value', 'list']:
                 continue
-            if type(value) in [dict,list]:
+            if type(value) in [dict, list]:
                 value = copy.deepcopy(value)
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
@@ -357,7 +363,8 @@ class BaseAtom(object):
             self._defs = BaseAtom.load_definition(self)
         if hasattr(self, "internal"):
             if not hasattr(self, "_defs"):
-                raise Exception("Internal Atom must provide its own definition via '_defs' attr")
+                raise Exception("Internal Atom must provide its own "
+                                "definition via '_defs' attr")
 
     def load_definition(self):
         try:
@@ -365,7 +372,8 @@ class BaseAtom(object):
                 Message(
                     priority="debug",
                     publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for namespace.%s."
+                    payload={"message": "Load definitions (.yml) for "
+                                        "namespace.%s."
                                         "objects.%s.atoms.%s" %
                                         (self._ns.ns_name, self.obj.__name__,
                                          self.__class__.__name__)
@@ -373,7 +381,8 @@ class BaseAtom(object):
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects.%s."
+            sys.stdout.write("Load definitions (.yml) for "
+                             "namespace.%s.objects.%s."
                              "atoms.%s" % (self._ns.ns_name, self.obj.__name__,
                                            self.__class__.__name__))
         try:
@@ -413,13 +422,15 @@ class BaseAtom(object):
             'define the function run to use this class'
         )
 
+
 class AtomNotImplementedError(NotImplementedError):
     def __init__(self, err):
         self.message = "run function not implemented. {}".format(err)
-        super(AtomNotImplementedError,self).__init__(self.message)
+        super(AtomNotImplementedError, self).__init__(self.message)
+
 
 class AtomExecutionFailedError(Exception):
     def __init__(self, err):
         self.message = "Atom Execution failed. Error:" + \
                        " {}".format(err)
-        super(AtomExecutionFailedError,self).__init__(self.message)
+        super(AtomExecutionFailedError, self).__init__(self.message)

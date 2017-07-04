@@ -6,7 +6,9 @@ from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import Message
 
+
 def create_ceph(parameters):
+    _integration_id = parameters['TendrlContext.integration_id']
     mon_ips, osd_ips = install_packages(parameters)
     # install the packages
     Event(
@@ -15,8 +17,8 @@ def create_ceph(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed all ceph packages" %
-                                parameters['TendrlContext.integration_id']
+            payload={"message": "Cluster (%s) Successfully installed all "
+                                "ceph packages" % _integration_id
                      }
         )
     )
@@ -29,8 +31,9 @@ def create_ceph(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully created and configured all ceph mons" %
-                                parameters['TendrlContext.integration_id']
+            payload={"message": "Cluster (%s) Successfully created and "
+                                "configured all ceph mons" %
+                                _integration_id
                      }
         )
     )
@@ -43,8 +46,9 @@ def create_ceph(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully created and configured all ceph osds" %
-                     parameters['TendrlContext.integration_id']}
+            payload={"message": "Cluster (%s) Successfully created and "
+                                "configured all ceph osds" %
+                                _integration_id}
         )
     )
 
@@ -54,9 +58,12 @@ def create_ceph(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) is ready for import by tendrl!" % parameters['TendrlContext.integration_id']}
+            payload={"message": "Cluster (%s) is ready for import by "
+                                "tendrl!" % _integration_id
+                     }
         )
     )
+
 
 def install_packages(parameters):
     plugin = NS.ceph_provisioner.get_plugin()
@@ -76,7 +83,9 @@ def install_packages(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed ceph mon packages on all nodes [%s], ceph-installer task %s" %
+            payload={"message": "Cluster (%s) Successfully installed ceph "
+                                "mon packages on all nodes [%s], "
+                                "ceph-installer task %s" %
                                 (parameters['TendrlContext.integration_id'],
                                  " ".join(mon_ips), task_id)
                      }
@@ -91,7 +100,9 @@ def install_packages(parameters):
             flow_id=parameters['flow_id'],
             priority="info",
             publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed ceph osd packages on all nodes [%s], ceph-installer task %s" %
+            payload={"message": "Cluster (%s) Successfully installed ceph "
+                                "osd packages on all nodes [%s], "
+                                "ceph-installer task %s" %
                                 (parameters['TendrlContext.integration_id'],
                                  " ".join(osd_ips), task_id)
                      }
@@ -99,6 +110,7 @@ def install_packages(parameters):
     )
 
     return mon_ips, osd_ips
+
 
 def create_mons(parameters, mon_ips):
     created_mons = []
@@ -122,19 +134,21 @@ def create_mons(parameters, mon_ips):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Cluster (%s) Configured ceph mon %s, ceph-installer task %s" %
+                    "message": "Cluster (%s) Configured ceph mon %s, "
+                               "ceph-installer task %s" %
                     (parameters['TendrlContext.integration_id'],
                      mon_ip, task_id)
                 }
             )
         )
 
-        created_mons.append({"address":mon_ip, "host": mon_ip})
+        created_mons.append({"address": mon_ip, "host": mon_ip})
 
     # Save the monitor secret for future reference
     if parameters.get('create_mon_secret', False):
         NS._int.wclient.write(
-            "clusters/%s/_mon_key" % parameters['TendrlContext.integration_id'],
+            "clusters/%s/_mon_key" % parameters[
+                'TendrlContext.integration_id'],
             plugin.monitor_secret
         )
 
@@ -142,7 +156,6 @@ def create_mons(parameters, mon_ips):
 
 
 def create_osds(parameters, created_mons):
-    failed = []
     plugin = NS.ceph_provisioner.get_plugin()
     for node, config in parameters["Cluster.node_configuration"].iteritems():
         if "osd" in config["role"].lower():
@@ -173,8 +186,10 @@ def create_osds(parameters, created_mons):
                     flow_id=parameters['flow_id'],
                     priority="info",
                     publisher=NS.publisher_id,
-                    payload={"message": "Cluster (%s) Configured ceph osd %s, ceph-installer task %s" %
-                                        (parameters['TendrlContext.integration_id'],
+                    payload={"message": "Cluster (%s) Configured ceph osd "
+                                        "%s, ceph-installer task %s" %
+                                        (parameters[
+                                         'TendrlContext.integration_id'],
                                          config["provisioning_ip"], task_id)
                              }
                 )
@@ -202,13 +217,15 @@ def create_osds(parameters, created_mons):
                 for k, v in devices.iteritems():
                     journal_disk_name = v
                     if journal_disk_name in journal_details.keys():
-                        journal_details[journal_disk_name]['journal_count'] += 1
+                        journal_details[journal_disk_name]['journal_count'] \
+                            += 1
                         journal_details[journal_disk_name]['ssd'] = True
                     else:
                         journal_details[journal_disk_name] = {
                             'journal_count': 1,
                             'ssd': False,
-                            'journal_size': config['journal_size'] * 1024 * 1024
+                            'journal_size': config['journal_size'] * 1024 *
+                            1024
                         }
 
             NS.integrations.ceph.objects.Journal(
@@ -230,12 +247,18 @@ def wait_for_task(task_id):
                 if resp["succeeded"]:
                     return
                 else:
-                    stderr = resp.get("stderr", "ceph-installer task_id %s failed and did not complete" % task_id)
+                    stderr = resp.get("stderr", "ceph-installer task_id %s "
+                                                "failed and did not complete"
+                                      % task_id)
                     stdout = resp.get("stdout", "")
-                    raise FlowExecutionFailedError(dict(ceph_installer_task_id=task_id, ceph_installer_task_stdout=stdout,
-                                        ceph_installer_task_stderr=stderr))
+                    raise FlowExecutionFailedError(dict(
+                        ceph_installer_task_id=task_id,
+                        ceph_installer_task_stdout=stdout,
+                        ceph_installer_task_stderr=stderr))
         count = count + 1
-    stderr = resp.get("stderr", "ceph-installer task_id %s timed out and did not complete" % task_id)
+    stderr = resp.get("stderr", "ceph-installer task_id %s timed out and did "
+                                "not complete" % task_id)
     stdout = resp.get("stdout", "")
-    raise FlowExecutionFailedError(dict(ceph_installer_task_id=task_id, ceph_installer_task_stdout=stdout,
+    raise FlowExecutionFailedError(dict(ceph_installer_task_id=task_id,
+                                        ceph_installer_task_stdout=stdout,
                                         ceph_installer_task_stderr=stderr))

@@ -1,4 +1,3 @@
-import json
 from tendrl.commons import objects
 
 
@@ -21,11 +20,11 @@ class Job(objects.BaseObject):
             # Load parent job
             _parent = Job(job_id=self.payload['parent']).load()
             _children = []
-            
+
             if _parent.children:
                 # Load existing child job ids
                 _children = _parent.children
-                
+
             _children += [self.job_id]
             _parent.children = list(set(_children))
             _parent.save()
@@ -40,9 +39,9 @@ class Job(objects.BaseObject):
                     _parent.errors = _msg
                 _parent.status = "failed"
                 _parent.save()
-                
+
         super(Job, self).save()
-                
+
     def render(self):
         self.value = self.value.format(self.job_id)
         return super(Job, self).render()

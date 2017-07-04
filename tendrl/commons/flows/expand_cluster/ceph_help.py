@@ -1,13 +1,10 @@
 import json
 import socket
-import uuid
 
 from tendrl.commons.event import Event
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.create_cluster import \
     ceph_help as create_ceph_help
 from tendrl.commons.message import Message
-from tendrl.commons.objects.job import Job
 
 
 def expand_cluster(parameters):
@@ -37,7 +34,7 @@ def expand_cluster(parameters):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Creating Ceph Monitors %s" %\
+                    "message": "Creating Ceph Monitors %s" %
                     parameters['TendrlContext.integration_id']
                 }
             )
@@ -53,7 +50,7 @@ def expand_cluster(parameters):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Creating Ceph OSD %s" %\
+                    "message": "Creating Ceph OSD %s" %
                     parameters['TendrlContext.integration_id']
                 }
             )
@@ -66,7 +63,7 @@ def expand_cluster(parameters):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Created OSD on Cluster %s" %\
+                    "message": "Created OSD on Cluster %s" %
                     parameters['TendrlContext.integration_id']
                 }
             )
@@ -97,21 +94,21 @@ def create_mons(parameters, mon_ips, created_mons):
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
-                    "message": "Creating Ceph MON %s, ceph-installer task %s" %\
-                    (mon_ip, task_id)
+                    "message": "Creating Ceph MON %s, ceph-installer task "
+                               "%s" % (mon_ip, task_id)
                 }
             )
         )
 
         create_ceph_help.wait_for_task(task_id)
-        created_mons.append({"address":mon_ip, "host": mon_ip})
+        created_mons.append({"address": mon_ip, "host": mon_ip})
     return created_mons
 
 
 def existing_mons(parameters):
     mons = json.loads(
         NS._int.client.read(
-            "clusters/%s/maps/mon_map/data" %\
+            "clusters/%s/maps/mon_map/data" %
             parameters["TendrlContext.integration_id"]
         ).value
     )['mons']
