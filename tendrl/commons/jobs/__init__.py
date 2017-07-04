@@ -127,22 +127,13 @@ def process_job(job):
                 if flow_tag in NS.node_context.tags:
                     _tag_match = True
 
-        # Flows created by tendrl backend use 'node_ids' to
-        # target jobs
-        _node_id_match = False
-        if job.payload.get("node_ids", []):
-            if NS.node_context.node_id in job.payload['node_ids']:
-                _node_id_match = True
-
-        if not _tag_match and not _node_id_match:
-            _job_node_ids = ", ".join(job.payload.get(
-                "node_ids", []))
+        if not _tag_match:
             _job_tags = ", ".join(job.payload.get("tags", []))
             _msg = "Node (%s)(type: %s)(tags: %s) will not " \
-                   "process job-%s (node_ids: %s)(tags: %s)" % \
+                   "process job-%s (tags: %s)" % \
                    (NS.node_context.node_id, NS.type,
-                    json.dumps(NS.node_context.tags), jid,
-                    _job_node_ids, _job_tags)
+                    NS.node_context.tags, jid,
+                    _job_tags)
             Event(
                 Message(
                     priority="info",
