@@ -198,7 +198,7 @@ def acquire_node_lock(parameters):
             NS._int.client.read("/nodes/%s" % node)
         except EtcdKeyNotFound:
             raise FlowExecutionFailedError(
-                "Unable to lock node %s, not present in central store" %
+                "Unknown Node %s, cannot lock" %
                 node)
     # check job is parent or child
     job = Job(job_id=parameters['job_id']).load()
