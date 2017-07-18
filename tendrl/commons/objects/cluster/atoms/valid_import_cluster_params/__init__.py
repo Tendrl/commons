@@ -14,7 +14,7 @@ class ValidImportClusterParams(objects.BaseAtom):
                     priority="error",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "TendrlContext.integration_id is empty"
+                        "message": "Cluster uuid (integration_id) is empty"
                     },
                     job_id=self.job_id,
                     flow_id=self.parameters['flow_id'],
