@@ -37,7 +37,7 @@ class CheckClusterAvailable(objects.BaseAtom):
                         priority="error",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Cluster data sync is not over yet. Timing out"
+                            "message": "Cluster data sync still incomplete. Timing out"
                         },
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id'],
@@ -45,5 +45,5 @@ class CheckClusterAvailable(objects.BaseAtom):
                     )
                 )
                 raise AtomExecutionFailedError(
-                    "Cluster data sync is not over yet. Timing out"
+                    "Cluster data sync still incomplete. Timing out"
                 )
