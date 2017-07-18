@@ -67,7 +67,7 @@ def install_gdeploy():
         )
     try:
         result, err = runner.run()
-        if result['failed']:
+        if result.get('failed', None):
             raise FlowExecutionFailedError(
                 "Failed to install gdeploy. %s" % result['msg']
             )
@@ -107,7 +107,7 @@ def install_python_gdeploy():
         )
     try:
         result, err = runner.run()
-        if result['failed']:
+        if result.get('failed', None):
             raise FlowExecutionFailedError(
                 "Failed to install python-gdeploy. %s" % result['msg']
             )
