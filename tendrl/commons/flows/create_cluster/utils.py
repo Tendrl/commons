@@ -192,6 +192,14 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
 
 
 def acquire_node_lock(parameters):
+    # check node_id is present
+    for node in parameters['Node[]']:
+        try:
+            NS._int.client.read("/nodes/%s" % node)
+        except EtcdKeyNotFound:
+            raise FlowExecutionFailedError(
+                "Unknown Node %s, cannot lock" %
+                node)
     # check job is parent or child
     job = Job(job_id=parameters['job_id']).load()
     p_job_id = None
