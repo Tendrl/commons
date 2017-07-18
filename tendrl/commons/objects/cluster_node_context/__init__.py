@@ -1,5 +1,3 @@
-import json
-
 from tendrl.commons import objects
 
 

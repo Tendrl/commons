@@ -369,7 +369,11 @@ class TendrlNS(object):
         self.current_ns.flows[name] = flow_class
 
     def get_flow(self, name):
-        return self.current_ns.flows[name]
+        try:
+            return self.current_ns.flows[name]
+        except KeyError:
+            raise KeyError("Flow '{0}' not found in namespace.{1}".format(
+                name, self.ns_name))
 
     def get_obj_definition(self, obj_name):
         raw_ns = "namespace.%s" % self.ns_name

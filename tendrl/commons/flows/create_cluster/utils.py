@@ -1,15 +1,14 @@
 import copy
-import json
 import uuid
 
 from etcd import EtcdKeyNotFound
+
 from tendrl.commons.event import Event
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
-from tendrl.commons.utils.ssh import authorize_key
 from tendrl.commons.utils import ansible_module_runner
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.objects.job import Job
+from tendrl.commons.utils.ssh import authorize_key
 
 
 def ceph_create_ssh_setup_jobs(parameters):
@@ -49,10 +48,11 @@ def ceph_create_ssh_setup_jobs(parameters):
                 )
     return ssh_job_ids
 
+
 def install_gdeploy():
     # Install gdeploy on the node
     ansible_module_path = "packaging/os/yum.py"
-    attributes = {}
+    attributes = dict()
     attributes["name"] = "gdeploy"
     try:
         runner = ansible_module_runner.AnsibleRunner(
@@ -67,7 +67,7 @@ def install_gdeploy():
         )
     try:
         result, err = runner.run()
-        if result['failed']:
+        if result.get('failed', None):
             raise FlowExecutionFailedError(
                 "Failed to install gdeploy. %s" % result['msg']
             )
@@ -75,6 +75,7 @@ def install_gdeploy():
         raise FlowExecutionFailedError(
             "Failed to install gdeploy"
         )
+
 
 def install_python_gdeploy():
     attributes = {}
@@ -106,7 +107,7 @@ def install_python_gdeploy():
         )
     try:
         result, err = runner.run()
-        if result['failed']:
+        if result.get('failed', None):
             raise FlowExecutionFailedError(
                 "Failed to install python-gdeploy. %s" % result['msg']
             )
@@ -191,6 +192,14 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
 
 
 def acquire_node_lock(parameters):
+    # check node_id is present
+    for node in parameters['Node[]']:
+        try:
+            NS._int.client.read("/nodes/%s" % node)
+        except EtcdKeyNotFound:
+            raise FlowExecutionFailedError(
+                "Unknown Node %s, cannot lock" %
+                node)
     # check job is parent or child
     job = Job(job_id=parameters['job_id']).load()
     p_job_id = None
@@ -200,16 +209,21 @@ def acquire_node_lock(parameters):
     for node in parameters['Node[]']:
         key = "/nodes/%s/locked_by" % node
         try:
-            lock_owner_job = NS._int.client.read(key).value            
-            # If the parent job has aquired lock on participating nodes, dont you worry child job :)
+            lock_owner_job = NS._int.client.read(key).value
+            # If the parent job has aquired lock on participating nodes,
+            # dont you worry child job :)
             if p_job_id == lock_owner_job:
                 continue
             else:
-                raise FlowExecutionFailedError("Cannot proceed further, Node (%s) is already locked by Job (%s)" % (node, lock_owner_job))
+                raise FlowExecutionFailedError("Cannot proceed further, "
+                                               "Node (%s) is already locked "
+                                               "by Job (%s)" % (node,
+                                                                lock_owner_job)
+                                               )
         except EtcdKeyNotFound:
             # To check what are all the nodes are already locked
             continue
-    
+
     for node in parameters['Node[]']:
         try:
             lock_owner_job = NS._int.client.read(key).value
@@ -226,11 +240,12 @@ def acquire_node_lock(parameters):
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
-                        "message": "Acquired lock (%s) for Node (%s)" % (lock_owner_job,
-                                                                                        node)
+                        "message": "Acquired lock (%s) for Node (%s)" % (
+                            lock_owner_job, node)
                     }
                 )
             )
+
 
 def release_node_lock(parameters):
     for node in parameters['Node[]']:
@@ -246,8 +261,8 @@ def release_node_lock(parameters):
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Released lock (%s) for Node (%s)" % (lock_owner_job,
-                                                                                  node)
+                            "message": "Released lock (%s) for Node (%s)" %
+                                       (lock_owner_job, node)
                         }
                     )
                 )

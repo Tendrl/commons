@@ -63,7 +63,6 @@ class Cpu(objects.BaseObject):
 
         return cpuinfo
 
-
     def render(self):
         self.value = self.value.format(NS.node_context.node_id)
         return super(Cpu, self).render()

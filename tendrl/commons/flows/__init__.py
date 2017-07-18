@@ -3,7 +3,8 @@ import six
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.message import Message, ExceptionMessage
+from tendrl.commons.message import ExceptionMessage
+from tendrl.commons.message import Message
 from tendrl.commons.objects import AtomExecutionFailedError
 
 
@@ -117,18 +118,17 @@ class BaseFlow(object):
                 if item not in self.parameters:
                     msg = "Mandatory parameter %s not provided" % item
                     Event(
-                    Message(
-                        job_id=self.job_id,
-                        flow_id=self.parameters['flow_id'],
-                        priority="warning",
-                        publisher=NS.publisher_id,
-                        payload={"message": msg}
+                        Message(
+                            job_id=self.job_id,
+                            flow_id=self.parameters['flow_id'],
+                            priority="warning",
+                            publisher=NS.publisher_id,
+                            payload={"message": msg}
+                        )
                     )
-                )
 
-                    #raise FlowExecutionFailedError(
-                    #    "Mandatory parameter %s not provided" % item
-                    #)
+                    raise FlowExecutionFailedError("Mandatory parameter %s "
+                                                   "not provided" % item)
 
         if self._defs.get("pre_run") is not None:
             for atom_fqn in self._defs.get("pre_run"):
@@ -273,9 +273,9 @@ class BaseFlow(object):
             ns, atom_name = atom_fqdn.split(".atoms.")
             ns, obj_name = ns.split(".objects.")
             ns_str = ns.split(".")[-1]
-            
+
             if "integrations" in ns:
-                current_ns =  getattr(NS.integrations, ns_str)
+                current_ns = getattr(NS.integrations, ns_str)
             else:
                 current_ns = getattr(NS, ns_str)
 

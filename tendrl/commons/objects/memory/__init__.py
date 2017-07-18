@@ -1,6 +1,5 @@
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.utils import cmd_utils
 from tendrl.commons import objects
 
 
