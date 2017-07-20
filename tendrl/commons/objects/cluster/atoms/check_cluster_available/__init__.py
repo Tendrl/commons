@@ -26,7 +26,7 @@ class CheckClusterAvailable(objects.BaseAtom):
                 # pass and continue the time out below
                 pass
 
-            if _cluster and _cluster.status == "done":
+            if _cluster and _cluster.sync_status == "done":
                 return True
 
             retry_count += 1
