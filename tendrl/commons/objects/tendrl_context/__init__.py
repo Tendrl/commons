@@ -22,5 +22,5 @@ class TendrlContext(objects.BaseObject):
         self.value = 'nodes/{0}/TendrlContext'
 
     def render(self):
-        self.value = self.value.format(node_id or NS.node_context.node_id)
+        self.value = self.value.format(self.node_id or NS.node_context.node_id)
         return super(TendrlContext, self).render()
