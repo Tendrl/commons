@@ -1,23 +1,24 @@
-import pytest
-from tendrl.commons.utils.ssh import sshd_status
-from tendrl.commons.utils import cmd_utils
+import __builtin__
+import maps
 import mock
 from mock import patch
-import maps
 import psutil
-import __builtin__
+
+from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils.ssh import sshd_status
+
 
 def run(*args):
-    return 'LoadState=loaded','No Error',0
+    return 'LoadState=loaded', 'No Error', 0
 
 
 def conn(*args):
     if args[0]:
         con = maps.NamedDict(status='LISTEN',
-                             laddr = ["0.0.0.0","25"])
+                             laddr=["0.0.0.0", "25"])
     else:
         con = maps.NamedDict(status='READ',
-                             laddr = ["0.0.0.0","25"])
+                             laddr=["0.0.0.0", "25"])
     return [con]
 
 
@@ -32,17 +33,16 @@ def test_find_status():
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
-    with patch.object(psutil.Process,'connections') as mock_connections:
+    with patch.object(psutil.Process, 'connections') as mock_connections:
         mock_connections.return_value = conn(True)
         sshd_status.find_status()
-    with patch.object(psutil.Process,'connections') as mock_connections:
+    with patch.object(psutil.Process, 'connections') as mock_connections:
         mock_connections.return_value = conn(False)
         sshd_status.find_status()
-    with patch.object(sshd_status,'_find_pid',return_value =0) as mock_find_pid:
+    with patch.object(sshd_status, '_find_pid', return_value=0):
         sshd_status.find_status()
-    with patch.object(cmd_utils.Command,"run",run) as mock_run:
+    with patch.object(cmd_utils.Command, "run", run):
         sshd_status.find_status()
-
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',

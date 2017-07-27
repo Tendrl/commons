@@ -1,19 +1,20 @@
-import pytest
-import maps
 import __builtin__
+import maps
+
+
 from tendrl.commons.objects.tendrl_context import TendrlContext
 
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     tendrl_context = TendrlContext()
     assert tendrl_context.integration_id is None
-    
-    #Passing Dummy Values
+
+    # Passing Dummy Values
     tendrl_context = TendrlContext(
         integration_id="Test_integration_id",
         cluster_id="Test_cluster_id",
@@ -21,6 +22,7 @@ def test_constructor():
         sds_name="Test_sds",
         sds_version=1.1)
     assert tendrl_context.cluster_id == "Test_cluster_id"
+
 
 # Testing render
 def test_render():

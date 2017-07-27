@@ -1,17 +1,18 @@
 import etcd
 import gevent
+import json
 import uuid
 
-from tendrl.commons import objects
 from tendrl.commons.event import Event
-from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.objects.job import Job
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.ceph_help import import_ceph
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
+from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.message import Message
+from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.objects.job import Job
 
 
 class ImportCluster(objects.BaseAtom):
@@ -54,13 +55,13 @@ class ImportCluster(objects.BaseAtom):
                 if sds_name.find("gluster") > -1 and \
                     not self.parameters.get("gdeploy_provisioned", False) and \
                     not self._probe_and_mark_provisioner(
-                        self.parameters["Node[]"], integration_id
-                    ):
+                        self.parameters["Node[]"], integration_id):
                     create_cluster_utils.install_gdeploy()
                     create_cluster_utils.install_python_gdeploy()
-                    ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
-                        self.parameters
-                    )
+                    ssh_job_ids = \
+                        create_cluster_utils.gluster_create_ssh_setup_jobs(
+                            self.parameters
+                        )
 
                     while True:
                         gevent.sleep(3)
@@ -70,21 +71,25 @@ class ImportCluster(objects.BaseAtom):
                                 "/queue/%s/status" % job_id
                             ).value
 
-                        _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                        _failed = {_jid: status for _jid, status in
+                                   all_status.iteritems() if status ==
+                                   "failed"}
                         if _failed:
                             raise AtomExecutionFailedError(
                                 "SSH setup failed for jobs %s cluster %s" %
                                 (str(_failed), integration_id)
                             )
-                        if all([status == "finished" for status in all_status.values()]):
+                        if all([status == "finished" for status in
+                                all_status.values()]):
                             Event(
                                 Message(
                                     job_id=self.parameters['job_id'],
-                                    flow_id = self.parameters['flow_id'],
+                                    flow_id=self.parameters['flow_id'],
                                     priority="info",
                                     publisher=NS.publisher_id,
                                     payload={
-                                        "message": "SSH setup completed for all nodes in cluster %s" %
+                                        "message": "SSH setup completed for "
+                                                   "all nodes in cluster %s" %
                                         integration_id
                                     }
                                 )
@@ -96,23 +101,25 @@ class ImportCluster(objects.BaseAtom):
                             NS.node_context.tags = list(set(tags))
                             NS.node_context.save()
 
-                            # set gdeploy_provisioned to true so that no other nodes
-                            # tries to configure gdeploy
+                            # set gdeploy_provisioned to true so that no
+                            # other nodes tries to configure gdeploy
                             self.parameters['gdeploy_provisioned'] = True
                             break
 
             NS.tendrl_context = NS.tendrl_context.load()
             NS.tendrl_context.integration_id = integration_id
             _detected_cluster = NS.tendrl.objects.DetectedCluster().load()
-            NS.tendrl_context.cluster_id = _detected_cluster.detected_cluster_id
-            NS.tendrl_context.cluster_name = _detected_cluster.detected_cluster_name
+            NS.tendrl_context.cluster_id = \
+                _detected_cluster.detected_cluster_id
+            NS.tendrl_context.cluster_name = \
+                _detected_cluster.detected_cluster_name
             NS.tendrl_context.sds_name = _detected_cluster.sds_pkg_name
             NS.tendrl_context.sds_version = _detected_cluster.sds_pkg_version
             NS.tendrl_context.save()
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
+                    flow_id=self.parameters['flow_id'],
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
@@ -132,7 +139,8 @@ class ImportCluster(objects.BaseAtom):
                     if NS.node_context.node_id != node:
                         new_params = self.parameters.copy()
                         new_params['Node[]'] = [node]
-                        # create same flow for each node in node list except $this
+                        # create same flow for each node in node list except
+                        #  $this
                         payload = {"tags": ["tendrl/node_%s" % node],
                                    "run": "tendrl.flows.ImportCluster",
                                    "status": "new",
@@ -148,11 +156,12 @@ class ImportCluster(objects.BaseAtom):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
-                                flow_id = self.parameters['flow_id'],
+                                flow_id=self.parameters['flow_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
                                 payload={
-                                    "message": "Importing (job: %s) Node %s to cluster %s" %
+                                    "message": "Importing (job: %s) Node %s "
+                                               "to cluster %s" %
                                     (_job_id, node, integration_id)
                                 }
                             )
@@ -170,22 +179,26 @@ class ImportCluster(objects.BaseAtom):
                 if is_mon:
                     # Check if minimum required version of underlying ceph
                     # cluster met. If not fail the import task
-                    detected_cluster = NS.tendrl.objects.DetectedCluster().load()
-                    detected_cluster_ver = detected_cluster.sds_pkg_version.split('.')
+                    detected_cluster = NS.tendrl.objects.DetectedCluster(
+                    ).load()
+                    detected_cluster_ver = \
+                        detected_cluster.sds_pkg_version.split('.')
                     maj_ver = detected_cluster_ver[0]
                     min_ver = detected_cluster_ver[1]
                     reqd_ceph_ver = NS.compiled_definitions.get_parsed_defs()[
                         'namespace.tendrl'
                     ]['min_reqd_ceph_ver']
-                    req_maj_ver, req_min_ver, req_rel = reqd_ceph_ver.split('.')
+                    req_maj_ver, req_min_ver, req_rel = reqd_ceph_ver.split(
+                        '.')
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
                             payload={
-                                "message": "Check: Minimum required version (%s.%s.%s) of Ceph Storage" %
+                                "message": "Check: Minimum required version "
+                                           "(%s.%s.%s) of Ceph Storage" %
                                 (req_maj_ver, req_min_ver, req_rel)
                             }
                         )
@@ -195,13 +208,16 @@ class ImportCluster(objects.BaseAtom):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
-                                flow_id = self.parameters['flow_id'],
+                                flow_id=self.parameters['flow_id'],
                                 priority="error",
                                 publisher=NS.publisher_id,
                                 payload={
-                                    "message": "Error: Minimum required version (%s.%s.%s) "
-                                    "doesnt match that of detected Ceph Storage (%s.%s.%s)" %
-                                    (req_maj_ver, req_min_ver, req_rel, maj_ver, min_ver, 0)
+                                    "message": "Error: Minimum required "
+                                               "version (%s.%s.%s) "
+                                    "doesnt match that of detected Ceph "
+                                               "Storage (%s.%s.%s)" %
+                                    (req_maj_ver, req_min_ver, req_rel,
+                                     maj_ver, min_ver, 0)
                                 }
                             )
                         )
@@ -219,7 +235,8 @@ class ImportCluster(objects.BaseAtom):
                 # Check if minimum required version of underlying gluster
                 # cluster met. If not fail the import task
                 detected_cluster = NS.tendrl.objects.DetectedCluster().load()
-                detected_cluster_ver = detected_cluster.sds_pkg_version.split('.')
+                detected_cluster_ver = \
+                    detected_cluster.sds_pkg_version.split('.')
                 maj_ver = detected_cluster_ver[0]
                 min_ver = detected_cluster_ver[1]
                 reqd_gluster_ver = NS.compiled_definitions.get_parsed_defs()[
@@ -229,11 +246,12 @@ class ImportCluster(objects.BaseAtom):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Check: Minimum required version (%s.%s.%s) of Gluster Storage" %
+                            "message": "Check: Minimum required version ("
+                                       "%s.%s.%s) of Gluster Storage" %
                             (req_maj_ver, req_min_ver, req_rel)
                         }
                     )
@@ -243,13 +261,16 @@ class ImportCluster(objects.BaseAtom):
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
+                            flow_id=self.parameters['flow_id'],
                             priority="error",
                             publisher=NS.publisher_id,
                             payload={
-                                "message": "Error: Minimum required version (%s.%s.%s) "
-                                "doesnt match that of detected Gluster Storage (%s.%s.%s)" %
-                                (req_maj_ver, req_min_ver, req_rel, maj_ver, min_ver, 0)
+                                "message": "Error: Minimum required version "
+                                           "(%s.%s.%s) "
+                                "doesnt match that of detected Gluster "
+                                           "Storage (%s.%s.%s)" %
+                                (req_maj_ver, req_min_ver, req_rel,
+                                 maj_ver, min_ver, 0)
                             }
                         )
                     )
@@ -267,7 +288,7 @@ class ImportCluster(objects.BaseAtom):
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
+                    flow_id=self.parameters['flow_id'],
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={
@@ -283,7 +304,8 @@ class ImportCluster(objects.BaseAtom):
                 _all_node_status = []
                 gevent.sleep(3)
                 for node_id in self.parameters['Node[]']:
-                    _status = NS.tendrl.objects.ClusterNodeContext(node_id=node_id).exists() \
+                    _status = NS.tendrl.objects.ClusterNodeContext(
+                        node_id=node_id).exists() \
                         and NS.tendrl.objects.ClusterTendrlContext(
                             integration_id=integration_id
                         ).exists()
@@ -293,12 +315,12 @@ class ImportCluster(objects.BaseAtom):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
-                                flow_id = self.parameters['flow_id'],
+                                flow_id=self.parameters['flow_id'],
                                 priority="info",
                                 publisher=NS.publisher_id,
                                 payload={
-                                    "message": "Import Cluster completed for all nodes "
-                                    "in cluster %s" % integration_id
+                                    "message": "Import cluster completed for "
+                                    "all nodes in cluster %s" % integration_id
                                 }
                             )
                         )
@@ -308,7 +330,7 @@ class ImportCluster(objects.BaseAtom):
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
+                    flow_id=self.parameters['flow_id'],
                     priority="info",
                     publisher=NS.publisher_id,
                     payload={

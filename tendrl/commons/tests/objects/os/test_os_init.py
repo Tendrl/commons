@@ -1,13 +1,15 @@
-import pytest
-import maps
 import __builtin__
+import maps
+
+
 from tendrl.commons.objects.os import Os
+
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.publisher_id = 1
@@ -21,6 +23,7 @@ def test_constructor():
             os_version=17.2, selinux_mode="Test")
     assert os.selinux_mode == "Test"
 
+
 def test_getNodeOs():
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.publisher_id = 1
@@ -30,6 +33,7 @@ def test_getNodeOs():
     NS.node_context.node_id = 1
     os = Os()
     assert os._getNodeOs() is not None
+
 
 # Testing render
 def test_render():

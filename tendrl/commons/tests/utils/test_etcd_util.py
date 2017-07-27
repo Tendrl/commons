@@ -1,11 +1,13 @@
-import pytest
-from tendrl.commons.utils import etcd_utils
 import __builtin__
-import maps
-import importlib
-from mock import patch
-from tendrl.commons.tests.fixtures.client import Client
 import etcd
+import importlib
+import maps
+from mock import patch
+import pytest
+
+
+from tendrl.commons.tests.fixtures.client import Client
+from tendrl.commons.utils import etcd_utils
 
 
 '''Dummy Functions'''
@@ -17,9 +19,6 @@ def raise_etcdconnectionfailed(*args, **kwargs):
 
 def raise_etcdkeynotfound(*args, **kwargs):
     raise etcd.EtcdKeyNotFound
-
-
-'''Unit Test Cases'''
 
 
 def test_read():
@@ -82,4 +81,3 @@ def test_refresh():
                       raise_etcdkeynotfound) as mock_refresh:
             with pytest.raises(etcd.EtcdKeyNotFound):
                 etcd_utils.refresh("test_value", 1)
-

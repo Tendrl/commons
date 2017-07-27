@@ -1,5 +1,4 @@
 import etcd
-import gevent
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
@@ -12,8 +11,8 @@ class CheckNodesInExistingCluster(objects.BaseAtom):
         super(CheckNodesInExistingCluster, self).__init__(*args, **kwargs)
 
     def run(self):
-        if not self.parameters.get('import_after_expand', False) and \
-            not self.parameters.get('import_after_create', False):
+        if not self.parameters.get('import_after_expand', False) and not \
+                self.parameters.get('import_after_create', False):
             # Above condition means, this is a fresh import
             # Check if nodes participate in some existing cluster
             try:
@@ -24,11 +23,12 @@ class CheckNodesInExistingCluster(objects.BaseAtom):
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
                             payload={
-                                "message": "Check: Node %s not part of any other cluster" % entry
+                                "message": "Check: Node %s not part of any "
+                                           "other cluster" % entry
                             }
                         )
                     )
@@ -39,7 +39,7 @@ class CheckNodesInExistingCluster(objects.BaseAtom):
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
-                                flow_id = self.parameters['flow_id'],
+                                flow_id=self.parameters['flow_id'],
                                 priority="error",
                                 publisher=NS.publisher_id,
                                 payload={"message": _msg}
@@ -48,7 +48,8 @@ class CheckNodesInExistingCluster(objects.BaseAtom):
                         return False
             except etcd.EtcdKeyNotFound:
                 raise AtomExecutionFailedError(
-                    "Error while checking pre-participation of nodes in any cluster"
+                    "Error while checking pre-participation of nodes in any "
+                    "cluster"
                 )
 
         return True

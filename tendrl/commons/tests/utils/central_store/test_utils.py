@@ -1,24 +1,29 @@
-import maps
-import etcd
-import pytest
 import __builtin__
-from tendrl.commons.utils.central_store.utils import to_tendrl_field
-from tendrl.commons.utils.central_store.utils import wreconnect
-from tendrl.commons.utils.central_store.utils import reconnect
+import etcd
+import maps
 from mock import patch
 import time
 
+
+from tendrl.commons.utils.central_store.utils import reconnect
+from tendrl.commons.utils.central_store.utils import to_tendrl_field
+from tendrl.commons.utils.central_store.utils import wreconnect
+
+
 def client(**args):
     raise etcd.EtcdException
+
 
 def sleep(*args):
     NS._int.wclient = "Temp_obj"
     NS._int.client = "Temp_obj"
 
+
 def test_to_tendrl_field():
-     ret = to_tendrl_field("test_name",{"message":"test"})
-     assert ret is not None
-     ret = to_tendrl_field("test_name",{"message":"test"},'json')
+    ret = to_tendrl_field("test_name", {"message": "test"})
+    assert ret is not None
+    ret = to_tendrl_field("test_name", {"message": "test"}, 'json')
+
 
 @patch.object(etcd, "Client")
 def test_wreconnect(patch_client):
@@ -30,8 +35,8 @@ def test_wreconnect(patch_client):
         'host': 2,
         'allow_reconnect': True}
     wreconnect()
-    with patch.object(etcd,'Client',client) as mock_client:
-        with patch.object(time,'sleep',sleep) as mock_sleep:
+    with patch.object(etcd, 'Client', client):
+        with patch.object(time, 'sleep', sleep):
             wreconnect()
 
 
@@ -45,6 +50,6 @@ def test_reconnect(patch_client):
         'host': 2,
         'allow_reconnect': True}
     reconnect()
-    with patch.object(etcd,'Client',client) as mock_client:
-        with patch.object(time,'sleep',sleep) as mock_sleep:
+    with patch.object(etcd, 'Client', client):
+        with patch.object(time, 'sleep', sleep):
             reconnect()
