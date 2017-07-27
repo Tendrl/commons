@@ -1,14 +1,15 @@
-import pytest
-import maps
 import __builtin__
-from tendrl.commons.objects.service.atoms.check_service_status import CheckServiceStatus
+import maps
 import mock
 from mock import patch
+
+from tendrl.commons.objects.service.atoms.check_service_status import \
+    CheckServiceStatus
 from tendrl.commons.utils.cmd_utils import Command
 
 
 def run(*args):
-    return 'active','No Error',0
+    return 'active', 'No Error', 0
 
 
 # Testing run
@@ -29,7 +30,7 @@ def test_run():
     check_service_status.parameters['job_id'] = "node_job"
     check_service_status.parameters['flow_id'] = "flow_id"
     check_service_status.parameters['fqdn'] = "Test_fqdn"
-    with patch.object(Command,"run") as mock_run:
+    with patch.object(Command, "run") as mock_run:
         mock_run.return_value = run()
         ret = check_service_status.run()
         assert ret is True

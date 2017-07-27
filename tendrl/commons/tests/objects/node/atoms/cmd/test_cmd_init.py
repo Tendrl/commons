@@ -1,18 +1,19 @@
-import pytest
-import maps
 import __builtin__
-from tendrl.commons.objects.node.atoms.cmd import Cmd
+import maps
 import mock
-from tendrl.commons.utils.cmd_utils import UnsupportedCommandException,Command
 from mock import patch
+import pytest
+
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.objects.node.atoms.cmd import Cmd
+from tendrl.commons.utils.cmd_utils import Command
+from tendrl.commons.utils.cmd_utils import UnsupportedCommandException
 
 
 def run(*args):
     return "out", "No_Error", 1
 
 
-# Testing run
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
@@ -31,7 +32,7 @@ def test_run():
     cmd.parameters['job_id'] = "node_job"
     cmd.parameters['flow_id'] = "flow_id"
     cmd.run()
-    with patch.object(Command,"run",run) as mock_run:
+    with patch.object(Command, "run", run):
         with pytest.raises(AtomExecutionFailedError):
             cmd.run()
     with pytest.raises(UnsupportedCommandException):

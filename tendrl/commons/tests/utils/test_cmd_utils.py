@@ -1,12 +1,14 @@
-import pytest
 import __builtin__
-from tendrl.commons.utils import cmd_utils
-from tendrl.commons.utils import ansible_module_runner
-from mock import patch
-import mock
 import maps
+import mock
+from mock import patch
+import pytest
 
-def ansible(*args,**kwargs):
+from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import cmd_utils
+
+
+def ansible(*args, **kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
 
@@ -17,12 +19,13 @@ def run(*args):
 
 def test_UnsupportedCommandException_constructor():
     exception_obj = cmd_utils.UnsupportedCommandException("test_cmd")
-    assert exception_obj.message == "Command: test_cmd not supported by tendrl commons"
+    assert exception_obj.message == "Command: test_cmd not supported by " \
+                                    "tendrl commons"
 
 
 def test_Command_constructor():
     cmd_obj = cmd_utils.Command("ls -a")
-    assert isinstance(cmd_obj.attributes,dict)
+    assert isinstance(cmd_obj.attributes, dict)
     with pytest.raises(cmd_utils.UnsupportedCommandException):
         cmd_obj = cmd_utils.Command("test_cmd")
 
@@ -39,11 +42,8 @@ def test_run():
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     cmd_obj = cmd_utils.Command("ls -a")
-    with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
+    with patch.object(ansible_module_runner, 'AnsibleRunner', ansible):
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
-            cmd_obj.run()        
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+            cmd_obj.run()
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
         cmd_obj.run()
-    
-
-    

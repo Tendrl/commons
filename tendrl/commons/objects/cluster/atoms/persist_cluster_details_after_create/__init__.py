@@ -1,7 +1,3 @@
-import gevent
-
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 
 

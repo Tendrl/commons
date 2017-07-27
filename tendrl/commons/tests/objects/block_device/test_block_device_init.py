@@ -1,19 +1,22 @@
-import pytest
-import maps
 import __builtin__
+import maps
+import pytest
+
+
 from tendrl.commons.objects.block_device import BlockDevice
 
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     block_device = BlockDevice()
     assert block_device.device_name is None
     block_device = BlockDevice("Test_device")
     assert block_device.device_name == "Test_device"
+
 
 # Testing render
 def test_render():

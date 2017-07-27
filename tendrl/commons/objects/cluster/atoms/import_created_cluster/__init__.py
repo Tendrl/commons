@@ -18,7 +18,7 @@ class ImportCreatedCluster(objects.BaseAtom):
         Event(
             Message(
                 job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
+                flow_id=self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
                 payload={
@@ -49,21 +49,24 @@ class ImportCreatedCluster(objects.BaseAtom):
                     break
 
         # Create the params list for import cluster flow
-        new_params = {}
+        new_params = dict()
         new_params['Node[]'] = self.parameters['Node[]']
         new_params['TendrlContext.integration_id'] = integration_id
 
         # Get node context for one of the nodes from list
         detected_cluster_id = NS._int.client.read(
-            "nodes/%s/DetectedCluster/detected_cluster_id" % self.parameters['Node[]'][0]
+            "nodes/%s/DetectedCluster/detected_cluster_id" %
+            self.parameters['Node[]'][0]
         ).value
         sds_pkg_name = NS._int.client.read(
-            "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node[]'][0]
+            "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node['
+                                                                      ']'][0]
         ).value
         if "gluster" in sds_pkg_name:
             new_params['gdeploy_provisioned'] = True
         sds_pkg_version = NS._int.client.read(
-            "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters['Node[]'][0]
+            "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters[
+                'Node[]'][0]
         ).value
         new_params['DetectedCluster.sds_pkg_name'] = \
             sds_pkg_name
@@ -76,7 +79,7 @@ class ImportCreatedCluster(objects.BaseAtom):
                    "parameters": new_params,
                    "parent": self.parameters['job_id'],
                    "type": "node"
-                  }
+                   }
         _job_id = str(uuid.uuid4())
 
         Job(job_id=_job_id,
@@ -85,12 +88,14 @@ class ImportCreatedCluster(objects.BaseAtom):
         Event(
             Message(
                 job_id=self.parameters['job_id'],
-                flow_id = self.parameters['flow_id'],
+                flow_id=self.parameters['flow_id'],
                 priority="info",
                 publisher=NS.publisher_id,
-                payload={"message": "Please wait while Tendrl imports newly created %s SDS Cluster %s"
-                         " Import job id :%s" % (sds_pkg_name, integration_id, _job_id)
-                     }
+                payload={"message": "Please wait while Tendrl imports newly "
+                                    "created %s SDS Cluster %s"
+                         " Import job id :%s" % (sds_pkg_name, integration_id,
+                                                 _job_id)
+                         }
             )
         )
 

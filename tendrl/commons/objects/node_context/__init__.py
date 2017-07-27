@@ -11,7 +11,6 @@ from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 
 from tendrl.commons import objects
-import traceback
 
 
 NODE_ID = None

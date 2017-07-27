@@ -1,18 +1,20 @@
-import pytest
-import maps
 import __builtin__
+import maps
+import pytest
+
+
 from tendrl.commons.objects.disk import Disk
 
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     disk = Disk()
     assert disk.disk_id is None
-    #Passing Dummy Values
+    # Passing Dummy Values
     disk = Disk(
         disk_id="M-Test-Disk-Id", hardware_id=172, disk_name="Test Disk",
         sysfs_id="Test System", sysfs_busid=1, sysfs_device_link="",
@@ -23,7 +25,7 @@ def test_constructor():
         geo_bios_legacy=None, config_status=None, partitions=None)
     assert disk.model == "M34"
 
-# Testing render
+
 def test_render():
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
