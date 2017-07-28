@@ -198,7 +198,7 @@ namespace.tendrl:
               - DetectedCluster.sds_pkg_name
               - TendrlContext.integration_id
           name: import cluster
-          run: tendrl.objects.Cluster.atoms.Import
+          run: tendrl.objects.Cluster.atoms.ImportCluster
           type: Create
           uuid: 452f6190-9b37-11e6-950d-a24fc0d9649c
           help: Import the cluster

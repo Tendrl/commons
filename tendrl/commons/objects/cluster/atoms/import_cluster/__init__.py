@@ -37,7 +37,7 @@ class ImportCluster(objects.BaseAtom):
                 nc.tags = list(set(tags))
                 nc.save()
                 return True
-        except etcd.EtcdKyNotFound:
+        except etcd.EtcdKeyNotFound:
             return False
 
     def run(self):
