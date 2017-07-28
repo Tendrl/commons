@@ -82,7 +82,7 @@ def test_run():
                                               "shebang"
             ansible_obj.run()
         with patch.object(module_common, 'modify_module') as \
-            mock_modify_module:
+                mock_modify_module:
             with patch.object(os, "system", system):
                 mock_modify_module.return_value = "Module_data",\
                                                   "module_style", "shebang"

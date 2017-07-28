@@ -1,4 +1,4 @@
-class Config():
+class Config(object):
     def __init__(self):
         self.data = {}
         self.data['etcd_port'] = 1

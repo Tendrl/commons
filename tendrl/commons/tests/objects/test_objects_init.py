@@ -272,7 +272,7 @@ def test_load():
                                       value="test_value")):
                     with patch.object(objects.BaseObject, 'render',
                                       return_value=[{'value':
-                                                    "9fb712695c0f42dbf2ed"
+                                                     "9fb712695c0f42dbf2ed"
                                                      "f13e6c03a828",
                                                      'dir': False,
                                                      'name': 'hash',
@@ -285,7 +285,7 @@ def test_load():
                                       value="test_value")):
                     with patch.object(objects.BaseObject, 'render',
                                       return_value=[{'value':
-                                                    "9fb712695c0f42dbf2ed"
+                                                     "9fb712695c0f42dbf2ed"
                                                      "f13e6c03a828",
                                                      'dir': False,
                                                      'name': 'hash',
@@ -297,7 +297,7 @@ def test_load():
                     with patch.object(objects.BaseObject, 'render',
                                       return_value=[{'value': 'test_val',
                                                      'dir': True, 'name':
-                                                    'test',
+                                                     'test',
                                                      'key': '/1/hash'}]):
                         with pytest.raises(AttributeError):
                             obj._defs = maps.NamedDict(attrs=maps.NamedDict(
@@ -365,8 +365,8 @@ def test_load_all():
             with pytest.raises(etcd.EtcdConnectionFailed):
                 obj.load_all()
         with patch.object(dummy_client, "read", read_fn):
-                ret = obj.load_all()
-                assert ret is None
+            ret = obj.load_all()
+            assert ret is None
 
 
 def test_constructor_BaseAtom():

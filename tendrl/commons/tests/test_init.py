@@ -1,20 +1,20 @@
-import os
-import pytest
-import maps
+import __builtin__
+import etcd
+from etcd import Client
 import importlib
 import inspect
-import yaml
-import __builtin__
-from etcd import Client
-import etcd
-import pkgutil
-import sys
-
+import maps
 from mock import MagicMock
-from tendrl.commons import objects
-from tendrl.commons import TendrlNS
 from mock import patch
+import os
+import pkgutil
+import pytest
+import yaml
+
+
+from tendrl.commons import objects
 import tendrl.commons.objects.node_context as node
+from tendrl.commons import TendrlNS
 
 
 @patch.object(etcd, "Client")
@@ -41,7 +41,7 @@ def init(patch_get_node_id, patch_read, patch_client):
 def test_constructor():
 
     with patch.object(TendrlNS, 'setup_common_objects') as \
-     mocked_method:
+            mocked_method:
         mocked_method.return_value = None
         tendrlNS = TendrlNS()
     tendrlNS = init()
@@ -94,8 +94,10 @@ def test_register_subclasses_to_ns(monkeypatch):
     tendrlNS._register_subclasses_to_ns()
     assert len(getattr(NS.tendrl, "objects")) > 0
     assert len(getattr(NS.tendrl, "flows")) > 0
-    ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit('/',1)[0],
-                                   "objects")
+    ns_objects_path = os.path.join(
+        os.path.dirname(
+            os.path.abspath(__file__)).rsplit(
+            '/', 1)[0], "objects")
     ns_objects_prefix = "tendrl.commons.objects."
     modules = tendrlNS._list_modules_in_package_path(ns_objects_path,
                                                      ns_objects_prefix)
@@ -110,7 +112,7 @@ def test_register_subclasses_to_ns(monkeypatch):
         else:
             modules = []
             for importer, name, ispkg in pkgutil.walk_packages(
-             path=[package_path]):
+                    path=[package_path]):
                 modules.append((name, prefix + name))
         return modules
 
@@ -139,12 +141,13 @@ def test_add_object():
     with patch.object(TendrlNS, "_get_ns") as mock_add_obj:
         mock_add_obj.return_value = maps.NamedDict(
             objects=maps.NamedDict(_Service=maps.NamedDict(
-            atoms=maps.NamedDict())))
+                atoms=maps.NamedDict())))
         tendrlNS._add_object("Service", obj_cls[1])
-    with patch.object(TendrlNS,"_get_ns") as mock_add_obj:
-        mock_add_obj.return_value= maps.NamedDict(objects=
-                                    maps.NamedDict(_Service=
-                                     maps.NamedDict(flows=maps.NamedDict())))
+    with patch.object(TendrlNS, "_get_ns") as mock_add_obj:
+        mock_add_obj.return_value = maps.NamedDict(
+            objects=maps.NamedDict(
+                _Service=maps.NamedDict(
+                    flows=maps.NamedDict())))
         tendrlNS._add_object("Service", obj_cls[1])
 
 
@@ -215,7 +218,7 @@ def test_get_obj_flow_definition():
 def test_get_flow_definition():
     tendrlNS = init()
     with pytest.raises(KeyError):
-        ret = tendrlNS.get_flow_definition("BaseFlow")
+        tendrlNS.get_flow_definition("BaseFlow")
     NS["compiled_definitions"] = tendrlNS.current_ns.definitions
     tendrlNS.get_flow_definition("ImportCluster")
 
@@ -278,7 +281,7 @@ def test_get_flow():
 def test_add_obj_flow():
     tendrlNS = init()
     flow = importlib.import_module("tendrl.commons.flows")
-    for flow_cls in inspect.getmembers(flow,inspect.isclass):
+    for flow_cls in inspect.getmembers(flow, inspect.isclass):
         tendrlNS._add_obj_flow("Node", "AtomExecutionFailedError", flow_cls[1])
         break
     ret = tendrlNS.get_obj_flow("Node", "AtomExecutionFailedError")
@@ -307,7 +310,7 @@ def test_get_obj_flows():
         break
     ret = tendrlNS._get_obj_flows("Node")
     assert ret is not None
-    assert isinstance(ret,maps.NamedDict)
+    assert isinstance(ret, maps.NamedDict)
 
 
 # Testing get_atom
@@ -410,7 +413,7 @@ def test_setup_common_objects(monkeypatch):
     tendrlNS = init()
     obj = importlib.import_module("tendrl.commons.tests.fixtures.config")
     for obj_cls in inspect.getmembers(obj, inspect.isclass):
-        tendrlNS.current_ns.objects["Config"]=obj_cls[1]
+        tendrlNS.current_ns.objects["Config"] = obj_cls[1]
     with patch.object(etcd, "Client", return_value=etcd.Client()) as client:
         tendrlNS.current_ns.objects.pop("NodeContext")
         tendrlNS.setup_common_objects()

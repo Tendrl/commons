@@ -1,20 +1,21 @@
-import pytest
+import __builtin__
 import etcd
 from etcd import Client
-import __builtin__
-import maps
-import mock
-from tendrl.commons.message import Message
-from tendrl.commons.utils.time_utils import now
-from tendrl.commons import logger
-from tendrl.commons.logger import Logger
+import importlib
 from inspect import getframeinfo
 from inspect import stack
+import maps
+import mock
 from mock import patch
-import importlib
+import pytest
 
 
-def getatr(*args,**kwargs):
+from tendrl.commons.logger import Logger
+from tendrl.commons.message import Message
+from tendrl.commons.utils.time_utils import now
+
+
+def getatr(*args, **kwargs):
     raise AttributeError
 
 
@@ -37,7 +38,8 @@ def init(patch_write, patch_refresh, patch_client):
     NS.config["data"] = maps.NamedDict()
     NS.config.data['message_retention_time'] = "infinite"
     NS.node_agent = maps.NamedDict()
-    NS.node_agent.objects = importlib.import_module("tendrl.commons.tests.fixtures.cluster_message")
+    NS.node_agent.objects = importlib.import_module(
+        "tendrl.commons.tests.fixtures.cluster_message")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     message = maps.NamedDict()
@@ -47,7 +49,7 @@ def init(patch_write, patch_refresh, patch_client):
     message["timestamp"] = now()
     message["publisher"] = "node_context"
     message["node_id"] = "test_id"
-    message["payload"] = {"message":"test_message"}
+    message["payload"] = {"message": "test_message"}
     message["job_id"] = "test_job_id"
     message["flow_id"] = "test_flow_id"
     message["parent_id"] = "test_parent_id"
@@ -58,6 +60,7 @@ def init(patch_write, patch_refresh, patch_client):
     message["caller"] = obj_caller
     return message
 
+
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
@@ -66,25 +69,29 @@ def test_constructor():
     message = init()
     log = Logger(message)
     assert log.message == message
-    with patch.object(Logger,'_logger') as mock_logger:
+    with patch.object(Logger, '_logger') as mock_logger:
         log = Logger(message)
         assert mock_logger.called
     message["job_id"] = None
     log = Logger(message)
-    with patch.object(Logger,'push_event') as mock_push_event:
+    with patch.object(Logger, 'push_event') as mock_push_event:
         log = Logger(message)
         assert mock_push_event.called
-    message.payload = maps.NamedDict(exception_traceback = "Traceback",
-    message = "Test Message",exception_type = "Exception Type")
+    message.payload = maps.NamedDict(
+        exception_traceback="Traceback",
+        message="Test Message",
+        exception_type="Exception Type")
     log = Logger(message)
     message["cluster_id"] = None
     log = Logger(message)
+
 
 def test_push_event():
     message = init()
     log = Logger(message)
     message["priority"] = "error"
     log.push_event()
+
 
 def test_push_message():
     message = init()
@@ -99,8 +106,9 @@ def test_logger():
     message = init()
     log = Logger(message)
     log._logger(message)
-    msg = Message(priority = None,publisher = "node_context", payload = {"message":"Test Message"})
+    msg = Message(priority=None, publisher="node_context",
+                  payload={"message": "Test Message"})
     log._logger(msg)
-    with patch.object(__builtin__,'getattr',getatr) as mock_getattr:
+    with patch.object(__builtin__, 'getattr', getatr):
         with pytest.raises(NotImplementedError):
             log._logger(msg)
