@@ -4,9 +4,11 @@ from gevent import socket
 from gevent.socket import error as socket_error
 from gevent.socket import timeout as socket_timeout
 import sys
-from tendrl.commons.message import Message
-from tendrl.commons.logger import Logger
 import traceback
+
+
+from tendrl.commons.logger import Logger
+from tendrl.commons.message import Message
 
 
 class Event(object):
@@ -43,7 +45,7 @@ class Event(object):
                 "Unable to pass the message into socket.%s\n" % msg)
         finally:
             self.sock.close()
-    
+
     def _pack_and_send(self, msg):
         frmt = "=%ds" % len(msg)
         packedMsg = struct.pack(frmt, msg)
@@ -55,4 +57,3 @@ class Event(object):
         sent = 0
         while sent < len(msg):
             sent += self.sock.send(msg[sent:])
-

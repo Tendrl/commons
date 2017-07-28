@@ -43,8 +43,8 @@ def test_run(mock_read, mock_client):
         'allow_reconnect': True}
     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
     with patch.object(etcd.Client, 'read', read):
-            obj.run()
+        obj.run()
     with patch.object(etcd.Client, 'read', read):
-            obj.run()
+        obj.run()
     with patch.object(Client, "read", read):
-            obj.run()
+        obj.run()

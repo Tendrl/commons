@@ -1,24 +1,25 @@
-class ClusterMessage():
+class ClusterMessage(object):
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         pass
 
     def save(self):
         pass
 
-class Message():
 
-    def __init__(self,*args,**kwargs):
+class Message(object):
+
+    def __init__(self, *args, **kwargs):
         pass
 
     def save(self):
         pass
 
-class NodeMessage():
 
-    def __init__(self,*args,**kwargs):
+class NodeMessage(object):
+
+    def __init__(self, *args, **kwargs):
         pass
 
     def save(self):
         pass
-

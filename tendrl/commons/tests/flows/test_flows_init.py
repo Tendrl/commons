@@ -1,18 +1,18 @@
-import pytest
-import maps
 import __builtin__
-from etcd import Client
 import etcd
-import pkgutil
-import json
-import mock
-from tendrl.commons import flows
-from tendrl.commons import TendrlNS
-from mock import patch
+from etcd import Client
 import importlib
-import tendrl.commons.objects.node_context as node
+import maps
+import mock
+from mock import patch
+import pytest
+
+
+from tendrl.commons import flows
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
+import tendrl.commons.objects.node_context as node
+from tendrl.commons import TendrlNS
 
 
 ''' Global Variables'''
@@ -25,54 +25,95 @@ def_flag = 1
 
 ''' Child Classes'''
 
+
 class BaseFlow_Child(flows.BaseFlow):
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         self.__class__.__name__ = "ImportCluster"
-        super(BaseFlow_Child,self).__init__(*args,**kwargs)
+        super(BaseFlow_Child, self).__init__(*args, **kwargs)
 
     def run(self):
-        super(BaseFlow_Child,self).run()
+        super(BaseFlow_Child, self).run()
+
 
 ''' Dummy Functions'''
+
 
 def has_attr(*args):
     global internal_flag
     if args[1] == "internal" and internal_flag:
-        internal_flag = internal_flag+1
+        internal_flag = internal_flag + 1
         return False
     else:
-        return True 
+        return True
     if args[1] == "_defs":
         return True
 
-def mock_hasattr(*args,**kwargs):
+
+def mock_hasattr(*args, **kwargs):
     global def_flag
     if args[1] == "_defs" and def_flag == 1:
         def_flag = 2
         return False
     return True
 
+
 def set_defs(*args):
-    if isinstance(args[0],BaseFlow_Child):
-        args[0]._defs = maps.NamedDict(uuid = "Test_uuid")
+    if isinstance(args[0], BaseFlow_Child):
+        args[0]._defs = maps.NamedDict(uuid="Test_uuid")
         global obj_flag
         if args[1] == "obj" and obj_flag < 3:
             obj_flag = obj_flag + 1
             return True
         elif args[1] == "obj":
             return False
-    return True    
-
-def get_obj_definition(*args,**kwargs):
-    def_obj = maps.NamedDict({'attrs': {'integration_id': {'type': 'String', 'help': 'Tendrl managed/generated cluster id for the sds being managed by Tendrl'}, 'cluster_name': {'type': 'String', 'help': 'Name of the cluster'}, 'node_id': {'type': 'String', 'help': 'Tendrl ID for the managed node'}, 'cluster_id': {'type': 'String', 'help': 'UUID of the cluster'}, 'sds_version': {'type': 'String', 'help': "Version of the Tendrl managed sds, eg: '3.2.1'"}, 'sds_name': {'type': 'String', 'help': "Name of the Tendrl managed sds, eg: 'gluster'"}}, 'help': 'Tendrl context', 'obj_list': '', 'enabled': True, 'obj_value': 'nodes/$NodeContext.node_id/TendrlContext', 'flows': {}, 'atoms': {}})
-    def_obj.flows["ImportCluster"] = {'help': 'Tendrl context', 'enabled': True, 'type': 'test_type', 'flows': {}, 'atoms': {},'inputs':'test_input','uuid':'test_uuid'}
-    return def_obj
-
-def get_flow_definition(*args,**kwargs):
     return True
 
-    
+
+def get_obj_definition(*args, **kwargs):
+    def_obj = maps.NamedDict(
+        {
+            'attrs': {
+                'integration_id': {
+                    'type': 'String',
+                    'help': 'Tendrl managed/generated cluster id for the sds '
+                            'being managed by Tendrl'},
+                'cluster_name': {
+                    'type': 'String',
+                    'help': 'Name of the cluster'},
+                'node_id': {
+                    'type': 'String',
+                    'help': 'Tendrl ID for the managed node'},
+                'cluster_id': {
+                    'type': 'String',
+                    'help': 'UUID of the cluster'},
+                'sds_version': {
+                    'type': 'String',
+                    'help': "Version of the Tendrl managed sds, eg: '3.2.1'"},
+                'sds_name': {
+                    'type': 'String',
+                    'help': "Name of the Tendrl managed sds, eg: 'gluster'"}},
+            'help': 'Tendrl context',
+            'obj_list': '',
+            'enabled': True,
+            'obj_value': 'nodes/$NodeContext.node_id/TendrlContext',
+            'flows': {},
+            'atoms': {}})
+    def_obj.flows["ImportCluster"] = {
+        'help': 'Tendrl context',
+        'enabled': True,
+        'type': 'test_type',
+        'flows': {},
+        'atoms': {},
+        'inputs': 'test_input',
+        'uuid': 'test_uuid'}
+    return def_obj
+
+
+def get_flow_definition(*args, **kwargs):
+    return True
+
+
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
@@ -95,6 +136,7 @@ def init(patch_get_node_id, patch_read, patch_client):
     tendrlNS = TendrlNS()
     return tendrlNS
 
+
 '''Unit Test Cases for Base Flow Class'''
 
 
@@ -103,14 +145,16 @@ def init(patch_get_node_id, patch_read, patch_client):
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_constructor():
-    with patch.object(flows.BaseFlow,'load_definition',return_value = maps.NamedDict(uuid = "Test_uuid")) as mock_load:
-        flow_obj = BaseFlow_Child()
+    with patch.object(flows.BaseFlow, 'load_definition',
+                      return_value=maps.NamedDict(uuid="Test_uuid")) as \
+            mock_load:
+        BaseFlow_Child()
         assert mock_load.called
-        with patch.object(__builtin__,'hasattr',has_attr) as mock_hasattr:
-            flow_obj = BaseFlow_Child()
-    with patch.object(__builtin__,'hasattr',mock_hasattr) as mock_fn:
+        with patch.object(__builtin__, 'hasattr', has_attr) as mock_hasattr:
+            BaseFlow_Child()
+    with patch.object(__builtin__, 'hasattr', mock_hasattr):
         with pytest.raises(Exception):
-            flow_obj = BaseFlow_Child()
+            BaseFlow_Child()
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',
@@ -120,19 +164,21 @@ def test_constructor():
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))
 def test_load_definition():
-     tendrlNS = init()
-     with patch.object(__builtin__,'hasattr',set_defs) as mock_hasattr:
+    tendrlNS = init()
+    with patch.object(__builtin__, 'hasattr', set_defs):
         flow_obj = BaseFlow_Child()
         flow_obj._ns = tendrlNS
-        flow_obj.obj = importlib.import_module("tendrl.commons.objects.node").Node
+        flow_obj.obj = importlib.import_module(
+            "tendrl.commons.objects.node").Node
         with pytest.raises(Exception):
             flow_obj.load_definition()
-        with patch.object(TendrlNS,'get_obj_definition',get_obj_definition) as mock_fn:
+        with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
             ret = flow_obj.load_definition()
             assert ret is not None
         with pytest.raises(Exception):
             flow_obj.load_definition()
-        with patch.object(TendrlNS,'get_flow_definition',get_flow_definition) as mock_fn:
+        with patch.object(TendrlNS, 'get_flow_definition',
+                          get_flow_definition):
             ret = flow_obj.load_definition()
             assert ret is not None
 
@@ -144,19 +190,20 @@ def test_load_definition():
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))
 def test_run():
-    tendrlNS = init()
-    with patch.object(__builtin__,'hasattr',set_defs) as mock_hasattr:
+    init()
+    with patch.object(__builtin__, 'hasattr', set_defs):
         flow_obj = BaseFlow_Child()
         global obj
         flow_obj._defs = get_obj_definition()
         flow_obj.to_str = "ImportCluster"
         flow_obj.run()
-        flow_obj._defs['inputs'] = maps.NamedDict(mandatory = [''])
+        flow_obj._defs['inputs'] = maps.NamedDict(mandatory=[''])
         with mock.patch('tendrl.commons.message.Message.__init__',
-            mock.Mock(return_value=None)) as mock_msg:
+                        mock.Mock(return_value=None)) as mock_msg:
             flow_obj.run()
             assert mock_msg.assert_called
-        flow_obj._defs['inputs'] = maps.NamedDict(mandatory = ['job_id','flow_id'])
+        flow_obj._defs['inputs'] = maps.NamedDict(
+            mandatory=['job_id', 'flow_id'])
         flow_obj.run()
         flow_obj._defs['pre_run'] = None
         flow_obj.run()
@@ -164,7 +211,7 @@ def test_run():
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
         flow_obj._defs['pre_run'] = ["tendrl.objects.Node.atoms.Cmd"]
-        with patch.object(Cmd,'run',return_value = True) as mock_run:
+        with patch.object(Cmd, 'run', return_value=True):
             flow_obj.run()
         flow_obj._defs['pre_run'] = None
         flow_obj._defs['atoms'] = None
@@ -173,7 +220,7 @@ def test_run():
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
         flow_obj._defs['atoms'] = ["tendrl.objects.Node.atoms.Cmd"]
-        with patch.object(Cmd,'run',return_value = True) as mock_run:
+        with patch.object(Cmd, 'run', return_value=True):
             flow_obj.run()
         flow_obj._defs['atoms'] = None
         flow_obj._defs['post_run'] = None
@@ -182,8 +229,9 @@ def test_run():
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()
         flow_obj._defs['post_run'] = ["tendrl.objects.Node.atoms.Cmd"]
-        with patch.object(Cmd,'run',return_value = True) as mock_run:
+        with patch.object(Cmd, 'run', return_value=True):
             flow_obj.run()
-        flow_obj._defs['post_run'] = ["tendrl.integrations.objects.Node.atoms.Cmd"]
+        flow_obj._defs['post_run'] = [
+            "tendrl.integrations.objects.Node.atoms.Cmd"]
         with pytest.raises(AtomExecutionFailedError):
             flow_obj.run()

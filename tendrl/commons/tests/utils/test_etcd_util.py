@@ -35,8 +35,8 @@ def test_read():
         assert mock_read.assert_called
     with patch.object(Client, "read",
                       raise_etcdconnectionfailed) as mock_read:
-            with pytest.raises(etcd.EtcdConnectionFailed):
-                obj = etcd_utils.read("key")
+        with pytest.raises(etcd.EtcdConnectionFailed):
+            obj = etcd_utils.read("key")
     with patch.object(Client,
                       "read", raise_etcdkeynotfound) as mock_read:
         with pytest.raises(etcd.EtcdKeyNotFound):
@@ -55,8 +55,8 @@ def test_write():
         assert mock_write.assert_called
     with patch.object(Client, "write",
                       raise_etcdconnectionfailed) as mock_write:
-            with pytest.raises(etcd.EtcdConnectionFailed):
-                etcd_utils.write("key", "test_value", False)
+        with pytest.raises(etcd.EtcdConnectionFailed):
+            etcd_utils.write("key", "test_value", False)
     with patch.object(Client, "write",
                       raise_etcdkeynotfound) as mock_write:
         with pytest.raises(etcd.EtcdKeyNotFound):
@@ -75,9 +75,9 @@ def test_refresh():
         assert mock_refresh.assert_called
     with patch.object(Client, "refresh",
                       raise_etcdconnectionfailed) as mock_refresh:
-            with pytest.raises(etcd.EtcdConnectionFailed):
-                etcd_utils.refresh("test_value", 1)
+        with pytest.raises(etcd.EtcdConnectionFailed):
+            etcd_utils.refresh("test_value", 1)
     with patch.object(Client, "refresh",
                       raise_etcdkeynotfound) as mock_refresh:
-            with pytest.raises(etcd.EtcdKeyNotFound):
-                etcd_utils.refresh("test_value", 1)
+        with pytest.raises(etcd.EtcdKeyNotFound):
+            etcd_utils.refresh("test_value", 1)
