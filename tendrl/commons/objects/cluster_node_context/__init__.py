@@ -3,12 +3,11 @@ from tendrl.commons import objects
 
 class ClusterNodeContext(objects.BaseObject):
 
-    def __init__(self, machine_id=None, node_id=None, fqdn=None,
+    def __init__(self, node_id=None, fqdn=None,
                  tags=None, status=None, sync_status=None,
                  last_sync=None, *args, **kwargs):
         super(ClusterNodeContext, self).__init__(*args, **kwargs)
         _node_context = NS.node_context.load()
-        self.machine_id = machine_id or _node_context.machine_id
         self.node_id = node_id or _node_context.node_id
         self.fqdn = fqdn or _node_context.fqdn
         self.tags = tags or _node_context.tags

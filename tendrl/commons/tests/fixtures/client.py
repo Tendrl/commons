@@ -1,12 +1,12 @@
-class Client():
+class Client(object):
 
     def __init__(self):
         pass
 
-    def read(*args,**kwargs):
+    def read(*args, **kwargs):
         pass
 
-    def write(self,*args,**kwargs):
+    def write(self, *args, **kwargs):
         pass
 
     def save(self):

@@ -1,13 +1,15 @@
-import pytest
-import maps
 import __builtin__
+import maps
+
+
 from tendrl.commons.objects.platform import Platform
+
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     platform = Platform()
     assert platform is not None
@@ -15,6 +17,7 @@ def test_constructor():
     platform = Platform(os="Centos", os_version=1.1,
                         kernel_version=2.1)
     assert platform.os == "Centos"
+
 
 # Testing render
 def test_render():

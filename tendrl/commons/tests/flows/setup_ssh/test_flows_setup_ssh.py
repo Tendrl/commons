@@ -1,10 +1,8 @@
-from tendrl.commons.flows.setup_ssh import SetupSsh
+import __builtin__
 import maps
 import mock
-import __builtin__
-import tempfile
-from mock import patch
 
+from tendrl.commons.flows.setup_ssh import SetupSsh
 
 '''Unit Test Cases'''
 
@@ -19,8 +17,8 @@ def test_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
-    param = maps.NamedDict(ssh_setup_script = 'Test ssh_setup_script')
+    param = maps.NamedDict(ssh_setup_script='Test ssh_setup_script')
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
-    setup_ssh = SetupSsh(parameters = param)
+    setup_ssh = SetupSsh(parameters=param)
     setup_ssh.run()

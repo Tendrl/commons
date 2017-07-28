@@ -732,9 +732,6 @@ namespace.tendrl:
       help: "Tendrl context"
     NodeContext:
       attrs:
-        machine_id:
-          help: "Unique /etc/machine-id"
-          type: String
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String
@@ -754,9 +751,6 @@ namespace.tendrl:
       help: Node Context
     ClusterNodeContext:
       attrs:
-        machine_id:
-          help: "Unique /etc/machine-id"
-          type: String
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String

@@ -1,13 +1,15 @@
-import pytest
-import maps
 import __builtin__
-from tendrl.commons.objects.node.atoms.check_node_up import CheckNodeUp
+import maps
 import mock
 from mock import patch
+
+from tendrl.commons.objects.node.atoms.check_node_up import CheckNodeUp
 from tendrl.commons.utils.cmd_utils import Command
 
+
 def run(*args):
-    return "Test Out", '', 0    
+    return "Test Out", '', 0
+
 
 # Testing run
 @mock.patch('tendrl.commons.event.Event.__init__',
@@ -27,7 +29,7 @@ def test_run():
     check_node_up.parameters['job_id'] = "node_job"
     check_node_up.parameters['flow_id'] = "flow_id"
     check_node_up.run()
-    with patch.object(Command,"run",run) as mock_run:
+    with patch.object(Command, "run", run):
         check_node_up.run()
     check_node_up.parameters['fqdn'] = "Test_fqdn"
     check_node_up.run()

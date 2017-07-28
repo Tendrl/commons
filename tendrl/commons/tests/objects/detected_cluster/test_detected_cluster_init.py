@@ -1,16 +1,16 @@
-import pytest
-import maps
 import __builtin__
+import maps
+
+
 from tendrl.commons.objects.detected_cluster import DetectedCluster
 
 
-
-# Testing __init__
 def test_constructor():
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
-    '''
+
     # Passing dummy values
     detected_cluster = DetectedCluster(detected_cluster_id=1,
                                        detected_cluster_name="Test Cluster",

@@ -1,26 +1,28 @@
 import __builtin__
-from tendrl.commons.flows.import_cluster import ceph_help
-from tendrl.commons.utils import ansible_module_runner
-from tendrl.commons import TendrlNS
+import etcd
 import maps
 import mock
 from mock import patch
 import pytest
 import tempfile
-import etcd
-import tendrl.commons.objects.node_context as node
+
+from tendrl.commons.flows.import_cluster import ceph_help
+from tendrl.commons import TendrlNS
+from tendrl.commons.utils import ansible_module_runner
 
 
 '''Dummy Functions'''
+
 
 def run(*args):
     raise ansible_module_runner.AnsibleExecutableGenerationFailed
 
 
-def ansible(*args,**kwargs):
+def ansible(*args, **kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
-def open(*args,**kwargs):
+
+def open(*args, **kwargs):
     f = tempfile.TemporaryFile()
     return f
 
@@ -30,9 +32,7 @@ def open(*args,**kwargs):
 
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
-@patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
-    patch_get_node_id.return_value = 1
+def init(patch_read, patch_client):
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -55,6 +55,7 @@ def init(patch_get_node_id, patch_read, patch_client):
     tendrlNS = TendrlNS()
     return tendrlNS
 
+
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
@@ -62,19 +63,20 @@ def init(patch_get_node_id, patch_read, patch_client):
 def test_import_ceph():
     tendrlNS = init()
     NS.compiled_definitions = tendrlNS.current_ns.definitions
-    parameters = maps.NamedDict(job_id = 1,flow_id= 1)
+    parameters = maps.NamedDict(job_id=1, flow_id=1)
     assert ceph_help.import_ceph(parameters) is False
     NS.config.data['package_source_type'] = 'pip'
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
         ret = ceph_help.import_ceph(parameters)
         assert ret is False
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',return_value = True) as mock_run:
-        with patch.object(__builtin__,'open',open) as mock_open:
-            ret = ceph_help.import_ceph(parameters)
-    with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run',
+                      return_value=True):
+        with patch.object(__builtin__, 'open', open):
+            ceph_help.import_ceph(parameters)
+    with patch.object(ansible_module_runner, 'AnsibleRunner', ansible):
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
-            ret = ceph_help.import_ceph(parameters)
+            ceph_help.import_ceph(parameters)
     NS.config.data['package_source_type'] = 'rpm'
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:	
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
         ret = ceph_help.import_ceph(parameters)
         assert ret is False

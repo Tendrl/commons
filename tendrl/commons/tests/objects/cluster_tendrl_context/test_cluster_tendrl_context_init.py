@@ -1,14 +1,15 @@
-import pytest
-import maps
 import __builtin__
+import maps
+
+
 from tendrl.commons.objects.cluster_tendrl_context import ClusterTendrlContext
 
 
 # Testing __init__
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
@@ -22,7 +23,7 @@ def test_constructor():
         sds_name="Test_sds",
         sds_version=1.1)
     assert cluster_tendrl_context.cluster_id == 2
-    assert cluster_tendrl_context.cluster_name=="Test_cluster"
+    assert cluster_tendrl_context.cluster_name == "Test_cluster"
 
 
 # Testing render

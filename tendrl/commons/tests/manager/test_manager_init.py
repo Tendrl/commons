@@ -1,14 +1,15 @@
-import pytest
-import maps
 import __builtin__
 import gevent
-from tendrl.commons.manager import Manager
-from mock import patch
-from tendrl.commons import jobs
+import maps
 import mock
+from mock import patch
+import pytest
 
 
-# Testing __init
+from tendrl.commons import jobs
+from tendrl.commons.manager import Manager
+
+
 def test_constructor(monkeypatch):
     """Testing for constructor involves checking if all needed
 
