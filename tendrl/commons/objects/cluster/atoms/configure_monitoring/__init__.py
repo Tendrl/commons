@@ -42,7 +42,7 @@ class ConfigureMonitoring(objects.BaseAtom):
         try:
             subprocess.check_call(
                 [
-                    "tendrl_monitoring_config_manager",
+                    "tendrl-monitoring-config-manager",
                     plugin_name,
                     json.dumps(plugin_params)
                 ]
