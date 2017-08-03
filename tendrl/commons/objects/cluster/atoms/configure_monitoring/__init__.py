@@ -50,7 +50,7 @@ class ConfigureMonitoring(objects.BaseAtom):
             return True
         except subprocess.CalledProcessError as ex:
             logger.log(
-                "info",
+                "error",
                 NS.get("publisher_id", None),
                 {
                     "message": "Error configuring %s on %s with %s"
