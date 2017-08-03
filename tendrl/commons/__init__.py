@@ -416,7 +416,8 @@ class TendrlNS(object):
         raw_atom = obj_def.atoms[atom_name]
         return maps.NamedDict(help=raw_atom['help'],
                               enabled=raw_atom['enabled'],
-                              inputs=raw_atom.get('inputs').get('mandatory'),
+                              inputs=raw_atom.get('inputs',
+                                                  {}).get('mandatory'),
                               outputs=raw_atom.get('outputs', []),
                               uuid=raw_atom['uuid'])
 
