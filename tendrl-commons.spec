@@ -25,7 +25,7 @@ Requires: python-gevent
 
 
 %description
-Common lib for Tendrl sds integrations and node-agent
+Common library for tendrl
 
 %prep
 %setup
