@@ -1,6 +1,9 @@
+import json
+import subprocess
+
+
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
-from tendrl.commons.utils.cmd_utils import Command
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -30,46 +33,32 @@ class ConfigureMonitoring(objects.BaseAtom):
                 "as conf parameters" % (
                     plugin_name,
                     NS.node_context.fqdn,
-                    plugin_params
+                    json.dumps(plugin_params).encode('utf-8')
                 )
             },
             job_id=self.parameters['job_id'],
             flow_id=self.parameters['flow_id']
         )
-        cmd_str = "tendrl_monitoring_config_manager %s '%s'" % (
-            plugin_name,
-            plugin_params
-        )
-        out, err, rc = Command(cmd_str).run()
-        if not err and rc == 0:
+        try:
+            subprocess.check_call(
+                [
+                    "tendrl_monitoring_config_manager",
+                    plugin_name,
+                    json.dumps(plugin_params)
+                ]
+            )
+            return True
+        except subprocess.CalledProcessError as ex:
             logger.log(
                 "info",
                 NS.get("publisher_id", None),
                 {
-                    "message": "Configured %s on %s with %s"
-                    "as conf parameters" % (
+                    "message": "Error configuring %s on %s with %s"
+                    "as conf parameters. Error %s" % (
                         plugin_name,
                         NS.node_context.fqdn,
-                        plugin_params
-                    )
-                },
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id']
-            )
-            return True
-        else:
-            logger.log(
-                "error",
-                NS.get("publisher_id", None),
-                {
-                    "message": "Configuring %s on %s with %s"
-                    "as conf parameters failed.Error %s."
-                    "Return code %s" % (
-                        plugin_name,
-                        NS.node_context.fqdn,
-                        plugin_params,
-                        err,
-                        rc
+                        json.dumps(plugin_params).encode('utf-8'),
+                        str(ex)
                     )
                 },
                 job_id=self.parameters['job_id'],
@@ -89,12 +78,12 @@ class ConfigureMonitoring(objects.BaseAtom):
             2003
         )
         plugin_params = {
-            'graphite_host': graphite_host,
-            'graphite_port': graphite_port,
-            'hostname': NS.node_context.fqdn,
-            'integration_id': NS.tendrl_context.integration_id,
-            'node_id': NS.node_context.node_id,
-            'logging_socket_path': NS.config.data['logging_socket_path']
+            "graphite_host": graphite_host,
+            "graphite_port": graphite_port,
+            "hostname": NS.node_context.fqdn,
+            "integration_id": NS.tendrl_context.integration_id,
+            "node_id": NS.node_context.node_id,
+            "logging_socket_path": NS.config.data['logging_socket_path']
         }
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
@@ -112,3 +101,4 @@ class ConfigureMonitoring(objects.BaseAtom):
                     NS.tendrl_context.integration_id
                 )
             )
+        return True
