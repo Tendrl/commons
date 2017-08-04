@@ -20,6 +20,14 @@ NODE_PLUGINS = {
 }
 
 
+GLUSTER_CLUSTER_PLUGINS = {
+    'tendrl_glusterfs_brick_utilization',
+    'tendrl_glusterfs_health_counters',
+    'tendrl_glusterfs_peer_network_throughput',
+    'tendrl_glusterfs_profile_info'
+}
+
+
 class ConfigureMonitoring(objects.BaseAtom):
     def __init__(self, *args, **kwargs):
         super(ConfigureMonitoring, self).__init__(*args, **kwargs)
@@ -90,10 +98,12 @@ class ConfigureMonitoring(objects.BaseAtom):
                 node_plugin,
                 plugin_params
             )
-        plugin_config_success &= self._configure_plugin(
-            'tendrl_%s' % NS.tendrl_context.sds_name,
-            plugin_params
-        )
+        if NS.tendrl_context.sds_name == 'gluster':
+            for gluster_plugin in GLUSTER_CLUSTER_PLUGINS:
+                plugin_config_success &= self._configure_plugin(
+                    gluster_plugin,
+                    plugin_params
+                )
         if not plugin_config_success:
             raise AtomExecutionFailedError(
                 "Collectd configuration failed for node %s from cluster %s" % (
