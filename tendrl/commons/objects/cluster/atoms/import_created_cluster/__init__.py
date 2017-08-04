@@ -62,8 +62,6 @@ class ImportCreatedCluster(objects.BaseAtom):
             "nodes/%s/DetectedCluster/sds_pkg_name" % self.parameters['Node['
                                                                       ']'][0]
         ).value
-        if "gluster" in sds_pkg_name:
-            new_params['gdeploy_provisioned'] = True
         sds_pkg_version = NS._int.client.read(
             "nodes/%s/DetectedCluster/sds_pkg_version" % self.parameters[
                 'Node[]'][0]
