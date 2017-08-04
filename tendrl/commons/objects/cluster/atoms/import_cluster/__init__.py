@@ -185,7 +185,7 @@ class ImportCluster(objects.BaseAtom):
                     detected_cluster_ver = \
                         detected_cluster.sds_pkg_version.split('.')
                     maj_ver = detected_cluster_ver[0]
-                    min_ver = re.findall(r'\d+', detected_cluster_ver[1])
+                    min_ver = re.findall(r'\d+', detected_cluster_ver[1])[0]
                     reqd_ceph_ver = NS.compiled_definitions.get_parsed_defs()[
                         'namespace.tendrl'
                     ]['min_reqd_ceph_ver']
@@ -204,8 +204,15 @@ class ImportCluster(objects.BaseAtom):
                             }
                         )
                     )
-                    if int(maj_ver) < int(req_maj_ver) or \
-                        int(min_ver) < int(req_min_ver):
+                    ver_check_failed = False
+                    if int(maj_ver) < int(req_maj_ver):
+                        ver_check_failed = True
+                    else:
+                        if int(maj_ver) == int(req_maj_ver) and \
+                            int(min_ver) < int(req_min_ver):
+                            ver_check_failed = True
+
+                    if ver_check_failed:
                         Event(
                             Message(
                                 job_id=self.parameters['job_id'],
@@ -239,7 +246,7 @@ class ImportCluster(objects.BaseAtom):
                 detected_cluster_ver = \
                     detected_cluster.sds_pkg_version.split('.')
                 maj_ver = detected_cluster_ver[0]
-                min_ver = re.findall(r'\d+', detected_cluster_ver[1])
+                min_ver = re.findall(r'\d+', detected_cluster_ver[1])[0]
                 reqd_gluster_ver = NS.compiled_definitions.get_parsed_defs()[
                     'namespace.tendrl'
                 ]['min_reqd_gluster_ver']
@@ -257,8 +264,15 @@ class ImportCluster(objects.BaseAtom):
                         }
                     )
                 )
-                if int(maj_ver) < int(req_maj_ver) or \
-                    int(min_ver) < int(req_min_ver):
+                ver_check_failed = False
+                if int(maj_ver) < int(req_maj_ver):
+                    ver_check_failed = True
+                else:
+                    if int(maj_ver) == int(req_maj_ver) and \
+                        int(min_ver) < int(req_min_ver):
+                            ver_check_failed = True
+
+                if ver_check_failed:
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
