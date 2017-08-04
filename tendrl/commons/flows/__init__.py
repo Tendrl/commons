@@ -285,8 +285,8 @@ class BaseFlow(object):
                     parameters=self.parameters
                 ).run()
                 return ret_val
-            except AtomExecutionFailedError:
-                return False
+            except AtomExecutionFailedError as ex:
+                raise ex
 
         except (KeyError, AttributeError) as ex:
             _msg = "Could not find atom {0}".format(atom_fqdn)
