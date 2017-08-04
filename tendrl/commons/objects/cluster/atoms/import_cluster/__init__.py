@@ -1,6 +1,7 @@
 import etcd
 import gevent
 import json
+import re
 import uuid
 
 from tendrl.commons.event import Event
@@ -184,7 +185,7 @@ class ImportCluster(objects.BaseAtom):
                     detected_cluster_ver = \
                         detected_cluster.sds_pkg_version.split('.')
                     maj_ver = detected_cluster_ver[0]
-                    min_ver = detected_cluster_ver[1]
+                    min_ver = re.findall(r'\d+', detected_cluster_ver[1])
                     reqd_ceph_ver = NS.compiled_definitions.get_parsed_defs()[
                         'namespace.tendrl'
                     ]['min_reqd_ceph_ver']
@@ -238,7 +239,7 @@ class ImportCluster(objects.BaseAtom):
                 detected_cluster_ver = \
                     detected_cluster.sds_pkg_version.split('.')
                 maj_ver = detected_cluster_ver[0]
-                min_ver = detected_cluster_ver[1]
+                min_ver = re.findall(r'\d+', detected_cluster_ver[1])
                 reqd_gluster_ver = NS.compiled_definitions.get_parsed_defs()[
                     'namespace.tendrl'
                 ]['min_reqd_gluster_ver']
