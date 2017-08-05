@@ -5,6 +5,7 @@ import subprocess
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.utils import log_utils as logger
+from tendrl.commons.utils.service import Service
 
 
 NODE_PLUGINS = {
@@ -111,4 +112,12 @@ class ConfigureMonitoring(objects.BaseAtom):
                     NS.tendrl_context.integration_id
                 )
             )
+        err, success = Service(
+            'collectd',
+            publisher_id='node_agent',
+            node_id=NS.node_context.node_id,
+            socket_path=NS.config.data['logging_socket_path'],
+            enabled=True
+        ).restart()
+
         return True
