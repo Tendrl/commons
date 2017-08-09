@@ -51,14 +51,7 @@ class ImportCluster(objects.BaseAtom):
             if not self.parameters.get('import_after_expand', False) and \
                 not self.parameters.get('import_after_create', False):
 
-                # check if gdeploy in already provisioned in this cluster
-                # if no it has to be provisioned here
-                if sds_name.find("gluster") > -1 and \
-                    not self.parameters.get("gdeploy_provisioned", False) and \
-                    not self._probe_and_mark_provisioner(
-                        self.parameters["Node[]"], integration_id):
-                    create_cluster_utils.install_gdeploy()
-                    create_cluster_utils.install_python_gdeploy()
+                if sds_name.find("gluster") > -1:
                     ssh_job_ids = \
                         create_cluster_utils.gluster_create_ssh_setup_jobs(
                             self.parameters
@@ -95,16 +88,7 @@ class ImportCluster(objects.BaseAtom):
                                     }
                                 )
                             )
-                            # set this node as gluster provisioner
-                            tags = ["provisioner/%s" % integration_id]
-                            NS.node_context = NS.node_context.load()
-                            tags += NS.node_context.tags
-                            NS.node_context.tags = list(set(tags))
-                            NS.node_context.save()
 
-                            # set gdeploy_provisioned to true so that no
-                            # other nodes tries to configure gdeploy
-                            self.parameters['gdeploy_provisioned'] = True
                             break
 
             NS.tendrl_context = NS.tendrl_context.load()

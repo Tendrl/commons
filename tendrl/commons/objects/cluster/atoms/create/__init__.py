@@ -27,8 +27,6 @@ class Create(objects.BaseAtom):
                     self.parameters
                 )
             else:
-                create_cluster_utils.install_gdeploy()
-                create_cluster_utils.install_python_gdeploy()
                 ssh_job_ids = \
                     create_cluster_utils.gluster_create_ssh_setup_jobs(
                         self.parameters
