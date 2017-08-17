@@ -252,6 +252,12 @@ namespace.tendrl:
         node_identifier:
           help: How nodes should be identified while create cluster
           type: list
+        enable_volume_profiling:
+          help: Whether to enable volume profiling
+          type: Boolean
+        is_managed:
+          help: If the cluster is managed by tendrl
+          type: Boolean
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
