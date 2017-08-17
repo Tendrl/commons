@@ -1,25 +1,26 @@
-import pytest
-from tendrl.commons.utils.service import Service
-from tendrl.commons.utils import ansible_module_runner
-import mock
 import __builtin__
 import maps
 from mock import patch
-import os
+import pytest
+
+
+from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils.service import Service
 
 
 def ansible_run(*args):
     if args[0]:
-        return {"msg":"test_msg","state":"started"},"Error"
+        return {"msg": "test_msg", "state": "started"}, "Error"
     else:
-        return {"msg":"test_msg","state":"stopped"},"Error"
+        return {"msg": "test_msg", "state": "stopped"}, "Error"
+
 
 def run(*args):
     NS.pop('publisher_id')
     raise ansible_module_runner.AnsibleExecutableGenerationFailed("Error")
 
 
-def ansible(*args,**kwargs):
+def ansible(*args, **kwargs):
     raise ansible_module_runner.AnsibleModuleNotFound
 
 
@@ -34,7 +35,8 @@ def init():
 
 
 def test_constructor():
-    service = Service("Test_service","node_context",1,"/path/to/socket/",True)
+    service = Service("Test_service", "node_context", 1, "/path/to/socket/",
+                      True)
     assert service.publisher_id == "node_context"
     assert service.attributes["name"] == "Test_service"
     assert service.attributes["enabled"] is True
@@ -48,13 +50,13 @@ def test_start():
     init()
     service = Service("Test_service")
     service.start()
-    with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
+    with patch.object(ansible_module_runner, 'AnsibleRunner', ansible):
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
             ret = service.start()
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',run) as mock_run:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
         ret = service.start()
         assert ret[1] is False
-    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run') as mock_run:
         mock_run.return_value = ansible_run(True)
         ret = service.start()
         assert ret[1] is True
@@ -65,7 +67,7 @@ def test_stop():
     init()
     service = Service("Test_service")
     service.stop()
-    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run') as mock_run:
         mock_run.return_value = ansible_run(False)
         ret = service.stop()
         assert ret[1] is True
@@ -75,7 +77,7 @@ def test_reload():
     init()
     service = Service("Test_service")
     service.reload()
-    with patch.object(ansible_module_runner.AnsibleRunner,'run') as mock_run:
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run') as mock_run:
         mock_run.return_value = ansible_run(False)
         ret = service.reload()
         assert ret[1] is False
@@ -84,6 +86,6 @@ def test_reload():
 def test_restart():
     init()
     service = Service("Test_service")
-    with patch.object(ansible_module_runner,'AnsibleRunner',ansible) as mock_ansible:
+    with patch.object(ansible_module_runner, 'AnsibleRunner', ansible):
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
-            ret = service.restart()
+            service.restart()

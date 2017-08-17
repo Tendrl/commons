@@ -1,17 +1,17 @@
-import pytest
-import maps
 import __builtin__
-from tendrl.commons.objects.node.atoms.is_node_tendrl_managed import IsNodeTendrlManaged
-import mock
 import etcd
-import sys	
 from etcd import Client
-from tendrl.commons.utils.cmd_utils import UnsupportedCommandException,Command
+import maps
 from mock import patch
+import pytest
+
+
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.objects.node.atoms.is_node_tendrl_managed import \
+    IsNodeTendrlManaged
 
 
-def read(*args,**kwargs):
+def read(*args, **kwargs):
     if args:
         if args[0] == "nodes/Test_node/Os":
             raise etcd.EtcdKeyNotFound
@@ -20,13 +20,14 @@ def read(*args,**kwargs):
 
 
 def test_constructor():
-    obj = IsNodeTendrlManaged()
+    IsNodeTendrlManaged()
+
 
 @patch.object(etcd, "Client")
-@patch.object(Client,  "read")
-def test_run(mock_read,mock_client):
+@patch.object(Client, "read")
+def test_run(mock_read, mock_client):
     mock_read.return_value = read()
-    mock_client.return_value=etcd.Client()
+    mock_client.return_value = etcd.Client()
     obj = IsNodeTendrlManaged()
     assert obj.parameters is not None
     obj.parameters = maps.NamedDict()
@@ -41,9 +42,9 @@ def test_run(mock_read,mock_client):
         'host': 2,
         'allow_reconnect': True}
     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
-    with patch.object(etcd.Client,'read',read) as mock_read:
-            obj.run()
-    with patch.object(etcd.Client,'read',read) as mock_read:
-            obj.run()
-    with patch.object(Client,"read",read) as mock_read:
-            obj.run()
+    with patch.object(etcd.Client, 'read', read):
+        obj.run()
+    with patch.object(etcd.Client, 'read', read):
+        obj.run()
+    with patch.object(Client, "read", read):
+        obj.run()

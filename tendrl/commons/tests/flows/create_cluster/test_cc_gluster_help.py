@@ -1,17 +1,20 @@
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.flows.create_cluster import gluster_help
-import maps
-import mock
-from mock import patch
 import __builtin__
 import importlib
+import maps
+import mock
 import pytest
+
+
+from tendrl.commons.flows.create_cluster import gluster_help
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 
 '''Unit Test Cases'''
 
+
 def test_get_node_ips():
     param = maps.NamedDict()
-    param["Cluster.node_configuration"] = {"test_node": maps.NamedDict(role="mon",provisioning_ip="test_ip")}
+    param["Cluster.node_configuration"] = {
+        "test_node": maps.NamedDict(role="mon", provisioning_ip="test_ip")}
     ret = gluster_help.get_node_ips(param)
     assert ret[0] == "test_ip"
 
@@ -30,12 +33,15 @@ def test_create_gluster():
     param["job_id"] = "test_id"
     param["flow_id"] = "test_flow_id"
     param['TendrlContext.integration_id'] = "test_integration_id"
-    param["Cluster.node_configuration"] = {"test_node": maps.NamedDict(role="mon",provisioning_ip="test_ip")}
-    NS.gluster_provisioner = importlib.import_module("tendrl.commons.tests.fixtures.plugin").Plugin()
+    param["Cluster.node_configuration"] = {
+        "test_node": maps.NamedDict(role="mon", provisioning_ip="test_ip")}
+    NS.gluster_provisioner = importlib.import_module(
+        "tendrl.commons.tests.fixtures.plugin").Plugin()
     with pytest.raises(FlowExecutionFailedError):
         gluster_help.create_gluster(param)
     NS.config.data['glusterfs_repo'] = "gluster"
     gluster_help.create_gluster(param)
-    param["Cluster.node_configuration"] = {"test_node": maps.NamedDict(role="mon",provisioning_ip="test")}
+    param["Cluster.node_configuration"] = {
+        "test_node": maps.NamedDict(role="mon", provisioning_ip="test")}
     with pytest.raises(FlowExecutionFailedError):
         gluster_help.create_gluster(param)

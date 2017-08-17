@@ -1,40 +1,37 @@
-import importlib
-import pytest
-import etcd
 import __builtin__
+import etcd
+import importlib
+import maps
 import mock
 from mock import patch
-import maps
-from tendrl.commons import flows
+import pytest
+
+
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.objects.job import Job
-from tendrl.commons.tests.fixtures.client import Client
-from tendrl.commons.flows.create_cluster import \
-    utils as create_cluster_utils
 from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import ExpandCluster
-from tendrl.commons.flows.expand_cluster import gluster_help
-from tendrl.commons import TendrlNS
 import tendrl.commons.objects.node_context as node
+from tendrl.commons import TendrlNS
+from tendrl.commons.tests.fixtures.client import Client
 
 
 '''Dummy Functions'''
 
 
-def read_failed(*args,**kwargs):
+def read_failed(*args):
     if args[0]:
         if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value = "")
+            return maps.NamedDict(value="")
         else:
-            return maps.NamedDict(value = "failed")
+            return maps.NamedDict(value="failed")
 
 
-def read_passed(*args,**kwargs):
+def read_passed(*args):
     if args[0]:
         if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value = "")
+            return maps.NamedDict(value="")
         else:
-            return maps.NamedDict(value = "finished")
+            return maps.NamedDict(value="finished")
 
 
 '''Unit Test Cases'''
@@ -98,23 +95,26 @@ def test_expand_cluster():
     param['TendrlContext.cluster_name'] = 'test name'
     param["flow_id"] = "test_flow_id"
     param['Node[]'] = ['test_node']
-    
+
     param["job_id"] = "test_id"
-    NS._int.client = importlib.import_module("tendrl.commons.tests.fixtures.client").Client()
-    NS.ceph_provisioner = importlib.import_module("tendrl.commons.tests.fixtures.plugin").Plugin()
-    NS.tendrl_context = maps.NamedDict(integration_id = "")
-    with patch.object(Client,"read",read_failed) as mock_read:
+    NS._int.client = importlib.import_module(
+        "tendrl.commons.tests.fixtures.client").Client()
+    NS.ceph_provisioner = importlib.import_module(
+        "tendrl.commons.tests.fixtures.plugin").Plugin()
+    NS.tendrl_context = maps.NamedDict(integration_id="")
+    with patch.object(Client, "read", read_failed):
         with pytest.raises(FlowExecutionFailedError):
             expand_cluster.run()
-    param["Cluster.node_configuration"] = {"test_node": maps.NamedDict(role="mon",provisioning_ip="test_ip")}
+    param["Cluster.node_configuration"] = {
+        "test_node": maps.NamedDict(role="mon", provisioning_ip="test_ip")}
     param['TendrlContext.cluster_id'] = ""
     param["TendrlContext.cluster_name"] = ""
     param["Cluster.cluster_network"] = ""
     param["Cluster.public_network"] = ""
-    with patch.object(Client,"read",read_passed) as mock_read:
-        with patch.object(ceph_help,'expand_cluster',return_value = True):
+    with patch.object(Client, "read", read_passed):
+        with patch.object(ceph_help, 'expand_cluster', return_value=True):
             expand_cluster.run()
     param['TendrlContext.sds_name'] = "gluster"
-    with patch.object(Client,"read",read_failed) as mock_read:
+    with patch.object(Client, "read", read_failed):
         with pytest.raises(KeyError):
             expand_cluster.run()

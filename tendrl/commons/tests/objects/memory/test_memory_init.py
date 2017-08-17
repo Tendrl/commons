@@ -1,25 +1,27 @@
-import pytest
-import maps
 import __builtin__
-from tendrl.commons.objects.memory import Memory
+import maps
 from mock import patch
+
+from tendrl.commons.objects.memory import Memory
+
 
 def open(*args):
     raise IOError
-# Testing __init__
+
+
 def test_constructor():
-    '''
-    Testing for constructor involves checking if all needed
-    variales are declared initialized
+    '''Testing for constructor involves checking if all needed
+
+    variables are declared initialized
     '''
     memory = Memory(total_size=10000, swap_total=150)
     assert memory is not None
     assert memory.total_size == 10000
     with patch.object(Memory, '_getNodeMemory') as mock_getNodeMemory:
-        memory = Memory()
+        Memory()
         assert mock_getNodeMemory.called
 
-# Testing _getNodeCpu()
+
 def test_getNodeMemory():
     memory = Memory()
     ret = memory._getNodeMemory()
@@ -28,8 +30,8 @@ def test_getNodeMemory():
     NS.publisher_id = "node_agent"
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
-    with patch.object(__builtin__,"open",open) as mock_open:
-            memory._getNodeMemory()
+    with patch.object(__builtin__, "open", open):
+        memory._getNodeMemory()
 
 
 # Testing render

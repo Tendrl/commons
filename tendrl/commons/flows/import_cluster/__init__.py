@@ -1,6 +1,4 @@
 from tendrl.commons import flows
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 
 
 class ImportCluster(flows.BaseFlow):

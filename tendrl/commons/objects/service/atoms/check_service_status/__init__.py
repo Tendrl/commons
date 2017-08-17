@@ -15,7 +15,7 @@ class CheckServiceStatus(BaseAtom):
                 payload={
                     "message": "Checking status of service %s on node %s" % (
                         service_name,
-                        self.parameters.get("fqdn")
+                        NS.node_context.fqdn
                     )
                 },
                 job_id=self.parameters['job_id'],
@@ -32,7 +32,7 @@ class CheckServiceStatus(BaseAtom):
                     payload={
                         "message": "Service %s running on node %s" % (
                             service_name,
-                            self.parameters.get("fqdn")
+                            NS.node_context.fqdn
                         )
                     },
                     job_id=self.parameters['job_id'],
@@ -49,7 +49,7 @@ class CheckServiceStatus(BaseAtom):
                         "message": "Failed to check status of service %s on "
                         "node %s" % (
                             service_name,
-                            self.parameters.get("fqdn")
+                            NS.node_context.fqdn
                         )
                     },
                     job_id=self.parameters['job_id'],

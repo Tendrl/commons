@@ -90,6 +90,8 @@ namespace.tendrl:
         - tendrl.objects.Cluster.atoms.CheckNodesInExistingCluster
       post_run:
         - tendrl.objects.Cluster.atoms.CheckClusterAvailable
+        - tendrl.objects.Cluster.atoms.ConfigureMonitoring
+        - tendrl.objects.Service.atoms.CheckServiceStatus
       run: tendrl.flows.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
@@ -102,6 +104,13 @@ namespace.tendrl:
       list: /clusters
       value: clusters/$TendrlContext.integration_id
       atoms:
+        ConfigureMonitoring:
+          enabled: true
+          name: configure monitoring
+          run: tendrl.objects.Cluster.atoms.ConfigureMonitoring
+          type: Create
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c3333c
+          help: Configure monitoring
         ValidCreateClusterParams:
           enabled: true
           inputs:
@@ -198,7 +207,7 @@ namespace.tendrl:
               - DetectedCluster.sds_pkg_name
               - TendrlContext.integration_id
           name: import cluster
-          run: tendrl.objects.Cluster.atoms.Import
+          run: tendrl.objects.Cluster.atoms.ImportCluster
           type: Create
           uuid: 452f6190-9b37-11e6-950d-a24fc0d9649c
           help: Import the cluster
@@ -243,6 +252,12 @@ namespace.tendrl:
         node_identifier:
           help: How nodes should be identified while create cluster
           type: list
+        enable_volume_profiling:
+          help: Whether to enable volume profiling
+          type: Boolean
+        is_managed:
+          help: If the cluster is managed by tendrl
+          type: Boolean
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -295,7 +310,6 @@ namespace.tendrl:
           enabled: true
           inputs:
             mandatory:
-              - Node.fqdn
               - Service.name
           outputs:
             - status
@@ -732,9 +746,6 @@ namespace.tendrl:
       help: "Tendrl context"
     NodeContext:
       attrs:
-        machine_id:
-          help: "Unique /etc/machine-id"
-          type: String
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String
@@ -754,9 +765,6 @@ namespace.tendrl:
       help: Node Context
     ClusterNodeContext:
       attrs:
-        machine_id:
-          help: "Unique /etc/machine-id"
-          type: String
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String

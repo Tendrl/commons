@@ -1,12 +1,12 @@
 import gevent
 
-from tendrl.commons import objects
 from tendrl.commons.event import Event
-from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.flows.create_cluster.ceph_help import create_ceph
 from tendrl.commons.flows.create_cluster.gluster_help import create_gluster
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
+from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.message import Message
+from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 
 
@@ -27,32 +27,37 @@ class Create(objects.BaseAtom):
                     self.parameters
                 )
             else:
-                create_cluster_utils.install_gdeploy()
-                create_cluster_utils.install_python_gdeploy()
-                ssh_job_ids = create_cluster_utils.gluster_create_ssh_setup_jobs(
-                    self.parameters
-                )
+                ssh_job_ids = \
+                    create_cluster_utils.gluster_create_ssh_setup_jobs(
+                        self.parameters
+                    )
 
             while True:
                 gevent.sleep(3)
                 all_status = {}
                 for job_id in ssh_job_ids:
                     # noinspection PyUnresolvedReferences
-                    all_status[job_id] = NS._int.client.read("/queue/%s/status" % job_id).value
+                    all_status[job_id] = NS._int.client.read(
+                        "/queue/%s/status" % job_id).value
 
-                _failed = {_jid: status for _jid, status in all_status.iteritems() if status == "failed"}
+                _failed = {_jid: status for _jid, status in
+                           all_status.iteritems() if status == "failed"}
                 if _failed:
                     raise AtomExecutionFailedError(
-                        "SSH setup failed for jobs %s cluster %s" % (str(_failed), integration_id))
-                if all([status == "finished" for status in all_status.values()]):
+                        "SSH setup failed for jobs %s cluster %s" % (str(
+                            _failed), integration_id))
+                if all([status == "finished" for status in
+                        all_status.values()]):
                     Event(
                         Message(
                             job_id=self.parameters['job_id'],
-                            flow_id = self.parameters['flow_id'],
+                            flow_id=self.parameters['flow_id'],
                             priority="info",
                             publisher=NS.publisher_id,
-                            payload={"message": "SSH setup completed for all nodes in cluster %s" % integration_id
-                                 }
+                            payload={"message": "SSH setup completed for all "
+                                                "nodes in cluster %s" %
+                                                integration_id
+                                     }
                         )
                     )
                     # set this node as gluster provisioner
@@ -67,24 +72,27 @@ class Create(objects.BaseAtom):
             Event(
                 Message(
                     job_id=self.parameters['job_id'],
-                    flow_id = self.parameters['flow_id'],
+                    flow_id=self.parameters['flow_id'],
                     priority="info",
                     publisher=NS.publisher_id,
-                    payload={"message": "Starting SDS install and config %s" % integration_id
-                         }
+                    payload={"message": "Starting SDS install and config %s"
+                                        % integration_id
+                             }
                 )
             )
 
-            # SSH setup jobs finished above, now install sds bits and create cluster
+            # SSH setup jobs finished above, now install sds bits and create
+            #  cluster
             if "ceph" in sds_name:
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
-                        payload={"message": "Creating Ceph Storage Cluster %s" % integration_id
-                             }
+                        payload={"message": "Creating Ceph Storage Cluster "
+                                            "%s" % integration_id
+                                 }
                     )
                 )
 
@@ -94,11 +102,12 @@ class Create(objects.BaseAtom):
                 Event(
                     Message(
                         job_id=self.parameters['job_id'],
-                        flow_id = self.parameters['flow_id'],
+                        flow_id=self.parameters['flow_id'],
                         priority="info",
                         publisher=NS.publisher_id,
-                        payload={"message": "Creating Gluster Storage Cluster %s" % integration_id
-                             }
+                        payload={"message": "Creating Gluster Storage "
+                                            "Cluster %s" % integration_id
+                                 }
                     )
                 )
 

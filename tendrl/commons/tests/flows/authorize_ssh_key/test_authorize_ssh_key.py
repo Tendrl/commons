@@ -1,21 +1,19 @@
-import logging
-
-from tendrl.commons import flows
-import maps
 import __builtin__
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.utils.ssh import authorize_key
-from tendrl.commons.utils import ansible_module_runner
-import pytest
+import maps
 from mock import patch
+import pytest
+
+
 from tendrl.commons.flows.authorize_ssh_key import AuthorizeSshKey
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.utils import ansible_module_runner
 
 
 '''Dummy Functions'''
 
 
 def run(*args):
-    return "passed",""
+    return "passed", ""
 
 
 '''Unit Test Cases'''
@@ -40,6 +38,6 @@ def test_run():
     authorize_obj.parameters = param
     with pytest.raises(FlowExecutionFailedError):
         authorize_obj.run()
-    with patch.object(ansible_module_runner.AnsibleRunner,'run',run):
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
         ret = authorize_obj.run()
         assert ret is True

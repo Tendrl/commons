@@ -15,7 +15,7 @@ SAFE_COMMAND_LIST = [
     "getenforce",
     "gluster",
     "ceph",
-    "config_manager",
+    "tendrl_monitoring_config_manager",
     "systemctl",
     "hwinfo",
     "ping",
