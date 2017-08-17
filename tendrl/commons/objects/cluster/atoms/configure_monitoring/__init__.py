@@ -92,7 +92,8 @@ class ConfigureMonitoring(objects.BaseAtom):
             "hostname": NS.node_context.fqdn,
             "integration_id": NS.tendrl_context.integration_id,
             "node_id": NS.node_context.node_id,
-            "logging_socket_path": NS.config.data['logging_socket_path']
+            "logging_socket_path": NS.config.data['logging_socket_path'],
+            "interval": NS.config.data['sync_interval']
         }
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
