@@ -434,7 +434,7 @@ class TendrlNS(object):
         return maps.NamedDict(atoms=raw_flow.get('atoms'),
                               help=raw_flow['help'],
                               enabled=raw_flow['enabled'],
-                              inputs=raw_flow['inputs'],
+                              inputs=raw_flow.get('inputs', {}),
                               pre_run=raw_flow.get('pre_run', []),
                               post_run=raw_flow.get('post_run', []),
                               type=raw_flow['type'],
