@@ -255,6 +255,9 @@ namespace.tendrl:
         enable_volume_profiling:
           help: Whether to enable volume profiling
           type: Boolean
+        is_managed:
+          help: If the cluster is managed by tendrl
+          type: Boolean
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
