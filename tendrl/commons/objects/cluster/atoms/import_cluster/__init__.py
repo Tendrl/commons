@@ -151,6 +151,9 @@ class ImportCluster(objects.BaseAtom):
                                 }
                             )
                         )
+                    else:
+                        NS.node_context.tags += ['provisioner/%s' % integration_id]
+                        NS.node_context.save()
 
             if "ceph" in sds_name.lower():
                 node_context = NS.node_context.load()
