@@ -164,6 +164,7 @@ class BaseObject(object):
             etcd_utils.refresh(self.value, ttl)
 
     def load_all(self):
+        self.render()
         value = '/'.join(self.value.split('/')[:-1])
         try:
             etcd_resp = NS._int.client.read(value)
@@ -201,7 +202,9 @@ class BaseObject(object):
                 pass
 
         _copy = self._copy_vars()
-
+        # Check if self.value already set, use it
+        if self.value.find('{') < 0:
+            _copy.value = self.value
         for item in _copy.render():
             try:
                 Event(
