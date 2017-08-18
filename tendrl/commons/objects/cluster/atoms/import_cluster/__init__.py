@@ -151,6 +151,11 @@ class ImportCluster(objects.BaseAtom):
                                 }
                             )
                         )
+                    else:
+                        # TODO(shtripat) ceph-installer is auto detected and provisioner/$integration_id
+                        # tag is set , below is not required for ceph
+                        NS.node_context.tags += ['provisioner/%s' % integration_id]
+                        NS.node_context.save()
 
             if "ceph" in sds_name.lower():
                 node_context = NS.node_context.load()
