@@ -1,4 +1,6 @@
 import json
+import netifaces
+import socket
 import subprocess
 
 
@@ -24,7 +26,6 @@ NODE_PLUGINS = {
 GLUSTER_CLUSTER_PLUGINS = {
     'tendrl_glusterfs_brick_utilization',
     'tendrl_glusterfs_health_counters',
-    'tendrl_glusterfs_peer_network_throughput',
     'tendrl_glusterfs_profile_info'
 }
 
@@ -75,6 +76,16 @@ class ConfigureMonitoring(objects.BaseAtom):
             )
             return False
 
+    def get_node_interface(self, fqdn):
+        ret_val = ''
+        infs = netifaces.interfaces()
+        ip = socket.gethostbyname(fqdn)
+        for inf in infs:
+            inf_ip = netifaces.ifaddresses(inf)[netifaces.AF_INET][0]['addr']
+            if inf_ip == ip:
+                return inf
+        return ret_val
+
     def run(self):
         self.parameters['Service.name'] = 'collectd'
         plugin_config_success = True
@@ -92,7 +103,9 @@ class ConfigureMonitoring(objects.BaseAtom):
             "hostname": NS.node_context.fqdn,
             "integration_id": NS.tendrl_context.integration_id,
             "node_id": NS.node_context.node_id,
-            "logging_socket_path": NS.config.data['logging_socket_path']
+            "logging_socket_path": NS.config.data['logging_socket_path'],
+            "interval": NS.config.data['sync_interval'],
+            "interface": self.get_node_interface(NS.node_context.fqdn)
         }
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
