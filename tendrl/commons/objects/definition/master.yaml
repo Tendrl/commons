@@ -236,10 +236,10 @@ namespace.tendrl:
           type: list
         enable_volume_profiling:
           help: Whether to enable volume profiling
-          type: Boolean
+          type: String
         is_managed:
           help: If the cluster is managed by tendrl
-          type: Boolean
+          type: String
         errors:
           help: Cluster wide errors
           type: list
