@@ -27,7 +27,7 @@ namespace.tendrl:
       atoms:
         - tendrl.objects.Cluster.atoms.Create
       help: "Create a cluster from scratch"
-      enabled: true
+      enabled: false
       inputs:
         mandatory:
           - "Node[]"
@@ -56,7 +56,7 @@ namespace.tendrl:
         - "provisioner/$TendrlContext.integration_id"
         - "provisioner/ceph"
       help: "expanding an existing cluster"
-      enabled: true
+      enabled: false
       inputs:
         mandatory:
           - "Node[]"
@@ -74,20 +74,18 @@ namespace.tendrl:
       version: 1
     ImportCluster:
       tags:
-        - "detected_cluster/$DetectedCluster.detected_cluster_id"
+        - "tendrl/integration/$TendrlContext.integration_id"
       atoms:
         - tendrl.objects.Cluster.atoms.ImportCluster
       help: "Import existing Gluster Cluster"
       enabled: true
       inputs:
         mandatory:
-          - "Node[]"
-          - DetectedCluster.sds_pkg_name
           - TendrlContext.integration_id
+          - Cluster.enable_volume_profiling
       pre_run:
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
-        - tendrl.objects.Cluster.atoms.CheckNodesInExistingCluster
       post_run:
         - tendrl.objects.Cluster.atoms.CheckClusterAvailable
         - tendrl.objects.Cluster.atoms.ConfigureMonitoring
@@ -134,8 +132,6 @@ namespace.tendrl:
           enabled: true
           inputs:
             mandatory:
-              - "Node[]"
-              - DetectedCluster.sds_pkg_name
               - TendrlContext.integration_id
           name: valid import cluster params
           run: tendrl.objects.Cluster.atoms.ValidImportClusterParams
@@ -203,8 +199,6 @@ namespace.tendrl:
           enabled: true
           inputs:
             mandatory:
-              - "Node[]"
-              - DetectedCluster.sds_pkg_name
               - TendrlContext.integration_id
           name: import cluster
           run: tendrl.objects.Cluster.atoms.ImportCluster
@@ -221,18 +215,6 @@ namespace.tendrl:
           type: Get
           uuid: 552f6190-9b37-11e6-950d-a24fc0d9649e
           help: check if cluster is available
-        CheckNodesInExistingCluster:
-          enabled: true
-          inputs:
-            mandatory:
-              - "Node[]"
-              - DetectedCluster.sds_pkg_name
-              - TendrlContext.integration_id
-          name: check nodes in existing cluster
-          run: tendrl.objects.Cluster.atoms.CheckNodesInExistingCluster
-          type: Get
-          uuid: 652f6190-9b37-11e6-950d-a24fc0d9649c
-          help: node is not part of existing cluster
       attrs:
         integration_id:
           help: integration id
@@ -258,6 +240,9 @@ namespace.tendrl:
         is_managed:
           help: If the cluster is managed by tendrl
           type: Boolean
+        errors:
+          help: Cluster wide errors
+          type: list
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"

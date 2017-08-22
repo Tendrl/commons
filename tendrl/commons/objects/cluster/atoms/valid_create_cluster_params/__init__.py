@@ -26,7 +26,7 @@ class ValidCreateClusterParams(objects.BaseAtom):
         supported_sds = NS.compiled_definitions.get_parsed_defs()[
             'namespace.tendrl'
         ]['supported_sds']
-        sds_name = self.parameters["TendrlContext.sds_name"]
+        sds_name = NS.tendrl_context.sds_name
         if sds_name not in supported_sds:
             Event(
                 Message(
@@ -43,7 +43,7 @@ class ValidCreateClusterParams(objects.BaseAtom):
             return False
 
         # Check if cluster name contains space char and fail if so
-        if ' ' in self.parameters['TendrlContext.cluster_name']:
+        if ' ' in NS.tendrl_context.cluster_name:
             Event(
                 Message(
                     priority="error",

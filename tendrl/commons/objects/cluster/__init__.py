@@ -6,7 +6,7 @@ class Cluster(objects.BaseObject):
                  cluster_network=None, node_configuration=None,
                  conf_overrides=None, node_identifier=None, sync_status=None,
                  last_sync=None, is_managed=False,
-                 enable_volume_profiling=False, *args, **kwargs):
+                 enable_volume_profiling=False, errors=None, *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
         self.integration_id = integration_id
         self.public_network = public_network
@@ -18,6 +18,7 @@ class Cluster(objects.BaseObject):
         self.last_sync = last_sync
         self.is_managed = is_managed
         self.enable_volume_profiling = enable_volume_profiling
+        self.errors = errors or []
         self.value = 'clusters/{0}'
 
     def render(self):
