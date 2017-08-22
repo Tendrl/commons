@@ -19,12 +19,6 @@ class ImportCluster(objects.BaseAtom):
         try:
             integration_id = self.parameters['TendrlContext.integration_id']
 
-            _cluster = NS.tendrl.objects.Cluster(
-                integration_id=NS.tendrl_context.integration_id).load()
-            _cluster.enable_volume_profiling = self.parameters[
-                'Cluster.enable_volume_profiling']
-            _cluster.save()
-
             # Lock nodes
             create_cluster_utils.acquire_node_lock(self.parameters)
             NS.tendrl_context = NS.tendrl_context.load()
@@ -77,6 +71,10 @@ class ImportCluster(objects.BaseAtom):
                         NS.node_context.tags += ['provisioner/%s' %
                                                  integration_id]
                         NS.node_context.save()
+                        _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id).load()
+                        _cluster.enable_volume_profiling = self.parameters['Cluster.enable_volume_profiling']
+                        _cluster.save()
+
 
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
