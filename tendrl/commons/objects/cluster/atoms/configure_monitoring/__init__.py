@@ -26,10 +26,10 @@ NODE_PLUGINS = {
 GLUSTER_CLUSTER_PLUGINS = {
     'node_plugins': {
         'tendrl_glusterfs_health_counters',
-        'tendrl_glusterfs_profile_info',
+        'tendrl_glusterfs_brick_utilization'
     },
     'cluster_plugins': {
-        'tendrl_glusterfs_brick_utilization',
+        'tendrl_glusterfs_profile_info',
         'tendrl_glusterfs_heal_info'
     }
 }
