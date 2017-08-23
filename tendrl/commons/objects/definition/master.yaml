@@ -572,6 +572,198 @@ namespace.tendrl:
       list: nodes/$NodeContext.node_id/LocalStorage/BlockDevice
       value: nodes/$NodeContext.node_id/LocalStorage/BlockDevice
       help: "BlockDevice"
+    Alert:
+      attrs:
+        alert_id:
+          help: 'The unique identifier of alert'
+          type: String
+        node_id:
+          help: 'The unique identifier of node on which alert was detected'
+          type: String
+        time_stamp:
+          help: 'The timestamp at which alert was observed'
+          type: String
+        resource:
+          help: 'The resource with problem for which alert was raised'
+          type: String
+        current_value:
+          help: 'The current magnitude(status/utilization) of problem'
+          type: String
+        tags:
+          help: 'Alert specific fields that cannot be generalized for all alerts'
+          type: Dict
+        alert_type:
+          help: 'The type(status/percentage utilization) of alert'
+          type: String
+        severity:
+          help: 'The severity of alert'
+          type: String
+        significance:
+          help: 'The significance of notifying alert'
+          type: String
+        ackedby:
+          help: 'Entity/person acking the alert'
+          type: String
+        acked:
+          help: 'Indication of whether alert is acked or not'
+          type: Boolean
+        ack_comment:
+          help: 'Users comments for acking this alert'
+          type: List
+        acked_at:
+          help: 'Time at which the alert was acked'
+          type: String
+        pid:
+          help: 'The id of process raising the alert'
+          type: String
+        source:
+          help: 'The process raising the alert'
+          type: String
+        delivered:
+          help: 'Delivery detials by notifier'
+          type: Dict
+      enabled: true
+      value: alerting/alerts/$Alert.alert_id
+      list: alerting/alerts
+      help: "alerts"
+    NodeAlert:
+      attrs:
+        alert_id:
+          help: 'The unique identifier of alert'
+          type: String
+        node_id:
+          help: 'The unique identifier of node on which alert was detected'
+          type: String
+        time_stamp:
+          help: 'The timestamp at which alert was observed'
+          type: String
+        resource:
+          help: 'The resource with problem for which alert was raised'
+          type: String
+        current_value:
+          help: 'The current magnitude(status/utilization) of problem'
+          type: String
+        tags:
+          help: 'Alert specific fields that cannot be generalized for all alerts'
+          type: Dict
+        alert_type:
+          help: 'The type(status/percentage utilization) of alert'
+          type: String
+        severity:
+          help: 'The severity of alert'
+          type: String
+        significance:
+          help: 'The significance of notifying alert'
+          type: String
+        ackedby:
+          help: 'Entity/person acking the alert'
+          type: String
+        acked:
+          help: 'Indication of whether alert is acked or not'
+          type: Boolean
+        ack_comment:
+          help: 'Users comments for acking this alert'
+          type: List
+        acked_at:
+          help: 'Time at which the alert was acked'
+          type: String
+        pid:
+          help: 'The id of process raising the alert'
+          type: String
+        source:
+          help: 'The process raising the alert'
+          type: String
+        delivered:
+          help: 'Delivery detials by notifier'
+          type: Dict
+      enabled: true
+      value: alerting/nodes/$Alert.node_id/$Alert.alert_id
+      list: alerting/nodes/$Alert.node_id
+      help: "Node alerts"
+    ClusterAlert:
+      attrs:
+        alert_id:
+          help: 'The unique identifier of alert'
+          type: String
+        node_id:
+          help: 'The unique identifier of node on which alert was detected'
+          type: String
+        time_stamp:
+          help: 'The timestamp at which alert was observed'
+          type: String
+        resource:
+          help: 'The resource with problem for which alert was raised'
+          type: String
+        current_value:
+          help: 'The current magnitude(status/utilization) of problem'
+          type: String
+        tags:
+          help: 'Alert specific fields that cannot be generalized for all alerts'
+          type: Dict
+        alert_type:
+          help: 'The type(status/percentage utilization) of alert'
+          type: String
+        severity:
+          help: 'The severity of alert'
+          type: String
+        significance:
+          help: 'The significance of notifying alert'
+          type: String
+        ackedby:
+          help: 'Entity/person acking the alert'
+          type: String
+        acked:
+          help: 'Indication of whether alert is acked or not'
+          type: Boolean
+        ack_comment:
+          help: 'Users comments for acking this alert'
+          type: List
+        acked_at:
+          help: 'Time at which the alert was acked'
+          type: String
+        pid:
+          help: 'The id of process raising the alert'
+          type: String
+        source:
+          help: 'The process raising the alert'
+          type: String
+        delivered:
+          help: 'Delivery detials by notifier'
+          type: Dict
+      enabled: true
+      value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
+      list: alerting/clusters/$Alert.tags['integration_id']
+      help: "Cluster alerts"
+    ClusterAlertCounters:
+      enabled: True
+      attrs:
+        warning_count:
+          help: "Count of warning alerts for the cluster"
+          type: int
+        info_count:
+          help: "Count of ok alerts for the cluster"
+          type: int
+        integration_id:
+          help: "Id of the cluster"
+          type: String
+      value: /clusters/{0}/alert_counters
+      list: /clusters/{0}/alert_counters
+      help: "Cluster Alert Counter"
+    NodeAlertCounters:
+      enabled: True
+      attrs:
+        warning_count:
+          help: "Count of warning alerts for the node"
+          type: int
+        info_count:
+          help: "Count of ok alerts for the node"
+          type: int
+        integration_id:
+          help: "Id of the node"
+          type: String
+      value: /nodes/{0}/alert_counters
+      list: /nodes/{0}/alert_counters
+      help: "Node Alert Counter"
     Node:
       atoms:
         IsNodeTendrlManaged:
