@@ -24,5 +24,21 @@ class ImportCluster(flows.BaseFlow):
                                                "integration_id "
                                                "(%s) not found, cannot "
                                                "import" % integration_id)
+            else:
+                # TODO(shtripat) ceph-installer is auto detected and
+                #  provisioner/$integration_id
+                # tag is set , below is not required for ceph
+                current_tags = list(NS.node_context.tags)
+                new_tags = ['provisioner/%s' % integration_id]
+                new_tags += current_tags
+                new_tags = list(set(new_tags))
+                if new_tags != current_tags:
+                    NS.node_context.tags = new_tags
+                    NS.node_context.save()
+
+                _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id).load()
+                _cluster.enable_volume_profiling = self.parameters['Cluster.enable_volume_profiling']
+                _cluster.save()
+
 
         super(ImportCluster, self).run()
