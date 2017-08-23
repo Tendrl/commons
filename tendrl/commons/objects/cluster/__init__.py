@@ -5,8 +5,8 @@ class Cluster(objects.BaseObject):
     def __init__(self, integration_id=None, public_network=None,
                  cluster_network=None, node_configuration=None,
                  conf_overrides=None, node_identifier=None, sync_status=None,
-                 last_sync=None, is_managed="no",
-                 enable_volume_profiling="no", errors=[], *args, **kwargs):
+                 last_sync=None, is_managed=None,
+                 enable_volume_profiling=None, errors=[], *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
         self.integration_id = integration_id
         self.public_network = public_network
