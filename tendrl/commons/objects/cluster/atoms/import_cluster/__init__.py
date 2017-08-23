@@ -64,16 +64,6 @@ class ImportCluster(objects.BaseAtom):
                                 }
                             )
                         )
-                    else:
-                        # TODO(shtripat) ceph-installer is auto detected and
-                        #  provisioner/$integration_id
-                        # tag is set , below is not required for ceph
-                        NS.node_context.tags += ['provisioner/%s' %
-                                                 integration_id]
-                        NS.node_context.save()
-                        _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id).load()
-                        _cluster.enable_volume_profiling = self.parameters['Cluster.enable_volume_profiling']
-                        _cluster.save()
 
 
             # Check if minimum required version of underlying gluster
