@@ -29,8 +29,7 @@ GLUSTER_CLUSTER_PLUGINS = {
         'tendrl_glusterfs_brick_utilization'
     },
     'cluster_plugins': {
-        'tendrl_glusterfs_profile_info',
-        'tendrl_glusterfs_heal_info'
+        'tendrl_glusterfs_profile_info'
     }
 }
 
