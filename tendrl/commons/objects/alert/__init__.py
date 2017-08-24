@@ -61,7 +61,7 @@ class AlertUtils(object):
     def equals(self, alert1, alert2):
         return (
             alert1.alert_id == alert2.alert_id and
-            alert1.acked == alert2.acked
+            str(alert1.acked) == alert2.acked
         )
 
     def update(self, new_alert, existing_alert):
