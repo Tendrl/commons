@@ -96,7 +96,8 @@ class AlertUtils(object):
         if 'integration_id' in alert1.tags:
             if 'integration_id' in alert2.tags:
                 if (
-                    alert1.tags['integration_id'] != alert2.tags['integration_id']
+                    alert1.tags['integration_id'] !=
+                    alert2.tags['integration_id']
                 ):
                     return False
             else:
@@ -113,7 +114,6 @@ class AlertUtils(object):
                 return False
         elif alert2.node_id:
             return False
-            
         if alert1.alert_type != alert2.alert_type:
             return False
         return True

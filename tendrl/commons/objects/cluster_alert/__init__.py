@@ -52,4 +52,3 @@ class ClusterAlert(Alert, objects.BaseObject):
                                        self.alert_id
                                        )
         return super(ClusterAlert, self).render()
-
