@@ -734,36 +734,6 @@ namespace.tendrl:
       value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
       list: alerting/clusters/$Alert.tags['integration_id']
       help: "Cluster alerts"
-    ClusterAlertCounters:
-      enabled: True
-      attrs:
-        warning_count:
-          help: "Count of warning alerts for the cluster"
-          type: int
-        info_count:
-          help: "Count of ok alerts for the cluster"
-          type: int
-        integration_id:
-          help: "Id of the cluster"
-          type: String
-      value: /clusters/{0}/alert_counters
-      list: /clusters/{0}/alert_counters
-      help: "Cluster Alert Counter"
-    NodeAlertCounters:
-      enabled: True
-      attrs:
-        warning_count:
-          help: "Count of warning alerts for the node"
-          type: int
-        info_count:
-          help: "Count of ok alerts for the node"
-          type: int
-        integration_id:
-          help: "Id of the node"
-          type: String
-      value: /nodes/{0}/alert_counters
-      list: /nodes/{0}/alert_counters
-      help: "Node Alert Counter"
     Node:
       atoms:
         IsNodeTendrlManaged:
