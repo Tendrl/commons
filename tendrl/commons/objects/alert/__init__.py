@@ -20,6 +20,7 @@ class Alert(objects.BaseObject):
         tags=None,
         alert_type=None,
         severity=None,
+        classification=None,
         significance=None,
         ackedby=None,
         acked=None,
@@ -40,6 +41,7 @@ class Alert(objects.BaseObject):
         self.tags = tags
         self.alert_type = alert_type
         self.severity = severity
+        self.classification = classification
         self.significance = significance
         self.ackedby = ackedby
         self.acked = acked
@@ -116,6 +118,8 @@ class AlertUtils(object):
             return False
         if alert1.alert_type != alert2.alert_type:
             return False
+        if alert1.classification != alert2.classification:
+            return False
         return True
 
     def to_obj(self, alert_json):
@@ -128,6 +132,7 @@ class AlertUtils(object):
             alert_json['tags'],
             alert_json['alert_type'],
             alert_json['severity'],
+            alert_json['classification'],
             alert_json.get('significance', ''),
             alert_json.get('ackedby', ''),
             alert_json.get('acked', False),

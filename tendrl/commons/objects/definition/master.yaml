@@ -598,6 +598,9 @@ namespace.tendrl:
         severity:
           help: 'The severity of alert'
           type: String
+        classification:
+          help: 'node/cluster'
+          type: String
         significance:
           help: 'The significance of notifying alert'
           type: String
@@ -652,6 +655,9 @@ namespace.tendrl:
         severity:
           help: 'The severity of alert'
           type: String
+        classification:
+          help: 'node/cluster'
+          type: String
         significance:
           help: 'The significance of notifying alert'
           type: String
@@ -705,6 +711,9 @@ namespace.tendrl:
           type: String
         severity:
           help: 'The severity of alert'
+          type: String
+        classification:
+          help: 'node/cluster'
           type: String
         significance:
           help: 'The significance of notifying alert'
