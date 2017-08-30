@@ -64,8 +64,6 @@ class ImportCluster(objects.BaseAtom):
                                 }
                             )
                         )
-
-
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
             cluster_ver = \

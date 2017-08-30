@@ -1,6 +1,5 @@
-import json
-
 import etcd
+import json
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -36,9 +35,10 @@ class ImportCluster(flows.BaseFlow):
                     NS.node_context.tags = new_tags
                     NS.node_context.save()
 
-                _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id).load()
-                _cluster.enable_volume_profiling = self.parameters['Cluster.enable_volume_profiling']
+                _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+                _cluster.enable_volume_profiling = self.parameters[
+                    'Cluster.enable_volume_profiling']
                 _cluster.save()
-
-
         super(ImportCluster, self).run()
