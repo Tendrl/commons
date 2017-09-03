@@ -24,13 +24,7 @@ NODE_PLUGINS = {
 
 
 GLUSTER_CLUSTER_PLUGINS = {
-    'node_plugins': {
-        'tendrl_glusterfs_health_counters',
-        'tendrl_glusterfs_brick_utilization'
-    },
-    'cluster_plugins': {
-        'tendrl_glusterfs_profile_info'
-    }
+    'tendrl_gluster'
 }
 
 
@@ -117,17 +111,12 @@ class ConfigureMonitoring(objects.BaseAtom):
                 plugin_params
             )
         if NS.tendrl_context.sds_name == 'gluster':
-            plugins = GLUSTER_CLUSTER_PLUGINS.get('node_plugins', [])
+            plugin_params['is_provisioner_node'] = False
             if "provisioner/%s" % (
                 NS.tendrl_context.integration_id
             ) in NS.node_context.tags:
-                plugins.update(
-                    GLUSTER_CLUSTER_PLUGINS.get(
-                        'cluster_plugins',
-                        []
-                    )
-                )
-            for gluster_plugin in plugins:
+                plugin_params['is_provisioner_node'] = True
+            for gluster_plugin in GLUSTER_CLUSTER_PLUGINS:
                 plugin_config_success &= self._configure_plugin(
                     gluster_plugin,
                     plugin_params
