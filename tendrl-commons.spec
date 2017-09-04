@@ -18,7 +18,7 @@ Requires: python-maps
 Requires: python-dateutil
 Requires: python-etcd
 Requires: python-six
-Requires: python-ruamel-yaml
+Requires: python2-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
 Requires: python-gevent
