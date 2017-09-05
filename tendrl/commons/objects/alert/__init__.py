@@ -1,5 +1,6 @@
-from tendrl.commons import objects
+import json
 
+from tendrl.commons import objects
 from tendrl.commons.utils.time_utils import now
 
 alert_severity_map = {
@@ -17,7 +18,7 @@ class Alert(objects.BaseObject):
         time_stamp=None,
         resource=None,
         current_value=None,
-        tags=None,
+        tags={},
         alert_type=None,
         severity=None,
         classification=None,
@@ -55,6 +56,9 @@ class Alert(objects.BaseObject):
 
     def render(self):
         self.value = self.value.format(self.alert_id)
+        # To read tags using loads method
+        if self.tags and type(self.tags) != str:
+            self.tags = json.dumps(self.tags)
         return super(Alert, self).render()
 
 
