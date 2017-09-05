@@ -15,8 +15,8 @@ class ClusterAlert(Alert, objects.BaseObject):
     def render(self):
         try:
             self.tags = json.loads(self.tags)
-        except TypeError:
-            # Already in json format
+        except(TypeError, ValueError):
+            # Already in json or None
             pass
         self.value = self.value.format(
             self.tags['integration_id'],
