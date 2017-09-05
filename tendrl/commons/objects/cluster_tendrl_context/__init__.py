@@ -14,7 +14,8 @@ class ClusterTendrlContext(objects.BaseObject):
 
         super(ClusterTendrlContext, self).__init__(*args, **kwargs)
         # integration_id is the Tendrl generated cluster UUID
-        self.integration_id = integration_id or NS.tendrl_context.integration_id
+        self.integration_id = integration_id or \
+            NS.tendrl_context.integration_id
         self.cluster_id = cluster_id
         self.cluster_name = cluster_name
         self.sds_name = sds_name
