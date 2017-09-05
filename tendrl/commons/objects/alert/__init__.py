@@ -6,7 +6,6 @@ from tendrl.commons.utils.time_utils import now
 alert_severity_map = {
     'INFO': 0,
     'WARNING': 1,
-    'UNKNOWN': 2
 }
 
 
@@ -18,7 +17,7 @@ class Alert(objects.BaseObject):
         time_stamp=None,
         resource=None,
         current_value=None,
-        tags={},
+        tags=None,
         alert_type=None,
         severity=None,
         classification=None,
