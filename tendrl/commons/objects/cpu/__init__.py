@@ -1,3 +1,6 @@
+import psutil
+
+
 from tendrl.commons import objects
 from tendrl.commons.utils import cmd_utils
 
@@ -6,6 +9,7 @@ class Cpu(objects.BaseObject):
     def __init__(self, architecture=None, cores_per_socket=None,
                  cpu_family=None, cpu_op_mode=None,
                  model=None, model_name=None, vendor_id=None,
+                 cpu_util_percent=None,
                  *args, **kwargs):
         super(Cpu, self).__init__(*args, **kwargs)
         cpu = self._getNodeCpu()
@@ -16,6 +20,7 @@ class Cpu(objects.BaseObject):
         self.model = model or cpu["Model"]
         self.model_name = model_name or cpu["ModelName"]
         self.vendor_id = vendor_id or cpu["VendorId"]
+        self.cpu_util_percent = cpu_util_percent or str(psutil.cpu_percent())
         self.value = 'nodes/{0}/Cpu'
 
     def _getNodeCpu(self):
