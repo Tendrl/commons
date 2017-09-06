@@ -14,6 +14,7 @@ from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.message import Message
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import alert_utils
 from tendrl.commons.utils import time_utils
 
 
@@ -104,6 +105,19 @@ def process_job(job):
                     _msg = str("Timed-out (>10min as 'new')")
                     job.errors = _msg
                     job.save()
+                    if job.payload.get('parent') is None:
+                        alert_utils.alert_job_status(
+                            "failed",
+                            "Job timed out (job_id: %s)" % jid,
+                            integration_id=NS.tendrl_context.integration_id or
+                            job.payload['parameters'].get(
+                                'TendrlContext.integration_id'
+                            ),
+                            cluster_name=NS.tendrl_context.cluster_name or
+                            job.payload['parameters'].get(
+                                'TendrlContext.cluster_name'
+                            )
+                        )
                     return
         else:
             _now_plus_10 = time_utils.now() + datetime.timedelta(minutes=10)
@@ -219,6 +233,19 @@ def process_job(job):
                              }
                 )
             )
+            if job.payload.get('parent') is None:
+                alert_utils.alert_job_status(
+                    "finished",
+                    "Job finished successfully (job_id: %s)" % job.job_id,
+                    integration_id=NS.tendrl_context.integration_id or
+                    job.payload['parameters'].get(
+                        'TendrlContext.integration_id'
+                    ),
+                    cluster_name=NS.tendrl_context.cluster_name or
+                    job.payload['parameters'].get(
+                        'TendrlContext.cluster_name'
+                    )
+                )
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
                 Exception) as e:
@@ -265,6 +292,19 @@ def process_job(job):
             else:
                 job = job.load()
                 job.errors = _trace
+                if job.payload.get('parent') is None:
+                    alert_utils.alert_job_status(
+                        "failed",
+                        "Job failed (job_id: %s)" % job.job_id,
+                        integration_id=NS.tendrl_context.integration_id or
+                        job.payload['parameters'].get(
+                            'TendrlContext.integration_id'
+                        ),
+                        cluster_name=NS.tendrl_context.cluster_name or
+                        job.payload['parameters'].get(
+                            'TendrlContext.cluster_name'
+                        )
+                    )
                 job.save()
 
 
