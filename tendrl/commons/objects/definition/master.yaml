@@ -277,14 +277,24 @@ namespace.tendrl:
           type: String
         vendor_id:
           type: String
+        cpu_util_percent:
+          type: String
       enabled: true
       value: nodes/$NodeContext.node_id/Cpu
       help: "CPU"
     Memory:
       attrs:
-        total_size:
+        memory_total:
           type: String
-        total_swap:
+        memory_available:
+          type: String
+        memory_util_percent:
+          type: String
+        swap_total:
+          type: String
+        swap_available:
+          type: String
+        swap_util_percent:
           type: String
       enabled: true
       value: nodes/$NodeContext.node_id/Memory
