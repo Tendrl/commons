@@ -22,7 +22,8 @@ SAFE_COMMAND_LIST = [
     "lvm",
     "gstatus",
     "ls",
-    "df"
+    "df",
+    "gluster-eventsapi"
 ]
 
 
