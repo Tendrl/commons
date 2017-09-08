@@ -10,8 +10,22 @@ class ImportCluster(flows.BaseFlow):
         super(ImportCluster, self).__init__(*args, **kwargs)
 
     def run(self):
-        integration_id = self.parameters['TendrlContext.integration_id']
         if "Node[]" not in self.parameters:
+            integration_id = self.parameters['TendrlContext.integration_id']
+            _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+
+            try:
+                _cluster_import_status = "clusters/%s/import_status" % integration_id
+                _cluster_import_job_id = "clusters/%s/import_job_id" % integration_id
+
+                NS._int.wclient.write(_cluster_import_status, "in_progress", prevExist=False)
+                NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevExist=False)
+                
+            except etcd.EtcdAlreadyExist:
+                raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id)
+                         
             try:
                 integration_id_index_key = \
                     "indexes/tags/tendrl/integration/%s" % integration_id
