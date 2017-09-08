@@ -3,6 +3,7 @@ import json
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects import AtomExecutionFailedError
 
 
 class ImportCluster(flows.BaseFlow):
@@ -10,8 +11,29 @@ class ImportCluster(flows.BaseFlow):
         super(ImportCluster, self).__init__(*args, **kwargs)
 
     def run(self):
-        integration_id = self.parameters['TendrlContext.integration_id']
         if "Node[]" not in self.parameters:
+            integration_id = self.parameters['TendrlContext.integration_id']
+            _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+            _cluster_import_status = "clusters/%s/import_status" % integration_id
+            _cluster_import_job_id = "clusters/%s/import_job_id" % integration_id
+            
+            # If cluster.import_status="failed", allow retries
+            try:
+                NS._int.wclient.delete(_cluster_import_status, prevValue="failed")
+                NS._int.wclient.delete(_cluster_import_job_id)
+            except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
+                pass
+            
+            try:
+
+                NS._int.wclient.write(_cluster_import_status, "in_progress", prevExist=False)
+                NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevExist=False)
+                
+            except etcd.EtcdAlreadyExist:
+                raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id))
+                         
             try:
                 integration_id_index_key = \
                     "indexes/tags/tendrl/integration/%s" % integration_id
@@ -41,4 +63,16 @@ class ImportCluster(flows.BaseFlow):
                 _cluster.enable_volume_profiling = self.parameters[
                     'Cluster.enable_volume_profiling']
                 _cluster.save()
-        super(ImportCluster, self).run()
+        try:
+            super(ImportCluster, self).run()
+        except (FlowExecutionFailedError,
+                AtomExecutionFailedError,
+                Exception) as ex:
+            _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+            _cluster.import_status = "failed"
+            _cluster.save()
+            raise ex
+
+
