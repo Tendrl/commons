@@ -135,5 +135,9 @@ class ConfigureMonitoring(objects.BaseAtom):
             socket_path=NS.config.data['logging_socket_path'],
             enabled=True
         ).restart()
+        
+        _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id).load()
+        _cluster.import_status = "done"
+        _cluster.save()
 
         return True
