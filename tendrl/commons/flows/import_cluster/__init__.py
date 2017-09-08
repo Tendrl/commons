@@ -3,6 +3,7 @@ import json
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects import AtomExecutionFailedError
 
 
 class ImportCluster(flows.BaseFlow):
@@ -62,4 +63,16 @@ class ImportCluster(flows.BaseFlow):
                 _cluster.enable_volume_profiling = self.parameters[
                     'Cluster.enable_volume_profiling']
                 _cluster.save()
-        super(ImportCluster, self).run()
+        try:
+            super(ImportCluster, self).run()
+        except (FlowExecutionFailedError,
+                AtomExecutionFailedError,
+                Exception) as ex:
+            _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+            _cluster.import_status = "failed"
+            _cluster.save()
+            raise ex
+
+
