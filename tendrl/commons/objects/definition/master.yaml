@@ -243,6 +243,12 @@ namespace.tendrl:
         errors:
           help: Cluster wide errors
           type: list
+        import_status:
+          help: Cluster import status in_progress or done or failed
+          type: String
+        import_job_id:
+          help: Cluster import job id
+          type: String
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
