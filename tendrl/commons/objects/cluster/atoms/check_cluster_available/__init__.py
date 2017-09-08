@@ -26,6 +26,8 @@ class CheckClusterAvailable(objects.BaseAtom):
                 pass
 
             if _cluster and _cluster.is_managed == "yes":
+                _cluster.import_status = "done"
+                _cluster.save()
                 return True
 
             retry_count += 1
