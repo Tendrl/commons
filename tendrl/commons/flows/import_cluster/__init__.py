@@ -24,7 +24,7 @@ class ImportCluster(flows.BaseFlow):
                 NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevExist=False)
                 
             except etcd.EtcdAlreadyExist:
-                raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id)
+                raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id))
                          
             try:
                 integration_id_index_key = \
