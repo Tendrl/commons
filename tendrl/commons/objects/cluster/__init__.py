@@ -18,7 +18,7 @@ class Cluster(objects.BaseObject):
         self.sync_status = sync_status
         self.last_sync = last_sync
         self.import_status = import_status
-        self.import_job_id = 
+        self.import_job_id = import_job_id
         self.is_managed = is_managed
         self.enable_volume_profiling = enable_volume_profiling
         self.errors = errors
