@@ -15,9 +15,15 @@ class ImportCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
-
+            _cluster_import_status = "clusters/%s/import_status" % integration_id
+            
+            # If cluster.import_status="failed", allow retries
             try:
-                _cluster_import_status = "clusters/%s/import_status" % integration_id
+                NS._int.wclient.delete(_cluster_import_status, prevValue="failed")
+            except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
+                pass
+            
+            try:
                 _cluster_import_job_id = "clusters/%s/import_job_id" % integration_id
 
                 NS._int.wclient.write(_cluster_import_status, "in_progress", prevExist=False)
