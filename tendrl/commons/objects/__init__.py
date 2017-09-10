@@ -337,6 +337,7 @@ class BaseObject(object):
             return False
         
     de invalidate_hash(self):
+        self.render()
         _hash_key = "/{0}/hash".format(self.value)
         try:
             NS._int.wclient.delete(_hash_key)
