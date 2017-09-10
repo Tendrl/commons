@@ -24,7 +24,8 @@ NODE_PLUGINS = {
 
 
 GLUSTER_CLUSTER_PLUGINS = {
-    'tendrl_gluster'
+    'tendrl_gluster',
+    'tendrl_gluster_brick_disk_stats'
 }
 
 
@@ -103,7 +104,9 @@ class ConfigureMonitoring(objects.BaseAtom):
             "node_id": NS.node_context.node_id,
             "logging_socket_path": NS.config.data['logging_socket_path'],
             "interval": NS.config.data['sync_interval'],
-            "interface": self.get_node_interface(NS.node_context.fqdn)
+            "interface": self.get_node_interface(NS.node_context.fqdn),
+            "etcd_host": NS.config.data['etcd_connection'],
+            "etcd_port": NS.config.data['etcd_port']
         }
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
