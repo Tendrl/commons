@@ -28,8 +28,8 @@ class ImportCluster(flows.BaseFlow):
             
             try:
 
-                NS._int.wclient.write(_cluster_import_status, "in_progress", prevExist=False)
-                NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevExist=False)
+                NS._int.wclient.write(_cluster_import_status, "in_progress", prevValue="None")
+                NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevValue="None")
                 
             except etcd.EtcdAlreadyExist:
                 raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id))
