@@ -313,6 +313,7 @@ class BaseObject(object):
         return self.hash
     
     def hash_compare_with_central_store(self, ttl=None):
+        self.render()
         try:
             # Generate current in memory object hash
             self._hash()
