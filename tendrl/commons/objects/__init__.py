@@ -78,7 +78,7 @@ class BaseObject(object):
         if "Message" not in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
-                self.hash = self._hash()
+                self._hash()
                 _hash_key = "/{0}/hash".format(self.value)
                 _stored_hash = None
                 try:
@@ -184,7 +184,7 @@ class BaseObject(object):
         if "Message" not in self.__class__.__name__:
             try:
                 # Generate current in memory object hash
-                self.hash = self._hash()
+                self._hash()
                 _hash_key = "/{0}/hash".format(self.value)
                 _stored_hash = None
                 try:
@@ -328,6 +328,8 @@ class BaseObject(object):
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
             for name, field in _fields.iteritems():
+                if field.name == "hash":
+                    continue
                 data[field.name] = json.loads(field.json)
                 # Flatten if needed
                 if field.name in data[field.name].keys():
@@ -336,13 +338,16 @@ class BaseObject(object):
         return json.dumps(data)
 
     def _hash(self):
-        self.hash = None
         self.updated_at = None
 
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
-        return hashlib.md5(_obj_str).hexdigest()
-
+        self.hash = hashlib.md5(_obj_str).hexdigest()
+        return self.hash
+    
+    def get_hash(self):
+        return self._hash()
+    
     def _copy_vars(self):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
