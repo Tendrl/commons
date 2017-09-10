@@ -335,7 +335,16 @@ class BaseObject(object):
         except TypeError:
             # no hash for this object, save the current hash as is
             return False
-    
+        
+    de invalidate_hash(self):
+        _hash_key = "/{0}/hash".format(self.value)
+        try:
+            NS._int.wclient.delete(_hash_key)
+        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+            if type(ex) != etcd.EtcdKeyNotFound:
+                NS._int.reconnect()
+                NS._int.wclient.delete(_hash_key)
+        
     def _copy_vars(self):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
