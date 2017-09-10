@@ -18,7 +18,7 @@ def alert_job_status(curr_value, msg, integration_id=None, cluster_name=None):
     alert['severity'] = severity
     alert['resource'] = 'job_status'
     alert['current_value'] = curr_value
-    alert['delivered'] = True
+    alert['notify_only_ui'] = True
     alert['tags'] = dict(
         message=msg,
         integration_id=integration_id or
