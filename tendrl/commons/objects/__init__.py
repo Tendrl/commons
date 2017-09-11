@@ -337,7 +337,7 @@ class BaseObject(object):
             # no hash for this object, save the current hash as is
             return False
         
-    de invalidate_hash(self):
+    def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
         try:
