@@ -4,9 +4,9 @@ from tendrl.commons import objects
 from tendrl.commons.objects.alert import Alert
 
 
-class SdsNativeAlert(Alert, objects.BaseObject):
+class UtilizationOnlyAlert(Alert, objects.BaseObject):
     def __init__(self, *args, **kwargs):
-        super(SdsNativeAlert, self).__init__(
+        super(UtilizationOnlyAlert, self).__init__(
             *args,
             **kwargs
         )
@@ -19,4 +19,4 @@ class SdsNativeAlert(Alert, objects.BaseObject):
             # Already in json or None
             pass
         self.value = self.value.format(self.alert_id)
-        return super(SdsNativeAlert, self).render()
+        return super(UtilizationOnlyAlert, self).render()
