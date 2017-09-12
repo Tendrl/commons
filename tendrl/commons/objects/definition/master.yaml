@@ -759,7 +759,7 @@ namespace.tendrl:
       value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
       list: alerting/clusters/$Alert.tags['integration_id']
       help: "Cluster alerts"
-    UtilizationOnlyAlert:
+    NotificationOnlyAlert:
       attrs:
         alert_id:
           help: 'The unique identifier of alert'
@@ -815,7 +815,7 @@ namespace.tendrl:
       enabled: true
       value: alerting/notify/$Alert.alert_id
       list: alerting/notify
-      help: "utilization alerts only"
+      help: "notification only alert"
     Node:
       atoms:
         IsNodeTendrlManaged:

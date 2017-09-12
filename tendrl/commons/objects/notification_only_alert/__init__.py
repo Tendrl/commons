@@ -4,9 +4,9 @@ from tendrl.commons import objects
 from tendrl.commons.objects.alert import Alert
 
 
-class UtilizationOnlyAlert(Alert, objects.BaseObject):
+class NotificationOnlyAlert(Alert, objects.BaseObject):
     def __init__(self, *args, **kwargs):
-        super(UtilizationOnlyAlert, self).__init__(
+        super(NotificationOnlyAlert, self).__init__(
             *args,
             **kwargs
         )
@@ -19,4 +19,4 @@ class UtilizationOnlyAlert(Alert, objects.BaseObject):
             # Already in json or None
             pass
         self.value = self.value.format(self.alert_id)
-        return super(UtilizationOnlyAlert, self).render()
+        return super(NotificationOnlyAlert, self).render()
