@@ -4,13 +4,13 @@ from tendrl.commons.objects.alert import Alert
 from tendrl.commons import objects
 
 
-class NodeAlert(Alert, objects.BaseObject):
+class SdsNativeAlert(Alert, objects.BaseObject):
     def __init__(self, *args, **kwargs):
-        super(NodeAlert, self).__init__(
+        super(SdsNativeAlert, self).__init__(
             *args,
             **kwargs
         )
-        self.value = 'alerting/nodes/{0}/{1}'
+        self.value = 'alerting/notify/{0}'
 
     def render(self):
         try:
@@ -18,5 +18,5 @@ class NodeAlert(Alert, objects.BaseObject):
         except(TypeError, ValueError):
             # Already in json or None
             pass
-        self.value = self.value.format(self.node_id, self.alert_id)
-        return super(NodeAlert, self).render()
+        self.value = self.value.format(self.alert_id)
+        return super(SdsNativeAlert, self).render()
