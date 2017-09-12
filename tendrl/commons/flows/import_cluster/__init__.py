@@ -13,9 +13,6 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
         if "Node[]" not in self.parameters:
             integration_id = self.parameters['TendrlContext.integration_id']
-            _cluster = NS.tendrl.objects.Cluster(
-                    integration_id=NS.tendrl_context.integration_id
-                ).load()
             _cluster_import_status = "clusters/%s/import_status" % integration_id
             _cluster_import_job_id = "clusters/%s/import_job_id" % integration_id
             
@@ -26,14 +23,16 @@ class ImportCluster(flows.BaseFlow):
             except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
                 pass
             
-            try:
-
-                NS._int.wclient.write(_cluster_import_status, "in_progress", prevValue="None")
-                NS._int.wclient.write(_cluster_import_job_id, self.job_id, prevValue="None")
-                
-            except etcd.EtcdAlreadyExist:
+            _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+            if _cluster.import_job_id is not None or _cluster.import_status in ["in_progress", "done", "failed"]:
                 raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id))
-                         
+                
+            _cluster.import_status = "in_progress"
+            _cluster.import_job_id = self.job_id
+            _cluster.save()
+         
             try:
                 integration_id_index_key = \
                     "indexes/tags/tendrl/integration/%s" % integration_id
