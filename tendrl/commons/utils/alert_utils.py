@@ -33,5 +33,5 @@ def alert_job_status(curr_value, msg, integration_id=None, cluster_name=None):
     logger.log(
         "notice",
         "alerting",
-        {'message': json.dumps(alert), 'notify_only_ui': True}
+        {'message': json.dumps(alert)}
     )
