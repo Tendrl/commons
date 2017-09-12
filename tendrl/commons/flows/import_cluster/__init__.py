@@ -26,8 +26,14 @@ class ImportCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
-            if _cluster.import_job_id is not None or _cluster.import_status in ["in_progress", "done", "failed"]:
-                raise FlowExecutionFailedError("Cluster already being imported by another Job, please wait till the job finishes (job_id: %s) (integration_id: %s) " % (_cluster.import_job_id, _cluster.integration_id))
+            if (_cluster.import_job_id  is not None and _cluster.import_job_id != "") \
+                or _cluster.import_status in ["in_progress", "done", "failed"]:
+                raise FlowExecutionFailedError(
+                    "Cluster already being imported by another Job, please wait till "
+                    "the job finishes (job_id: %s) (integration_id: %s) " % (
+                        _cluster.import_job_id, _cluster.integration_id
+                    )
+                )
                 
             _cluster.import_status = "in_progress"
             _cluster.import_job_id = self.job_id
