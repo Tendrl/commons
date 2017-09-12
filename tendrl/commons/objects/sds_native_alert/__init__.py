@@ -1,7 +1,7 @@
 import json
 
-from tendrl.commons.objects.alert import Alert
 from tendrl.commons import objects
+from tendrl.commons.objects.alert import Alert
 
 
 class SdsNativeAlert(Alert, objects.BaseObject):
