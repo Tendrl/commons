@@ -759,6 +759,63 @@ namespace.tendrl:
       value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
       list: alerting/clusters/$Alert.tags['integration_id']
       help: "Cluster alerts"
+    NotificationOnlyAlert:
+      attrs:
+        alert_id:
+          help: 'The unique identifier of alert'
+          type: String
+        node_id:
+          help: 'The unique identifier of node on which alert was detected'
+          type: String
+        time_stamp:
+          help: 'The timestamp at which alert was observed'
+          type: String
+        resource:
+          help: 'The resource with problem for which alert was raised'
+          type: String
+        current_value:
+          help: 'The current magnitude(status/utilization) of problem'
+          type: String
+        tags:
+          help: 'Alert specific fields that cannot be generalized for all alerts'
+          type: Dict
+        alert_type:
+          help: 'The type(status/percentage utilization) of alert'
+          type: String
+        severity:
+          help: 'The severity of alert'
+          type: String
+        classification:
+          help: 'node/cluster'
+          type: String
+        significance:
+          help: 'The significance of notifying alert'
+          type: String
+        ackedby:
+          help: 'Entity/person acking the alert'
+          type: String
+        acked:
+          help: 'Indication of whether alert is acked or not'
+          type: Boolean
+        ack_comment:
+          help: 'Users comments for acking this alert'
+          type: List
+        acked_at:
+          help: 'Time at which the alert was acked'
+          type: String
+        pid:
+          help: 'The id of process raising the alert'
+          type: String
+        source:
+          help: 'The process raising the alert'
+          type: String
+        delivered:
+          help: 'Delivery detials by notifier'
+          type: Dict
+      enabled: true
+      value: alerting/notify/$Alert.alert_id
+      list: alerting/notify
+      help: "notification only alert"
     Node:
       atoms:
         IsNodeTendrlManaged:

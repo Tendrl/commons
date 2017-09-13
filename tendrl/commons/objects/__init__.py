@@ -76,7 +76,8 @@ class BaseObject(object):
     def save(self, update=True, ttl=None):
         self.render()
         if "Message" not in self.__class__.__name__:
-            # If local object.hash is equal to central_store object.hash, return
+            # If local object.hash is equal to
+            # central_store object.hash, return
             if self.hash_compare_with_central_store(ttl=ttl):
                 return
         if update:
@@ -164,7 +165,8 @@ class BaseObject(object):
 
     def load(self):
         if "Message" not in self.__class__.__name__:
-            # If local object.hash is equal to central_store object.hash, return
+            # If local object.hash is equal to
+            # central_store object.hash, return
             if self.hash_compare_with_central_store():
                 return self
 
@@ -311,7 +313,7 @@ class BaseObject(object):
         _obj_str = "".join(sorted(self.json))
         self.hash = hashlib.md5(_obj_str).hexdigest()
         return self.hash
-    
+
     def hash_compare_with_central_store(self, ttl=None):
         self.render()
         try:
@@ -336,7 +338,7 @@ class BaseObject(object):
         except TypeError:
             # no hash for this object, save the current hash as is
             return False
-        
+
     def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
@@ -346,7 +348,7 @@ class BaseObject(object):
             if type(ex) != etcd.EtcdKeyNotFound:
                 NS._int.reconnect()
                 NS._int.wclient.delete(_hash_key)
-        
+
     def _copy_vars(self):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}

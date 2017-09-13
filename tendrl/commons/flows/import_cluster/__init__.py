@@ -79,5 +79,3 @@ class ImportCluster(flows.BaseFlow):
             _cluster.import_status = "failed"
             _cluster.save()
             raise ex
-
-
