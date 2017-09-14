@@ -106,7 +106,9 @@ class ConfigureMonitoring(objects.BaseAtom):
             "interval": NS.config.data['sync_interval'],
             "interface": self.get_node_interface(NS.node_context.fqdn),
             "etcd_host": NS.config.data['etcd_connection'],
-            "etcd_port": NS.config.data['etcd_port']
+            "etcd_port": NS.config.data['etcd_port'],
+            "etcd_username": NS.config.data['etcd_username'],
+            "etcd_password": NS.config.data['etcd_password']
         }
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
