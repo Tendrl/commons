@@ -251,6 +251,12 @@ class TendrlNS(object):
                 'port': self.current_ns.config.data['etcd_port'],
                 'host': self.current_ns.config.data['etcd_connection'],
                 'allow_reconnect': True}
+            if "etcd_ca_cert_file" in self.current_ns.config.data:
+                # setup etcd client with CA Cert and Client cert
+                pass
+            else:
+                NS._int.etcd_kwargs.update({"username" : self.current_ns.config.data['etcd_username'],
+                                            "password": self.current_ns.config.data['etcd_password']})
 
             logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup central store clients for "
