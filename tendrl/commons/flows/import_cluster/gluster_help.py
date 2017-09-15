@@ -90,6 +90,8 @@ def import_gluster(parameters):
     ]['tags']['tendrl-gluster-integration']
     config_data = {"etcd_port": int(NS.config.data['etcd_port']),
                    "etcd_connection": str(NS.config.data['etcd_connection']),
+                   "etcd_username": "root",
+                   "etcd_password": str(NS.config.data['etcd_password']),
                    "log_cfg_path": (logging_config_file_path +
                                     logging_file_name),
                    "log_level": "DEBUG",
