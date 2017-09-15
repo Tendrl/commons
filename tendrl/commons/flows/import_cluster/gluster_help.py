@@ -90,8 +90,6 @@ def import_gluster(parameters):
     ]['tags']['tendrl-gluster-integration']
     config_data = {"etcd_port": int(NS.config.data['etcd_port']),
                    "etcd_connection": str(NS.config.data['etcd_connection']),
-                   "etcd_username": "root",
-                   "etcd_password": str(NS.config.data['etcd_password']),
                    "log_cfg_path": (logging_config_file_path +
                                     logging_file_name),
                    "log_level": "DEBUG",
@@ -99,6 +97,12 @@ def import_gluster(parameters):
                    "sync_interval": 10,
                    "tags": [gluster_integration_tag]
                    }
+    etcd_username = NS.config.data.get('etcd_username')
+    etcd_password = NS.config.data.get('etcd_password')
+    if etcd_username and str(etcd_username) != "":
+        config_data['etcd_username'] = str(etcd_username)
+    if etcd_password and str(etcd_password) != "":
+        config_data['etcd_password'] = str(etcd_password)
     with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
