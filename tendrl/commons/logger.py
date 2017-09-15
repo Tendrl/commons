@@ -15,17 +15,20 @@ class Logger(object):
 
     def __init__(self, message):
         self.message = message
-        self.push_message()
         if self.message.job_id is not None:
+            self.push_message()
             """ If job_id is present then
             it is considered as operation
             """
             self._logger(self.push_operation())
+        elif self.message.priority == "notice":
+            # push notification
+            self.push_notification()
+            self._logger(self.message.payload["message"])
         else:
+            # push events
+            self.push_message()
             self.push_event()
-            if self.message.priority == "notice":
-                # push notification
-                self.push_notification()
             if "exception_traceback" in message.payload:
                 self._logger("%s - %s: %s" % (
                     self.message.payload["message"],
