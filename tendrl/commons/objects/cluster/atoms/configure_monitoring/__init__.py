@@ -114,7 +114,6 @@ class ConfigureMonitoring(objects.BaseAtom):
             plugin_params.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
                                   "etcd_client_cert_file": NS.config.data['etcd_client_cert_file'],
                                   "etcd_protocol":"https"})
-                                 })
         else:
             if etcd_username and str(etcd_username) != "":
                 plugin_params.update({"etcd_username":NS.config.data['etcd_username'],
