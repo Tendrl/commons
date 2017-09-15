@@ -97,6 +97,12 @@ def import_gluster(parameters):
                    "sync_interval": 10,
                    "tags": [gluster_integration_tag]
                    }
+    etcd_username = NS.config.data.get('etcd_username')
+    etcd_password = NS.config.data.get('etcd_password')
+    if etcd_username and str(etcd_username) != "":
+        config_data['etcd_username'] = str(etcd_username)
+    if etcd_password and str(etcd_password) != "":
+        config_data['etcd_password'] = str(etcd_password)
     with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
