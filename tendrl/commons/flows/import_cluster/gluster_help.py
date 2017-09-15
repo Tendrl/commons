@@ -103,7 +103,6 @@ def import_gluster(parameters):
         config_data.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
                               "etcd_client_cert_file": NS.config.data['etcd_client_cert_file'],
                               "etcd_protocol":"https"})
-                             })
     else:
         if etcd_username and str(etcd_username) != "":
             config_data.update({"etcd_username":str(NS.config.data['etcd_username']),
