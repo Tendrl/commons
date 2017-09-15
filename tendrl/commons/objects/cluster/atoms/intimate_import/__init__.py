@@ -20,6 +20,7 @@ class IntimateImport(objects.BaseAtom):
             "run": "monitoring.flows.NewClusterDashboard",
             "status": "new",
             "parameters": _params,
+            "parent": self.parameters['job_id'],
             "type": "monitoring"
         }
         Job(
