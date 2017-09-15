@@ -249,14 +249,17 @@ class TendrlNS(object):
             NS.config = self.current_ns.config
             NS._int.etcd_kwargs = {
                 'port': self.current_ns.config.data['etcd_port'],
-                'host': self.current_ns.config.data['etcd_connection'],
-                'allow_reconnect': True}
+                'host': self.current_ns.config.data['etcd_connection']
+            }
             if "etcd_ca_cert_file" in self.current_ns.config.data:
                 # setup etcd client with CA Cert and Client cert
-                pass
+                NS._int.etcd_kwargs.update({"ca_cert" : self.current_ns.config.data['etcd_ca_cert_file'],
+                                            "cert": self.current_ns.config.data['etcd_client_cert_file']
+                                            "protocol":"https"})
             else:
-                NS._int.etcd_kwargs.update({"username" : self.current_ns.config.data['etcd_username'],
-                                            "password": self.current_ns.config.data['etcd_password']})
+                if "etcd_username" in self.current_ns.config.data:
+                    NS._int.etcd_kwargs.update({"username":self.current_ns.config.data['etcd_username'],
+                                                "password":self.current_ns.config.data['etcd_password']})
 
             logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Setup central store clients for "
