@@ -106,10 +106,21 @@ class ConfigureMonitoring(objects.BaseAtom):
             "interval": NS.config.data['sync_interval'],
             "interface": self.get_node_interface(NS.node_context.fqdn),
             "etcd_host": NS.config.data['etcd_connection'],
-            "etcd_port": NS.config.data['etcd_port'],
-            "etcd_username": NS.config.data['etcd_username'],
-            "etcd_password": NS.config.data['etcd_password']
+            "etcd_port": NS.config.data['etcd_port']
         }
+        etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
+        etcd_username = NS.config.data.get("etcd_username")
+        if etcd_ca_cert_file and str(etcd_ca_cert_file) != "":
+            plugin_params.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
+                                  "etcd_client_cert_file": NS.config.data['etcd_client_cert_file'],
+                                  "etcd_protocol":"https"})
+                                 })
+        else:
+            if etcd_username and str(etcd_username) != "":
+                plugin_params.update({"etcd_username":NS.config.data['etcd_username'],
+                                      "etcd_password":NS.config.data['etcd_password']
+                                     })
+                
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
                 node_plugin,
