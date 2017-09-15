@@ -15,13 +15,19 @@ class Logger(object):
 
     def __init__(self, message):
         self.message = message
-        self.push_message()
         if self.message.job_id is not None:
+            self.push_message()
             """ If job_id is present then
             it is considered as operation
             """
             self._logger(self.push_operation())
+        elif self.message.priority == "notice":
+            # push notification
+            self.push_notification()
+            self._logger(self.message.payload["message"])
         else:
+            # push events
+            self.push_message()
             self.push_event()
             if "exception_traceback" in message.payload:
                 self._logger("%s - %s: %s" % (
@@ -95,6 +101,22 @@ class Logger(object):
                 parent_id=self.message.parent_id,
                 caller=self.message.caller
             ).save()
+
+    def push_notification(self):
+        # storing notification message in one more directory
+        NS.node_agent.objects.NotificationMessage(
+            message_id=self.message.message_id,
+            timestamp=self.message.timestamp,
+            priority=self.message.priority,
+            publisher=self.message.publisher,
+            node_id=self.message.node_id,
+            payload=self.message.payload,
+            cluster_id=self.message.cluster_id,
+            job_id=self.message.job_id,
+            flow_id=self.message.flow_id,
+            parent_id=self.message.parent_id,
+            caller=self.message.caller
+        ).save()
 
     def _logger(self, log_message):
         # Invalid message
