@@ -256,7 +256,7 @@ class TendrlNS(object):
             if etcd_ca_cert_file and str(etcd_ca_cert_file) != "":
                 # setup etcd client with CA Cert and Client cert
                 NS._int.etcd_kwargs.update({"ca_cert" : self.current_ns.config.data['etcd_ca_cert_file'],
-                                            "cert": self.current_ns.config.data['etcd_client_cert_file']
+                                            "cert": self.current_ns.config.data['etcd_client_cert_file'],
                                             "protocol":"https"})
             else:
                 if etcd_username and str(etcd_username) != "":
