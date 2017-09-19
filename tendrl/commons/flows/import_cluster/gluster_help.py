@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import pkg_resources
@@ -108,8 +109,9 @@ def import_gluster(parameters):
             config_data.update({"etcd_username":str(NS.config.data['etcd_username']),
                                   "etcd_password":str(NS.config.data['etcd_password'])
                                  })
-        
-    with open("/etc/tendrl/gluster-integration/gluster-integration.conf.yaml",
+    
+    _gluster_integration_conf_file_path = "/etc/tendrl/gluster-integration/gluster-integration.conf.yaml"
+    with open(_gluster_integration_conf_file_path,
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
     Event(
@@ -123,5 +125,5 @@ def import_gluster(parameters):
                      }
         )
     )
-
+    os.chmod(_gluster_integration_conf_file_path, 0o640)
     subprocess.Popen(_cmd.split())
