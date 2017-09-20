@@ -1,3 +1,4 @@
+import gevent
 import re
 import uuid
 
@@ -123,18 +124,51 @@ class ImportCluster(objects.BaseAtom):
                 )
             import_gluster(self.parameters)
 
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Waiting for participant nodes %s to be "
-                        "imported %s" % (node_list, integration_id)
-                    }
+            if len(node_list) > 1:
+                Event(
+                    Message(
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id'],
+                        priority="info",
+                        publisher=NS.publisher_id,
+                        payload={
+                            "message": "Waiting for participant nodes %s to be "
+                            "imported %s" % (node_list, integration_id)
+                        }
+                    )
                 )
-            )
+                parent_job = Job(job_id=self.parameters['job_id']).load()
+                loop_count = 0
+                # Wait for (no of nodes) * 1 minutes for import to complete
+                wait_count = (len(node_list) - 1) * 6
+                while True:
+                    if loop_count >= wait_count:
+                        Event(
+                            Message(
+                                job_id=self.parameters['job_id'],
+                                flow_id=self.parameters['flow_id'],
+                                priority="info",
+                                publisher=NS.publisher_id,
+                                payload={
+                                    "message": "Import jobs not yet complete "
+                                    "on all nodes. Timing out. (%s, %s)" %
+                                    (str(node_list), integration_id)
+                                }
+                            )
+                        )
+                        return False
+                    gevent.sleep(10)
+                    finished = True
+                    for child_job_id in parent_job.children:
+                        child_job = Job(job_id=child_job_id).load()
+                        if child_job.status != "finished":
+                            finished = False
+                            break
+                    if not finished:
+                        loop_count += 1
+                        continue
+                    else:
+                        break
 
         except Exception as ex:
             # For traceback
