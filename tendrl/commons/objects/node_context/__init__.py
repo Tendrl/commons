@@ -11,6 +11,8 @@ from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 
 from tendrl.commons import objects
+from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import time_utils
 
 
 NODE_ID = None
@@ -20,6 +22,7 @@ class NodeContext(objects.BaseObject):
 
     def __init__(self, node_id=None, fqdn=None,
                  tags=None, status=None, sync_status=None, last_sync=None,
+                 updated_at=None,
                  *args, **kwargs):
         super(NodeContext, self).__init__(*args, **kwargs)
         self.node_id = node_id or self._get_node_id() or self._create_node_id()
@@ -45,6 +48,7 @@ class NodeContext(objects.BaseObject):
         self.status = status or "UP"
         self.sync_status = sync_status
         self.last_sync = last_sync
+        self.updated_at = updated_at or str(time_utils.now())
         self.value = 'nodes/{0}/NodeContext'
 
     def _create_node_id(self):
@@ -85,3 +89,9 @@ class NodeContext(objects.BaseObject):
     def render(self):
         self.value = self.value.format(self.node_id or NS.node_context.node_id)
         return super(NodeContext, self).render()
+
+    def save(self, update=True, ttl=None):
+        super(NodeContext, self).save(update)
+        status = self.value + "/status"
+        if ttl:
+            etcd_utils.refresh(status, ttl)
