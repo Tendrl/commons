@@ -164,11 +164,11 @@ class ImportCluster(objects.BaseAtom):
                         if child_job.status != "finished":
                             finished = False
                             break
-                    if not finished:
+                    if finished:
+                        break
+                    else:
                         loop_count += 1
                         continue
-                    else:
-                        break
 
         except Exception as ex:
             # For traceback
