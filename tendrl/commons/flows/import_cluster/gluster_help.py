@@ -99,16 +99,13 @@ def import_gluster(parameters):
                    "tags": [gluster_integration_tag]
                    }
     etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
-    etcd_username = NS.config.data.get("etcd_username")
-    if etcd_ca_cert_file and str(etcd_ca_cert_file) != "":
+    etcd_cert_file = self.current_ns.config.data.get("etcd_cert_file")
+    etcd_key_file = self.current_ns.config.data.get("etcd_key_file")
+    if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" and etcd_cert_file and str(etcd_cert_file) != ""
+        and etcd_key_file and str(etcd_key_file) != "":
         config_data.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
-                              "etcd_client_cert_file": NS.config.data['etcd_client_cert_file'],
-                              "etcd_protocol":"https"})
-    else:
-        if etcd_username and str(etcd_username) != "":
-            config_data.update({"etcd_username":str(NS.config.data['etcd_username']),
-                                  "etcd_password":str(NS.config.data['etcd_password'])
-                                 })
+                              "etcd_cert_file": NS.config.data['etcd_cert_file'],
+                              "etcd_key_file": NS.config.data['etcd_key_file'],})
     
     _gluster_integration_conf_file_path = "/etc/tendrl/gluster-integration/gluster-integration.conf.yaml"
     with open(_gluster_integration_conf_file_path,
