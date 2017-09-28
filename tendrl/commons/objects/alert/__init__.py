@@ -17,7 +17,7 @@ class Alert(objects.BaseObject):
         time_stamp=None,
         resource=None,
         current_value=None,
-        tags=None,
+        tags={},
         alert_type=None,
         severity=None,
         classification=None,
@@ -56,7 +56,7 @@ class Alert(objects.BaseObject):
     def render(self):
         self.value = self.value.format(self.alert_id)
         # To read tags using loads method
-        if self.tags and type(self.tags) != str:
+        if type(self.tags) != str:
             self.tags = json.dumps(self.tags)
         return super(Alert, self).render()
 
@@ -72,7 +72,7 @@ class AlertUtils(object):
     def update(self, new_alert, existing_alert):
         time_stamp = existing_alert.time_stamp
         if (
-            alert_severity_map[new_alert.severity] < alert_severity_map[
+            alert_severity_map[new_alert.severity] <= alert_severity_map[
                 existing_alert.severity] and
             alert_severity_map[new_alert.severity] == alert_severity_map[
                 'INFO']
