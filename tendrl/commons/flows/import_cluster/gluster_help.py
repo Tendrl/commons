@@ -99,8 +99,8 @@ def import_gluster(parameters):
                    "tags": [gluster_integration_tag]
                    }
     etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
-    etcd_cert_file = self.current_ns.config.data.get("etcd_cert_file")
-    etcd_key_file = self.current_ns.config.data.get("etcd_key_file")
+    etcd_cert_file = NS.config.data.get("etcd_cert_file")
+    etcd_key_file = NS.config.data.get("etcd_key_file")
     if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" and etcd_cert_file and str(etcd_cert_file) != ""
         and etcd_key_file and str(etcd_key_file) != "":
         config_data.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
