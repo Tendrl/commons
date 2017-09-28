@@ -109,16 +109,13 @@ class ConfigureMonitoring(objects.BaseAtom):
             "etcd_port": NS.config.data['etcd_port']
         }
         etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
-        etcd_username = NS.config.data.get("etcd_username")
-        if etcd_ca_cert_file and str(etcd_ca_cert_file) != "":
+        etcd_cert_file = NS.config.data.get("etcd_cert_file")
+        etcd_key_file = NS.config.data.get("etcd_key_file")
+        if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" and etcd_cert_file and str(etcd_cert_file) != ""
+            and etcd_key_file and str(etcd_key_file) != "":
             plugin_params.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
-                                  "etcd_client_cert_file": NS.config.data['etcd_client_cert_file'],
-                                  "etcd_protocol":"https"})
-        else:
-            if etcd_username and str(etcd_username) != "":
-                plugin_params.update({"etcd_username":NS.config.data['etcd_username'],
-                                      "etcd_password":NS.config.data['etcd_password']
-                                     })
+                                  "etcd_cert_file": NS.config.data['etcd_cert_file'],
+                                  "etcd_key_file": NS.config.data['etcd_key_file']})
                 
         for node_plugin in NODE_PLUGINS:
             plugin_config_success &= self._configure_plugin(
