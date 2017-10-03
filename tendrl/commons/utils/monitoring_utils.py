@@ -28,7 +28,7 @@ def update_dashboard(res_name, res_type, integration_id, action):
     return _job_id
 
 
-def update_graphite(res_name, res_type, integration_id, action):
+def delete_resource_from_graphite(res_name, res_type, integration_id, action):
     _job_id = str(uuid.uuid4())
     _params = {
         "TendrlContext.integration_id": NS.tendrl_context.integration_id,
@@ -39,7 +39,7 @@ def update_graphite(res_name, res_type, integration_id, action):
     }
     _job_payload = {
         "tags": ["tendrl/integration/monitoring"],
-        "run": "monitoring.flows.UpdateGraphite",
+        "run": "monitoring.flows.DeleteResourceFromGraphite",
         "status": "new",
         "parameters": _params,
         "type": "monitoring"
