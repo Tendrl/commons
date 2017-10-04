@@ -111,7 +111,8 @@ class ConfigureMonitoring(objects.BaseAtom):
         etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
         etcd_cert_file = NS.config.data.get("etcd_cert_file")
         etcd_key_file = NS.config.data.get("etcd_key_file")
-        if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" and etcd_cert_file and str(etcd_cert_file) != ""
+        if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" \
+            and etcd_cert_file and str(etcd_cert_file) != "" \
             and etcd_key_file and str(etcd_key_file) != "":
             plugin_params.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
                                   "etcd_cert_file": NS.config.data['etcd_cert_file'],

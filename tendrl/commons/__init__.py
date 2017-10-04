@@ -260,7 +260,7 @@ class TendrlNS(object):
                 # setup etcd client with CA Cert and Client cert
                 NS._int.etcd_kwargs.update({"ca_cert" : self.current_ns.config.data['etcd_ca_cert_file'],
                                             "cert": (self.current_ns.config.data['etcd_cert_file'],
-                                                     self.current_ns.config.data['etcd_key_file'])
+                                                     self.current_ns.config.data['etcd_key_file']),
                                             "protocol":"https"})
 
             logger.log("debug", NS.get("publisher_id", None),
