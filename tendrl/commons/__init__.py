@@ -254,7 +254,8 @@ class TendrlNS(object):
             etcd_ca_cert_file = self.current_ns.config.data.get("etcd_ca_cert_file")
             etcd_cert_file = self.current_ns.config.data.get("etcd_cert_file")
             etcd_key_file = self.current_ns.config.data.get("etcd_key_file")
-            if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" and etcd_cert_file and str(etcd_cert_file) != ""
+            if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" \
+                and etcd_cert_file and str(etcd_cert_file) != "" \
                 and etcd_key_file and str(etcd_key_file) != "":
                 # setup etcd client with CA Cert and Client cert
                 NS._int.etcd_kwargs.update({"ca_cert" : self.current_ns.config.data['etcd_ca_cert_file'],
