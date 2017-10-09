@@ -1,6 +1,6 @@
 import etcd
-import gevent
 
+import time
 import uuid
 
 from tendrl.commons.event import Event
@@ -46,7 +46,7 @@ class ExpandCluster(flows.BaseFlow):
                     )
 
             while True:
-                gevent.sleep(3)
+                time.sleep(3)
                 all_status = {}
                 for job_id in ssh_job_ids:
                     all_status[job_id] = NS._int.client.read(
@@ -122,7 +122,7 @@ class ExpandCluster(flows.BaseFlow):
 
             # Wait till detected cluster in populated for nodes
             while True:
-                gevent.sleep(3)
+                time.sleep(3)
                 all_status = []
                 detected_cluster = ""
                 different_cluster_id = False

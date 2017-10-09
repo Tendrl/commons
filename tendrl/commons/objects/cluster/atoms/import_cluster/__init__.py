@@ -1,5 +1,5 @@
-import gevent
 import re
+import time
 import uuid
 
 from tendrl.commons.event import Event
@@ -157,7 +157,7 @@ class ImportCluster(objects.BaseAtom):
                             )
                         )
                         return False
-                    gevent.sleep(10)
+                    time.sleep(10)
                     finished = True
                     for child_job_id in parent_job.children:
                         child_job = Job(job_id=child_job_id).load()

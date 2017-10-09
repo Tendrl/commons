@@ -1,10 +1,11 @@
 import datetime
 import json
+import threading
+import time
 import traceback
 
 
 import etcd
-import gevent.event
 from pytz import utc
 
 
@@ -18,13 +19,13 @@ from tendrl.commons.utils import alert_utils
 from tendrl.commons.utils import time_utils
 
 
-class JobConsumerThread(gevent.greenlet.Greenlet):
+class JobConsumerThread(threading.Thread):
 
     def __init__(self):
         super(JobConsumerThread, self).__init__()
-        self._complete = gevent.event.Event()
+        self._complete = threading.Event()
 
-    def _run(self):
+    def run(self):
         Event(
             Message(
                 priority="debug",
@@ -38,14 +39,14 @@ class JobConsumerThread(gevent.greenlet.Greenlet):
             if "tendrl/monitor" in NS.node_context.tags:
                 _job_sync_interval = 3
 
-            gevent.sleep(_job_sync_interval)
+            time.sleep(_job_sync_interval)
             try:
                 jobs = NS._int.client.read("/queue")
             except etcd.EtcdKeyNotFound:
                 continue
 
             for job in jobs.leaves:
-                gevent.spawn(process_job, job)
+                threading.Thread(target=process_job, args=(job,)).start()
 
     def stop(self):
         self._complete.set()

@@ -1,22 +1,21 @@
 import abc
+import threading
 
-import gevent.event
-import gevent.greenlet
 import six
 
 
 @six.add_metaclass(abc.ABCMeta)
-class StateSyncThread(gevent.greenlet.Greenlet):
+class StateSyncThread(threading.Thread):
     def __init__(self):
         super(StateSyncThread, self).__init__()
 
-        self._complete = gevent.event.Event()
+        self._complete = threading.Event()
 
     def stop(self):
         self._complete.set()
 
     @abc.abstractmethod
-    def _run(self):
+    def run(self):
         raise NotImplementedError(
             'define the function run to use this class'
         )

@@ -1,8 +1,6 @@
 import struct
 
-from gevent import socket
-from gevent.socket import error as socket_error
-from gevent.socket import timeout as socket_timeout
+import socket
 import sys
 import traceback
 
@@ -36,7 +34,7 @@ class Event(object):
             json_str = Message.to_json(message)
             self.sock.connect(self.socket_path)
             self._pack_and_send(json_str)
-        except (socket_error, socket_timeout, TypeError):
+        except (socket.error, socket.timeout, TypeError):
             msg = Message.to_json(message)
             exc_type, exc_value, exc_tb = sys.exc_info()
             traceback.print_exception(

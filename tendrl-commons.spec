@@ -21,7 +21,6 @@ Requires: python-six
 Requires: python2-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
-Requires: python-gevent
 
 
 %description
