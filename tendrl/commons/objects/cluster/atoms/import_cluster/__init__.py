@@ -138,11 +138,11 @@ class ImportCluster(objects.BaseAtom):
                         }
                     )
                 )
-                parent_job = Job(job_id=self.parameters['job_id']).load()
                 loop_count = 0
-                # Wait for (no of nodes) * 2 minutes for import to complete
-                wait_count = (len(node_list) - 1) * 12
+                # Wait for (no of nodes) * 6 minutes for import to complete
+                wait_count = (len(node_list) - 1) * 36
                 while True:
+                    parent_job = Job(job_id=self.parameters['job_id']).load()
                     if loop_count >= wait_count:
                         Event(
                             Message(
