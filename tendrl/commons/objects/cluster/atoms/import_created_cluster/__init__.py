@@ -1,6 +1,9 @@
-import etcd
-import gevent
+import time
 import uuid
+
+
+import etcd
+
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
@@ -33,7 +36,7 @@ class ImportCreatedCluster(objects.BaseAtom):
         )
 
         while True:
-            gevent.sleep(3)
+            time.sleep(3)
             all_status = []
             for node in self.parameters['Node[]']:
                 try:

@@ -1,6 +1,9 @@
-import etcd
-import gevent
 import json
+import time
+
+
+import etcd
+
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -240,7 +243,7 @@ def wait_for_task(task_id):
     plugin = NS.ceph_provisioner.get_plugin()
     resp = {}
     while count < 90:
-        gevent.sleep(10)
+        time.sleep(10)
         resp = plugin.task_status(task_id)
         if resp:
             if resp["ended"]:

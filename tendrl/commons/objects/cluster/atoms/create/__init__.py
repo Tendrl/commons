@@ -1,4 +1,4 @@
-import gevent
+import time
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.create_cluster.ceph_help import create_ceph
@@ -33,7 +33,7 @@ class Create(objects.BaseAtom):
                     )
 
             while True:
-                gevent.sleep(3)
+                time.sleep(3)
                 all_status = {}
                 for job_id in ssh_job_ids:
                     # noinspection PyUnresolvedReferences
