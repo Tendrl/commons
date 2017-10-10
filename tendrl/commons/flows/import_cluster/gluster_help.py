@@ -104,11 +104,14 @@ def import_gluster(parameters):
     if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" \
         and etcd_cert_file and str(etcd_cert_file) != "" \
         and etcd_key_file and str(etcd_key_file) != "":
-        config_data.update({"etcd_ca_cert_file" : NS.config.data['etcd_ca_cert_file'],
-                              "etcd_cert_file": NS.config.data['etcd_cert_file'],
-                              "etcd_key_file": NS.config.data['etcd_key_file'],})
-    
-    _gluster_integration_conf_file_path = "/etc/tendrl/gluster-integration/gluster-integration.conf.yaml"
+        config_data.update({
+            "etcd_ca_cert_file": NS.config.data['etcd_ca_cert_file'],
+            "etcd_cert_file": NS.config.data['etcd_cert_file'],
+            "etcd_key_file": NS.config.data['etcd_key_file']
+        })
+
+    _gluster_integration_conf_file_path = \
+        "/etc/tendrl/gluster-integration/gluster-integration.conf.yaml"
     with open(_gluster_integration_conf_file_path,
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)

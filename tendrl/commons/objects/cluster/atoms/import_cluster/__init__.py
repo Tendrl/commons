@@ -132,7 +132,8 @@ class ImportCluster(objects.BaseAtom):
                         priority="info",
                         publisher=NS.publisher_id,
                         payload={
-                            "message": "Waiting for participant nodes %s to be "
+                            "message": "Waiting for participant nodes %s to "
+                                       "be "
                             "imported %s" % (node_list, integration_id)
                         }
                     )

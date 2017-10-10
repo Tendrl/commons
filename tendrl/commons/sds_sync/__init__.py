@@ -10,6 +10,8 @@ class StateSyncThread(threading.Thread):
         super(StateSyncThread, self).__init__()
 
         self._complete = threading.Event()
+        self.daemon = True
+        self.name = "State sync thread"
 
     def stop(self):
         self._complete.set()
