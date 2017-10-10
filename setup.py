@@ -117,7 +117,6 @@ setup(
         "python-etcd",
         "python-dateutil",
         "ruamel.yaml",
-        "gevent>=1.0",
         "maps",
         "pytz",
         "six"
