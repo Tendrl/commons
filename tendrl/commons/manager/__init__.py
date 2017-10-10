@@ -46,17 +46,3 @@ class Manager(object):
         if self._sds_sync_thread is not None:
             self._sds_sync_thread.start()
         self._job_consumer_thread.start()
-
-    def join(self):
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": "%s joining" % self.__class__.__name__}
-            )
-        )
-        if self._message_handler_thread is not None:
-            self._message_handler_thread.join()
-        self._job_consumer_thread.join()
-        if self._sds_sync_thread is not None:
-            self._sds_sync_thread.join()
