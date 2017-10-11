@@ -21,6 +21,24 @@ namespace.tendrl:
     ceph-provisioner: "provisioner/ceph"
     ceph-installer: "provisioner/ceph"
   flows:
+    ConfigureMonitoring:
+      tags:
+        - "tendrl/node_$NodeContext.node_id"
+      atoms:
+        - tendrl.objects.Cluster.atoms.ConfigureMonitoring
+      help: "(Re)Configure Monitoring"
+      enabled: true
+      inputs:
+        mandatory:
+          - TendrlContext.integration_id
+      pre_run:
+        - tendrl.objects.Cluster.atoms.CheckClusterAvailable
+      post_run:
+        - tendrl.objects.Service.atoms.CheckServiceStatus
+      run: tendrl.flows.ConfigureMonitoring
+      type: Create
+      uuid: 6f94a48a-05d7-408m-b400-e27827q4eacd
+      version: 1
     CreateCluster:
       tags: 
         - "provisioner/$TendrlContext.sds_name"
