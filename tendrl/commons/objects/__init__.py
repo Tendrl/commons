@@ -6,6 +6,7 @@ import hashlib
 import json
 import six
 import sys
+import threading
 import types
 
 from tendrl.commons.event import Event
@@ -16,9 +17,18 @@ from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import time_utils
 
 
+def thread_safe(thread_unsafe_method):
+    def thread_safe_method(self, *args, **kws):
+        with self._lock:
+            return thread_unsafe_method(self, *args, **kws)
+
+    return thread_safe_method
+
+
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
     def __init__(self, *args, **kwargs):
+        self.o_lock = threading.RLock()
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
@@ -73,6 +83,7 @@ class BaseObject(object):
                 sys.stdout.write(msg)
             raise Exception(msg)
 
+    @thread_safe
     def save(self, update=True, ttl=None):
         self.render()
         if "Message" not in self.__class__.__name__:
@@ -146,6 +157,7 @@ class BaseObject(object):
         if ttl:
             etcd_utils.refresh(self.value, ttl)
 
+    @thread_safe
     def load_all(self):
         self.render()
         value = '/'.join(self.value.split('/')[:-1])
@@ -163,6 +175,7 @@ class BaseObject(object):
             ins.append(self.load())
         return ins
 
+    @thread_safe
     def load(self):
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
@@ -238,6 +251,7 @@ class BaseObject(object):
             setattr(_copy, item['name'], value)
         return _copy
 
+    @thread_safe
     def exists(self):
         self.render()
         _exists = False
@@ -251,6 +265,7 @@ class BaseObject(object):
                 _exists = True
         return _exists
 
+    @thread_safe
     def _map_vars_to_tendrl_fields(self):
         _fields = {}
         for attr, value in vars(self).iteritems():
@@ -267,6 +282,7 @@ class BaseObject(object):
 
         return _fields
 
+    @thread_safe
     def render(self):
         """Renders the instance into a structure for central store based on
 
@@ -289,6 +305,7 @@ class BaseObject(object):
         return rendered
 
     @property
+    @thread_safe
     def json(self):
         """Dumps the entire object as a json structure.
 
@@ -306,6 +323,7 @@ class BaseObject(object):
 
         return json.dumps(data)
 
+    @thread_safe
     def _hash(self):
         self.updated_at = None
 
@@ -314,6 +332,7 @@ class BaseObject(object):
         self.hash = hashlib.md5(_obj_str).hexdigest()
         return self.hash
 
+    @thread_safe
     def hash_compare_with_central_store(self, ttl=None):
         self.render()
         try:
@@ -339,6 +358,7 @@ class BaseObject(object):
             # no hash for this object, save the current hash as is
             return False
 
+    @thread_safe
     def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
@@ -349,6 +369,7 @@ class BaseObject(object):
                 NS._int.reconnect()
                 NS._int.wclient.delete(_hash_key)
 
+    @thread_safe
     def _copy_vars(self):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
