@@ -28,7 +28,7 @@ def thread_safe(thread_unsafe_method):
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
     def __init__(self, *args, **kwargs):
-        self.o_lock = threading.RLock()
+        self._lock = threading.RLock()
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
