@@ -48,7 +48,10 @@ class JobConsumerThread(threading.Thread):
                 continue
 
             for job in jobs.leaves:
-                process_job(job)
+                _job_thread = threading.Thread(target=process_job, args=(job,))
+                _job_thread.daemon = True
+                _job_thread.start()
+                _job_thread.join()
 
     def stop(self):
         self._complete.set()
