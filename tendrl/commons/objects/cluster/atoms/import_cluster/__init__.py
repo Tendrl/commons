@@ -6,6 +6,7 @@ from tendrl.commons.event import Event
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
+from tendrl.commons.flows.import_cluster.gluster_help import update_dashboard
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.message import Message
 from tendrl.commons import objects
@@ -186,6 +187,7 @@ class ImportCluster(objects.BaseAtom):
             # raising exception to mark job as failed
             raise ex
         finally:
+            update_dashboard(self.parameters)
             # release lock
             create_cluster_utils.release_node_lock(self.parameters)
 
