@@ -1,6 +1,6 @@
 Name: tendrl-commons
 Version: 1.5.3
-Release: 2%{?dist}
+Release: 1%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
 Source0: %{name}-%{version}.tar.gz
@@ -46,9 +46,6 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
-* Fri Oct 13 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.3-2
-- BugFixes for tendrl-commons v1.5.3
-
 * Thu Oct 12 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.3-1
 - Release tendrl-commons v1.5.3
 
