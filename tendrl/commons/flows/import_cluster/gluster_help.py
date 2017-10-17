@@ -56,7 +56,23 @@ def import_gluster(parameters):
             **attributes
         )
     try:
-        runner.run()
+        out, err = runner.run()
+        if out['rc'] != 0:
+            Event(
+                Message(
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id'],
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Could not install "
+                                   "tendrl-gluster-integration on Node %s"
+                                   "Error: %s" %
+                                   (NS.node_context.node_id, out['msg'])
+                    }
+                )
+            )
+            return False
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
         Event(
             Message(
