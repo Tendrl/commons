@@ -147,6 +147,7 @@ def import_gluster(parameters):
     )
     os.chmod(_gluster_integration_conf_file_path, 0o640)
     subprocess.Popen(_cmd.split())
+    return True
 
 
 def update_dashboard(parameters):
