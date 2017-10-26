@@ -123,7 +123,8 @@ class ImportCluster(objects.BaseAtom):
                         reqd_gluster_ver
                     )
                 )
-            import_gluster(self.parameters)
+            if not import_gluster(self.parameters):
+                return False
 
             if len(node_list) > 1:
                 Event(
