@@ -410,7 +410,8 @@ class TendrlNS(object):
                               obj_value=raw_obj['value'],
                               atoms=raw_obj.get('atoms', {}),
                               flows=raw_obj.get('flows', {}),
-                              help=raw_obj['help']
+                              help=raw_obj['help'],
+                              relationship=raw_obj.get('relationship', {})
                               )
 
     def get_obj_flow_definition(self, obj_name, flow_name):

@@ -111,17 +111,17 @@ class AlertUtils(object):
             if 'integration_id' in alert2.tags:
                 return False
         # grafana gives cluster id for all
-        if alert1.node_id:
-            if alert2.node_id:
+        if "node" in alert1.classification and alert1.node_id:
+            if "node" in alert2.classification and alert2.node_id:
                 if alert1.node_id != alert2.node_id:
                     return False
             else:
                 return False
-        elif alert2.node_id:
+        elif "node" in alert2.classification and alert2.node_id:
             return False
         if alert1.alert_type != alert2.alert_type:
             return False
-        if alert1.classification != alert2.classification:
+        if set(alert1.classification) != set(alert2.classification):
             return False
         return True
 
@@ -135,7 +135,7 @@ class AlertUtils(object):
             alert_json['tags'],
             alert_json['alert_type'],
             alert_json['severity'],
-            alert_json['classification'],
+            alert_json.get('classification', []),
             alert_json.get('significance', ''),
             alert_json.get('ackedby', ''),
             alert_json.get('acked', False),

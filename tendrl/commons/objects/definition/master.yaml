@@ -633,8 +633,8 @@ namespace.tendrl:
           help: 'The severity of alert'
           type: String
         classification:
-          help: 'node/cluster'
-          type: String
+          help: 'node or cluster or both'
+          type: List
         significance:
           help: 'The significance of notifying alert'
           type: String
@@ -690,8 +690,8 @@ namespace.tendrl:
           help: 'The severity of alert'
           type: String
         classification:
-          help: 'node/cluster'
-          type: String
+          help: 'node or cluster or both'
+          type: List
         significance:
           help: 'The significance of notifying alert'
           type: String
@@ -716,6 +716,13 @@ namespace.tendrl:
         delivered:
           help: 'Delivery detials by notifier'
           type: Dict
+      relationship:
+        utilization:
+          - cpu_utilization
+          - memory_utilization
+          - swap_utilization
+        status:
+          - brick_status
       enabled: true
       value: alerting/nodes/$Alert.node_id/$Alert.alert_id
       list: alerting/nodes/$Alert.node_id
@@ -747,8 +754,8 @@ namespace.tendrl:
           help: 'The severity of alert'
           type: String
         classification:
-          help: 'node/cluster'
-          type: String
+          help: 'node or cluster or both'
+          type: List
         significance:
           help: 'The significance of notifying alert'
           type: String
@@ -773,6 +780,22 @@ namespace.tendrl:
         delivered:
           help: 'Delivery detials by notifier'
           type: Dict
+      relationship:
+        utilization:
+          - volume_utilization
+          - brick_utilization
+          - cluster_utilization
+        status:
+          - volume_status
+          - brick_status
+          - peer_status
+          - rebalance_status_update_failed
+          - georep_checkpoint_completed
+          - quorum
+          - svc_connecion
+          - ec_min_bricks_up
+          - afr_quorum_state
+          - afr_subvol_state
       enabled: true
       value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
       list: alerting/clusters/$Alert.tags['integration_id']
@@ -804,8 +827,8 @@ namespace.tendrl:
           help: 'The severity of alert'
           type: String
         classification:
-          help: 'node/cluster'
-          type: String
+          help: 'node or cluster or both'
+          type: List
         significance:
           help: 'The significance of notifying alert'
           type: String
