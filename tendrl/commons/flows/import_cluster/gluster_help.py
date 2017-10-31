@@ -39,7 +39,7 @@ def import_gluster(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Installing tendrl-gluster-integration on "
-                                "Node %s" % NS.node_context.node_id
+                                "Node %s" % NS.node_context.fqdn
                      }
         )
     )
@@ -68,7 +68,7 @@ def import_gluster(parameters):
                         "message": "Could not install "
                                    "tendrl-gluster-integration on Node %s"
                                    "Error: %s" %
-                                   (NS.node_context.node_id, out['msg'])
+                                   (NS.node_context.fqdn, out['msg'])
                     }
                 )
             )
@@ -82,7 +82,7 @@ def import_gluster(parameters):
                 publisher=NS.publisher_id,
                 payload={"message": "Error: Could not install "
                                     "tendrl-gluster-integration on Node %s" %
-                                    NS.node_context.node_id
+                                    NS.node_context.fqdn
                          }
             )
         )
@@ -97,7 +97,7 @@ def import_gluster(parameters):
             publisher=NS.publisher_id,
             payload={"message": "Generating configuration for "
                                 "tendrl-gluster-integration on Node %s" %
-                                NS.node_context.node_id
+                                NS.node_context.fqdn
                      }
         )
     )
@@ -141,7 +141,7 @@ def import_gluster(parameters):
             priority="info",
             publisher=NS.publisher_id,
             payload={"message": "Running tendrl-gluster-integration on Node "
-                                "%s" % NS.node_context.node_id
+                                "%s" % NS.node_context.fqdn
                      }
         )
     )
