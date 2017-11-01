@@ -72,3 +72,25 @@ def refresh(value, ttl):
             NS._int.wclient.refresh(value, ttl=ttl)
         else:
             raise etcd.EtcdKeyNotFound
+
+'''
+   Delete from etcd
+   input params:
+       key  : type  - >  string
+              value - >  attr to be deleted
+
+   return param:
+       None - > if delete is successful
+       None - > if key is not found
+'''
+
+
+def delete(key):
+    try:
+        return NS._int.wclient.delete(key)
+    except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
+        if type(ex) != etcd.EtcdKeyNotFound:
+            NS._int.wreconnect()
+            return NS._int.wclient.delete(key)
+        else:
+            raise etcd.EtcdKeyNotFound
