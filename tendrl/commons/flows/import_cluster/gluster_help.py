@@ -146,7 +146,12 @@ def import_gluster(parameters):
         )
     )
     os.chmod(_gluster_integration_conf_file_path, 0o640)
+
+    if NS.config.data['package_source_type'] == 'rpm':
+        command = "systemctl enable tendrl-gluster-integration"
+        subprocess.Popen(command.split())
     subprocess.Popen(_cmd.split())
+
     return True
 
 
