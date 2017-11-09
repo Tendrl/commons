@@ -712,6 +712,7 @@ namespace.tendrl:
           - cpu_utilization
           - memory_utilization
           - swap_utilization
+          - brick_utilization
         status:
           - brick_status
       enabled: true
