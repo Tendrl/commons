@@ -65,13 +65,18 @@ class ImportCluster(flows.BaseFlow):
                 if new_tags != current_tags:
                     NS.node_context.tags = new_tags
                     NS.node_context.save()
-
+                
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
                 _cluster.enable_volume_profiling = self.parameters[
                     'Cluster.enable_volume_profiling']
                 _cluster.save()
+                _tag = "provisioner/%s" % _cluster.integration_id
+                _index_key = "/indexes/tags/%s" % _tag
+                _node_id = json.dumps([NS.node_context.node_id])
+                NS._int.wclient.write(_index_key, _node_id)
+                        
         try:
             super(ImportCluster, self).run()
         except (FlowExecutionFailedError,
