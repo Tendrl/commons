@@ -80,6 +80,12 @@ class ImportCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
             _cluster.import_status = "failed"
-            _cluster.errors = json.dumps([ex])
+            _errors = []
+            if hasattr(ex, 'message'):
+                _errors = [ex.message]
+            else:
+                _errors = [str(ex)]
+            if _errors:
+                _cluster.errors = json.dumps(_errors)
             _cluster.save()
             raise ex
