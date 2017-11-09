@@ -73,6 +73,7 @@ def refresh(value, ttl):
         else:
             raise etcd.EtcdKeyNotFound
 
+
 '''
    Delete from etcd
    input params:
