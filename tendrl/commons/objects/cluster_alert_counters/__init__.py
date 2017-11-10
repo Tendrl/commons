@@ -15,5 +15,7 @@ class ClusterAlertCounters(objects.BaseObject):
         self.value = '/clusters/{0}/alert_counters'
 
     def render(self):
-        self.value = self.value.format(self.integration_id or NS.tendrl_context.integration_id)
+        self.value = self.value.format(
+            self.integration_id or NS.tendrl_context.integration_id
+        )
         return super(ClusterAlertCounters, self).render()

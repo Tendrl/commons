@@ -1,5 +1,4 @@
 import os
-import subprocess
 import uuid
 
 import pkg_resources
@@ -9,6 +8,7 @@ from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import log_utils
 
 
@@ -120,9 +120,13 @@ def import_gluster(parameters):
     etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
     etcd_cert_file = NS.config.data.get("etcd_cert_file")
     etcd_key_file = NS.config.data.get("etcd_key_file")
-    if etcd_ca_cert_file and str(etcd_ca_cert_file) != "" \
-        and etcd_cert_file and str(etcd_cert_file) != "" \
-        and etcd_key_file and str(etcd_key_file) != "":
+    if etcd_ca_cert_file and str(
+            etcd_ca_cert_file
+    ) != "" and etcd_cert_file and str(
+        etcd_cert_file
+    ) != "" and etcd_key_file and str(
+        etcd_key_file
+    ) != "":
         config_data.update({
             "etcd_ca_cert_file": NS.config.data['etcd_ca_cert_file'],
             "etcd_cert_file": NS.config.data['etcd_cert_file'],
@@ -146,7 +150,44 @@ def import_gluster(parameters):
         )
     )
     os.chmod(_gluster_integration_conf_file_path, 0o640)
-    subprocess.Popen(_cmd.split())
+
+    if NS.config.data['package_source_type'] == 'rpm':
+        command = cmd_utils.Command(
+            "systemctl enable tendrl-gluster-integration"
+        )
+        err, out, rc = command.run()
+        if err:
+            Event(
+                Message(
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id'],
+                    priority="error",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Could not enable gluster-integration"
+                        " service. Error: %s" % err
+                    }
+                )
+            )
+            return False
+
+    cmd = cmd_utils.Command(_cmd)
+    err, out, rc = cmd.run()
+    if err:
+        Event(
+            Message(
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
+                priority="error",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "Could not start gluster-integration"
+                    " service. Error: %s" % err
+                }
+            )
+        )
+        return False
+
     return True
 
 
