@@ -189,33 +189,3 @@ def import_gluster(parameters):
         return False
 
     return True
-
-
-def update_dashboard(parameters):
-    integration_id = parameters['TendrlContext.integration_id']
-    _job_id = str(uuid.uuid4())
-    _params = {
-        "TendrlContext.integration_id": integration_id
-    }
-    _job_payload = {
-        "tags": ["tendrl/integration/monitoring"],
-        "run": "monitoring.flows.NewClusterDashboard",
-        "status": "new",
-        "parameters": _params,
-        "parent": parameters['job_id'],
-        "type": "monitoring"
-    }
-    Job(
-        job_id=_job_id,
-        status="new",
-        payload=_job_payload
-    ).save()
-    log_utils.log(
-        "debug",
-        NS.publisher_id,
-        {
-            'message': "Job (job_id: %s) created to "
-                       "create monitoring dashboard" %
-                       _job_id
-        }
-    )
