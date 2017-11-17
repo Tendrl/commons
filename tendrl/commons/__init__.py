@@ -277,7 +277,7 @@ class TendrlNS(object):
                 except etcd.EtcdException:
                     sys.stdout.write(
                         "Error connecting to central store (etcd), trying "
-                        "again...")
+                        "again...\n")
                     time.sleep(2)
 
             # Use this for central store read, watch
@@ -288,7 +288,7 @@ class TendrlNS(object):
                 except etcd.EtcdException:
                     sys.stdout.write(
                         "Error connecting to central store (etcd), trying "
-                        "again...")
+                        "again...\n")
                     time.sleep(2)
 
         # NodeContext, if the namespace has implemented its own
