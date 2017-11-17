@@ -63,7 +63,7 @@ class NodeContext(objects.BaseObject):
                 )
             )
         except KeyError:
-            sys.stdout.write("message: Registered Node (%s)" % node_id)
+            sys.stdout.write("message: Registered Node (%s) \n" % node_id)
 
         local_node_id = "/var/lib/tendrl/node_id"
         if not os.path.exists(os.path.dirname(local_node_id)):

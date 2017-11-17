@@ -98,6 +98,6 @@ class ImportCluster(flows.BaseFlow):
             else:
                 _errors = [str(ex)]
             if _errors:
-                _cluster.errors = json.dumps(_errors)
+                _cluster.errors = _errors
             _cluster.save()
             raise ex

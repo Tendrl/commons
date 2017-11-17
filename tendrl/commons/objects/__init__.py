@@ -52,7 +52,7 @@ class BaseObject(object):
             )
         except KeyError:
             sys.stdout.write("Load definitions (.yml) for namespace.%s.objects"
-                             ".%s" % (self._ns.ns_name,
+                             ".%s \n" % (self._ns.ns_name,
                                       self.__class__.__name__))
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
@@ -70,7 +70,7 @@ class BaseObject(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write(str(ex))
+                sys.stdout.write(str(ex) + "\n")
             try:
                 Event(
                     Message(
@@ -80,7 +80,7 @@ class BaseObject(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write(msg)
+                sys.stdout.write(msg + "\n")
             raise Exception(msg)
 
     @thread_safe
@@ -127,7 +127,7 @@ class BaseObject(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Writing %s to %s" % (item['key'],
+                sys.stdout.write("Writing %s to %s \n" % (item['key'],
                                                        item['value']))
             # convert list, dict (json) to python based on definitions
             _type = self._defs.get("attrs", {}).get(item['name'],
@@ -197,7 +197,7 @@ class BaseObject(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Reading %s" % item['key'])
+                sys.stdout.write("Reading %s \n" % item['key'])
 
             try:
                 etcd_resp = NS._int.client.read(item['key'], quorum=True)
@@ -413,7 +413,7 @@ class BaseAtom(object):
         except KeyError:
             sys.stdout.write("Load definitions (.yml) for "
                              "namespace.%s.objects.%s."
-                             "atoms.%s" % (self._ns.ns_name, self.obj.__name__,
+                             "atoms.%s \n" % (self._ns.ns_name, self.obj.__name__,
                                            self.__class__.__name__))
         try:
             return self._ns.get_atom_definition(self.obj.__name__,
@@ -433,7 +433,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stderr.write("Error: %s" % ex)
+                sys.stderr.write("Error: %s \n" % ex)
             try:
                 Event(
                     Message(
@@ -443,7 +443,7 @@ class BaseAtom(object):
                     )
                 )
             except KeyError:
-                sys.stderr.write(msg)
+                sys.stderr.write(msg + "\n")
             raise Exception(msg)
 
     @abc.abstractmethod
