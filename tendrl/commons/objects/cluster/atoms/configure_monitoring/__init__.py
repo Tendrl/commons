@@ -80,9 +80,13 @@ class ConfigureMonitoring(objects.BaseAtom):
         infs = netifaces.interfaces()
         ip = socket.gethostbyname(fqdn)
         for inf in infs:
-            inf_ip = netifaces.ifaddresses(inf)[netifaces.AF_INET][0]['addr']
-            if inf_ip == ip:
-                return inf
+            try:
+                inf_ip = netifaces.ifaddresses(
+                    inf)[netifaces.AF_INET][0]['addr']
+                if inf_ip == ip:
+                    return inf
+            except KeyError:
+                continue
         return ret_val
 
     def run(self):
