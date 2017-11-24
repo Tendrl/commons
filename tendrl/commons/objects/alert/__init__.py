@@ -70,20 +70,17 @@ class AlertUtils(object):
         )
 
     def update(self, new_alert, existing_alert):
-        time_stamp = existing_alert.time_stamp
         if (
             alert_severity_map[new_alert.severity] <= alert_severity_map[
                 existing_alert.severity] and
             alert_severity_map[new_alert.severity] == alert_severity_map[
                 'INFO']
         ):
-            time_stamp = new_alert.time_stamp
             new_alert.ackedby = "TENDRL"
             new_alert.acked = True
             new_alert.acked_at = now()
             new_alert.ack_comment = ['System acked']
         new_alert.alert_id = existing_alert.alert_id
-        new_alert.time_stamp = time_stamp
         return new_alert
 
     def is_same(self, alert1, alert2):
