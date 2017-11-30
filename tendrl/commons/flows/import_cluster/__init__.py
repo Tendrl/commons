@@ -19,12 +19,12 @@ class ImportCluster(flows.BaseFlow):
                                      integration_id
 
             # If cluster.import_status="failed", allow retries
-            try:
-                NS._int.wclient.delete(_cluster_import_status,
-                                       prevValue="failed")
-                NS._int.wclient.delete(_cluster_import_job_id)
-            except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
-                pass
+            #try:
+            #    NS._int.wclient.delete(_cluster_import_status,
+            #                           prevValue="failed")
+            #    NS._int.wclient.delete(_cluster_import_job_id)
+            #except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
+            #    pass
 
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
