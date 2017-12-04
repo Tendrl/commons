@@ -780,6 +780,8 @@ namespace.tendrl:
         status:
           - volume_status
           - brick_status
+          - volume_state
+          - cluster_health_status
           - peer_status
           - rebalance_status_update_failed
           - georep_checkpoint_completed
