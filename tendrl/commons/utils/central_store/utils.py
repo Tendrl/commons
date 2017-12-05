@@ -2,6 +2,7 @@ import datetime
 import etcd
 import sys
 import time
+import thread
 
 from tendrl.commons.utils.central_store import fields
 
@@ -60,31 +61,34 @@ def reconnect():
 
 
 def read(*args, **kws):
-    _success = False
-    while not _success:
+    _tries = 5
+    while _tries < 5:
         try:
-            _res = NS._int.client._read(*args, **kws)
-            _success = True
-            return _res
+            return NS._int.client._read(*args, **kws)
         except etcd.EtcdConnectionFailed:
+            _tries += 1
             reconnect()
+    
+    thread.interrupt_main() 
 
 def write(*args, **kws):
-    _success = False
-    while not _success:
+    _tries = 5
+    while _tries < 5:
         try:
-            _res = NS._int.wclient._write(*args, **kws)
-            _success = True
-            return _res
+            return NS._int.wclient._write(*args, **kws)
         except etcd.EtcdConnectionFailed:
+            _tries += 1
             wreconnect()
+            
+    thread.interrupt_main() 
 
 def delete(*args, **kws):
-    _success = False
-    while not _success:
+    _tries = 5
+    while _tries < 5:
         try:
-            _res = NS._int.wclient._delete(*args, **kws)
-            _success = True
-            return _res
+            return NS._int.wclient._delete(*args, **kws)
         except etcd.EtcdConnectionFailed:
+            _tries += 1
             wreconnect()
+            
+    thread.interrupt_main() 
