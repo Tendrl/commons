@@ -274,23 +274,29 @@ class TendrlNS(object):
             while not NS._int.wclient:
                 try:
                     NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
+                    # Wrap etd client's read/write/delete to auto-reconnect all the times
+                    NS._int.wclient._read = NS._int.wclient.read
+                    NS._int.wclient.read = cs_utils.read
+                    NS._int.wclient._write = NS._int.wclient.write
+                    NS._int.wclient.write = cs_utils.write
+                    NS._int.wclient._delete = NS._int.wclient.delete
+                    NS._int.wclient.delete = cs_utils.delete
                 except etcd.EtcdException:
-                    sys.stdout.write(
-                        "Error connecting to central store (etcd), trying "
-                        "again...\n")
-                    time.sleep(2)
-
+                    NS._int.wreconnect()
             # Use this for central store read, watch
             NS._int.client = None
             while not NS._int.client:
                 try:
                     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+                    # Wrap etd client's read/write/delete to auto-reconnect all the times
+                    NS._int.client._read = NS._int.client.read
+                    NS._int.client.read = cs_utils.read
+                    NS._int.client._write = NS._int.client.write
+                    NS._int.client.write = cs_utils.write
+                    NS._int.client._delete = NS._int.client.delete
+                    NS._int.client.delete = cs_utils.delete
                 except etcd.EtcdException:
-                    sys.stdout.write(
-                        "Error connecting to central store (etcd), trying "
-                        "again...\n")
-                    time.sleep(2)
-
+                    NS._int.reconnect()
         # NodeContext, if the namespace has implemented its own
         if "NodeContext" in self.current_ns.objects:
             logger.log("debug", NS.get("publisher_id", None),
