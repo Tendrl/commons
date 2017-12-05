@@ -51,7 +51,7 @@ def read(*args, **kws):
     while not _success:
         try:
             _res = NS._int.client._read(*args, **kws)
-            _sucess = True
+            _success = True
             return _res
         except etcd.EtcdConnectionFailed:
             reconnect()
@@ -61,7 +61,7 @@ def write(*args, **kws):
     while not _success:
         try:
             _res = NS._int.wclient._write(*args, **kws)
-            _sucess = True
+            _success = True
             return _res
         except etcd.EtcdConnectionFailed:
             wreconnect()
@@ -71,7 +71,7 @@ def delete(*args, **kws):
     while not _success:
         try:
             _res = NS._int.wclient._delete(*args, **kws)
-            _sucess = True
+            _success = True
             return _res
         except etcd.EtcdConnectionFailed:
             wreconnect()
