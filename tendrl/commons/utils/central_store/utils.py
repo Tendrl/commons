@@ -61,7 +61,7 @@ def reconnect():
 
 
 def read(*args, **kws):
-    _tries = 5
+    _tries = 0
     while _tries < 5:
         try:
             return NS._int.client._read(*args, **kws)
@@ -72,7 +72,7 @@ def read(*args, **kws):
     thread.interrupt_main() 
 
 def write(*args, **kws):
-    _tries = 5
+    _tries = 0
     while _tries < 5:
         try:
             return NS._int.wclient._write(*args, **kws)
@@ -83,7 +83,7 @@ def write(*args, **kws):
     thread.interrupt_main() 
 
 def delete(*args, **kws):
-    _tries = 5
+    _tries = 0
     while _tries < 5:
         try:
             return NS._int.wclient._delete(*args, **kws)
