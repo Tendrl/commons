@@ -24,40 +24,31 @@ def to_tendrl_field(name, value, tendrl_type=None):
 
 
 def wreconnect():
-    NS._int.wclient = None
-    while not NS._int.wclient:
-        try:
-            NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
-            NS._int.wclient._read = NS._int.wclient.read
-            NS._int.wclient.read = read
-            NS._int.wclient._write = NS._int.wclient.write
-            NS._int.wclient.write = write
-            NS._int.wclient._delete = NS._int.wclient.delete
-            NS._int.wclient.delete = delete
-        except etcd.EtcdException:
-            sys.stdout.write(
-                "Error connecting to central store (etcd), trying "
+    sys.stderr.write("Error connecting to central store (etcd), trying "
                 "again...")
-            time.sleep(2)
+    time.sleep(2)
+    NS._int.wclient = None
+    NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
+    NS._int.wclient._read = NS._int.wclient.read
+    NS._int.wclient.read = read
+    NS._int.wclient._write = NS._int.wclient.write
+    NS._int.wclient.write = write
+    NS._int.wclient._delete = NS._int.wclient.delete
+    NS._int.wclient.delete = delete
 
 
 def reconnect():
-    NS._int.client = None
-    while not NS._int.client:
-        try:
-            NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
-            NS._int.client._read = NS._int.client.read
-            NS._int.client.read = read
-            NS._int.client._write = NS._int.client.write
-            NS._int.client.write = write
-            NS._int.client._delete = NS._int.client.delete
-            NS._int.client.delete = delete
-
-        except etcd.EtcdException:
-            sys.stdout.write(
-                "Error connecting to central store (etcd), trying "
+    sys.stderr.write("Error connecting to central store (etcd), trying "
                 "again...")
-            time.sleep(2)
+    time.sleep(2)
+    NS._int.client = None
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS._int.client._read = NS._int.client.read
+    NS._int.client.read = read
+    NS._int.client._write = NS._int.client.write
+    NS._int.client.write = write
+    NS._int.client._delete = NS._int.client.delete
+    NS._int.client.delete = delete
 
 
 def read(*args, **kws):
