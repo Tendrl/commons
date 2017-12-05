@@ -44,3 +44,34 @@ def reconnect():
                 "Error connecting to central store (etcd), trying "
                 "again...")
             time.sleep(2)
+
+
+def read(*args, **kws):
+    _success = False
+    while not _success:
+        try:
+            _res = NS._int.client._read(*args, **kws)
+            _sucess = True
+            return _res
+        except etcd.EtcdConnectionFailed:
+            reconnect()
+
+def write(*args, **kws):
+    _success = False
+    while not _success:
+        try:
+            _res = NS._int.wclient._write(*args, **kws)
+            _sucess = True
+            return _res
+        except etcd.EtcdConnectionFailed:
+            wreconnect()
+
+def delete(*args, **kws):
+    _success = False
+    while not _success:
+        try:
+            _res = NS._int.wclient._delete(*args, **kws)
+            _sucess = True
+            return _res
+        except etcd.EtcdConnectionFailed:
+            wreconnect()
