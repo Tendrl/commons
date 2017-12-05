@@ -27,6 +27,12 @@ def wreconnect():
     while not NS._int.wclient:
         try:
             NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
+            NS._int.wclient._read = NS._int.wclient.read
+            NS._int.wclient.read = read
+            NS._int.wclient._write = NS._int.wclient.write
+            NS._int.wclient.write = write
+            NS._int.wclient._delete = NS._int.wclient.delete
+            NS._int.wclient.delete = delete
         except etcd.EtcdException:
             sys.stdout.write(
                 "Error connecting to central store (etcd), trying "
@@ -39,6 +45,13 @@ def reconnect():
     while not NS._int.client:
         try:
             NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+            NS._int.client._read = NS._int.client.read
+            NS._int.client.read = read
+            NS._int.client._write = NS._int.client.write
+            NS._int.client.write = write
+            NS._int.client._delete = NS._int.client.delete
+            NS._int.client.delete = delete
+
         except etcd.EtcdException:
             sys.stdout.write(
                 "Error connecting to central store (etcd), trying "
