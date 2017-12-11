@@ -1,6 +1,6 @@
 Name: tendrl-commons
 Version: 1.5.4
-Release: 8%{?dist}
+Release: 9%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
 Source0: %{name}-%{version}.tar.gz
@@ -48,6 +48,9 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
+* Mon Dec 11 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.4-9
+- Add dependency on python-IPy, python-dns
+
 * Wed Dec 06 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.4-8
 - Bugfixes
 
