@@ -16,11 +16,13 @@ BuildRequires: systemd
 Requires: ansible
 Requires: python-maps
 Requires: python-dateutil
+Requires: python-dns
 Requires: python-etcd
 Requires: python-six
 Requires: python2-ruamel-yaml
 Requires: pytz
 Requires: python-psutil
+Requires: python-IPy
 
 
 %description
