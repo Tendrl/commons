@@ -41,7 +41,8 @@ def test_constructor(patch_get_node_id, patch_client):
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 def test_get_node_id(patch_read, patch_client):
-    patch_read.return_value = "8ceccbee-1e88-4232-9877-61d0ea595930"
+    patch_read.return_value = maps.NamedDict(
+        value=u'"testing"')
     patch_client.return_value = etcd.Client()
     setattr(__builtin__, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
@@ -59,11 +60,7 @@ def test_get_node_id(patch_read, patch_client):
                 mock.mock_open(
                     read_data="8eccbee-1e88-4232-9877-61d0ea595930"
                               "").return_value]
-            with pytest.raises(Exception):
-                NodeContext()
-    with patch.object(os.path, "isfile", return_value=False):
-        with patch.object(NodeContext, "_create_node_id", return_value=None):
-            NodeContext()
+            NodeContext()    
 
 
 @patch.object(etcd, "Client")
@@ -115,9 +112,6 @@ def test_create_node_id(patch_write, patch_read, patch_client):
         with patch.object(os, "makedirs", return_value=True):
             node_context._create_node_id()
     f.close()
-    with pytest.raises(IOError):
-        with patch.object(os, "makedirs", return_value=True):
-            node_context._create_node_id()
     f = tempfile.TemporaryFile()
     with patch.object(__builtin__, "open") as mock_open:
         mock_open.return_value = f

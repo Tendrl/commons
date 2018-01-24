@@ -11,6 +11,7 @@ from tendrl.commons.flows.import_cluster import gluster_help
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import cmd_utils
 
 '''Dummy Functions'''
 
@@ -55,6 +56,8 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.config.data['tags'] = "test"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
+    NS.config.data['sync_interval'] = 30
+    NS.compiled_definitions = mock.MagicMock()
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -73,13 +76,21 @@ def test_import_gluster():
         ret = gluster_help.import_gluster(parameters)
         assert ret is False
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
-                      return_value=True):
-        with patch.object(__builtin__, 'open', open):
-            gluster_help.import_gluster(parameters)
-    with patch.object(ansible_module_runner, 'AnsibleRunner', ansible):
-        with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
-            gluster_help.import_gluster(parameters)
-    NS.config.data['package_source_type'] = 'rpm'
-    with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
+                      return_value=({"rc" : 1, "msg": None}, None)):
         ret = gluster_help.import_gluster(parameters)
         assert ret is False
+    NS.config.data['package_source_type'] = 'rpm'
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run',
+                      return_value=({"rc" : 0, "msg": None}, None)):
+        with patch.object(__builtin__,'open',open) as mock_open:
+            with patch.object(cmd_utils.Command,'run',
+                              return_value=("err", "", 1)) as mock_open:
+                ret = gluster_help.import_gluster(parameters)
+        assert ret is False
+    with patch.object(ansible_module_runner.AnsibleRunner, 'run',
+                      return_value=({"rc" : 0, "msg": None}, None)):
+        with patch.object(__builtin__,'open',open) as mock_open:
+            with patch.object(cmd_utils.Command,'run',
+                              return_value=(None, "", 0)) as mock_open:
+                ret = gluster_help.import_gluster(parameters)
+        assert ret is True

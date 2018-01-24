@@ -8,10 +8,10 @@ import pytest
 import tempfile
 
 
-from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster import ImportCluster
 from tendrl.commons import objects
+from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
@@ -20,74 +20,6 @@ from tendrl.commons.utils import ansible_module_runner
 
 
 '''Dummy Functions'''
-
-
-def ansible_run(*args):
-    if args[0]:
-        return {"msg": "test_msg", "rc": 0}, "Error"
-    else:
-        return {"msg": "test_msg", "rc": 1}, "Error"
-
-
-def read_failed(*args, **kwargs):
-    if args[0]:
-        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value="")
-        else:
-            return maps.NamedDict(value="failed")
-
-
-def read_passed(*args, **kwargs):
-    if args[0]:
-        if args[1] == 'nodes/TestNode/TendrlContext/integration_id':
-            return maps.NamedDict(value="")
-        else:
-            return maps.NamedDict(value="finished")
-
-
-def read(*args, **kwargs):
-    raise etcd.EtcdKeyNotFound
-
-
-def open(*args, **kwargs):
-    f = tempfile.TemporaryFile()
-    return f
-
-
-def run(*args):
-    raise ansible_module_runner.AnsibleExecutableGenerationFailed
-
-
-def load_trendrl_context(*args):
-    ret = importlib.import_module(
-        "tendrl.commons.tests.fixtures.client").Client()
-    ret.detected_cluster_id = 'Test Cluster Id'
-    ret.sds_pkg_version = '9.9'
-    ret.detected_cluster_name = "Test Cluster name"
-    ret.sds_pkg_name = "Test/package/name"
-    ret.machine_id = "Test_machine_id"
-    ret.fqdn = "fqdn"
-    ret.tags = ["Test tag", "ceph/mon"]
-    ret.status = True
-    ret.node_id = 1
-    ret.sync_status = True
-    ret.last_sync = "test_last_sync"
-    return ret
-
-
-def load_tendrl_context_high_version(*args):
-    ret = importlib.import_module(
-        "tendrl.commons.tests.fixtures.client").Client()
-    ret.detected_cluster_id = 'Test Cluster Id'
-    ret.sds_pkg_version = '10.10'
-    ret.detected_cluster_name = "Test Cluster name"
-    ret.sds_pkg_name = "Test/package/name"
-    ret.machine_id = "Test_machine_id"
-    ret.fqdn = "fqdn"
-    ret.tags = ["Test tag", "ceph/mon"]
-    ret.status = True
-    ret.node_id = 1
-    return ret
 
 
 def get_obj_definition(*args, **kwargs):
@@ -130,9 +62,31 @@ def get_obj_definition(*args, **kwargs):
     return ret
 
 
-def save(*args):
-    raise Exception
+def return_fail(param):
+    return NS.tendrl.objects.Cluster(
+        integration_id='13ced2a7-cd12-4063-bf6c-a8226b0789a0',
+        import_status='done',
+        import_job_id='0f2381f0-e6e3-4cad-bb84-47c06cb46ffb'
+    )
 
+
+def return_pass(param):
+    return NS.tendrl.objects.Cluster(
+        integration_id='13ced2a7-cd12-4063-bf6c-a8226b0789a0',
+        import_status='new',
+        import_job_id=''
+    )
+
+
+def read(key):
+    if key == 'indexes/tags/tendrl/integration/None':
+        raise etcd.EtcdKeyNotFound
+    else:
+        return maps.NamedDict(value = u'["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]')
+
+
+def save(*args):
+    pass
 
 '''Unit Test Cases'''
 
@@ -166,116 +120,26 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
-            mock.Mock(return_value=True))
-@mock.patch('tendrl.commons.flows.create_cluster.utils.acquire_node_lock',
-            mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.flows.create_cluster.utils.release_node_lock',
-            mock.Mock(return_value=None))
 def test_run():
     tendrlNS = init()
     param = maps.NamedDict()
     param['TendrlContext.integration_id'] = None
-    param['Node[]'] = []
+    param['Cluster.enable_volume_profiling'] = 'yes'
     with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
         import_cluster = ImportCluster(parameters=param)
-    with pytest.raises(FlowExecutionFailedError):
-        import_cluster.run()
-    param['TendrlContext.integration_id'] = "Test integration_id"
-    param['DetectedCluster.sds_pkg_name'] = "Test package_name"
-    param['Node[]'] = ["TestNode"]
-    with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
-        import_cluster = ImportCluster(parameters=param)
-    import_cluster._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
-    with patch.object(Cmd, 'run', return_value=True):
+    with patch.object(objects.BaseObject, 'load', return_fail):
         with pytest.raises(FlowExecutionFailedError):
             import_cluster.run()
-    NS.compiled_definitions = tendrlNS.current_ns.definitions
-    NS._int.client = importlib.import_module(
-        "tendrl.commons.tests.fixtures.client").Client()
-    NS.config.data['package_source_type'] = "test"
-    with patch.object(Cmd, 'run', return_value=True):
-        with patch.object(Client, "read", read):
-            with pytest.raises(FlowExecutionFailedError):
-                import_cluster.run()
-    NS.config.data['logging_socket_path'] = "test"
-    with patch.object(Cmd, 'run', return_value=True):
-        with patch.object(Client, "read") as mock_read:
-            mock_read.return_value = maps.NamedDict(value="")
-            with patch.object(objects.BaseObject, 'load',
-                              load_trendrl_context):
-                import_cluster.run()
-        with patch.object(Client, "read", read_failed):
-            param['DetectedCluster.sds_pkg_name'] = "gluster"
-            with patch.object(objects.BaseObject, 'load',
-                              load_trendrl_context):
-                NS.config.data['package_source_type'] = 'rpm'
-                with patch.object(ansible_module_runner.AnsibleRunner,
-                                  'run', ansible_run):
-                    with patch.object(create_cluster_utils,
-                                      'gluster_create_ssh_setup_jobs',
-                                      return_value=[1, 2]):
-                        with pytest.raises(FlowExecutionFailedError):
-                            import_cluster.run()
-        NS.tendrl_context = importlib.import_module(
-            "tendrl.commons.objects.tendrl_context").TendrlContext()
-        NS.node_context = Client()
-        NS.node_context.node_id = 1
-        param['Node[]'] = ["TestNode", "Test_node"]
-        param["import_after_expand"] = True
-        param['DetectedCluster.sds_pkg_name'] = "test/package/name"
-        with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
-            cluster_obj = ImportCluster(parameters=param)
-        with patch.object(TendrlNS, 'get_atom_definition', get_obj_definition):
-            cluster_obj._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
-            with patch.object(Client, 'load', load_trendrl_context):
-                with patch.object(objects.BaseObject, 'load',
-                                  load_trendrl_context):
-                    with mock.patch('tendrl.commons.objects.__init__',
-                                    mock.Mock(return_value=None)):
-                        with mock.patch('tendrl.commons.objects.job.Job.save',
-                                        mock.Mock(return_value=None)):
-                            with patch.object(__builtin__, 'open',
-                                              return_value=False):
-                                cluster_obj.run()
-        param['DetectedCluster.sds_pkg_name'] = "ceph"
-        param['Node[]'] = ["TestNode"]
-        with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
-            cluster_obj = ImportCluster(parameters=param)
-        with patch.object(TendrlNS, 'get_atom_definition', get_obj_definition):
-            cluster_obj._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
-            with patch.object(Client, 'load', load_trendrl_context):
-                with patch.object(objects.BaseObject, 'load',
-                                  load_trendrl_context):
-                    with mock.patch('tendrl.commons.objects.__init__',
-                                    mock.Mock(return_value=None)):
-                        with mock.patch('tendrl.commons.objects.job.Job.save',
-                                        mock.Mock(return_value=None)):
-                            with patch.object(__builtin__, 'open', open):
-                                with pytest.raises(FlowExecutionFailedError):
-                                    cluster_obj.run()
-
-        param['Node[]'] = ["TestNode"]
-        param["import_after_expand"] = False
-        param['DetectedCluster.sds_pkg_name'] = "gluster"
-        with patch.object(Client, "read", read_passed):
-            param['DetectedCluster.sds_pkg_name'] = "gluster"
-            with patch.object(objects.BaseObject, 'load',
-                              load_trendrl_context):
-                with patch.object(Client, 'load', load_trendrl_context):
-                    NS.config.data['package_source_type'] = 'rpm'
-                    with patch.object(ansible_module_runner.AnsibleRunner,
-                                      'run', ansible_run):
-                        with patch.object(create_cluster_utils,
-                                          'gluster_create_ssh_setup_jobs',
-                                          return_value=[1, 2]):
-                            with patch.object(
-                                    ansible_module_runner.AnsibleRunner,
-                                    'run', run):
-                                with patch.object(create_cluster_utils,
-                                                  'install_gdeploy',
-                                                  return_value=False):
-                                    with patch.object(create_cluster_utils,
-                                                      'install_python_gdeploy',
-                                                      return_value=False):
-                                        import_cluster.run()
+    param['TendrlContext.integration_id'] = '94ac63ba-de73-4e7f-8dfa-9010d9554084'
+    import_cluster._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
+    with patch.object(NS._int.client, 'read', read):
+        with patch.object(objects.BaseObject, 'save', save):
+            with patch.object(Cmd,'run',return_value = True):
+                with patch.object(objects.BaseObject, 'load', return_pass):
+                    import_cluster.run()
+    with patch.object(NS._int.client, 'read', read):
+        with patch.object(objects.BaseObject, 'save', save):
+            with patch.object(Cmd,'run',return_value = False):
+                with patch.object(objects.BaseObject, 'load', return_pass):
+                    with pytest.raises(AtomExecutionFailedError):
+                        import_cluster.run()

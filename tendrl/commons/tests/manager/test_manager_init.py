@@ -1,5 +1,4 @@
 import __builtin__
-import gevent
 import maps
 import mock
 from mock import patch
@@ -85,33 +84,3 @@ def test_start():
     manager = Manager(test_job)
     with pytest.raises(AttributeError):
         manager.start()
-
-
-# Testing join
-@patch.object(gevent.greenlet.Greenlet, 'join')
-@mock.patch('tendrl.commons.event.Event.__init__',
-            mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
-            mock.Mock(return_value=None))
-def test_join(mock_join):
-    mock_join.return_value = 'Done'
-    setattr(__builtin__, "NS", maps.NamedDict())
-    NS.publisher_id = "node_agent"
-    # Creating dummy job
-    sds_job = jobs.JobConsumerThread()
-    # Testing to start the sds_sync thread
-    manager = Manager(sds_job)
-    manager.start()
-    manager.join()
-    assert manager._sds_sync_thread._complete.is_set() is False
-    # Testing to start all threads
-    sds_job = jobs.JobConsumerThread()
-    message_job = jobs.JobConsumerThread()
-    manager = Manager(sds_job, message_job)
-    manager.start()
-    manager.join()
-
-    # Testig with None Value
-    manager = Manager(None)
-    manager.start()
-    manager.join()

@@ -119,7 +119,8 @@ setup(
         "ruamel.yaml",
         "maps==4.2.0",
         "pytz",
-        "six"
+        "six",
+        "netifaces"
         ],
     include_package_data=True,
     cmdclass={'bumpversion': BumpCommand, 'release': ReleaseCommand},

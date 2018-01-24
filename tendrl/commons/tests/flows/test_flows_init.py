@@ -197,7 +197,7 @@ def test_run():
         flow_obj._defs = get_obj_definition()
         flow_obj.to_str = "ImportCluster"
         flow_obj.run()
-        flow_obj._defs['inputs'] = maps.NamedDict(mandatory=[''])
+        flow_obj._defs['inputs'] = maps.NamedDict(mandatory=[])
         with mock.patch('tendrl.commons.message.Message.__init__',
                         mock.Mock(return_value=None)) as mock_msg:
             flow_obj.run()
