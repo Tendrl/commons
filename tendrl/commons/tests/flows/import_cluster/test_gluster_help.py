@@ -66,6 +66,8 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
+@mock.patch('os.chmod',
+            mock.Mock(return_value=None))
 def test_import_gluster():
     tendrlNS = init()
     NS.compiled_definitions = tendrlNS.current_ns.definitions

@@ -66,6 +66,8 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
+@mock.patch('subprocess.Popen',
+            mock.Mock(return_value=None))
 @patch.object(yaml, "dump")
 def test_import_ceph(dump):
     dump.return_value = None
