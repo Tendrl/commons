@@ -34,7 +34,7 @@ def ansible(*args, **kwargs):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_ceph_create_ssh_setup_jobs():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -60,7 +60,7 @@ def test_ceph_create_ssh_setup_jobs():
     assert ret is not None
 
 
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_install_gdeploy():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -77,7 +77,7 @@ def test_install_gdeploy():
             utils.install_gdeploy()
 
 
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_install_python_gdeploy():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -107,7 +107,7 @@ def test_install_python_gdeploy():
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_gluster_create_ssh_setup_jobs():
     setattr(__builtin__, "NS", maps.NamedDict())

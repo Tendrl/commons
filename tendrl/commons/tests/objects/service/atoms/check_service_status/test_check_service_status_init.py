@@ -24,6 +24,7 @@ def test_run():
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
+    NS.node_context.fqdn = "Test_service"
     check_service_status = CheckServiceStatus()
     check_service_status.parameters = maps.NamedDict()
     check_service_status.parameters['Service.name'] = "Test_service"
