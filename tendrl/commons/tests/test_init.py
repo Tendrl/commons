@@ -57,6 +57,16 @@ def test_list_modules_in_package_path():
 
     tendrlNS = init()
     modules = [
+        ('alert',
+         'tendrl.commons.objects.alert'),
+        ('block_device',
+         'tendrl.commons.objects.block_device'),
+        ('cluster',
+         'tendrl.commons.objects.cluster'),
+        ('cluster_alert',
+         'tendrl.commons.objects.cluster_alert'),
+        ('cluster_alert_counters',
+         'tendrl.commons.objects.cluster_alert_counters'),
         ('cluster_node_context',
          'tendrl.commons.objects.cluster_node_context'),
         ('cluster_tendrl_context',
@@ -68,13 +78,18 @@ def test_list_modules_in_package_path():
         ('job', 'tendrl.commons.objects.job'),
         ('memory', 'tendrl.commons.objects.memory'),
         ('node', 'tendrl.commons.objects.node'),
+        ('node_alert',
+         'tendrl.commons.objects.node_alert'),
+        ('node_alert_counters',
+         'tendrl.commons.objects.notification_only_alert'),
         ('node_context', 'tendrl.commons.objects.node_context'),
         ('node_network', 'tendrl.commons.objects.node_network'),
+        ('notification_only_alert',
+         'tendrl.commons.objects.notification_only_alert'),
         ('os', 'tendrl.commons.objects.os'),
         ('platform', 'tendrl.commons.objects.platform'),
         ('service', 'tendrl.commons.objects.service'),
         ('tendrl_context', 'tendrl.commons.objects.tendrl_context'),
-        ('block_device', 'tendrl.commons.objects.block_device'),
         ('virtual_disk', 'tendrl.commons.objects.virtual_disk')]
     ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)).
                                    rsplit('/', 1)[0], "objects")
@@ -419,7 +434,7 @@ def test_setup_common_objects(monkeypatch):
         tendrlNS.setup_common_objects()
         assert NS._int.client is not None
         assert NS._int.wclient is not None
-        etcd.Client.assert_called_with(allow_reconnect=True, host=1, port=1)
+        etcd.Client.assert_called_with(host=1, port=1)
         tendrlNS.current_ns.objects.pop("TendrlContext")
         tendrlNS.setup_common_objects()
 

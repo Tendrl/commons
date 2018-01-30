@@ -1,28 +1,17 @@
-import gevent
 import pytest
 
 from tendrl.commons.sds_sync import SdsSyncThread
-from tendrl.commons.sds_sync import StateSyncThread
 
 
-class test_StateSyncThread(StateSyncThread):
+class test_StateSyncThread(SdsSyncThread):
     def __init__(self):
         super(test_StateSyncThread, self).__init__()
 
-    def _run(self):
-        super(test_StateSyncThread, self)._run()
+    def run(self):
+        pass
 
     def stop(self):
         super(test_StateSyncThread, self).stop()
-
-
-class test_SdsSyncThread(SdsSyncThread):
-    def __init__(self):
-        super(test_SdsSyncThread, self).__init__()
-
-    def _run(self):
-        super(test_SdsSyncThread, self)._run()
-# Testing StateSyncThread __init__
 
 
 def test_statesyncthread_constructor():
@@ -30,19 +19,10 @@ def test_statesyncthread_constructor():
 
     variables are declared initialized
     '''
-    assert isinstance(test_StateSyncThread()._complete, gevent.event.Event)
-
-
-def test_run():
-    with pytest.raises(NotImplementedError):
-        test_StateSyncThread()._run()
-
-
-def test_stop():
-    test_StateSyncThread().stop()
-    # assert test_StateSyncThread()._complete.isset()
-
-
-def test_sdssyncthread_constructor():
-    with pytest.raises(NotImplementedError):
-        test_SdsSyncThread()._run()
+    obj = test_StateSyncThread()
+    obj.start()
+    # check thread is alive
+    assert obj._complete.isSet() is False
+    # check thread is not alive
+    obj.stop()
+    assert obj._complete.isSet() is True

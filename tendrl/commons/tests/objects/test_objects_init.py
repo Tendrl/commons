@@ -151,12 +151,13 @@ def test_save():
         obj._ns = tendrlNS
         with patch.object(TendrlNS, 'get_obj_definition', obj_definition):
             obj._defs = obj.load_definition()
-            obj.value = 1
+            obj.value = "1"
             obj.save()
             NS._int.wclient = etcd.Client()
             with patch.object(Client, "refresh", refresh_client):
                 with patch.object(Client, "write", return_value=True):
-                    obj.save(True, 2)
+                    with pytest.raises(etcd.EtcdKeyNotFound):
+                        obj.save(True, 2)
             NS._int.wreconnect = type("Dummy", (object,), {})
             with patch.object(Client, "refresh", refresh):
                 with pytest.raises(etcd.EtcdConnectionFailed):

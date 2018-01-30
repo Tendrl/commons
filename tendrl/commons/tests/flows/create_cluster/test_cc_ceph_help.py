@@ -26,7 +26,7 @@ def read(*args, **kwargs):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_create_ceph():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -50,7 +50,7 @@ def test_create_ceph():
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_install_packages():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -75,7 +75,7 @@ def test_install_packages():
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 @patch.object(etcd, "Client")
 def test_create_mons(patch_client):
@@ -107,7 +107,7 @@ def test_create_mons(patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 @patch.object(etcd, "Client")
 def test_create_osds(patch_client):
@@ -167,7 +167,7 @@ def test_create_osds(patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 def test_wait_for_task():
     setattr(__builtin__, "NS", maps.NamedDict())
