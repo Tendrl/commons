@@ -33,6 +33,9 @@ def read_passed(*args):
         else:
             return maps.NamedDict(value="finished")
 
+def get_parsed_defs():
+    return {"namespace.tendrl" : {"supported_sds" : "ceph"}}
+
 
 '''Unit Test Cases'''
 
@@ -68,7 +71,7 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.flows.BaseFlow._execute_atom',
             mock.Mock(return_value=True))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 @mock.patch('tendrl.commons.objects.job.Job.__init__',
             mock.Mock(return_value=None))
@@ -95,7 +98,6 @@ def test_expand_cluster():
     param['TendrlContext.cluster_name'] = 'test name'
     param["flow_id"] = "test_flow_id"
     param['Node[]'] = ['test_node']
-
     param["job_id"] = "test_id"
     NS._int.client = importlib.import_module(
         "tendrl.commons.tests.fixtures.client").Client()
@@ -112,8 +114,11 @@ def test_expand_cluster():
     param["Cluster.cluster_network"] = ""
     param["Cluster.public_network"] = ""
     with patch.object(Client, "read", read_passed):
-        with patch.object(ceph_help, 'expand_cluster', return_value=True):
-            expand_cluster.run()
+        with patch.object(NS.compiled_definitions,
+                          "get_parsed_defs",
+                          get_parsed_defs):
+            with patch.object(ceph_help, 'expand_cluster', return_value=True):
+                expand_cluster.run()
     param['TendrlContext.sds_name'] = "gluster"
     with patch.object(Client, "read", read_failed):
         with pytest.raises(KeyError):

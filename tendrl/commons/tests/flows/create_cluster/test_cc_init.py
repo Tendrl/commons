@@ -67,7 +67,7 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.flows.BaseFlow._execute_atom',
             mock.Mock(return_value=True))
-@mock.patch('gevent.sleep',
+@mock.patch('time.sleep',
             mock.Mock(return_value=True))
 @mock.patch('tendrl.commons.objects.job.Job.__init__',
             mock.Mock(return_value=None))
@@ -81,6 +81,7 @@ def test_create_cluster():
     param['TendrlContext.integration_id'] = None
     param['Node[]'] = []
     param["job_id"] = ""
+    param["flow_id"] = 1
     create_cluster.parameters = param
     with pytest.raises(FlowExecutionFailedError):
         create_cluster.run()
@@ -114,7 +115,3 @@ def test_create_cluster():
     param["Cluster.public_network"] = ""
     with patch.object(Client, "read", read_passed):
         create_cluster.run()
-    param['TendrlContext.sds_name'] = "gluster"
-    with patch.object(Client, "read", read_failed):
-        with pytest.raises(KeyError):
-            create_cluster.run()

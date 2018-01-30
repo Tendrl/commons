@@ -49,11 +49,11 @@ def test_expand_cluster():
         "tendrl.commons.tests.fixtures.plugin").Plugin()
     with patch.object(Client, "read", return_value=maps.NamedDict(
         value="Test")):
-        with patch.object(json, "loads", return_value=[]):
+        with patch.object(json, "loads", return_value={"mons": []}):
             ceph_help.expand_cluster(param)
     with patch.object(Client, "read", return_value=maps.NamedDict(
         value="Test")):
-        with patch.object(json, "loads", return_value=[]):
+        with patch.object(json, "loads", return_value={"mons": []}):
             with patch.object(create_ceph_help, 'install_packages') as mock_fn:
                 mock_fn.return_value = ['test_osd_ip'], []
 
@@ -70,6 +70,6 @@ def test_existing_mons():
     param['TendrlContext.integration_id'] = "test_integration_id"
     with patch.object(Client, "read", return_value=maps.NamedDict(
             value="Test")):
-        with patch.object(json, "loads", return_value=[maps.NamedDict(
-                addr="10:10:10:10")]):
+        with patch.object(json, "loads", return_value=maps.NamedDict(
+            mons=[maps.NamedDict(addr="10:10:10:10")])):
             ceph_help.existing_mons(param)

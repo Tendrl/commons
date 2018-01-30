@@ -715,6 +715,7 @@ namespace.tendrl:
           - brick_utilization
         status:
           - brick_status
+          - node_status
       enabled: true
       value: alerting/nodes/$Alert.node_id/$Alert.alert_id
       list: alerting/nodes/$Alert.node_id
