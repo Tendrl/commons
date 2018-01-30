@@ -787,10 +787,11 @@ namespace.tendrl:
           - rebalance_status_update_failed
           - georep_checkpoint_completed
           - quorum
-          - svc_connection
+          - svc_connecion
           - ec_min_bricks_up
           - afr_quorum_state
           - afr_subvol_state
+          - georep_status
       enabled: true
       value: alerting/clusters/$Alert.tags['integration_id']/$Alert.alert_id
       list: alerting/clusters/$Alert.tags['integration_id']
