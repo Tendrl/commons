@@ -1,8 +1,10 @@
 import __builtin__
 import maps
+from mock import patch
 
 from tendrl.commons.objects.cluster_node_context import ClusterNodeContext
 from tendrl.commons.tests.fixtures.nodecontext import NodeContext
+from tendrl.commons.utils import etcd_utils
 
 
 def load(*args):
@@ -28,8 +30,8 @@ def test_constructor(monkeypatch):
     NS.node_context = NodeContext()
     cluster_node_context = ClusterNodeContext()
     assert cluster_node_context.status
-    cluster_node_context = ClusterNodeContext("Test machine id")
-    assert cluster_node_context.machine_id == "Test machine id"
+    cluster_node_context = ClusterNodeContext()
+    assert cluster_node_context.node_id == 1
 
 
 # Testing render
