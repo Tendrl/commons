@@ -30,8 +30,12 @@ def emit_event(resource, curr_value, msg, instance,
     )
     if "entity_type" in tags:
         if tags["entity_type"] == BRICK_ENTITY:
-            alert['node_id'] = NS.node_context.node_id
-            alert['tags']['fqdn'] = NS.node_context.fqdn
+            alert['node_id'] = tags.get(
+                "node_id", NS.node_context.node_id
+            )
+            alert['tags']['fqdn'] = tags.get(
+                "fqdn", NS.node_context.fqdn
+            )
             alert['tags']['volume_name'] = tags.get(
                 'volume_name', None
             )
