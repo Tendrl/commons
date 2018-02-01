@@ -1114,4 +1114,19 @@ namespace.tendrl:
       value: /nodes/{0}/alert_counters
       list: /nodes/{0}/alert_counters
       help: "Node Alert Counter"
+    ClusterNodeAlertCounters:
+      enabled: True
+      attrs:
+        warning_count:
+          help: "Count of warning alerts for the cluster node"
+          type: int
+        node_id:
+          help: "Id of the node"
+          type: String
+        integration_id:
+          help: "Integration Id of the cluster"
+          type: String
+      value: /clusters/{0}/nodes/{1}/alert_counters
+      list: /clusters/{0}/nodes/{1}/alert_counters
+      help: "Cluster Alert Counter"
 tendrl_schema_version: 0.3
