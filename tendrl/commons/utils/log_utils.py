@@ -25,7 +25,8 @@ def log(log_priority, publisher_id, log_payload, job_id=None,
         Event(
             Message(
                 log_priority, publisher_id, log_payload,
-                job_id, flow_id, parent_id, cluster_id,
+                job_id, flow_id, parent_id,
+                cluster_id or NS.tendrl_context.integration_id,
                 caller=caller_details
             )
         )
