@@ -1,7 +1,6 @@
 import __builtin__
 import maps
 import mock
-from mock import patch
 import pytest
 
 

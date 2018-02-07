@@ -1,8 +1,8 @@
 import __builtin__
 import etcd
 import maps
-import pytest
 from mock import patch
+import pytest
 import time
 
 
@@ -38,7 +38,7 @@ def test_wreconnect(patch_client):
     wreconnect()
     with patch.object(etcd, 'Client', client):
         with patch.object(time, 'sleep', sleep):
-            with pytest.raises(etcd.EtcdException) as ex:
+            with pytest.raises(etcd.EtcdException):
                 wreconnect()
 
 
@@ -54,5 +54,5 @@ def test_reconnect(patch_client):
     reconnect()
     with patch.object(etcd, 'Client', client):
         with patch.object(time, 'sleep', sleep):
-            with pytest.raises(etcd.EtcdException) as ex:
+            with pytest.raises(etcd.EtcdException):
                 reconnect()

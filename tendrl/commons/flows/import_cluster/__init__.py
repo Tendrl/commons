@@ -13,18 +13,6 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
         if "Node[]" not in self.parameters:
             integration_id = self.parameters['TendrlContext.integration_id']
-            _cluster_import_status = "clusters/%s/import_status" % \
-                                     integration_id
-            _cluster_import_job_id = "clusters/%s/import_job_id" % \
-                                     integration_id
-
-            # If cluster.import_status="failed", allow retries
-            #try:
-            #    NS._int.wclient.delete(_cluster_import_status,
-            #                           prevValue="failed")
-            #    NS._int.wclient.delete(_cluster_import_job_id)
-            #except (etcd.EtcdKeyNotFound, etcd.EtcdCompareFailed):
-            #    pass
 
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
@@ -54,14 +42,14 @@ class ImportCluster(flows.BaseFlow):
                                                "integration_id "
                                                "(%s) not found, cannot "
                                                "import" % integration_id)
-            else:                
+            else:
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
                 _cluster.enable_volume_profiling = self.parameters[
                     'Cluster.enable_volume_profiling']
                 _cluster.save()
-                
+
                 # Try to claim "provisioner/:integration_id" tag
                 try:
                     _tag = "provisioner/%s" % _cluster.integration_id
@@ -81,9 +69,7 @@ class ImportCluster(flows.BaseFlow):
                         NS.node_context.save()
                 except etcd.EtcdAlreadyExist:
                     pass
-                
 
-                        
         try:
             super(ImportCluster, self).run()
         except (FlowExecutionFailedError,

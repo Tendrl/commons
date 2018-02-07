@@ -15,12 +15,16 @@ class NodeAlertCounters(objects.BaseObject):
         self.value = '/nodes/{0}/alert_counters'
 
     def render(self):
-        self.value = self.value.format(self.node_id or NS.node_context.node_id)
+        self.value = self.value.format(
+            self.node_id or NS.node_context.node_id
+        )
         return super(NodeAlertCounters, self).render()
 
     def save(self, *args, **kwargs):
         if NS.tendrl_context.integration_id:
-            NS.tendrl.objects.ClusterNodeAlertCounters(warn_count=self.warning_count,
-                                                       node_id=self.node_id,
-                                                       integration_id=NS.tendrl_context.integration_id).save()
+            NS.tendrl.objects.ClusterNodeAlertCounters(
+                warn_count=self.warning_count,
+                node_id=self.node_id,
+                integration_id=NS.tendrl_context.integration_id
+            ).save()
         super(NodeAlertCounters, self).save(*args, **kwargs)

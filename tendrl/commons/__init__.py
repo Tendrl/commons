@@ -4,8 +4,6 @@ import importlib
 import inspect
 import maps
 import pkgutil
-import sys
-import time
 
 from tendrl.commons import flows
 from tendrl.commons import objects
@@ -274,7 +272,8 @@ class TendrlNS(object):
             while not NS._int.wclient:
                 try:
                     NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
-                    # Wrap etd client's read/write/delete to auto-reconnect all the times
+                    # Wrap etd client's read/write/delete to
+                    # auto-reconnect all the times
                     NS._int.wclient._read = NS._int.wclient.read
                     NS._int.wclient.read = cs_utils.read
                     NS._int.wclient._write = NS._int.wclient.write
@@ -288,7 +287,8 @@ class TendrlNS(object):
             while not NS._int.client:
                 try:
                     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
-                    # Wrap etd client's read/write/delete to auto-reconnect all the times
+                    # Wrap etd client's read/write/delete to
+                    # auto-reconnect all the times
                     NS._int.client._read = NS._int.client.read
                     NS._int.client.read = cs_utils.read
                     NS._int.client._write = NS._int.client.write

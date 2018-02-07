@@ -1,15 +1,11 @@
 import os
-import uuid
 
 import pkg_resources
 from ruamel import yaml
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils import cmd_utils
-from tendrl.commons.utils import log_utils
+from tendrl.commons.utils import log_utils as logger
 
 
 def import_gluster(parameters):
@@ -32,16 +28,15 @@ def import_gluster(parameters):
     else:
         return False
 
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Installing tendrl-gluster-integration on "
-                                "Node %s" % NS.node_context.fqdn
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {
+            'message': "Installing tendrl-gluster-integration on "
+            "Node %s" % NS.node_context.fqdn
+        },
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id'],
     )
 
     try:
@@ -58,48 +53,43 @@ def import_gluster(parameters):
     try:
         out, err = runner.run()
         if out['rc'] != 0:
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Could not install "
-                                   "tendrl-gluster-integration on Node %s"
-                                   "Error: %s" %
-                                   (NS.node_context.fqdn, out['msg'])
-                    }
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {
+                    "message": "Could not install "
+                    "tendrl-gluster-integration on Node %s"
+                    "Error: %s" %
+                    (NS.node_context.fqdn, out['msg'])
+                },
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
             )
             return False
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="error",
-                publisher=NS.publisher_id,
-                payload={"message": "Error: Could not install "
-                                    "tendrl-gluster-integration on Node %s" %
-                                    NS.node_context.fqdn
-                         }
-            )
-        )
-
-        return False
-
-    Event(
-        Message(
+        logger.log(
+            "error",
+            NS.publisher_id,
+            {
+                "message": "Error: Could not install "
+                "tendrl-gluster-integration on Node %s" %
+                NS.node_context.fqdn
+            },
             job_id=parameters['job_id'],
             flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Generating configuration for "
-                                "tendrl-gluster-integration on Node %s" %
-                                NS.node_context.fqdn
-                     }
         )
+        return False
+
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {
+            "message": "Generating configuration for "
+            "tendrl-gluster-integration on Node %s" %
+            NS.node_context.fqdn
+        },
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id'],
     )
 
     with open(logging_config_file_path + logging_file_name,
@@ -108,15 +98,16 @@ def import_gluster(parameters):
     gluster_integration_tag = NS.compiled_definitions.get_parsed_defs()[
         'namespace.tendrl'
     ]['tags']['tendrl-gluster-integration']
-    config_data = {"etcd_port": int(NS.config.data['etcd_port']),
-                   "etcd_connection": str(NS.config.data['etcd_connection']),
-                   "log_cfg_path": (logging_config_file_path +
-                                    logging_file_name),
-                   "log_level": "DEBUG",
-                   "logging_socket_path": "/var/run/tendrl/message.sock",
-                   "sync_interval": int(NS.config.data['sync_interval']),
-                   "tags": [gluster_integration_tag]
-                   }
+    config_data = {
+        "etcd_port": int(NS.config.data['etcd_port']),
+        "etcd_connection": str(NS.config.data['etcd_connection']),
+        "log_cfg_path": (logging_config_file_path +
+                         logging_file_name),
+        "log_level": "DEBUG",
+        "logging_socket_path": "/var/run/tendrl/message.sock",
+        "sync_interval": int(NS.config.data['sync_interval']),
+        "tags": [gluster_integration_tag]
+    }
     etcd_ca_cert_file = NS.config.data.get("etcd_ca_cert_file")
     etcd_cert_file = NS.config.data.get("etcd_cert_file")
     etcd_key_file = NS.config.data.get("etcd_key_file")
@@ -138,16 +129,15 @@ def import_gluster(parameters):
     with open(_gluster_integration_conf_file_path,
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Running tendrl-gluster-integration on Node "
-                                "%s" % NS.node_context.fqdn
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {
+            "message": "Running tendrl-gluster-integration on Node "
+            "%s" % NS.node_context.fqdn
+        },
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id'],
     )
     os.chmod(_gluster_integration_conf_file_path, 0o640)
 
@@ -157,34 +147,30 @@ def import_gluster(parameters):
         )
         err, out, rc = command.run()
         if err:
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Could not enable gluster-integration"
-                        " service. Error: %s" % err
-                    }
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {
+                    "message": "Could not enable gluster-integration"
+                    " service. Error: %s" % err
+                },
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id'],
             )
             return False
 
     cmd = cmd_utils.Command(_cmd)
     err, out, rc = cmd.run()
     if err:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="error",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Could not start gluster-integration"
-                    " service. Error: %s" % err
-                }
-            )
+        logger.log(
+            "error",
+            NS.publisher_id,
+            {
+                "message": "Could not start gluster-integration"
+                " service. Error: %s" % err
+            },
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id'],
         )
         return False
 

@@ -98,7 +98,7 @@ def test_list_modules_in_package_path():
                                                  ns_objects_prefix)
 
     # TO-DISCUSS : modules is hard coded and might change in future
-    assert len(ret) == len(modules)
+    assert len(ret) == len(modules) + 1
     ret = tendrlNS._list_modules_in_package_path("test", "test")
     assert len(ret) == 0
 

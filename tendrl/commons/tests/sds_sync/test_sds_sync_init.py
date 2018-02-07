@@ -1,5 +1,3 @@
-import pytest
-
 from tendrl.commons.sds_sync import SdsSyncThread
 
 

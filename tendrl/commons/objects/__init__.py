@@ -51,9 +51,10 @@ class BaseObject(object):
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for namespace.%s.objects"
-                             ".%s \n" % (self._ns.ns_name,
-                                      self.__class__.__name__))
+            sys.stdout.write(
+                "Load definitions (.yml) for namespace.%s.objects"
+                ".%s \n" % (self._ns.ns_name, self.__class__.__name__)
+            )
         try:
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
@@ -127,8 +128,10 @@ class BaseObject(object):
                     )
                 )
             except KeyError:
-                sys.stdout.write("Writing %s to %s \n" % (item['key'],
-                                                       item['value']))
+                sys.stdout.write(
+                    "Writing %s to %s \n" %
+                    (item['key'], item['value'])
+                )
             # convert list, dict (json) to python based on definitions
             _type = self._defs.get("attrs", {}).get(item['name'],
                                                     {}).get("type")
@@ -411,19 +414,26 @@ class BaseAtom(object):
                 )
             )
         except KeyError:
-            sys.stdout.write("Load definitions (.yml) for "
-                             "namespace.%s.objects.%s."
-                             "atoms.%s \n" % (self._ns.ns_name, self.obj.__name__,
-                                           self.__class__.__name__))
+            sys.stdout.write(
+                "Load definitions (.yml) for "
+                "namespace.%s.objects.%s."
+                "atoms.%s \n" %
+                (self._ns.ns_name, self.obj.__name__,
+                 self.__class__.__name__)
+            )
         try:
-            return self._ns.get_atom_definition(self.obj.__name__,
-                                                self.__class__.__name__)
+            return self._ns.get_atom_definition(
+                self.obj.__name__,
+                self.__class__.__name__
+            )
         except KeyError as ex:
             msg = "Could not find definitions (.yml) for" \
-                  "namespace.%s.objects.%s.atoms.%s" % (self._ns.ns_src,
-                                                        self.obj.__name__,
-                                                        self.__class__.__name__
-                                                        )
+                  "namespace.%s.objects.%s.atoms.%s" % \
+                  (
+                      self._ns.ns_src,
+                      self.obj.__name__,
+                      self.__class__.__name__
+                  )
             try:
                 Event(
                     ExceptionMessage(
