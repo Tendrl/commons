@@ -3,7 +3,6 @@ import etcd
 import maps
 import mock
 from mock import patch
-import pytest
 from ruamel import yaml
 import tempfile
 
@@ -11,7 +10,6 @@ from tendrl.commons.flows.import_cluster import ceph_help
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import ansible_module_runner
-from tendrl.commons.utils import cmd_utils
 
 '''Dummy Functions'''
 
@@ -71,7 +69,7 @@ def init(patch_get_node_id, patch_read, patch_client):
 @patch.object(yaml, "dump")
 def test_import_ceph(dump):
     dump.return_value = None
-    tendrlNS = init()
+    init()
     parameters = maps.NamedDict(job_id=1, flow_id=1)
     assert ceph_help.import_ceph(parameters) is False
     NS.config.data['package_source_type'] = 'pip'
@@ -80,6 +78,6 @@ def test_import_ceph(dump):
         assert ret is False
     NS.config.data['package_source_type'] = 'rpm'
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
-                      return_value=({"rc" : 0, "msg": None}, None)):
-        with patch.object(__builtin__,'open',open) as mock_open:
+                      return_value=({"rc": 0, "msg": None}, None)):
+        with patch.object(__builtin__, 'open', open):
             ret = ceph_help.import_ceph(parameters)

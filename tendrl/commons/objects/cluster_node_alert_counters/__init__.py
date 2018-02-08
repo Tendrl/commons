@@ -13,7 +13,8 @@ class ClusterNodeAlertCounters(objects.BaseObject):
         super(ClusterNodeAlertCounters, self).__init__(*args, **kwargs)
         self.warning_count = warn_count
         self.node_id = node_id or NS.node_context.node_id
-        self.integration_id = integration_id or NS.tendrl_context.integration_id
+        self.integration_id = \
+            integration_id or NS.tendrl_context.integration_id
         self.value = 'clusters/{0}/nodes/{1}/alert_counters'
 
     def render(self):

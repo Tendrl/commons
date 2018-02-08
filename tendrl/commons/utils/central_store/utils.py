@@ -1,8 +1,9 @@
+# flake8:noqa
 import datetime
 import etcd
 import sys
-import time
 import thread
+import time
 
 from tendrl.commons.utils.central_store import fields
 
@@ -25,7 +26,7 @@ def to_tendrl_field(name, value, tendrl_type=None):
 
 def wreconnect():
     sys.stderr.write("Error connecting to central store (etcd), trying "
-                "again...")
+                     "again...")
     time.sleep(2)
     NS._int.wclient = None
     NS._int.wclient = etcd.Client(**NS._int.etcd_kwargs)
@@ -39,7 +40,7 @@ def wreconnect():
 
 def reconnect():
     sys.stderr.write("Error connecting to central store (etcd), trying "
-                "again...")
+                     "again...")
     time.sleep(2)
     NS._int.client = None
     NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
@@ -59,8 +60,9 @@ def read(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             reconnect()
-    
-    thread.interrupt_main() 
+
+    thread.interrupt_main()
+
 
 def write(*args, **kws):
     _tries = 0
@@ -70,8 +72,9 @@ def write(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             wreconnect()
-            
-    thread.interrupt_main() 
+
+    thread.interrupt_main()
+
 
 def delete(*args, **kws):
     _tries = 0
@@ -81,5 +84,5 @@ def delete(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             wreconnect()
-            
-    thread.interrupt_main() 
+
+    thread.interrupt_main()

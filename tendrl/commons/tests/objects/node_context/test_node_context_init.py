@@ -4,7 +4,6 @@ import maps
 import mock
 from mock import patch
 import os
-import pytest
 import tempfile
 
 from tendrl.commons.objects.node_context import NodeContext
@@ -60,7 +59,7 @@ def test_get_node_id(patch_read, patch_client):
                 mock.mock_open(
                     read_data="8eccbee-1e88-4232-9877-61d0ea595930"
                               "").return_value]
-            NodeContext()    
+            NodeContext()
 
 
 @patch.object(etcd, "Client")

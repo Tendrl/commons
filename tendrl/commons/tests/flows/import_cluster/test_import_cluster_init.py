@@ -1,12 +1,9 @@
 import __builtin__
 import etcd
-import importlib
 import maps
 import mock
 from mock import patch
 import pytest
-import tempfile
-
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster import ImportCluster
@@ -15,11 +12,6 @@ from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
-from tendrl.commons.tests.fixtures.client import Client
-from tendrl.commons.utils import ansible_module_runner
-
-
-'''Dummy Functions'''
 
 
 def get_obj_definition(*args, **kwargs):
@@ -82,13 +74,13 @@ def read(key):
     if key == 'indexes/tags/tendrl/integration/None':
         raise etcd.EtcdKeyNotFound
     else:
-        return maps.NamedDict(value = u'["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]')
+        return maps.NamedDict(
+            value=u'["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]'
+        )
 
 
 def save(*args):
     pass
-
-'''Unit Test Cases'''
 
 
 @patch.object(etcd, "Client")
@@ -121,7 +113,7 @@ def init(patch_get_node_id, patch_read, patch_client):
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
-    tendrlNS = init()
+    init()
     param = maps.NamedDict()
     param['TendrlContext.integration_id'] = None
     param['Cluster.enable_volume_profiling'] = 'yes'
@@ -130,16 +122,17 @@ def test_run():
     with patch.object(objects.BaseObject, 'load', return_fail):
         with pytest.raises(FlowExecutionFailedError):
             import_cluster.run()
-    param['TendrlContext.integration_id'] = '94ac63ba-de73-4e7f-8dfa-9010d9554084'
+    param['TendrlContext.integration_id'] = \
+        '94ac63ba-de73-4e7f-8dfa-9010d9554084'
     import_cluster._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
-            with patch.object(Cmd,'run',return_value = True):
+            with patch.object(Cmd, 'run', return_value=True):
                 with patch.object(objects.BaseObject, 'load', return_pass):
                     import_cluster.run()
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
-            with patch.object(Cmd,'run',return_value = False):
+            with patch.object(Cmd, 'run', return_value=False):
                 with patch.object(objects.BaseObject, 'load', return_pass):
                     with pytest.raises(AtomExecutionFailedError):
                         import_cluster.run()

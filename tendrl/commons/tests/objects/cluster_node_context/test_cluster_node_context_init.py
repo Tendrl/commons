@@ -1,10 +1,8 @@
 import __builtin__
 import maps
-from mock import patch
 
 from tendrl.commons.objects.cluster_node_context import ClusterNodeContext
 from tendrl.commons.tests.fixtures.nodecontext import NodeContext
-from tendrl.commons.utils import etcd_utils
 
 
 def load(*args):

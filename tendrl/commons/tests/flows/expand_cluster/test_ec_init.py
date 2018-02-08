@@ -6,16 +6,12 @@ import mock
 from mock import patch
 import pytest
 
-
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import ExpandCluster
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.tests.fixtures.client import Client
-
-
-'''Dummy Functions'''
 
 
 def read_failed(*args):
@@ -33,11 +29,9 @@ def read_passed(*args):
         else:
             return maps.NamedDict(value="finished")
 
+
 def get_parsed_defs():
-    return {"namespace.tendrl" : {"supported_sds" : "ceph"}}
-
-
-'''Unit Test Cases'''
+    return {"namespace.tendrl": {"supported_sds": "ceph"}}
 
 
 @patch.object(etcd, "Client")
