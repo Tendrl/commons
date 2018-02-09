@@ -17,3 +17,6 @@ class Client(object):
 
     def refresh(self):
         pass
+
+    def delete(self):
+        pass
