@@ -25,8 +25,7 @@ def emit_event(resource, curr_value, msg, instance,
         plugin_instance=instance,
         message=msg,
         integration_id=integration_id or NS.tendrl_context.integration_id,
-        cluster_name=cluster_name or NS.tendrl_context.cluster_name,
-        sds_name=sds_name or NS.tendrl_context.sds_name,
+        cluster_name=cluster_name or NS.tendrl_context.cluster_name
     )
     if "entity_type" in tags:
         if tags["entity_type"] == BRICK_ENTITY:

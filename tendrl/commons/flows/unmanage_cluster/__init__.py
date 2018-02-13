@@ -1,6 +1,3 @@
-import etcd
-import time
-
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects import AtomExecutionFailedError
@@ -15,13 +12,18 @@ class UnmanageCluster(flows.BaseFlow):
         _cluster = NS.tendrl.objects.Cluster(
             integration_id=integration_id
         ).load()
-        if _cluster.status is not None and \
-            _cluster.status != "" and \
-            _cluster.status in \
-            ['syncing', 'importing', 'unmanaging']:
+        if _cluster.is_managed == "no":
+            if _cluster.current_job['job_name'] == self.__class__.__name__ \
+                and _cluster.current_job['status'] == 'finished':
+                    raise FlowExecutionFailedError(
+                        "Cluster is already in un-managed state"
+                    )
+        if ('job_id' in _cluster.locked_by and
+            _cluster.locked_by['job_id'] != "") or \
+            _cluster.status in ['importing', 'unmanaging']:
             raise FlowExecutionFailedError(
-                "Another job in progress for cluster"
-                "please wait till the job finishes "
+                "Another job in progress for cluster."
+                " Please wait till the job finishes "
                 "(job_id: %s) (integration_id: %s) " %
                 (
                     _cluster.current_job['job_id'],
@@ -29,6 +31,15 @@ class UnmanageCluster(flows.BaseFlow):
                 )
             )
 
+        _lock_details = {
+            'node_id': NS.node_context.node_id,
+            'fqdn': NS.node_context.fqdn,
+            'tags': NS.node_context.tags,
+            'type': NS.type,
+            'job_name': self.__class__.__name__,
+            'job_id': self.job_id
+        }
+        _cluster.locked_by = _lock_details
         _cluster.status = "unmanaging"
         _cluster.current_job = {
             'job_id': self.job_id,
@@ -39,20 +50,18 @@ class UnmanageCluster(flows.BaseFlow):
 
         try:
             super(UnmanageCluster, self).run()
-            # Wait for cluster to re-appear as detected cluster
-            # as node-agents are still running on the storage nodes
-            while True:
-                try:
-                    _cluster = NS.tendrl.objects.Cluster(
-                        integration_id=integration_id
-                    ).load()
-                    if _cluster.is_managed == "no":
-                        break
-                except etcd.EtcdKeyNotFound:
-                    time.sleep(5)
-                    continue
+            _cluster = NS.tendrl.objects.Cluster(
+                integration_id=integration_id
+            ).load()
             _cluster.status = ""
-            _cluster.current_job['status'] = "done"
+            _cluster.is_managed = "no"
+            _cluster.locked_by = {}
+            _cluster.errors = []
+            _cluster.current_job = {
+                'status': "finished",
+                'job_name': self.__class__.__name__,
+                'job_id': self.job_id
+            }
             _cluster.save()
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
@@ -60,6 +69,7 @@ class UnmanageCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
             ).load()
+            _cluster.locked_by = {}
             _cluster.current_job['status'] = "failed"
             _errors = []
             if hasattr(ex, 'message'):

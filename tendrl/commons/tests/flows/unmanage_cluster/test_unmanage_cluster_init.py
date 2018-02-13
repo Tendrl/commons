@@ -60,6 +60,9 @@ def return_fail(param):
         integration_id='13ced2a7-cd12-4063-bf6c-a8226b0789a0',
         status="unmanaging",
         is_managed='yes',
+        locked_by={
+            'job_id': "uuid"
+        },
         current_job={
             'job_id': "uuid",
             'status': 'in_progress',
@@ -72,7 +75,8 @@ def return_pass(param):
     return NS.tendrl.objects.Cluster(
         integration_id='13ced2a7-cd12-4063-bf6c-a8226b0789a0',
         status=None,
-        is_managed='no'
+        is_managed='yes',
+        locked_by={}
     )
 
 
@@ -98,6 +102,7 @@ def init(patch_get_node_id, patch_read, patch_client):
     patch_client.return_value = etcd.Client()
     setattr(__builtin__, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
+    NS.type = "test"
     NS._int.etcd_kwargs = {
         'port': 1,
         'host': 2,

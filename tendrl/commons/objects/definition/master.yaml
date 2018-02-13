@@ -119,6 +119,8 @@ namespace.tendrl:
           - TendrlContext.integration_id
       pre_run:
         - tendrl.objects.Cluster.atoms.IsClusterManaged
+      post_run:
+        - tendrl.objects.Cluster.atoms.IsClusterImportReady
       run: tendrl.flows.UnmanageCluster
       type: Update
       uuid: 2f94a48a-05d7-408c-b400-e27827f4efed
@@ -191,6 +193,16 @@ namespace.tendrl:
           type: check
           uuid: 333c3333-3c33-33c3-333c-c33cc3c7676c
           help: Check if cluster is managed
+        IsClusterImportReady:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: Check if the cluster is import ready
+          run: tendrl.objects.Cluster.atoms.IsClusterImportReady
+          type: check
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c7678c
+          help: Check if cluster is import ready
         ConfigureMonitoring:
           enabled: true
           name: configure monitoring
@@ -337,6 +349,9 @@ namespace.tendrl:
           type: String
         current_job:
           help: Current job on the cluster
+          type: json
+        locked_by:
+          help: job details which locks the cluster
           type: json
     DetectedCluster:
       enabled: True

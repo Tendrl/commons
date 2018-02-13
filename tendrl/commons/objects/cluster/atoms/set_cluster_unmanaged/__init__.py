@@ -1,7 +1,6 @@
 import etcd
 
 from tendrl.commons import objects
-from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -13,10 +12,11 @@ class SetClusterUnmanaged(objects.BaseAtom):
         integration_id = self.parameters['TendrlContext.integration_id']
 
         try:
-            etcd_utils.write(
-                "/clusters/%s/is_managed" % integration_id,
-                "no"
-            )
+            _cluster = NS.tendrl.objects.Cluster(
+                integration_id=integration_id
+            ).load()
+            _cluster.is_managed = "no"
+            _cluster.save()
         except etcd.EtcdKeyNotFound:
             logger.log(
                 "error",

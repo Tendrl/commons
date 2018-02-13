@@ -7,6 +7,7 @@ class Cluster(objects.BaseObject):
                  conf_overrides=None, node_identifier=None,
                  last_sync=None, is_managed=None, current_job=dict(),
                  status=None, enable_volume_profiling=None, errors=[],
+                 locked_by=None,
                  *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
         self.integration_id = integration_id
@@ -21,6 +22,7 @@ class Cluster(objects.BaseObject):
         self.status = status
         self.enable_volume_profiling = enable_volume_profiling
         self.errors = errors
+        self.locked_by = locked_by
         self.value = 'clusters/{0}'
 
     def render(self):

@@ -158,7 +158,7 @@ class ConfigureMonitoring(objects.BaseAtom):
             integration_id=NS.tendrl_context.integration_id
         ).load()
         _cluster.status = ""
-        _cluster.current_job['status'] = "done"
+        _cluster.current_job['status'] = "finished"
         _cluster.save()
 
         return True

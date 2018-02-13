@@ -1,4 +1,3 @@
-import ast
 import etcd
 
 from tendrl.commons import objects
@@ -11,31 +10,31 @@ class DeleteClusterDetails(objects.BaseAtom):
 
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
-        cluster_tendrl_context = NS.tendrl.objects.ClusterTendrlContext(
-            integration_id=integration_id
-        ).load()
 
         etcd_keys_to_delete = []
         etcd_keys_to_delete.append(
-            "/clusters/%s" % integration_id
+            "/clusters/%s/Peers" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/Bricks" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/Volumes" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/GlobalDetails" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/TendrlContext" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/Utilization" % integration_id
+        )
+        etcd_keys_to_delete.append(
+            "/clusters/%s/raw_map" % integration_id
         )
         etcd_keys_to_delete.append(
             "/alerting/clusters/%s" % integration_id
-        )
-        etcd_keys_to_delete.append(
-            "/indexes/tags/detected_cluster/%s" %
-            cluster_tendrl_context.cluster_id
-        )
-        etcd_keys_to_delete.append(
-            "/indexes/tags/detected_cluster_id_to_integration_id/%s" %
-            cluster_tendrl_context.cluster_id
-        )
-        etcd_keys_to_delete.append(
-            "/indexes/tags/provisioner/%s" % integration_id
-        )
-        etcd_keys_to_delete.append(
-            "/indexes/tags/tendrl/integration/%s" %
-            integration_id
         )
         nodes = NS._int.client.read(
             "/clusters/%s/nodes" % integration_id
@@ -91,22 +90,5 @@ class DeleteClusterDetails(objects.BaseAtom):
                     flow_id=self.parameters['flow_id'],
                 )
                 continue
-
-        # Load the gluster servers list and remove
-        # the cluster nodes
-        try:
-            gl_srvr_list = NS._int.client.read(
-                "/indexes/tags/gluster/server"
-            ).value
-            gl_srvr_list = ast.literal_eval(gl_srvr_list)
-            for node_id in node_ids:
-                if node_id in gl_srvr_list:
-                    gl_srvr_list.remove(node_id)
-            NS._int.client.write(
-                "/indexes/tags/gluster/server",
-                gl_srvr_list
-            )
-        except etcd.EtcdKeyNotFound:
-            pass
 
         return True
