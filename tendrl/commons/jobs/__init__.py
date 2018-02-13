@@ -12,10 +12,10 @@ from pytz import utc
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import alert_utils
+from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
 
@@ -28,12 +28,10 @@ class JobConsumerThread(threading.Thread):
         self._complete = threading.Event()
 
     def run(self):
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": "%s running" % self.__class__.__name__}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": "%s running" % self.__class__.__name__}
         )
         while not self._complete.is_set():
             _job_sync_interval = 5
@@ -154,12 +152,10 @@ def process_job(job):
                    (NS.node_context.node_id, NS.type,
                     NS.node_context.tags, jid,
                     _job_tags)
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": _msg}
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": _msg}
             )
             return
 
@@ -192,28 +188,22 @@ def process_job(job):
 
             the_flow = runnable_flow(parameters=job.payload[
                 'parameters'], job_id=job.job_id)
-            Event(
-                Message(
-                    job_id=job.job_id,
-                    flow_id=the_flow.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Processing Job %s" %
-                                        job.job_id
-                             }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Processing Job %s" %
+                            job.job_id},
+                job_id=job.job_id,
+                flow_id=the_flow.parameters['flow_id']
             )
 
-            Event(
-                Message(
-                    job_id=job.job_id,
-                    flow_id=the_flow.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Running Flow %s" %
-                                        job.payload['run']
-                             }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Running Flow %s" %
+                            job.payload['run']},
+                job_id=job.job_id,
+                flow_id=the_flow.parameters['flow_id']
             )
             the_flow.run()
             try:
@@ -226,18 +216,15 @@ def process_job(job):
                        "current job status invalid"
                 raise FlowExecutionFailedError(_msg)
 
-            Event(
-                Message(
-                    job_id=job.job_id,
-                    flow_id=the_flow.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Job (%s):  Finished "
-                                        "Flow %s" % (
-                                            job.job_id,
-                                            job.payload['run'])
-                             }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Job (%s):  Finished "
+                            "Flow %s" % (
+                                job.job_id,
+                                job.payload['run'])},
+                job_id=job.job_id,
+                flow_id=the_flow.parameters['flow_id'],
             )
             if job.payload.get('parent') is None:
                 alert_utils.alert_job_status(
@@ -268,22 +255,18 @@ def process_job(job):
                 )
             )
             if the_flow:
-                Event(
-                    Message(
-                        job_id=job.job_id,
-                        flow_id=the_flow.parameters['flow_id'],
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={"message": _msg + "\n" + _trace}
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": _msg + "\n" + _trace},
+                    job_id=job.job_id,
+                    flow_id=the_flow.parameters['flow_id']
                 )
             else:
-                Event(
-                    Message(
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={"message": _msg + "\n" + _trace}
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": _msg + "\n" + _trace}
                 )
 
             try:

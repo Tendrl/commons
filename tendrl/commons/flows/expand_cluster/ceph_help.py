@@ -1,24 +1,20 @@
 import json
 import socket
 
-from tendrl.commons.event import Event
 from tendrl.commons.flows.create_cluster import \
     ceph_help as create_ceph_help
-from tendrl.commons.message import Message
+from tendrl.commons.utils import log_utils as logger
 
 
 def expand_cluster(parameters):
     # install the packages
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Installing Ceph Packages %s" %
-                                parameters['TendrlContext.integration_id']
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Installing Ceph Packages %s" %
+                    parameters['TendrlContext.integration_id']},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
     mon_ips, osd_ips = create_ceph_help.install_packages(parameters)
 
@@ -27,46 +23,34 @@ def expand_cluster(parameters):
 
     # If mons passed create add them
     if len(mon_ips) > 0:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Creating Ceph Monitors %s" %
-                    parameters['TendrlContext.integration_id']
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Creating Ceph Monitors %s" %
+             parameters['TendrlContext.integration_id']},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
         created_mons = create_mons(parameters, mon_ips, created_mons)
 
     # If osds passed create and add them
     if len(osd_ips) > 0:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Creating Ceph OSD %s" %
-                    parameters['TendrlContext.integration_id']
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Creating Ceph OSD %s" %
+             parameters['TendrlContext.integration_id']},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
         create_ceph_help.create_osds(parameters, created_mons)
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Created OSD on Cluster %s" %
-                    parameters['TendrlContext.integration_id']
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Created OSD on Cluster %s" %
+             parameters['TendrlContext.integration_id']},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
 
 
@@ -87,19 +71,14 @@ def create_mons(parameters, mon_ips, created_mons):
             created_mons,
             mon_secret=mon_secret
         )
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Creating Ceph MON %s, ceph-installer task "
-                               "%s" % (mon_ip, task_id)
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Creating Ceph MON %s, ceph-installer task "
+                        "%s" % (mon_ip, task_id)},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
-
         create_ceph_help.wait_for_task(task_id)
         created_mons.append({"address": mon_ip, "host": mon_ip})
     return created_mons

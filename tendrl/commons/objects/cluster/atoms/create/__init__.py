@@ -5,9 +5,9 @@ from tendrl.commons.flows.create_cluster.ceph_help import create_ceph
 from tendrl.commons.flows.create_cluster.gluster_help import create_gluster
 from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import log_utils as logger
 
 
 class Create(objects.BaseAtom):
@@ -48,17 +48,14 @@ class Create(objects.BaseAtom):
                             _failed), integration_id))
                 if all([status == "finished" for status in
                         all_status.values()]):
-                    Event(
-                        Message(
-                            job_id=self.parameters['job_id'],
-                            flow_id=self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={"message": "SSH setup completed for all "
-                                                "nodes in cluster %s" %
-                                                integration_id
-                                     }
-                        )
+                    logger.log(
+                        "info",
+                        NS.publisher_id,
+                        {"message": "SSH setup completed for all "
+                                    "nodes in cluster %s" %
+                                    integration_id},
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id']
                     )
                     # set this node as gluster provisioner
                     if "gluster" in self.parameters["TendrlContext.sds_name"]:
@@ -69,46 +66,37 @@ class Create(objects.BaseAtom):
                         NS.node_context.save()
                     break
 
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Starting SDS install and config %s"
-                                        % integration_id
-                             }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Starting SDS install and config %s"
+                            % integration_id},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
 
             # SSH setup jobs finished above, now install sds bits and create
             #  cluster
             if "ceph" in sds_name:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Creating Ceph Storage Cluster "
-                                            "%s" % integration_id
-                                 }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Creating Ceph Storage Cluster "
+                                "%s" % integration_id},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
 
                 self.parameters.update({'create_mon_secret': True})
                 create_ceph(self.parameters)
             else:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Creating Gluster Storage "
-                                            "Cluster %s" % integration_id
-                                 }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Creating Gluster Storage "
+                                "Cluster %s" % integration_id},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
 
                 create_gluster(self.parameters)

@@ -3,10 +3,9 @@ import time
 import etcd
 
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import log_utils as logger
 
 
 class CheckClusterAvailable(objects.BaseAtom):
@@ -33,18 +32,14 @@ class CheckClusterAvailable(objects.BaseAtom):
             retry_count += 1
             time.sleep(1)
             if retry_count == 600:
-                Event(
-                    Message(
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Cluster data sync still incomplete. "
-                                       "Timing out"
-                        },
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        cluster_id=NS.tendrl_context.integration_id,
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Cluster data sync still incomplete. "
+                                "Timing out"},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id'],
+                    integration_id=NS.tendrl_context.integration_id
                 )
                 raise AtomExecutionFailedError(
                     "Cluster data sync still incomplete. Timing out"

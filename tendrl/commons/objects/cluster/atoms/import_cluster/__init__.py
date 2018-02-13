@@ -7,9 +7,9 @@ from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import log_utils as logger
 
 
 class ImportCluster(objects.BaseAtom):
@@ -52,18 +52,14 @@ class ImportCluster(objects.BaseAtom):
                         Job(job_id=_job_id,
                             status="new",
                             payload=payload).save()
-                        Event(
-                            Message(
-                                job_id=self.parameters['job_id'],
-                                flow_id=self.parameters['flow_id'],
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Importing (job: %s) Node %s "
-                                               "to cluster %s" %
-                                    (_job_id, node, integration_id)
-                                }
-                            )
+                        logger.log(
+                            "info",
+                            NS.publisher_id,
+                            {"message": "Importing (job: %s) Node %s "
+                                        "to cluster %s" %
+                             (_job_id, node, integration_id)},
+                            job_id=self.parameters['job_id'],
+                            flow_id=self.parameters['flow_id']
                         )
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
@@ -75,18 +71,14 @@ class ImportCluster(objects.BaseAtom):
                 'namespace.tendrl'
             ]['min_reqd_gluster_ver']
             req_maj_ver, req_min_ver, req_rel = reqd_gluster_ver.split('.')
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Check: Minimum required version ("
-                                   "%s.%s.%s) of Gluster Storage" %
-                        (req_maj_ver, req_min_ver, req_rel)
-                    }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Check: Minimum required version ("
+                            "%s.%s.%s) of Gluster Storage" %
+                 (req_maj_ver, req_min_ver, req_rel)},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
             ver_check_failed = False
             if int(maj_ver) < int(req_maj_ver):
@@ -97,21 +89,17 @@ class ImportCluster(objects.BaseAtom):
                         ver_check_failed = True
 
             if ver_check_failed:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Error: Minimum required version "
-                                       "(%s.%s.%s) "
-                            "doesnt match that of detected Gluster "
-                                       "Storage (%s.%s.%s)" %
-                            (req_maj_ver, req_min_ver, req_rel,
-                             maj_ver, min_ver, 0)
-                        }
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Error: Minimum required version "
+                                "(%s.%s.%s) "
+                     "doesnt match that of detected Gluster "
+                                "Storage (%s.%s.%s)" %
+                     (req_maj_ver, req_min_ver, req_rel,
+                      maj_ver, min_ver, 0)},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
 
                 raise FlowExecutionFailedError(
@@ -126,18 +114,14 @@ class ImportCluster(objects.BaseAtom):
                 return False
 
             if len(node_list) > 1:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Waiting for participant nodes %s to "
-                                       "be "
-                            "imported %s" % (node_list, integration_id)
-                        }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Waiting for participant nodes %s to "
+                                "be "
+                     "imported %s" % (node_list, integration_id)},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
                 loop_count = 0
                 # Wait for (no of nodes) * 6 minutes for import to complete
@@ -145,18 +129,14 @@ class ImportCluster(objects.BaseAtom):
                 while True:
                     parent_job = Job(job_id=self.parameters['job_id']).load()
                     if loop_count >= wait_count:
-                        Event(
-                            Message(
-                                job_id=self.parameters['job_id'],
-                                flow_id=self.parameters['flow_id'],
-                                priority="info",
-                                publisher=NS.publisher_id,
-                                payload={
-                                    "message": "Import jobs not yet complete "
-                                    "on all nodes. Timing out. (%s, %s)" %
-                                    (str(node_list), integration_id)
-                                }
-                            )
+                        logger.log(
+                            "info",
+                            NS.publisher_id,
+                            {"message": "Import jobs not yet complete "
+                             "on all nodes. Timing out. (%s, %s)" %
+                             (str(node_list), integration_id)},
+                            job_id=self.parameters['job_id'],
+                            flow_id=self.parameters['flow_id']
                         )
                         return False
                     time.sleep(10)

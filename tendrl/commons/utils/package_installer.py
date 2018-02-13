@@ -1,7 +1,6 @@
 from tendrl.commons.utils import ansible_module_runner
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.utils import log_utils as logger
 
 
 class Installer(object):
@@ -17,14 +16,11 @@ class Installer(object):
         elif package_type == "deb":
             self.ansible_module_path = "packaging/os/apt.py"
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Unsupported package type: %s" %
-                                        package_type
-                             }
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Unsupported package type: %s" %
+                            package_type}
             )
             raise ValueError("Unsupported package type: %s" % package_type)
 
@@ -47,23 +43,18 @@ class Installer(object):
 
         try:
             result, err = runner.run()
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "INSTALLATION: %s" % result}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "INSTALLATION: %s" % result}
             )
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Could not install package: %s. Error:"
-                                        " %s" %
-                                        (self.attributes["name"], str(e))
-                             }
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Could not install package: %s. Error:"
+                            " %s" %
+                            (self.attributes["name"], str(e))}
             )
             return e.message, False
         message = result.get("msg", "").encode("ascii")

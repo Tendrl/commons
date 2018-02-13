@@ -11,8 +11,8 @@ from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import gluster_help
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import log_utils as logger
 
 
 class ExpandCluster(flows.BaseFlow):
@@ -60,17 +60,13 @@ class ExpandCluster(flows.BaseFlow):
                             _failed), integration_id))
                 if all([status == "finished" for status in
                         all_status.values()]):
-                    Event(
-                        Message(
-                            job_id=self.parameters['job_id'],
-                            flow_id=self.parameters['flow_id'],
-                            priority="info",
-                            publisher=NS.publisher_id,
-                            payload={
-                                "message": "SSH setup completed for all "
-                                "nodes in cluster %s" % integration_id
-                            }
-                        )
+                    logger.log(
+                        "info",
+                        NS.publisher_id,
+                        {"message": "SSH setup completed for all "
+                         "nodes in cluster %s" % integration_id},
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id']
                     )
 
                     break
@@ -78,46 +74,34 @@ class ExpandCluster(flows.BaseFlow):
             # SSH setup jobs finished above, now install sds
             # bits and create cluster
             if "ceph" in sds_name:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Expanding ceph cluster %s" %
-                                       integration_id
-                        }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Expanding ceph cluster %s" %
+                                integration_id},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
                 ceph_help.expand_cluster(self.parameters)
             else:
-                Event(
-                    Message(
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Expanding Gluster Storage"
-                            " Cluster %s" % integration_id
-                        }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Expanding Gluster Storage"
+                     " Cluster %s" % integration_id},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
                 gluster_help.expand_gluster(self.parameters)
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "SDS install/config completed on newly "
-                        "expanded nodes, Please wait while "
-                        "tendrl-node-agents detect sds details on the newly "
-                        "expanded nodes %s" % self.parameters['Node[]']
-                    }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "SDS install/config completed on newly "
+                 "expanded nodes, Please wait while "
+                 "tendrl-node-agents detect sds details on the newly "
+                 "expanded nodes %s" % self.parameters['Node[]']},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
 
             # Wait till detected cluster in populated for nodes
@@ -192,22 +176,17 @@ class ExpandCluster(flows.BaseFlow):
             Job(job_id=_job_id,
                 status="new",
                 payload=payload).save()
-            Event(
-                Message(
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Please wait while Tendrl imports ("
-                                   "job_id: %s) newly expanded "
-                        "%s storage nodes %s" % (
-                            _job_id,
-                            sds_pkg_name,
-                            integration_id
-                        )
-                    }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Please wait while Tendrl imports ("
+                            "job_id: %s) newly expanded "
+                 "%s storage nodes %s" % (
+                     _job_id,
+                     sds_pkg_name,
+                     integration_id)},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
         except Exception as ex:
             Event(

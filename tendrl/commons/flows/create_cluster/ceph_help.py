@@ -4,67 +4,53 @@ import time
 
 import etcd
 
-
-from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.message import Message
+from tendrl.commons.utils import log_utils as logger
 
 
 def create_ceph(parameters):
     _integration_id = parameters['TendrlContext.integration_id']
     mon_ips, osd_ips = install_packages(parameters)
     # install the packages
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed all "
-                                "ceph packages" % _integration_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) Successfully installed all "
+                    "ceph packages" % _integration_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     # Configure Mons
     created_mons = create_mons(parameters, mon_ips)
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully created and "
-                                "configured all ceph mons" %
-                                _integration_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) Successfully created and "
+                    "configured all ceph mons" %
+                    _integration_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     # Configure osds
     create_osds(parameters, created_mons)
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully created and "
-                                "configured all ceph osds" %
-                                _integration_id}
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) Successfully created and "
+                    "configured all ceph osds" %
+                    _integration_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
-
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) is ready for import by "
-                                "tendrl!" % _integration_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) is ready for import by "
+                    "tendrl!" % _integration_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
 
@@ -80,36 +66,30 @@ def install_packages(parameters):
 
     task_id = plugin.install_mon(mon_ips)
     wait_for_task(task_id)
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed ceph "
-                                "mon packages on all nodes [%s], "
-                                "ceph-installer task %s" %
-                                (parameters['TendrlContext.integration_id'],
-                                 " ".join(mon_ips), task_id)
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) Successfully installed ceph "
+                    "mon packages on all nodes [%s], "
+                    "ceph-installer task %s" %
+                    (parameters['TendrlContext.integration_id'],
+                     " ".join(mon_ips), task_id)},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     task_id = plugin.install_osd(osd_ips)
     wait_for_task(task_id)
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Cluster (%s) Successfully installed ceph "
-                                "osd packages on all nodes [%s], "
-                                "ceph-installer task %s" %
-                                (parameters['TendrlContext.integration_id'],
-                                 " ".join(osd_ips), task_id)
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Cluster (%s) Successfully installed ceph "
+                    "osd packages on all nodes [%s], "
+                    "ceph-installer task %s" %
+                    (parameters['TendrlContext.integration_id'],
+                     " ".join(osd_ips), task_id)},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     return mon_ips, osd_ips
@@ -130,19 +110,15 @@ def create_mons(parameters, mon_ips):
         )
 
         wait_for_task(task_id)
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Cluster (%s) Configured ceph mon %s, "
-                               "ceph-installer task %s" %
-                    (parameters['TendrlContext.integration_id'],
-                     mon_ip, task_id)
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Cluster (%s) Configured ceph mon %s, "
+                        "ceph-installer task %s" %
+             (parameters['TendrlContext.integration_id'],
+              mon_ip, task_id)},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
 
         created_mons.append({"address": mon_ip, "host": mon_ip})
@@ -183,19 +159,16 @@ def create_osds(parameters, created_mons):
             )
 
             wait_for_task(task_id)
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Cluster (%s) Configured ceph osd "
-                                        "%s, ceph-installer task %s" %
-                                        (parameters[
-                                         'TendrlContext.integration_id'],
-                                         config["provisioning_ip"], task_id)
-                             }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Cluster (%s) Configured ceph osd "
+                            "%s, ceph-installer task %s" %
+                            (parameters[
+                             'TendrlContext.integration_id'],
+                             config["provisioning_ip"], task_id)},
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id']
             )
 
             journal_details = {}

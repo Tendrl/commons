@@ -5,8 +5,7 @@ import tempfile
 import ansible.executor.module_common as module_common
 from ansible import modules
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.utils import log_utils as logger
 
 try:
     import json
@@ -36,35 +35,26 @@ class AnsibleRunner(object):
         module_path,
         publisher_id=None,
         node_id=None,
-        socket_path=None,
         **kwargs
     ):
         self.module_path = modules.__path__[0] + "/" + module_path
-        self.socket_path = socket_path or NS.config.data['logging_socket_path']
         self.publisher_id = publisher_id or NS.publisher_id
         self.node_id = node_id or NS.node_context.node_id
         if not os.path.isfile(self.module_path):
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=self.publisher_id,
-                    payload={"message": "Module path: %s does not exist" %
-                                        self.module_path
-                             },
-                    node_id=self.node_id
-                ),
-                socket_path=self.socket_path
+            logger.log(
+                "debug",
+                self.publisher_id,
+                {"message": "Module path: %s does not exist" %
+                    self.module_path},
+                node_id=self.node_id
             )
             raise AnsibleModuleNotFound(module_path=self.module_path)
         if kwargs == {}:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=self.publisher_id,
-                    payload={"message": "Empty argument dictionary"},
-                    node_id=self.node_id
-                ),
-                socket_path=self.socket_path
+            logger.log(
+                "debug",
+                self.publisher_id,
+                {"message": "Empty argument dictionary"},
+                node_id=self.node_id
             )
             raise ValueError
         else:
@@ -84,18 +74,14 @@ class AnsibleRunner(object):
                     task_vars={}
                 )
         except Exception as e:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=self.publisher_id,
-                    payload={"message": "Could not generate ansible "
-                                        "executable data "
-                                        "for module  : %s. Error: %s" %
-                                        (self.module_path, str(e))
-                             },
-                    node_id=self.node_id
-                ),
-                socket_path=self.socket_path
+            logger.log(
+                "debug",
+                self.publisher_id,
+                {"message": "Could not generate ansible "
+                            "executable data "
+                            "for module  : %s. Error: %s" %
+                            (self.module_path, str(e))},
+                node_id=self.node_id
             )
             raise AnsibleExecutableGenerationFailed(
                 module_path=self.module_path,

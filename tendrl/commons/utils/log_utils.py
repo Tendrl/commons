@@ -8,7 +8,7 @@ from tendrl.commons.message import Message
 
 
 def log(log_priority, publisher_id, log_payload, job_id=None,
-        flow_id=None, parent_id=None, cluster_id=None):
+        flow_id=None, parent_id=None, integration_id=None, node_id=None):
     """Function used for logging errors/output/info.
 
     Args:
@@ -26,8 +26,9 @@ def log(log_priority, publisher_id, log_payload, job_id=None,
             Message(
                 log_priority, publisher_id, log_payload,
                 job_id, flow_id, parent_id,
-                cluster_id or NS.tendrl_context.integration_id,
-                caller=caller_details
+                integration_id or NS.tendrl_context.integration_id,
+                caller=caller_details,
+                node_id=node_id
             )
         )
     except Exception:

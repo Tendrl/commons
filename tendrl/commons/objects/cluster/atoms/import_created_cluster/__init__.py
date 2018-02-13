@@ -5,10 +5,9 @@ import uuid
 import etcd
 
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import log_utils as logger
 
 
 class ImportCreatedCluster(objects.BaseAtom):
@@ -18,23 +17,18 @@ class ImportCreatedCluster(objects.BaseAtom):
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
         # Wait till detected cluster in populated for nodes
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "SDS install and config completed, "
-                               "Waiting for tendrl-node-agent to "
-                               "detect newly installed sds details %s %s" % (
-                                   integration_id,
-                                   self.parameters['Node[]']
-                               )
-                }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "SDS install and config completed, "
+                        "Waiting for tendrl-node-agent to "
+                        "detect newly installed sds details %s %s" % (
+                            integration_id,
+                            self.parameters['Node[]']
+                        )},
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id']
         )
-
         while True:
             time.sleep(3)
             all_status = []
@@ -86,18 +80,14 @@ class ImportCreatedCluster(objects.BaseAtom):
         Job(job_id=_job_id,
             status="new",
             payload=payload).save()
-        Event(
-            Message(
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Please wait while Tendrl imports newly "
-                                    "created %s SDS Cluster %s"
-                         " Import job id :%s" % (sds_pkg_name, integration_id,
-                                                 _job_id)
-                         }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Please wait while Tendrl imports newly "
+                        "created %s SDS Cluster %s"
+             " Import job id :%s" % (sds_pkg_name, integration_id,
+                                     _job_id)},
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id']
         )
-
         return True

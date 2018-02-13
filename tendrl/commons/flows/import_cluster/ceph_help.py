@@ -3,9 +3,8 @@ import subprocess
 import pkg_resources
 from ruamel import yaml
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import log_utils as logger
 
 
 def import_ceph(parameters):
@@ -27,16 +26,13 @@ def import_ceph(parameters):
     else:
         return False
 
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Installing tendrl-ceph-integration on Node "
-                                "%s" % NS.node_context.node_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Installing tendrl-ceph-integration on Node "
+                    "%s" % NS.node_context.node_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     try:
@@ -53,32 +49,26 @@ def import_ceph(parameters):
     try:
         runner.run()
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="error",
-                publisher=NS.publisher_id,
-                payload={"message": "Error: Could not install "
-                                    "tendrl-ceph-integration on Node %s" %
-                                    NS.node_context.node_id
-                         }
-            )
+        logger.log(
+            "error",
+            NS.publisher_id,
+            {"message": "Error: Could not install "
+                        "tendrl-ceph-integration on Node %s" %
+                        NS.node_context.node_id},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
 
         return False
 
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Generating configuration for "
-                                "tendrl-ceph-integration on Node %s" %
-                                NS.node_context.node_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Generating configuration for "
+                    "tendrl-ceph-integration on Node %s" %
+                    NS.node_context.node_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     with open(logging_config_file_path + logging_file_name,
@@ -101,16 +91,13 @@ def import_ceph(parameters):
               'w') as outfile:
         yaml.dump(config_data, outfile, default_flow_style=False)
 
-    Event(
-        Message(
-            job_id=parameters['job_id'],
-            flow_id=parameters['flow_id'],
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={"message": "Running tendrl-ceph-integration on Node %s" %
-                                NS.node_context.node_id
-                     }
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "Running tendrl-ceph-integration on Node %s" %
+                    NS.node_context.node_id},
+        job_id=parameters['job_id'],
+        flow_id=parameters['flow_id']
     )
 
     subprocess.Popen(_cmd.split())

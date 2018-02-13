@@ -2,10 +2,8 @@ import abc
 
 import six
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-
 from tendrl.commons import jobs
+from tendrl.commons.utils import log_utils as logger
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -20,12 +18,10 @@ class Manager(object):
         self._message_handler_thread = message_handler_thread
 
     def stop(self):
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": "%s stopping" % self.__class__.__name__}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": "%s stopping" % self.__class__.__name__}
         )
         if self._message_handler_thread is not None:
             self._message_handler_thread.stop()
@@ -34,12 +30,10 @@ class Manager(object):
             self._sds_sync_thread.stop()
 
     def start(self):
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": "%s starting" % self.__class__.__name__}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": "%s starting" % self.__class__.__name__}
         )
         if self._message_handler_thread is not None:
             self._message_handler_thread.start()

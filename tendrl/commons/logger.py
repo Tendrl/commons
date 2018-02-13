@@ -54,8 +54,8 @@ class Logger(object):
     def push_message(self):
         if self.message.priority not in ["info", "debug"]:
             # Storing messages cluster wise
-            if (self.message.cluster_id is not None) and (
-                self.message.cluster_id != ""):
+            if (self.message.integration_id is not None) and (
+                self.message.integration_id != ""):
                 NS.node_agent.objects.ClusterMessage(
                     message_id=self.message.message_id,
                     timestamp=self.message.timestamp,
@@ -63,7 +63,7 @@ class Logger(object):
                     publisher=self.message.publisher,
                     node_id=self.message.node_id,
                     payload=self.message.payload,
-                    cluster_id=self.message.cluster_id,
+                    integration_id=self.message.integration_id,
                     job_id=self.message.job_id,
                     flow_id=self.message.flow_id,
                     parent_id=self.message.parent_id,
@@ -78,7 +78,7 @@ class Logger(object):
                     publisher=self.message.publisher,
                     node_id=self.message.node_id,
                     payload=self.message.payload,
-                    cluster_id=self.message.cluster_id,
+                    integration_id=self.message.integration_id,
                     job_id=self.message.job_id,
                     flow_id=self.message.flow_id,
                     parent_id=self.message.parent_id,
@@ -95,7 +95,7 @@ class Logger(object):
                 publisher=self.message.publisher,
                 node_id=self.message.node_id,
                 payload=self.message.payload,
-                cluster_id=self.message.cluster_id,
+                integration_id=self.message.integration_id,
                 job_id=self.message.job_id,
                 flow_id=self.message.flow_id,
                 parent_id=self.message.parent_id,
@@ -111,7 +111,7 @@ class Logger(object):
             publisher=self.message.publisher,
             node_id=self.message.node_id,
             payload=self.message.payload,
-            cluster_id=self.message.cluster_id,
+            integration_id=self.message.integration_id,
             job_id=self.message.job_id,
             flow_id=self.message.flow_id,
             parent_id=self.message.parent_id,
