@@ -5,10 +5,8 @@ import uuid
 
 from tendrl.commons.event import Event
 from tendrl.commons import flows
-from tendrl.commons.flows.create_cluster import \
-    utils as create_cluster_utils
+from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import gluster_help
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.objects.job import Job
@@ -19,7 +17,7 @@ class ExpandCluster(flows.BaseFlow):
     def run(self):
         try:
             # Lock nodes
-            create_cluster_utils.acquire_node_lock(self.parameters)
+            flow_utils.acquire_node_lock(self.parameters)
             integration_id = self.parameters['TendrlContext.integration_id']
             if integration_id is None:
                 raise FlowExecutionFailedError(
@@ -34,16 +32,11 @@ class ExpandCluster(flows.BaseFlow):
                                                sds_name)
 
             ssh_job_ids = []
-            if "ceph" in sds_name:
-                ssh_job_ids = create_cluster_utils.ceph_create_ssh_setup_jobs(
-                    self.parameters
+            ssh_job_ids = \
+                flow_utils.gluster_create_ssh_setup_jobs(
+                    self.parameters,
+                    skip_current_node=True
                 )
-            else:
-                ssh_job_ids = \
-                    create_cluster_utils.gluster_create_ssh_setup_jobs(
-                        self.parameters,
-                        skip_current_node=True
-                    )
 
             while True:
                 time.sleep(3)
@@ -73,26 +66,15 @@ class ExpandCluster(flows.BaseFlow):
 
             # SSH setup jobs finished above, now install sds
             # bits and create cluster
-            if "ceph" in sds_name:
-                logger.log(
-                    "info",
-                    NS.publisher_id,
-                    {"message": "Expanding ceph cluster %s" %
-                                integration_id},
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id']
-                )
-                ceph_help.expand_cluster(self.parameters)
-            else:
-                logger.log(
-                    "info",
-                    NS.publisher_id,
-                    {"message": "Expanding Gluster Storage"
-                     " Cluster %s" % integration_id},
-                    job_id=self.parameters['job_id'],
-                    flow_id=self.parameters['flow_id']
-                )
-                gluster_help.expand_gluster(self.parameters)
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Expanding Gluster Storage"
+                 " Cluster %s" % integration_id},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
+            )
+            gluster_help.expand_gluster(self.parameters)
             logger.log(
                 "info",
                 NS.publisher_id,
@@ -171,7 +153,7 @@ class ExpandCluster(flows.BaseFlow):
             }
             _job_id = str(uuid.uuid4())
             # release lock before import cluster
-            create_cluster_utils.release_node_lock(self.parameters)
+            flow_utils.release_node_lock(self.parameters)
 
             Job(job_id=_job_id,
                 status="new",
@@ -202,4 +184,4 @@ class ExpandCluster(flows.BaseFlow):
             raise ex
         finally:
             # release lock if any exception came
-            create_cluster_utils.release_node_lock(self.parameters)
+            flow_utils.release_node_lock(self.parameters)

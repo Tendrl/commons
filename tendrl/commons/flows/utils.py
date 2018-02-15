@@ -10,41 +10,6 @@ from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils.ssh import authorize_key
 
 
-def ceph_create_ssh_setup_jobs(parameters):
-    node_list = parameters['Node[]']
-    ssh_job_ids = []
-    ssh_setup_script = NS.ceph_provisioner.get_plugin().setup()
-    if len(node_list) > 0:
-        for node in node_list:
-            if NS.node_context.node_id != node:
-                new_params = parameters.copy()
-                new_params['Node[]'] = [node]
-                new_params['ssh_setup_script'] = ssh_setup_script
-                # create same flow for each node in node list except $this
-                payload = {
-                    "tags": ["tendrl/node_%s" % node],
-                    "run": "tendrl.flows.SetupSsh",
-                    "status": "new",
-                    "parameters": new_params,
-                    "parent": parameters['job_id'],
-                    "type": "node"
-                }
-                _job_id = str(uuid.uuid4())
-                Job(job_id=_job_id,
-                    status="new",
-                    payload=payload).save()
-                ssh_job_ids.append(_job_id)
-                logger.log(
-                    "info",
-                    NS.publisher_id,
-                    {"message": "Created SSH setup job %s for node"
-                                " %s" % (_job_id, node)},
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id']
-                )
-    return ssh_job_ids
-
-
 def install_gdeploy():
     # Install gdeploy on the node
     ansible_module_path = "packaging/os/yum.py"

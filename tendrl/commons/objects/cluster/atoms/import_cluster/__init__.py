@@ -3,7 +3,7 @@ import time
 import uuid
 
 from tendrl.commons.event import Event
-from tendrl.commons.flows.create_cluster import utils as create_cluster_utils
+from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.message import ExceptionMessage
@@ -21,7 +21,7 @@ class ImportCluster(objects.BaseAtom):
             integration_id = self.parameters['TendrlContext.integration_id']
 
             # Lock nodes
-            create_cluster_utils.acquire_node_lock(self.parameters)
+            flow_utils.acquire_node_lock(self.parameters)
             NS.tendrl_context = NS.tendrl_context.load()
 
             # TODO(team) when Tendrl supports create/expand/shrink cluster
@@ -168,6 +168,6 @@ class ImportCluster(objects.BaseAtom):
             raise ex
         finally:
             # release lock
-            create_cluster_utils.release_node_lock(self.parameters)
+            flow_utils.release_node_lock(self.parameters)
 
         return True
