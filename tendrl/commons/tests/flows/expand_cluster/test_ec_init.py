@@ -7,7 +7,6 @@ from mock import patch
 import pytest
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.flows.expand_cluster import ceph_help
 from tendrl.commons.flows.expand_cluster import ExpandCluster
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
@@ -31,7 +30,7 @@ def read_passed(*args):
 
 
 def get_parsed_defs():
-    return {"namespace.tendrl": {"supported_sds": "ceph"}}
+    return {"namespace.tendrl": {"supported_sds": "gluster"}}
 
 
 @patch.object(etcd, "Client")
@@ -71,7 +70,7 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.objects.job.Job.save',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.flows.create_cluster.utils.acquire_node_lock',
+@mock.patch('tendrl.commons.flows.utils.acquire_node_lock',
             mock.Mock(return_value=None))
 def test_expand_cluster():
     expand_cluster = ExpandCluster()
@@ -88,32 +87,16 @@ def test_expand_cluster():
     NS.compiled_definitions = tendrlNS.current_ns.definitions
     with pytest.raises(FlowExecutionFailedError):
         expand_cluster.run()
-    param['TendrlContext.sds_name'] = "ceph"
+    param['TendrlContext.sds_name'] = "gluster"
     param['TendrlContext.cluster_name'] = 'test name'
     param["flow_id"] = "test_flow_id"
     param['Node[]'] = ['test_node']
     param["job_id"] = "test_id"
     NS._int.client = importlib.import_module(
         "tendrl.commons.tests.fixtures.client").Client()
-    NS.ceph_provisioner = importlib.import_module(
+    NS.gluster_provisioner = importlib.import_module(
         "tendrl.commons.tests.fixtures.plugin").Plugin()
     NS.tendrl_context = maps.NamedDict(integration_id="")
     with patch.object(Client, "read", read_failed):
         with pytest.raises(FlowExecutionFailedError):
-            expand_cluster.run()
-    param["Cluster.node_configuration"] = {
-        "test_node": maps.NamedDict(role="mon", provisioning_ip="test_ip")}
-    param['TendrlContext.cluster_id'] = ""
-    param["TendrlContext.cluster_name"] = ""
-    param["Cluster.cluster_network"] = ""
-    param["Cluster.public_network"] = ""
-    with patch.object(Client, "read", read_passed):
-        with patch.object(NS.compiled_definitions,
-                          "get_parsed_defs",
-                          get_parsed_defs):
-            with patch.object(ceph_help, 'expand_cluster', return_value=True):
-                expand_cluster.run()
-    param['TendrlContext.sds_name'] = "gluster"
-    with patch.object(Client, "read", read_failed):
-        with pytest.raises(KeyError):
             expand_cluster.run()

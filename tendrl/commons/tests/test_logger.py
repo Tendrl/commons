@@ -44,7 +44,7 @@ def init(patch_write, patch_refresh, patch_client):
     NS.node_context.node_id = 1
     message = maps.NamedDict()
     message["priority"] = "info"
-    message["cluster_id"] = "test_cluster"
+    message["integration_id"] = "test_cluster"
     message["message_id"] = "test_id"
     message["timestamp"] = now()
     message["publisher"] = "node_context"
@@ -82,7 +82,7 @@ def test_constructor():
         message="Test Message",
         exception_type="Exception Type")
     log = Logger(message)
-    message["cluster_id"] = None
+    message["integration_id"] = None
     log = Logger(message)
 
 
@@ -98,7 +98,7 @@ def test_push_message():
     log = Logger(message)
     message["priority"] = "error"
     log.push_message()
-    message["cluster_id"] = None
+    message["integration_id"] = None
     log.push_message()
 
 

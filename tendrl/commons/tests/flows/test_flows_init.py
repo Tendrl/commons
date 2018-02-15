@@ -142,7 +142,7 @@ def init(patch_get_node_id, patch_read, patch_client):
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 def test_constructor():
     with patch.object(flows.BaseFlow, 'load_definition',
@@ -159,7 +159,7 @@ def test_constructor():
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))
@@ -185,7 +185,7 @@ def test_load_definition():
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))
@@ -198,7 +198,7 @@ def test_run():
         flow_obj.to_str = "ImportCluster"
         flow_obj.run()
         flow_obj._defs['inputs'] = maps.NamedDict(mandatory=[])
-        with mock.patch('tendrl.commons.message.Message.__init__',
+        with mock.patch('tendrl.commons.utils.log_utils.log',
                         mock.Mock(return_value=None)) as mock_msg:
             flow_obj.run()
             assert mock_msg.assert_called

@@ -3,9 +3,9 @@ import time
 import uuid
 
 from tendrl.commons.event import Event
-from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
+from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
 from tendrl.commons.objects.job import Job

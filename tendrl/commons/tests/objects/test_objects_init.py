@@ -124,7 +124,7 @@ def test_constructor():
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 def test_load_definition():
     tendrlNS = init()
@@ -140,7 +140,7 @@ def test_load_definition():
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))
@@ -384,7 +384,7 @@ def test_constructor_BaseAtom():
 
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
-@mock.patch('tendrl.commons.message.Message.__init__',
+@mock.patch('tendrl.commons.utils.log_utils.log',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.ExceptionMessage.__init__',
             mock.Mock(return_value=None))

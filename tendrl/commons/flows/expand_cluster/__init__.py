@@ -5,9 +5,9 @@ import uuid
 
 from tendrl.commons.event import Event
 from tendrl.commons import flows
-from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.expand_cluster import gluster_help
+from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import log_utils as logger
