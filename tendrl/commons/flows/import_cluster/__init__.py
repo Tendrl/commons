@@ -13,22 +13,25 @@ class ImportCluster(flows.BaseFlow):
     def run(self):
         if "Node[]" not in self.parameters:
             integration_id = self.parameters['TendrlContext.integration_id']
-
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
-            if (_cluster.import_job_id is not None and
-                    _cluster.import_job_id != "") or _cluster.import_status \
-                    in ["in_progress", "done", "failed"]:
+            if (_cluster.status is not None and
+                    _cluster.status != "" and
+                    _cluster.status in ["syncing", "importing", "unmanaging"]):
                 raise FlowExecutionFailedError(
-                    "Cluster already being imported by another Job, please "
-                    "wait till "
+                    "Another job in progress for cluster, please wait till "
                     "the job finishes (job_id: %s) (integration_id: %s) " % (
-                        _cluster.import_job_id, _cluster.integration_id
+                        _cluster.current_job['job_id'],
+                        _cluster.integration_id
                     )
                 )
 
-            _cluster.import_status = "in_progress"
-            _cluster.import_job_id = self.job_id
+            _cluster.status = "importing"
+            _cluster.current_job = {
+                'job_id': self.job_id,
+                'job_name': self.__class__.__name__,
+                'status': 'in_progress'
+            }
             _cluster.save()
 
             try:
@@ -77,7 +80,7 @@ class ImportCluster(flows.BaseFlow):
                 Exception) as ex:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
-            _cluster.import_status = "failed"
+            _cluster.current_job['status'] = 'failed'
             _errors = []
             if hasattr(ex, 'message'):
                 _errors = [ex.message]

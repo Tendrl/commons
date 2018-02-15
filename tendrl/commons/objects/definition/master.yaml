@@ -103,6 +103,28 @@ namespace.tendrl:
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
       version: 1
+    UnmanageCluster:
+      tags:
+        - "tendrl/monitor"
+      atoms:
+        - tendrl.objects.Cluster.atoms.SetClusterUnmanaged
+        - tendrl.objects.Cluster.atoms.StopMonitoringServices
+        - tendrl.objects.Cluster.atoms.StopIntegrationServices
+        - tendrl.objects.Cluster.atoms.DeleteMonitoringDetails
+        - tendrl.objects.Cluster.atoms.DeleteClusterDetails
+      help: "Unmanage a Gluster Cluster"
+      enabled: true
+      inputs:
+        mandatory:
+          - TendrlContext.integration_id
+      pre_run:
+        - tendrl.objects.Cluster.atoms.IsClusterManaged
+      post_run:
+        - tendrl.objects.Cluster.atoms.IsClusterImportReady
+      run: tendrl.flows.UnmanageCluster
+      type: Update
+      uuid: 2f94a48a-05d7-408c-b400-e27827f4efed
+      version: 1
 
   objects:
     Cluster:
@@ -111,6 +133,76 @@ namespace.tendrl:
       list: /clusters
       value: clusters/$TendrlContext.integration_id
       atoms:
+        StopMonitoringServices:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: stop node services
+          run: tendrl.objects.Cluster.atoms.StopNodeServices
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c4444c
+          help: Stop node services
+        StopIntegrationServices:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: stop node services
+          run: tendrl.objects.Cluster.atoms.StopNodeServices
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c4444d
+          help: Stop node services
+        DeleteClusterDetails:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: clear cluster details
+          run: tendrl.objects.Cluster.atoms.ClearClusterDetails
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c5555c
+          help: Clear cluster details
+        DeleteMonitoringDetails:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: Clear monitoring data
+          run: tendrl.objects.Cluster.atoms.ClearMonitoringData
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c6666c
+          help: Clear monitoring data
+        SetClusterUnmanaged:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: Set the cluster state as un-managed
+          run: tendrl.objects.Cluster.atoms.SetClusterUnmanaged
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c7766c
+          help: Set cluster as un-managed
+        IsClusterManaged:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: Check if the cluster is managed by tendrl
+          run: tendrl.objects.Cluster.atoms.IsClusterManaged
+          type: check
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c7676c
+          help: Check if cluster is managed
+        IsClusterImportReady:
+          enabled: True
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: Check if the cluster is import ready
+          run: tendrl.objects.Cluster.atoms.IsClusterImportReady
+          type: check
+          uuid: 333c3333-3c33-33c3-333c-c33cc3c7678c
+          help: Check if cluster is import ready
         ConfigureMonitoring:
           enabled: true
           name: configure monitoring
@@ -252,12 +344,15 @@ namespace.tendrl:
         errors:
           help: Cluster wide errors
           type: list
-        import_status:
-          help: Cluster import status in_progress or done or failed
+        status:
+          help: status of the cluster (importing, syncing, unmanaging, unknown)
           type: String
-        import_job_id:
-          help: Cluster import job id
-          type: String
+        current_job:
+          help: Current job on the cluster
+          type: json
+        locked_by:
+          help: job details which locks the cluster
+          type: json
     DetectedCluster:
       enabled: True
       help: "DetectedCluster"
@@ -854,6 +949,17 @@ namespace.tendrl:
       list: alerting/notify
       help: "notification only alert"
     Node:
+      flows:
+        StopServices:
+          help: Stop services on the node
+          enabled: True
+          inputs:
+            mandatory:
+              - "Services[]"
+          run: "tendrl.objects.Node.flows.StopServices"
+          uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
+          type: Update
+          version: 1
       atoms:
         IsNodeTendrlManaged:
           help: Check if a node is being managed by tendrl

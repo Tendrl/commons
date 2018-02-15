@@ -18,16 +18,18 @@ install:
 
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.4"
 
 # All CI checks are executed via tox, one tox run for each env (see below).
 script:
   - tox
 
+# List of tox enviroments to run. This way, result for each env will be
+# reported separately.
+# See: http://borntyping.co.uk/2013/09/02/tox-and-travis/
 env:
-  - TOXENV=pep8
   - TOXENV=vulture
+  - TOXENV=pep8
   - TOXENV=check_commit_msg
-  - TOXENV=codecov
+  - TOXENV=py27-cover-master
+  - TOXENV=docs

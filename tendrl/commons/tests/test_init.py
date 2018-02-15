@@ -123,7 +123,10 @@ def test_register_subclasses_to_ns(monkeypatch):
 
     def list_package(self_obj, package_path, prefix):
         if "flows" in prefix:
-            return [('ImportCluster', 'tendrl.commons.flows.import_cluster')]
+            return [
+                ('ImportCluster', 'tendrl.commons.flows.import_cluster'),
+                ('UnmanageCluster', 'tendrl.commons.flows.unmanage_cluster')
+            ]
         else:
             modules = []
             for importer, name, ispkg in pkgutil.walk_packages(
