@@ -31,36 +31,6 @@ namespace.tendrl:
       type: Create
       uuid: 6f94a48a-05d7-408m-b400-e27827q4eacd
       version: 1
-    CreateCluster:
-      tags: 
-        - "provisioner/$TendrlContext.sds_name"
-      atoms:
-        - tendrl.objects.Cluster.atoms.Create
-      help: "Create a cluster from scratch"
-      enabled: false
-      inputs:
-        mandatory:
-          - "Node[]"
-          - TendrlContext.cluster_name
-          - TendrlContext.sds_name
-          - TendrlContext.cluster_id
-          - TendrlContext.integration_id
-          - Cluster.node_configuration
-        optional:
-          - Cluster.public_network
-          - Cluster.cluster_network
-          - Cluster.conf_overrides
-      pre_run:
-        - tendrl.objects.Node.atoms.IsNodeTendrlManaged
-        - tendrl.objects.Cluster.atoms.ValidCreateClusterParams
-      post_run:
-        - tendrl.objects.Cluster.atoms.PersistClusterDetailsAfterCreate
-        - tendrl.objects.Cluster.atoms.ImportCreatedCluster
-        - tendrl.objects.Cluster.atoms.CheckClusterAvailable
-      run: tendrl.flows.CreateCluster
-      type: Create
-      uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
-      version: 1
     ExpandCluster:
       tags: 
         - "provisioner/$TendrlContext.integration_id"
@@ -210,25 +180,6 @@ namespace.tendrl:
           type: Create
           uuid: 333c3333-3c33-33c3-333c-c33cc3c3333c
           help: Configure monitoring
-        ValidCreateClusterParams:
-          enabled: true
-          inputs:
-            mandatory:
-              - "Node[]"
-              - TendrlContext.cluster_name
-              - TendrlContext.sds_name
-              - TendrlContext.cluster_id
-              - TendrlContext.integration_id
-              - Cluster.node_configuration
-            optional:
-              - Cluster.public_network
-              - Cluster.cluster_network
-              - Cluster.conf_overrides
-          name: valid create cluster params
-          run: tendrl.objects.Cluster.atoms.ValidCreateClusterParams
-          type: Get
-          uuid: 352f6190-9b37-11e6-950d-a24fc0d9649d
-          help: Check if the create cluster parameters are valid
         ValidImportClusterParams:
           enabled: true
           inputs:
@@ -239,63 +190,6 @@ namespace.tendrl:
           type: Get
           uuid: 352f6190-9b37-11e6-950d-a24fc0d9649e
           help: Check if the import cluster parameters are valid
-        ImportCreatedCluster:
-          enabled: true
-          inputs:
-            mandatory:
-              - "Node[]"
-              - TendrlContext.cluster_name
-              - TendrlContext.sds_name
-              - TendrlContext.cluster_id
-              - TendrlContext.integration_id
-              - Cluster.node_configuration
-            optional:
-              - Cluster.public_network
-              - Cluster.cluster_network
-              - Cluster.conf_overrides
-          name: import created cluster
-          run: tendrl.objects.Cluster.atoms.ImportCreatedCluster
-          type: Update
-          uuid: 352f6190-9b37-11e6-950d-a24fc0d9649f
-          help: Import the created cluster
-        PersistClusterDetailsAfterCreate:
-          enabled: true
-          inputs:
-            mandatory:
-              - "Node[]"
-              - TendrlContext.cluster_name
-              - TendrlContext.sds_name
-              - TendrlContext.cluster_id
-              - TendrlContext.integration_id
-              - Cluster.node_configuration
-            optional:
-              - Cluster.public_network
-              - Cluster.cluster_network
-              - Cluster.conf_overrides
-          name: persist cluster additional details
-          run: tendrl.objects.Cluster.atoms.PersistClusterDetailsAfterCreate
-          type: Update
-          uuid: 352f6190-9b37-11e6-950d-a24fc0d9649a
-          help: Persist additional cluster details
-        Create:
-          enabled: true
-          inputs:
-            mandatory:
-              - "Node[]"
-              - TendrlContext.cluster_name
-              - TendrlContext.sds_name
-              - TendrlContext.cluster_id
-              - TendrlContext.integration_id
-              - Cluster.node_configuration
-            optional:
-              - Cluster.public_network
-              - Cluster.cluster_network
-              - Cluster.conf_overrides
-          name: create cluster
-          run: tendrl.objects.Cluster.atoms.Create
-          type: Create
-          uuid: 352f6190-9b37-11e6-950d-a24fc0d9649b
-          help: create cluster
         ImportCluster:
           enabled: true
           inputs:

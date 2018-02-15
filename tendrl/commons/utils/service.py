@@ -1,6 +1,5 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import log_utils as logger
 
 ANSIBLE_MODULE_PATH = "system/service.py"
 
@@ -48,30 +47,22 @@ class Service(object):
             )
         try:
             result, err = runner.run()
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=self.publisher_id,
-                    payload={"message": "Service Management: %s" % result},
-                    node_id=self.node_id
-                ),
-                socket_path=self.socket_path
+            logger.log(
+                "debug",
+                self.publisher_id,
+                {"message": "Service Management: %s" % result}
             )
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=self.publisher_id,
-                    payload={"message": "Error switching the service: "
-                                        "%s to %s state. Error: %s" %
-                                        (self.attributes["name"],
-                                         attr["state"],
-                                         str(e)
-                                         )
-                             },
-                    node_id=self.node_id
-                ),
-                socket_path=self.socket_path
+            logger.log(
+                "error",
+                self.publisher_id,
+                {"message": "Error switching the service: "
+                            "%s to %s state. Error: %s" %
+                            (self.attributes["name"],
+                             attr["state"],
+                             str(e)
+                             )},
+                node_id=self.node_id
             )
             return e.message, False
         message = result.get("msg", "").encode("ascii")

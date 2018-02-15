@@ -278,7 +278,7 @@ def test_setup_definitions():
 def test_add_flow():
     tendrlNS = init()
     flow_class = ""
-    flow = importlib.import_module("tendrl.commons.flows.create_cluster")
+    flow = importlib.import_module("tendrl.commons.flows.import_cluster")
     for flow_cls in inspect.getmembers(flow, inspect.isclass):
         tendrlNS._add_flow("test_flow", flow_cls[1])
         flow_class = flow_cls[1]

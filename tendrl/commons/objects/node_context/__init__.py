@@ -6,12 +6,9 @@ import uuid
 
 import etcd
 
-
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-
 from tendrl.commons import objects
 from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
 
@@ -54,13 +51,10 @@ class NodeContext(objects.BaseObject):
     def _create_node_id(self):
         node_id = str(uuid.uuid4())
         try:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Registered Node (%s) with " % node_id
-                             }
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Registered Node (%s) with " % node_id}
             )
         except KeyError:
             sys.stdout.write("message: Registered Node (%s) \n" % node_id)

@@ -1,7 +1,7 @@
 import psutil
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+
 from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils import log_utils as logger
 
 
 def find_status():
@@ -36,30 +36,23 @@ def find_status():
                 sshd["status"] = result[0].status
             else:
                 err = "Unable to find ssh port number"
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher="commons",
-                        payload={"message": err}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": err}
                 )
         else:
             err = "sshd service is not running"
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": err}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": err}
             )
-
     else:
-        Event(
-            Message(
-                priority="debug",
-                publisher="commons",
-                payload={"message": err}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": err}
         )
     return sshd, err
 

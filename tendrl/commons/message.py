@@ -26,12 +26,12 @@ class Message(object):
 
     message_id, timestamp and caller are always None
     because it assinged by Message class but job_id,
-    flwo_id, parent_id, cluster_id may come, when from_json
+    flwo_id, parent_id, integration_id may come, when from_json
     function call message old message_id, time_stamp and
     caller is populated
     """
     def __init__(self, priority, publisher, payload, job_id=None,
-                 flow_id=None, parent_id=None, cluster_id=None,
+                 flow_id=None, parent_id=None, integration_id=None,
                  message_id=None, timestamp=None, node_id=None,
                  caller=None, *args, **kwargs):
         super(Message, self).__init__(*args, **kwargs)
@@ -57,7 +57,7 @@ class Message(object):
         self.job_id = job_id
         self.flow_id = flow_id
         self.parent_id = parent_id
-        self.cluster_id = cluster_id
+        self.integration_id = integration_id
         self.payload = payload
 
     @staticmethod

@@ -1,7 +1,5 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
-
+from tendrl.commons.utils import log_utils as logger
 
 ANSIBLE_MODULE_PATH = "system/user.py"
 
@@ -46,44 +44,36 @@ class GenerateKey(object):
             )
         try:
             out, err = runner.run()
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "SSH-key Generation: %s" % out}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "SSH-key Generation: %s" % out}
             )
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
             err = str(e.message)
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "SSH-Key Genertion failed %s. "
-                             "Error: %s" % (
-                                 self.attributes["_raw_params"], err)}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "SSH-Key Genertion failed %s. "
+                 "Error: %s" % (
+                     self.attributes["_raw_params"], err)}
             )
             out = "Ansible Executable Generation Failed"
         if out is None:
             _msg = "No output after Ansible Executable Generation"
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": _msg}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": _msg}
             )
             return None, "No Output"
         if out is not None and "ssh_public_key" not in out:
             err = out
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "Unable to generate ssh-key .err: "
-                                        "%s" % err}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Unable to generate ssh-key .err: "
+                            "%s" % err}
             )
         elif "ssh_public_key" in out:
             result = out["ssh_public_key"]

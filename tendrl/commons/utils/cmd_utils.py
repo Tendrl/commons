@@ -3,9 +3,8 @@ import sys
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
-
+from tendrl.commons.utils import log_utils as logger
 
 ANSIBLE_MODULE_PATH = "commands/command.py"
 
@@ -54,12 +53,10 @@ class Command(object):
         try:
             result, err = runner.run()
             try:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Command Execution: %s" % result}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": "Command Execution: %s" % result}
                 )
             except KeyError:
                 sys.stdout.write("Command Execution: %s \n" % result)

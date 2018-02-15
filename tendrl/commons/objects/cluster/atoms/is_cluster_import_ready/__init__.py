@@ -10,7 +10,6 @@ class IsClusterImportReady(objects.BaseAtom):
         super(IsClusterImportReady, self).__init__(*args, **kwargs)
 
     def run(self):
-        #import pdb; pdb.set_trace()
         integration_id = self.parameters['TendrlContext.integration_id']
 
         # Wait for /indexes/tags/tendrl/integration/$integration_id

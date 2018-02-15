@@ -1,7 +1,5 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.utils import ansible_module_runner
-
+from tendrl.commons.utils import log_utils as logger
 
 ANSIBLE_MODULE_PATH = "system/authorized_key.py"
 
@@ -48,32 +46,27 @@ class AuthorizeKey(object):
             if 'failed' in result:
                 err = result
             else:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher="commons",
-                        payload={"message": "Authorize key: %s" % result}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": "Authorize key: %s" % result}
                 )
         except ansible_module_runner.AnsibleExecutableGenerationFailed as e:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "Copying authorize key failed %s. "
-                             "Error: %s" % (self.attributes["_raw_params"],
-                                            str(e.message))}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Copying authorize key failed %s. "
+                 "Error: %s" % (self.attributes["_raw_params"],
+                                str(e.message))
+                 }
             )
             err = str(e.message)
         if err != "":
-            Event(
-                Message(
-                    priority="debug",
-                    publisher="commons",
-                    payload={"message": "Unable to copy authorize key "
-                                        ".err:%s" % err}
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Unable to copy authorize key "
+                            ".err:%s" % err}
             )
             return False, err
         else:

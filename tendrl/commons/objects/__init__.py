@@ -11,9 +11,9 @@ import types
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons.utils.central_store import utils as cs_utils
 from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
 
@@ -39,16 +39,13 @@ class BaseObject(object):
 
     def load_definition(self):
         try:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for "
-                                        "namespace.%s.objects.%s" %
-                                        (self._ns.ns_name,
-                                         self.__class__.__name__)
-                             }
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Load definitions (.yml) for "
+                            "namespace.%s.objects.%s" %
+                            (self._ns.ns_name,
+                             self.__class__.__name__)}
             )
         except KeyError:
             sys.stdout.write(
@@ -73,12 +70,10 @@ class BaseObject(object):
             except KeyError:
                 sys.stdout.write(str(ex) + "\n")
             try:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher=NS.publisher_id,
-                        payload={"message": msg}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": msg}
                 )
             except KeyError:
                 sys.stdout.write(msg + "\n")
@@ -118,14 +113,11 @@ class BaseObject(object):
                 name spaces are being created.
             '''
             try:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Writing %s to %s" %
-                                            (item['key'], item['value'])
-                                 }
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": "Writing %s to %s" %
+                                (item['key'], item['value'])}
                 )
             except KeyError:
                 sys.stdout.write(
@@ -192,12 +184,10 @@ class BaseObject(object):
             _copy.value = self.value
         for item in _copy.render():
             try:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Reading %s" % item['key']}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": "Reading %s" % item['key']}
                 )
             except KeyError:
                 sys.stdout.write("Reading %s \n" % item['key'])
@@ -401,17 +391,14 @@ class BaseAtom(object):
 
     def load_definition(self):
         try:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={"message": "Load definitions (.yml) for "
-                                        "namespace.%s."
-                                        "objects.%s.atoms.%s" %
-                                        (self._ns.ns_name, self.obj.__name__,
-                                         self.__class__.__name__)
-                             }
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Load definitions (.yml) for "
+                            "namespace.%s."
+                            "objects.%s.atoms.%s" %
+                            (self._ns.ns_name, self.obj.__name__,
+                             self.__class__.__name__)}
             )
         except KeyError:
             sys.stdout.write(
@@ -445,12 +432,10 @@ class BaseAtom(object):
             except KeyError:
                 sys.stderr.write("Error: %s \n" % ex)
             try:
-                Event(
-                    Message(
-                        priority="debug",
-                        publisher=NS.publisher_id,
-                        payload={"message": msg}
-                    )
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {"message": msg}
                 )
             except KeyError:
                 sys.stderr.write(msg + "\n")

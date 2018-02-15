@@ -3,50 +3,11 @@ import uuid
 
 from etcd import EtcdKeyNotFound
 
-from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.message import Message
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import ansible_module_runner
+from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils.ssh import authorize_key
-
-
-def ceph_create_ssh_setup_jobs(parameters):
-    node_list = parameters['Node[]']
-    ssh_job_ids = []
-    ssh_setup_script = NS.ceph_provisioner.get_plugin().setup()
-    if len(node_list) > 0:
-        for node in node_list:
-            if NS.node_context.node_id != node:
-                new_params = parameters.copy()
-                new_params['Node[]'] = [node]
-                new_params['ssh_setup_script'] = ssh_setup_script
-                # create same flow for each node in node list except $this
-                payload = {
-                    "tags": ["tendrl/node_%s" % node],
-                    "run": "tendrl.flows.SetupSsh",
-                    "status": "new",
-                    "parameters": new_params,
-                    "parent": parameters['job_id'],
-                    "type": "node"
-                }
-                _job_id = str(uuid.uuid4())
-                Job(job_id=_job_id,
-                    status="new",
-                    payload=payload).save()
-                ssh_job_ids.append(_job_id)
-                Event(
-                    Message(
-                        job_id=parameters['job_id'],
-                        flow_id=parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={"message": "Created SSH setup job %s for node"
-                                            " %s" % (_job_id, node)
-                                 }
-                    )
-                )
-    return ssh_job_ids
 
 
 def install_gdeploy():
@@ -124,15 +85,12 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
     ssh_key, err = NS.gluster_provisioner.get_plugin().setup()
     if err != "":
         _msg = "Error generating ssh key on node %s" % NS.node_context.node_id
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="error",
-                publisher=NS.publisher_id,
-                payload={"message": _msg
-                         }
-            )
+        logger.log(
+            "error",
+            NS.publisher_id,
+            {"message": _msg},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
         raise FlowExecutionFailedError(_msg)
 
@@ -141,16 +99,12 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         if ret_val is not True or err != "":
             _msg = "Error adding authorized key for node %s" % \
                    NS.node_context.node_id
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": _msg
-                    }
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": _msg},
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id']
             )
             raise FlowExecutionFailedError(_msg)
         node_list.remove(NS.node_context.node_id)
@@ -177,16 +131,13 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
             payload=payload
         ).save()
         ssh_job_ids.append(_job_id)
-        Event(
-            Message(
-                job_id=parameters['job_id'],
-                flow_id=parameters['flow_id'],
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "Created SSH setup job %s for node %s" %
-                                    (_job_id, node)
-                         }
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Created SSH setup job %s for node %s" %
+                        (_job_id, node)},
+            job_id=parameters['job_id'],
+            flow_id=parameters['flow_id']
         )
     return ssh_job_ids
 
@@ -233,17 +184,13 @@ def acquire_node_lock(parameters):
             lock_owner_job = str(parameters["job_id"])
             key = "nodes/%s/locked_by" % node
             NS._int.client.write(key, lock_owner_job)
-            Event(
-                Message(
-                    job_id=parameters['job_id'],
-                    flow_id=parameters['flow_id'],
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Acquired lock (%s) for Node (%s)" % (
-                            lock_owner_job, node)
-                    }
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Acquired lock (%s) for Node (%s)" % (
+                    lock_owner_job, node)},
+                job_id=parameters['job_id'],
+                flow_id=parameters['flow_id']
             )
 
 
@@ -254,17 +201,13 @@ def release_node_lock(parameters):
             lock_owner_job = NS._int.client.read(key).value
             if lock_owner_job == parameters['job_id']:
                 NS._int.client.delete(key)
-                Event(
-                    Message(
-                        job_id=parameters['job_id'],
-                        flow_id=parameters['flow_id'],
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Released lock (%s) for Node (%s)" %
-                                       (lock_owner_job, node)
-                        }
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Released lock (%s) for Node (%s)" %
+                                (lock_owner_job, node)},
+                    job_id=parameters['job_id'],
+                    flow_id=parameters['flow_id']
                 )
         except EtcdKeyNotFound:
             continue
