@@ -10,7 +10,6 @@ class Service(object):
         service_name,
         publisher_id=None,
         node_id=None,
-        socket_path=None,
         enabled=None
     ):
         self.attributes = {}
@@ -21,9 +20,6 @@ class Service(object):
         self.node_id = node_id
         if not node_id:
             self.node_id = NS.node_context.node_id
-        self.socket_path = socket_path
-        if not socket_path:
-            self.socket_path = NS.config.data['logging_socket_path']
         if enabled:
             self.attributes["enabled"] = enabled
 
@@ -33,7 +29,6 @@ class Service(object):
                 ANSIBLE_MODULE_PATH,
                 publisher_id=self.publisher_id,
                 node_id=self.node_id,
-                socket_path=self.socket_path,
                 **attr
             )
         except ansible_module_runner.AnsibleModuleNotFound:
@@ -42,7 +37,6 @@ class Service(object):
                 "core/" + ANSIBLE_MODULE_PATH,
                 publisher_id=self.publisher_id,
                 node_id=self.node_id,
-                socket_path=self.socket_path,
                 **attr
             )
         try:
