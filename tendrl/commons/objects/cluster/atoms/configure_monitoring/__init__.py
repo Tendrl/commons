@@ -151,7 +151,6 @@ class ConfigureMonitoring(objects.BaseAtom):
             'collectd',
             publisher_id='node_agent',
             node_id=NS.node_context.node_id,
-            socket_path=NS.config.data['logging_socket_path'],
             enabled=True
         ).restart()
         _cluster = NS.tendrl.objects.Cluster(
