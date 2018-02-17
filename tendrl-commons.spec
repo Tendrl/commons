@@ -1,5 +1,5 @@
 Name: tendrl-commons
-Version: 1.5.5
+Version: 1.6.0
 Release: 1%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
@@ -48,6 +48,9 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
+* Sat Feb 17 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.0-1
+- API to un-manage clusters managed by Tendrl
+
 * Fri Feb 02 2018 Rohan Kanade <rkanade@redhat.com> - 1.5.5-1
 - Move gluster.event_utils to commons
 - Fix geo-rep classification
