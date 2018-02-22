@@ -47,6 +47,8 @@ namespace.tendrl:
           - Cluster.cluster_network
           - Cluster.node_identifier
           - Cluster.node_configuration
+      pre_run:
+        - tendrl.objects.Node.atoms.CheckNodeUp
       run: tendrl.flows.ExpandCluster
       type: Update
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
@@ -63,6 +65,7 @@ namespace.tendrl:
           - TendrlContext.integration_id
           - Cluster.volume_profiling_flag
       pre_run:
+        - tendrl.objects.Node.atoms.CheckNodeUp
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
       post_run:
@@ -88,6 +91,7 @@ namespace.tendrl:
         mandatory:
           - TendrlContext.integration_id
       pre_run:
+        - tendrl.objects.Node.atoms.CheckNodeUp
         - tendrl.objects.Cluster.atoms.IsClusterManaged
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
@@ -906,11 +910,11 @@ namespace.tendrl:
           enabled: true
           inputs:
             mandatory:
-              - Node.fqdn
+              - TendrlContext.integration_id
           outputs:
             - Node.status
-          name: "check whether the node is up"
-          help: "Checks if a node is up"
+          name: "check whether the nodes are up"
+          help: "Checks if a nodes are up"
           run: tendrl.objects.Node.atoms.CheckNodeUp
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
