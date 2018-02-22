@@ -35,14 +35,12 @@ def init():
 
 
 def test_constructor():
-    service = Service("Test_service", "node_context", 1, "/path/to/socket/",
-                      True)
+    service = Service("Test_service", "node_context", 1, True)
     assert service.publisher_id == "node_context"
     assert service.attributes["name"] == "Test_service"
     assert service.attributes["enabled"] is True
     init()
     service = Service("Test_service")
-    assert service.socket_path == "test"
     assert service.node_id == 1
 
 

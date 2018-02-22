@@ -116,7 +116,7 @@ def test_run():
     init()
     param = maps.NamedDict()
     param['TendrlContext.integration_id'] = None
-    param['Cluster.enable_volume_profiling'] = 'yes'
+    param['Cluster.volume_profiling_flag'] = 'yes'
     with patch.object(TendrlNS, 'get_obj_definition', get_obj_definition):
         import_cluster = ImportCluster(parameters=param)
     with patch.object(objects.BaseObject, 'load', return_fail):

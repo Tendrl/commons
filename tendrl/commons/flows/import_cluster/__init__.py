@@ -49,8 +49,8 @@ class ImportCluster(flows.BaseFlow):
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
-                _cluster.enable_volume_profiling = self.parameters[
-                    'Cluster.enable_volume_profiling']
+                _cluster.volume_profiling_flag = self.parameters[
+                    'Cluster.volume_profiling_flag']
                 _cluster.save()
 
                 # Try to claim "provisioner/:integration_id" tag
