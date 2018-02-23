@@ -3,11 +3,11 @@ import time
 import uuid
 
 from tendrl.commons.event import Event
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
+from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import log_utils as logger
 
@@ -102,7 +102,7 @@ class ImportCluster(objects.BaseAtom):
                     flow_id=self.parameters['flow_id']
                 )
 
-                raise FlowExecutionFailedError(
+                raise AtomExecutionFailedError(
                     "Detected gluster version: %s"
                     " is lesser than required version: %s" %
                     (
@@ -110,8 +110,12 @@ class ImportCluster(objects.BaseAtom):
                         reqd_gluster_ver
                     )
                 )
-            if not import_gluster(self.parameters):
-                return False
+            ret_val, err = import_gluster(self.parameters)
+            if not ret_val:
+                raise AtomExecutionFailedError(
+                    "Error importing the cluster (integration_id: %s). "
+                    "Error: %s" % (integration_id, err)
+                )
 
             if len(node_list) > 1:
                 logger.log(

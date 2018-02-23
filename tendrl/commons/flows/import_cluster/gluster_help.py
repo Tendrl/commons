@@ -6,6 +6,7 @@ from ruamel import yaml
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import log_utils as logger
+from tendrl.commons.utils.service_status import ServiceStatus
 
 
 def import_gluster(parameters):
@@ -26,7 +27,11 @@ def import_gluster(parameters):
         ansible_module_path = "packaging/os/yum.py"
         attributes["name"] = name
     else:
-        return False
+        return (
+            False,
+            "Invalid package_source_type: %s" %
+            NS.config.data['package_source_type']
+        )
 
     logger.log(
         "info",
@@ -53,32 +58,28 @@ def import_gluster(parameters):
     try:
         out, err = runner.run()
         if out['rc'] != 0:
+            err_msg = "Could not install tendrl-gluster-integration " \
+                "on Node %s. Error: %s" % (NS.node_context.fqdn, out['msg'])
             logger.log(
                 "error",
                 NS.publisher_id,
-                {
-                    "message": "Could not install "
-                    "tendrl-gluster-integration on Node %s"
-                    "Error: %s" %
-                    (NS.node_context.fqdn, out['msg'])
-                },
+                {"message": err_msg},
                 job_id=parameters['job_id'],
                 flow_id=parameters['flow_id'],
             )
-            return False
+            return False, err_msg
     except ansible_module_runner.AnsibleExecutableGenerationFailed:
+        err_msg = "Cluster management requires service " \
+            "tendrl-gluster-integration. Failed to install same" \
+            "on Node %s" % NS.node_context.fqdn
         logger.log(
             "error",
             NS.publisher_id,
-            {
-                "message": "Error: Could not install "
-                "tendrl-gluster-integration on Node %s" %
-                NS.node_context.fqdn
-            },
+            {"message": err_msg},
             job_id=parameters['job_id'],
             flow_id=parameters['flow_id'],
         )
-        return False
+        return False, err_msg
 
     logger.log(
         "info",
@@ -147,31 +148,41 @@ def import_gluster(parameters):
         )
         err, out, rc = command.run()
         if err:
+            err_msg = "Could not enable tendrl-gluster-integration " \
+                "service. Error: %s" % err
             logger.log(
                 "error",
                 NS.publisher_id,
-                {
-                    "message": "Could not enable gluster-integration"
-                    " service. Error: %s" % err
-                },
+                {"message": err_msg},
                 job_id=parameters['job_id'],
                 flow_id=parameters['flow_id'],
             )
-            return False
+            return False, err_msg
 
     cmd = cmd_utils.Command(_cmd)
     err, out, rc = cmd.run()
     if err:
+        err_msg = "Could not start tendrl-gluster-integration " \
+            "service. Error: %s" % err
         logger.log(
             "error",
             NS.publisher_id,
-            {
-                "message": "Could not start gluster-integration"
-                " service. Error: %s" % err
-            },
+            {"message": err_msg},
             job_id=parameters['job_id'],
             flow_id=parameters['flow_id'],
         )
-        return False
+        return False, err_msg
 
-    return True
+    # Check if tendrl-gluster-integration active on the node
+    response = ServiceStatus(
+        "tendrl-gluster-integration"
+    ).status()
+    if not response:
+        return (
+            False,
+            "Cluster management requires service tendrl-gluster-integration."
+            " The same is not running on node: %s" %
+            NS.node_context.fqdn
+        )
+
+    return True, ""

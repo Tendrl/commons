@@ -61,14 +61,14 @@ namespace.tendrl:
       inputs:
         mandatory:
           - TendrlContext.integration_id
-          - Cluster.enable_volume_profiling
+          - Cluster.volume_profiling_flag
       pre_run:
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
       post_run:
-        - tendrl.objects.Cluster.atoms.CheckClusterAvailable
         - tendrl.objects.Cluster.atoms.ConfigureMonitoring
         - tendrl.objects.Service.atoms.CheckServiceStatus
+        - tendrl.objects.Cluster.atoms.CheckSyncDone
       run: tendrl.flows.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
@@ -223,6 +223,16 @@ namespace.tendrl:
           type: Get
           uuid: 552f6190-9b37-11e6-950d-a24fc0d9649e
           help: check if cluster is available
+        CheckSyncDone:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: check sync is done from nodes of the cluster
+          run: tendrl.objects.Cluster.atoms.CheckSyncDone
+          type: Get
+          uuid: 552f6190-9b37-11e6-950d-a24fc096d49e
+          help: check if cluster is available
       attrs:
         integration_id:
           help: integration id
@@ -242,8 +252,11 @@ namespace.tendrl:
         node_identifier:
           help: How nodes should be identified while create cluster
           type: list
-        enable_volume_profiling:
-          help: Whether to enable volume profiling
+        volume_profiling_flag:
+          help: Whether to enable/disable/leave as-is volume profiling
+          type: String
+        volume_profiling_state:
+          help: Current state(enabled/disabled/mixed) of volume profiling for cluster
           type: String
         is_managed:
           help: If the cluster is managed by tendrl
@@ -1061,6 +1074,9 @@ namespace.tendrl:
           type: List
         status:
           help: "Node status"
+          type: String
+        first_sync_done:
+          help: "Flag to mention if first round of sync is done for cluster data"
           type: String
 
       enabled: true

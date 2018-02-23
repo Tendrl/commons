@@ -11,6 +11,7 @@ import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils.service_status import ServiceStatus
 
 '''Dummy Functions'''
 
@@ -71,14 +72,16 @@ def test_import_gluster():
     tendrlNS = init()
     NS.compiled_definitions = tendrlNS.current_ns.definitions
     parameters = maps.NamedDict(job_id=1, flow_id=1)
-    assert gluster_help.import_gluster(parameters) is False
+    ret_val, err = gluster_help.import_gluster(parameters)
+    assert ret_val is False
+    assert err is not None
     NS.config.data['package_source_type'] = 'pip'
     with patch.object(ansible_module_runner.AnsibleRunner, 'run', run):
-        ret = gluster_help.import_gluster(parameters)
+        ret, err = gluster_help.import_gluster(parameters)
         assert ret is False
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
                       return_value=({"rc": 1, "msg": None}, None)):
-        ret = gluster_help.import_gluster(parameters)
+        ret, err = gluster_help.import_gluster(parameters)
         assert ret is False
     NS.config.data['package_source_type'] = 'rpm'
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
@@ -86,12 +89,14 @@ def test_import_gluster():
         with patch.object(__builtin__, 'open', open):
             with patch.object(cmd_utils.Command, 'run',
                               return_value=("err", "", 1)):
-                ret = gluster_help.import_gluster(parameters)
+                ret, err = gluster_help.import_gluster(parameters)
         assert ret is False
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
                       return_value=({"rc": 0, "msg": None}, None)):
         with patch.object(__builtin__, 'open', open):
             with patch.object(cmd_utils.Command, 'run',
                               return_value=(None, "", 0)):
-                ret = gluster_help.import_gluster(parameters)
+                with patch.object(ServiceStatus, 'status',
+                                  return_value=True):
+                    ret, err = gluster_help.import_gluster(parameters)
         assert ret is True

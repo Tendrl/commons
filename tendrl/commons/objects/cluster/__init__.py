@@ -6,7 +6,8 @@ class Cluster(objects.BaseObject):
                  cluster_network=None, node_configuration=None,
                  conf_overrides=None, node_identifier=None,
                  last_sync=None, is_managed=None, current_job=dict(),
-                 status=None, enable_volume_profiling=None, errors=[],
+                 status=None, volume_profiling_flag=None,
+                 volume_profiling_state=None, errors=[],
                  locked_by=None,
                  *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
@@ -20,7 +21,8 @@ class Cluster(objects.BaseObject):
         self.is_managed = is_managed
         self.current_job = current_job
         self.status = status
-        self.enable_volume_profiling = enable_volume_profiling
+        self.volume_profiling_flag = volume_profiling_flag
+        self.volume_profiling_state = volume_profiling_state
         self.errors = errors
         self.locked_by = locked_by
         self.value = 'clusters/{0}'
