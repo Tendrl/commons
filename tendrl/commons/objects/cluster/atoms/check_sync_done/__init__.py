@@ -18,7 +18,7 @@ class CheckSyncDone(objects.BaseAtom):
         while True:
             if loop_count >= 36:
                 raise AtomExecutionFailedError(
-                    "Cluster data not yet updated (node: %s) "
+                    "Timing out import job, Cluster data still not fully updated (node: %s) "
                     "(integration_id: %s)" % (
                         integration_id,
                         NS.node_context.node_id
