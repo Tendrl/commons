@@ -1,0 +1,123 @@
+import time
+import uuid
+
+from tendrl.commons import flows
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
+from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import log_utils as logger
+
+
+class ExpandClusterWithDetectedPeers(flows.BaseFlow):
+    def __init__(self, *args, **kwargs):
+        super(
+            ExpandClusterWithDetectedPeers,
+            self
+        ).__init__(*args, **kwargs)
+
+    def run(self):
+        integration_id = self.parameters['TendrlContext.integration_id']
+        _cluster = NS.tendrl.objects.Cluster(
+            integration_id=integration_id
+        ).load()
+        if _cluster.status is not None and _cluster.status != "" and \
+            _cluster.status in ["importing", "unmanaging", "expanding"]:
+            raise FlowExecutionFailedError(
+                "Another job in progress for cluster, please wait till "
+                "the job finishes (job_id: %s) (integration_id: %s) " % (
+                    _cluster.current_job['job_id'],
+                    integration_id
+                )
+            )
+        _lock_details = {
+            'node_id': NS.node_context.node_id,
+            'fqdn': NS.node_context.fqdn,
+            'tags': NS.node_context.tags,
+            'type': NS.type,
+            'job_name': self.__class__.__name__,
+            'job_id': self.job_id
+        }
+        _cluster.locked_by = _lock_details
+        _cluster.status = "expanding"
+        _cluster.current_job = {
+            'job_id': self.job_id,
+            'job_name': self.__class__.__name__,
+            'status': 'in_progress'
+        }
+        _cluster.save()
+
+        node_ids = self.parameters.get("Node[]", [])
+        job_ids = []
+        for node_id in node_ids:
+            params = {
+                'TendrlContext.integration_id': integration_id,
+                'Node[]': [node_id],
+                'Cluster.enable_volume_profiling':
+                _cluster.enable_volume_profiling
+            }
+            payload = {
+                "tags": ["tendrl/node_%s" % node_id],
+                "run": "tendrl.flows.ImportCluster",
+                "status": "new",
+                "parent": self.parameters['job_id'],
+                "parameters": params,
+                "type": "node"
+            }
+            _job_id = str(uuid.uuid4())
+            Job(job_id=_job_id, status="new", payload=payload).save()
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {
+                    "message": "Importing (job: %s) Node %s "
+                    "to cluster %s" % (
+                        _job_id,
+                        node_id,
+                        integration_id
+                    )
+                },
+                job_id=self.parameters['job_id']
+            )
+            job_ids.append(_job_id)
+
+        loop_count = 0
+        # Wait for (no of nodes) * 6 minutes for import to complete
+        wait_count = len(node_ids) * 36
+        while True:
+            if loop_count >= wait_count:
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {
+                        "message": "Import jobs not yet complete "
+                        "on all new nodes. Timing out. (%s, %s)" %
+                        (str(node_ids), integration_id)
+                    },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
+                )
+                return False
+            time.sleep(10)
+            finished = True
+            for job_id in job_ids:
+                job = Job(job_id=job_id).load()
+                if job.status != "finished":
+                    finished = False
+                    break
+            if finished:
+                break
+            else:
+                loop_count += 1
+                continue
+
+        _cluster = NS.tendrl.objects.Cluster(
+            integration_id=integration_id
+        ).load()
+        _cluster.status = ""
+        _cluster.locked_by = {}
+        _cluster.current_job = {
+            'status': "finished",
+            'job_name': self.__class__.__name__,
+            'job_id': self.job_id
+        }
+        _cluster.save()
+        return True
