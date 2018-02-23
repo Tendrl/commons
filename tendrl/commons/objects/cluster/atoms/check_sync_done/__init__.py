@@ -12,11 +12,11 @@ class CheckSyncDone(objects.BaseAtom):
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
 
-        # wait for 180 sec to complete the first round of sync of
+        # wait for 360 sec to complete the first round of sync of
         # cluster data
         loop_count = 0
         while True:
-            if loop_count >= 36:
+            if loop_count >= 72:
                 raise AtomExecutionFailedError(
                     "Timing out import job, Cluster data still not fully updated (node: %s) "
                     "(integration_id: %s)" % (
