@@ -75,6 +75,11 @@ class ImportCluster(flows.BaseFlow):
 
         try:
             super(ImportCluster, self).run()
+            _cluster = NS.tendrl.objects.Cluster(
+                integration_id=NS.tendrl_context.integration_id
+            ).load()
+            _cluster.is_managed = "yes"
+            _cluster.save()
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
                 Exception) as ex:

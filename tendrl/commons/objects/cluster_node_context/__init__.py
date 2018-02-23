@@ -7,7 +7,8 @@ class ClusterNodeContext(objects.BaseObject):
 
     def __init__(self, node_id=None, fqdn=None, updated_at=None,
                  tags=None, status=None, sync_status=None,
-                 last_sync=None, *args, **kwargs):
+                 last_sync=None, first_sync_done=None,
+                 *args, **kwargs):
         super(ClusterNodeContext, self).__init__(*args, **kwargs)
         _node_context = NS.node_context.load()
         self.node_id = node_id or _node_context.node_id
@@ -17,6 +18,7 @@ class ClusterNodeContext(objects.BaseObject):
         self.status = status or _node_context.status
         self.sync_status = sync_status or _node_context.sync_status
         self.last_sync = last_sync or _node_context.last_sync
+        self.first_sync_done = first_sync_done
         self.value = 'clusters/{0}/nodes/{1}/NodeContext'
 
     def render(self):
