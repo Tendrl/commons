@@ -61,7 +61,7 @@ namespace.tendrl:
       inputs:
         mandatory:
           - TendrlContext.integration_id
-          - Cluster.enable_volume_profiling
+          - Cluster.volume_profiling_flag
       pre_run:
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
@@ -229,8 +229,11 @@ namespace.tendrl:
         node_identifier:
           help: How nodes should be identified while create cluster
           type: list
-        enable_volume_profiling:
-          help: Whether to enable volume profiling
+        volume_profiling_flag:
+          help: Whether to enable/disable/leave as-is volume profiling
+          type: String
+        volume_profiling_state:
+          help: Current state(enabled/disabled/mixed) of volume profiling for cluster
           type: String
         is_managed:
           help: If the cluster is managed by tendrl
