@@ -13,13 +13,11 @@ SAFE_COMMAND_LIST = [
     "lscpu",
     "getenforce",
     "gluster",
-    "ceph",
     "tendrl_monitoring_config_manager",
     "systemctl",
     "hwinfo",
     "ping",
     "lvm",
-    "gstatus",
     "ls",
     "df",
     "gluster-eventsapi"
