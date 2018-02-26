@@ -4,6 +4,7 @@ import uuid
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -45,9 +46,26 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
         }
         _cluster.save()
 
-        node_ids = self.parameters.get("Node[]", [])
+        try:
+            integration_id_index_key = \
+                "indexes/tags/tendrl/integration/%s" % integration_id
+            node_ids = etcd_utils.read(
+                integration_id_index_key).value
+            node_ids = json.loads(node_ids)
+        except etcd.EtcdKeyNotFound:
+            raise FlowExecutionFailedError("Cluster with "
+                                           "integration_id "
+                                           "(%s) not found, cannot "
+                                           "import" % integration_id)
+
         job_ids = []
         for node_id in node_ids:
+            _cnc = NS.tendrl.objects.ClusterNodeContext(
+                node_id=node_id
+            ).load()
+            if _cnc.is_managed.lower() == "yes":
+                continue
+
             params = {
                 'TendrlContext.integration_id': integration_id,
                 'Node[]': [node_id],
