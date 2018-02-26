@@ -98,11 +98,10 @@ namespace.tendrl:
     ExpandClusterWithDetectedPeers:
       tags:
         - "provisioner/$TendrlContext.integration_id"
-      help: "expanding an existing cluster with newly detected peers"
+      help: "Expand an existing cluster with newly detected peers"
       enabled: true
       inputs:
         mandatory:
-          - "Node[]"
           - TendrlContext.integration_id
       run: tendrl.flows.ExpandClusterWithDetectedPeers
       type: Update
