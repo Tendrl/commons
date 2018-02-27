@@ -62,6 +62,7 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                                            "import" % integration_id)
 
         job_ids = []
+        new_peers = []
         for node_id in node_ids:
             _cnc = NS.tendrl.objects.ClusterNodeContext(
                 node_id=node_id
@@ -99,10 +100,11 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 job_id=self.parameters['job_id']
             )
             job_ids.append(_job_id)
+            new_peers.append(node_id)
 
         loop_count = 0
         # Wait for (no of nodes) * 6 minutes for import to complete
-        wait_count = len(node_ids) * 36
+        wait_count = len(job_ids) * 36
         while True:
             if loop_count >= wait_count:
                 logger.log(
@@ -141,4 +143,16 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
             'job_id': self.job_id
         }
         _cluster.save()
+
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {
+                "message": "Newly detected node(s) added to the cluster."
+                "(nodes: %s) (integration_id: %s)" % (
+                    str(new_peers),
+                    integration_id
+                )
+            }
+        )
         return True
