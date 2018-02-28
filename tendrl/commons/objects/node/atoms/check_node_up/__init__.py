@@ -3,7 +3,6 @@ import json
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects import BaseAtom
-from tendrl.commons.utils.cmd_utils import Command
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
@@ -35,33 +34,34 @@ class CheckNodeUp(BaseAtom):
                     node_ids_str = etcd_utils.read(key).value
                     node_ids = json.loads(node_ids_str)
                 # identifying fqdn using node_id
-                hosts = []
+                hosts = {}
                 for node in node_ids:
-                    key = "nodes/%s/NodeContext/fqdn" % node
-                    fqdn = etcd_utils.read(key).value
-                    hosts.append(str(fqdn))
+                    try:
+                        key = "nodes/%s/NodeContext/status" % node
+                        status = etcd_utils.read(key).value
+                    except etcd.EtcdKeyNotFound:
+                        status = None
+                    hosts[str(node)] = status
                 logger.log(
                     "info",
                     NS.publisher_id,
-                    {"message": "Checking if nodes %s are up" % hosts},
+                    {"message": "Checking if nodes %s are up" % hosts.keys()},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
                 nodes_up = []
                 nodes_down = []
-                for fqdn in hosts:
-                    out, err, rc = Command("ping -c 1 %s" % fqdn).run()
-                    # and then check the response...
-                    if not err and rc == 0:
-                        nodes_up.append(fqdn)
+                for host in hosts:
+                    if hosts[host] == "UP":
+                        nodes_up.append(host)
                     else:
                         flag = False
-                        nodes_down.append(fqdn)
+                        nodes_down.append(host)
                 if flag:
                     logger.log(
                         "info",
                         NS.publisher_id,
-                        {"message": "Ping to nodes %s succeeded." % nodes_up},
+                        {"message": "Status of nodes %s are up" % nodes_up},
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id']
                     )
@@ -69,7 +69,8 @@ class CheckNodeUp(BaseAtom):
                     logger.log(
                         "info",
                         NS.publisher_id,
-                        {"message": "Failed to ping nodes %s" % nodes_down},
+                        {"message": "Status of nodes %s are down" %
+                         nodes_down},
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id']
                     )
