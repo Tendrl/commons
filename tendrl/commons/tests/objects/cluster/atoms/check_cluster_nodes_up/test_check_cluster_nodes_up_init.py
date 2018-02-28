@@ -2,7 +2,8 @@ import __builtin__
 import maps
 from mock import patch
 
-from tendrl.commons.objects.node.atoms.check_node_up import CheckNodeUp
+from tendrl.commons.objects.cluster.atoms.check_cluster_nodes_up import \
+    CheckClusterNodesUp
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
@@ -47,11 +48,11 @@ def test_run(log):
     NS.tendrl["objects"] = maps.NamedDict(Job=MockJob)
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
-    check_node_up = CheckNodeUp()
-    check_node_up.parameters = maps.NamedDict()
-    check_node_up.parameters['TendrlContext.integration_id'] = \
+    check_cluster_nodes_up = CheckClusterNodesUp()
+    check_cluster_nodes_up.parameters = maps.NamedDict()
+    check_cluster_nodes_up.parameters['TendrlContext.integration_id'] = \
         "7a3f2238-ef79-4943-9edf-762a80cf22a0"
-    check_node_up.parameters['job_id'] = "node_job"
-    check_node_up.parameters['flow_id'] = "flow_id"
+    check_cluster_nodes_up.parameters['job_id'] = "node_job"
+    check_cluster_nodes_up.parameters['flow_id'] = "flow_id"
     with patch.object(etcd_utils, "read", read):
-        check_node_up.run()
+        check_cluster_nodes_up.run()

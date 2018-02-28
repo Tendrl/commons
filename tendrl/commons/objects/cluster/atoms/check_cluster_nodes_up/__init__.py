@@ -7,9 +7,9 @@ from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
-class CheckNodeUp(BaseAtom):
+class CheckClusterNodesUp(BaseAtom):
     def __init__(self, *args, **kwargs):
-        super(CheckNodeUp, self).__init__(*args, **kwargs)
+        super(CheckClusterNodesUp, self).__init__(*args, **kwargs)
 
     def run(self):
         try:
