@@ -13,27 +13,21 @@ class CheckNodeUp(BaseAtom):
 
     def run(self):
         try:
-            flag = True
+            all_node_status_up = True
             # check job is parent or child
             job = NS.tendrl.objects.Job(
                 job_id=self.parameters['job_id']
             ).load()
             if "parent" not in job.payload:
-                # Getting node_ids from parameters
-                node_ids = self.parameters.get(
-                    'Node[]',
-                    None
-                )
-                if not node_ids:
-                    # fetch node id using integration_id
-                    integration_id = self.parameters[
-                        'TendrlContext.integration_id'
-                    ]
-                    key = "indexes/tags/tendrl/integration/%s" % \
-                        integration_id
-                    node_ids_str = etcd_utils.read(key).value
-                    node_ids = json.loads(node_ids_str)
-                # identifying fqdn using node_id
+                # fetch node id using integration_id
+                integration_id = self.parameters[
+                    'TendrlContext.integration_id'
+                ]
+                key = "indexes/tags/tendrl/integration/%s" % \
+                    integration_id
+                node_ids_str = etcd_utils.read(key).value
+                node_ids = json.loads(node_ids_str)
+                # identifying node status using node_id
                 hosts = {}
                 for node in node_ids:
                     try:
@@ -55,9 +49,9 @@ class CheckNodeUp(BaseAtom):
                     if hosts[host] == "UP":
                         nodes_up.append(host)
                     else:
-                        flag = False
+                        all_node_status_up = False
                         nodes_down.append(host)
-                if flag:
+                if all_node_status_up:
                     logger.log(
                         "info",
                         NS.publisher_id,
@@ -75,7 +69,7 @@ class CheckNodeUp(BaseAtom):
                         flow_id=self.parameters['flow_id']
                     )
             # no need to check for child job
-            return flag
+            return all_node_status_up
         except (etcd.EtcdKeyNotFound, KeyError, TypeError) as ex:
             raise FlowExecutionFailedError(
                 "Error checking status of nodes .error: %s" % str(ex)
