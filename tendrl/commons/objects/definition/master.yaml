@@ -97,7 +97,7 @@ namespace.tendrl:
       version: 1
     ExpandClusterWithDetectedPeers:
       tags:
-        - "provisioner/$TendrlContext.integration_id"
+        - "tendrl/node_$NodeContext.node_id"
       help: "Expand an existing cluster with newly detected peers"
       enabled: true
       inputs:
