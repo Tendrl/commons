@@ -153,7 +153,9 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 "(nodes: %s) (integration_id: %s)" % (
                     str(new_peers),
                     integration_id
-                )
-            }
+                ),
+            },
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id']
         )
         return True
