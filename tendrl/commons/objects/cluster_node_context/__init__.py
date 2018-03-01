@@ -5,14 +5,16 @@ from tendrl.commons.utils import time_utils
 
 class ClusterNodeContext(objects.BaseObject):
 
-    def __init__(self, node_id=None, fqdn=None, updated_at=None,
-                 tags=None, status=None, sync_status=None,
-                 last_sync=None, first_sync_done=None,
-                 is_managed=None, *args, **kwargs):
+    def __init__(self, node_id=None, fqdn=None, ipv4_addr=None,
+                 updated_at=None, tags=None, status=None,
+                 sync_status=None, last_sync=None,
+                 first_sync_done=None, is_managed=None,
+                 *args, **kwargs):
         super(ClusterNodeContext, self).__init__(*args, **kwargs)
         _node_context = NS.node_context.load()
         self.node_id = node_id or _node_context.node_id
         self.fqdn = fqdn or _node_context.fqdn
+        self.ipv4_addr = ipv4_addr or _node_context.ipv4_addr
         self.updated_at = updated_at or str(time_utils.now())
         self.tags = tags or _node_context.tags
         self.status = status or _node_context.status
