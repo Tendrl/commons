@@ -1,5 +1,5 @@
-import time
 import json
+import time
 import uuid
 
 import etcd
@@ -67,14 +67,15 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
             _cnc = NS.tendrl.objects.ClusterNodeContext(
                 node_id=node_id
             ).load()
-            if _cnc.is_managed.lower() == "yes":
+            if _cnc.is_managed not in [None, ""] \
+                and _cnc.is_managed.lower() == "yes":
                 continue
 
             params = {
                 'TendrlContext.integration_id': integration_id,
                 'Node[]': [node_id],
-                'Cluster.enable_volume_profiling':
-                _cluster.enable_volume_profiling
+                'Cluster.volume_profiling_flag':
+                _cluster.volume_profiling_flag
             }
             payload = {
                 "tags": ["tendrl/node_%s" % node_id],
