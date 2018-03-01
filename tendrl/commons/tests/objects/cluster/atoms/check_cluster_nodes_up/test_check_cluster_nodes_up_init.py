@@ -17,22 +17,19 @@ class MockJob(object):
         return self
 
 
+class MockNodeContext(object):
+    def __init__(self, node_id=None, status=None):
+        pass
+
+    def load(self):
+        self.status = 'UP'
+        return self
+
+
 def read(key):
-    if "tags" in key:
-        out = maps.NamedDict(
-            value=u'[' +
-            '"fe80532d-95e0-4b10-b486-a357e325cccf",' +
-            '"cafff14b-a79f-4fe0-8307-41f0c2b93493"' +
-            ']'
-        )
-    elif "fe80532d-95e0-4b10-b486-a357e325cccf" in key:
-        out = maps.NamedDict(
-            value=u'DOWN'
-        )
-    elif "cafff14b-a79f-4fe0-8307-41f0c2b93493" in key:
-        out = maps.NamedDict(
-            value=u'UP'
-        )
+    out = maps.NamedDict(
+        value=u'["fe80532d-95e0-4b10-b486-a357e325cccf"]'
+    )
     return out
 
 
@@ -45,7 +42,10 @@ def test_run(log):
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS["tendrl"] = maps.NamedDict()
-    NS.tendrl["objects"] = maps.NamedDict(Job=MockJob)
+    NS.tendrl["objects"] = maps.NamedDict(
+        Job=MockJob,
+        NodeContext=MockNodeContext
+    )
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     check_cluster_nodes_up = CheckClusterNodesUp()
