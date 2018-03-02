@@ -7,6 +7,7 @@ from mock import patch
 from tendrl.commons.objects.node.flows.stop_services import \
     StopServices
 import tendrl.commons.objects.node_context as node
+from tendrl.commons.objects.service import Service
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import log_utils as logger
@@ -26,6 +27,10 @@ def service_success(param):
 
 def service_failed(param):
     return 'error', '', 0
+
+
+def service_info(*args, **kwargs):
+    return {"exists": True, "running": True}
 
 
 def mock_log(*args, **kwargs):
@@ -81,9 +86,11 @@ def test_run():
     obj.parameters["Services[]"] = ["TestService"]
     with patch.object(logger, 'log', mock_log):
         with patch.object(cmd_utils.Command, 'run', service_success):
-            ret_val = obj.run()
-            assert ret_val is True
+            with patch.object(Service, 'get_service_info', service_info):
+                ret_val = obj.run()
+                assert ret_val is True
     with patch.object(logger, 'log', mock_log):
         with patch.object(cmd_utils.Command, 'run', service_failed):
-            ret_val = obj.run()
-            assert ret_val is False
+            with patch.object(Service, 'get_service_info', service_info):
+                ret_val = obj.run()
+                assert ret_val is False

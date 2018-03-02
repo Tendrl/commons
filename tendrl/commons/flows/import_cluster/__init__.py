@@ -17,7 +17,9 @@ class ImportCluster(flows.BaseFlow):
                 integration_id=NS.tendrl_context.integration_id).load()
             if (_cluster.status is not None and
                     _cluster.status != "" and
-                    _cluster.status in ["syncing", "importing", "unmanaging"]):
+                    _cluster.current_job['status'] == 'in_progress' and
+                    _cluster.status in
+                    ["importing", "unmanaging", "expanding"]):
                 raise FlowExecutionFailedError(
                     "Another job in progress for cluster, please wait till "
                     "the job finishes (job_id: %s) (integration_id: %s) " % (
@@ -85,6 +87,7 @@ class ImportCluster(flows.BaseFlow):
                 Exception) as ex:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
+            _cluster.status = ""
             _cluster.current_job['status'] = 'failed'
             _errors = []
             if hasattr(ex, 'message'):

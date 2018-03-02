@@ -11,6 +11,20 @@ class StopServices(flows.BaseFlow):
         super(StopServices, self).run()
         services = self.parameters['Services[]']
         for service in services:
+            srv = NS.tendrl.objects.Service(service=service)
+            if not srv.running:
+                logger.log(
+                    "debug",
+                    NS.publisher_id,
+                    {
+                        "message": "Service %s not running on "
+                        "node %s" % (service, NS.node_context.fqdn)
+                    },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id'],
+                )
+                continue
+
             _cmd_str = "systemctl stop %s" % service
             cmd = cmd_utils.Command(_cmd_str)
             err, out, rc = cmd.run()
