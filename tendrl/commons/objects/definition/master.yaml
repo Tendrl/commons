@@ -235,16 +235,14 @@ namespace.tendrl:
           run: tendrl.objects.Cluster.atoms.CheckSyncDone
           type: Get
           uuid: 552f6190-9b37-11e6-950d-a24fc096d49e
-          help: check if cluster is available
+          help: check sync is done from nodes of the cluster
         CheckClusterNodesUp:
           enabled: true
           inputs:
             mandatory:
               - TendrlContext.integration_id
-          outputs:
-            - Node.status
-          name: "check whether the nodes are up"
-          help: "Checks if a nodes are up"
+          name: "Check all cluster nodes are up"
+          help: "Check all cluster nodes are up"
           run: tendrl.objects.Cluster.atoms.CheckClusterNodesUp
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
