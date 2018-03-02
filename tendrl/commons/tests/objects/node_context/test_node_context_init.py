@@ -104,7 +104,9 @@ def test_create_node_id(patch_write, patch_read, patch_client):
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
-    node_context = NodeContext(node_id="Test_Node_id", fqdn="Test_fqdn")
+    node_context = NodeContext(node_id="Test_Node_id",
+                               fqdn="Test_fqdn",
+                               ipv4_addr="127.0.0.1")
     f = tempfile.TemporaryFile()
     with patch.object(__builtin__, "open") as mock_open:
         mock_open.return_value = f

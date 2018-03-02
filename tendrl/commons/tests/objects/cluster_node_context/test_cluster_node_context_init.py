@@ -26,9 +26,9 @@ def test_constructor(monkeypatch):
     setattr(__builtin__, "NS", maps.NamedDict())
     monkeypatch.setattr(NodeContext, 'load', load)
     NS.node_context = NodeContext()
-    cluster_node_context = ClusterNodeContext()
+    cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
     assert cluster_node_context.status
-    cluster_node_context = ClusterNodeContext()
+    cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
     assert cluster_node_context.node_id == 1
 
 
@@ -39,5 +39,5 @@ def test_render(monkeypatch):
     NS.node_context = NodeContext()
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = 1
-    cluster_node_context = ClusterNodeContext()
+    cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
     assert cluster_node_context.render() is not None
