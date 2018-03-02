@@ -47,6 +47,8 @@ namespace.tendrl:
           - Cluster.cluster_network
           - Cluster.node_identifier
           - Cluster.node_configuration
+      pre_run:
+        - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
       run: tendrl.flows.ExpandCluster
       type: Update
       uuid: 2f94a48a-05d7-408c-b400-e27827f4eacd
@@ -63,6 +65,7 @@ namespace.tendrl:
           - TendrlContext.integration_id
           - Cluster.volume_profiling_flag
       pre_run:
+        - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
       post_run:
@@ -88,6 +91,7 @@ namespace.tendrl:
         mandatory:
           - TendrlContext.integration_id
       pre_run:
+        - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
         - tendrl.objects.Cluster.atoms.IsClusterManaged
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
@@ -231,7 +235,17 @@ namespace.tendrl:
           run: tendrl.objects.Cluster.atoms.CheckSyncDone
           type: Get
           uuid: 552f6190-9b37-11e6-950d-a24fc096d49e
-          help: check if cluster is available
+          help: check sync is done from nodes of the cluster
+        CheckClusterNodesUp:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: "Check all cluster nodes are up"
+          help: "Check all cluster nodes are up"
+          run: tendrl.objects.Cluster.atoms.CheckClusterNodesUp
+          type: Create
+          uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
         integration_id:
           help: integration id
@@ -902,18 +916,6 @@ namespace.tendrl:
           run: tendrl.objects.Node.atoms.Cmd
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
-        CheckNodeUp:
-          enabled: true
-          inputs:
-            mandatory:
-              - Node.fqdn
-          outputs:
-            - Node.status
-          name: "check whether the node is up"
-          help: "Checks if a node is up"
-          run: tendrl.objects.Node.atoms.CheckNodeUp
-          type: Create
-          uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
         cmd_str:
           type: String
