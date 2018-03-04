@@ -86,3 +86,17 @@ def delete(*args, **kws):
             wreconnect()
 
     thread.interrupt_main()
+
+
+def watch(obj, key):
+
+    while True:
+        try:
+            for _change in NS._int.client.eternal_watch(key):
+                attr = key.rstrip("/").split("/")[-1]
+                obj.on_change(attr, _change._prev_node.value,
+                              _change.value)
+        except etcd.EtcdKeyNotFound:
+            NS._int.watchers.pop(key, None)
+            return
+

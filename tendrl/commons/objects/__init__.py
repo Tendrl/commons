@@ -152,6 +152,8 @@ class BaseObject(object):
         if ttl:
             etcd_utils.refresh(self.value, ttl)
 
+        self.watch_attrs()
+
     @thread_safe
     def load_all(self):
         self.render()
@@ -374,6 +376,20 @@ class BaseObject(object):
                 value = copy.deepcopy(value)
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
+
+    @thread_safe
+    def watch_attrs(self):
+        if self.value:
+            watchables = self._defs.get("watch_attrs", [])
+            for attr in watchables:
+                key = "{0}/{1}".format(self.value.rstrip("/"), attr)
+                if key not in NS._int.watchers:
+                    watcher = threading.Thread(target=cs_utils.watch,
+                                               args=(copy.copy(self),
+                                                     key))
+                    watcher.setDaemon(True)
+                    NS._int.watchers[key] = watcher
+                    watcher.start()
 
 
 @six.add_metaclass(abc.ABCMeta)

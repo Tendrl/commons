@@ -20,6 +20,7 @@ class TendrlNS(object):
             setattr(NS, "_int", maps.NamedDict())
             NS._int.wreconnect = cs_utils.wreconnect
             NS._int.reconnect = cs_utils.reconnect
+            NS._int.watchers = dict()
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
