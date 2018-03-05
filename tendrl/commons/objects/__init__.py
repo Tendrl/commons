@@ -28,6 +28,7 @@ def thread_safe(thread_unsafe_method):
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
     def __init__(self, *args, **kwargs):
+        self._ttl = None
         self._lock = threading.RLock()
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
@@ -151,6 +152,8 @@ class BaseObject(object):
                 NS._int.wclient.write(item['key'], item['value'], quorum=True)
         if ttl:
             etcd_utils.refresh(self.value, ttl)
+
+        self.watch_attrs()
 
     @thread_safe
     def load_all(self):
@@ -374,6 +377,21 @@ class BaseObject(object):
                 value = copy.deepcopy(value)
             _public_vars[attr] = value
         return self.__class__(**_public_vars)
+
+    @thread_safe
+    def watch_attrs(self):
+        self.render()
+        if self.value:
+            watchables = self._defs.get("watch_attrs", [])
+            for attr in watchables:
+                key = "{0}/{1}".format(self.value.rstrip("/"), attr)
+                if key not in NS._int.watchers:
+                    watcher = threading.Thread(target=cs_utils.watch,
+                                               args=(copy.copy(self),
+                                                     key))
+                    watcher.setDaemon(True)
+                    NS._int.watchers[key] = watcher
+                    watcher.start()
 
 
 @six.add_metaclass(abc.ABCMeta)
