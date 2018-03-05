@@ -56,6 +56,12 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 integration_id_index_key).value
             node_ids = json.loads(node_ids)
         except etcd.EtcdKeyNotFound:
+            raise FlowExecutionFailedError(
+                "Cluster with integration_id "
+                "(%s) not found, cannot "
+                "import" % integration_id
+            )
+        finally:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
             ).load()
@@ -67,11 +73,6 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 'status': 'failed'
             }
             _cluster.save()
-            raise FlowExecutionFailedError(
-                "Cluster with integration_id "
-                "(%s) not found, cannot "
-                "import" % integration_id
-            )
 
         job_ids = []
         new_peers = []
