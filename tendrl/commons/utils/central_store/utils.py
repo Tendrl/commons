@@ -92,10 +92,13 @@ def watch(obj, key):
 
     while True:
         try:
-            for _change in NS._int.client.eternal_watch(key):
-                attr = key.rstrip("/").split("/")[-1]
-                obj.on_change(attr, _change._prev_node.value,
-                              _change.value)
+            for change in NS._int.client.eternal_watch(key):
+                is_deleted = change._prev_node.value is None and \
+                             change.value is None
+                if change._prev_node.value != change.value or is_deleted:
+                    attr = key.rstrip("/").split("/")[-1]
+                    obj.on_change(attr, change._prev_node.value,
+                                  change.value)
         except etcd.EtcdKeyNotFound:
             NS._int.watchers.pop(key, None)
             return

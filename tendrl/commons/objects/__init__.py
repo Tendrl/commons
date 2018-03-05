@@ -28,6 +28,7 @@ def thread_safe(thread_unsafe_method):
 @six.add_metaclass(abc.ABCMeta)
 class BaseObject(object):
     def __init__(self, *args, **kwargs):
+        self._ttl = None
         self._lock = threading.RLock()
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
@@ -379,6 +380,7 @@ class BaseObject(object):
 
     @thread_safe
     def watch_attrs(self):
+        self.render()
         if self.value:
             watchables = self._defs.get("watch_attrs", [])
             for attr in watchables:

@@ -8,6 +8,7 @@ import etcd
 
 from tendrl.commons import objects
 from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import event_utils
 from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
@@ -89,4 +90,70 @@ class NodeContext(objects.BaseObject):
         super(NodeContext, self).save(update)
         status = self.value + "/status"
         if ttl:
+            self._ttl = ttl
             etcd_utils.refresh(status, ttl)
+
+    def on_change(self, attr, prev_value, current_value):
+        if attr == "status":
+            if current_value is None:
+                self.status = "DOWN"
+                self.save()
+                msg = "Node {0} is DOWN".format(self.fqdn)
+                event_utils.emit_event(
+                    "node_status",
+                    self.status,
+                    msg,
+                    "node_{0}".format(self.fqdn),
+                    "WARNING",
+                    node_id=self.node_id
+                )
+
+                _tc = NS.tendrl.objects.TendrlContext(
+                    node_id=self.node_id
+                ).load()
+                _tag = "provisioner/%s" % _tc.integration_id
+                if _tag in self.tags:
+                    _index_key = "/indexes/tags/%s" % _tag
+                    self.tags.remove(_tag)
+                    self.save()
+                    etcd_utils.delete(_index_key)
+                    _msg = "node_sync, STALE provisioner node "\
+                        "found! re-configuring monitoring "\
+                        "(job-id: %s) on this node"
+                    payload = {
+                        "tags": ["tendrl/node_%s" % self.node_id],
+                        "run": "tendrl.flows.ConfigureMonitoring",
+                        "status": "new",
+                        "parameters": {
+                            'TendrlContext.integration_id': _tc.integration_id
+                        },
+                        "type": "node"
+                    }
+                    _job_id = str(uuid.uuid4())
+                    NS.tendrl.objects.Job(
+                        job_id=_job_id,
+                        status="new",
+                        payload=payload
+                    ).save()
+                    logger.log(
+                        "debug",
+                        NS.publisher_id,
+                        {"message": _msg % _job_id}
+                    )
+
+                if _tc.sds_name == "gluster":
+                    bricks = etcd_utils.read(
+                        "clusters/{0}/Bricks/all/{1}".format(
+                            _tc.integration_id,
+                            self.fqdn
+                        )
+                    )
+
+                    for brick in bricks.leaves:
+                        try:
+                            etcd_utils.write(
+                                "{0}/status".format(brick.key),
+                                "Stopped"
+                            )
+                        except (etcd.EtcdAlreadyExist, etcd.EtcdKeyNotFound):
+                            pass
