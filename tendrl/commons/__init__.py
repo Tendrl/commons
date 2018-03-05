@@ -20,6 +20,7 @@ class TendrlNS(object):
             setattr(NS, "_int", maps.NamedDict())
             NS._int.wreconnect = cs_utils.wreconnect
             NS._int.reconnect = cs_utils.reconnect
+            NS._int.watchers = dict()
         '''
             Note: Log messages in this file have try-except blocks to run in
             the condition when the node_agent has not been started and name
@@ -417,7 +418,8 @@ class TendrlNS(object):
                               atoms=raw_obj.get('atoms', {}),
                               flows=raw_obj.get('flows', {}),
                               help=raw_obj['help'],
-                              relationship=raw_obj.get('relationship', {})
+                              relationship=raw_obj.get('relationship', {}),
+                              watch_attrs=raw_obj.get("watch_attrs", [])
                               )
 
     def get_obj_flow_definition(self, obj_name, flow_name):
