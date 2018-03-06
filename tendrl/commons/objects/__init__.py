@@ -169,8 +169,14 @@ class BaseObject(object):
                         return None
         ins = []
         for item in etcd_resp.leaves:
-            self.value = item.key
-            ins.append(self.load())
+            # When directory is not empty then NS._int.client.read(key)
+            # will return key + directory id as new key. If directory is
+            # empty then it will return key only. When directory is
+            # not present then it will raise EtcdKeyNotFound
+            if item.key.strip("/") != value.strip("/"):
+                # if dir is empty then item.key and value is same
+                self.value = item.key
+                ins.append(self.load())
         return ins
 
     @thread_safe
