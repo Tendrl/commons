@@ -20,7 +20,8 @@ class UnmanageCluster(flows.BaseFlow):
                     )
         if ('job_id' in _cluster.locked_by and
             _cluster.locked_by['job_id'] != "") or \
-            _cluster.status in ['importing', 'unmanaging']:
+            (_cluster.current_job['status'] == 'in_progress' and
+             _cluster.status in ['importing', 'unmanaging', 'expanding']):
             raise FlowExecutionFailedError(
                 "Another job in progress for cluster."
                 " Please wait till the job finishes "
@@ -69,8 +70,13 @@ class UnmanageCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
             ).load()
+            _cluster.status = ""
             _cluster.locked_by = {}
-            _cluster.current_job['status'] = "failed"
+            _cluster.current_job = {
+                'status': "failed",
+                'job_name': self.__class__.__name__,
+                'job_id': self.job_id
+            }
             _errors = []
             if hasattr(ex, 'message'):
                 _errors = [ex.message]
