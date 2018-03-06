@@ -110,9 +110,9 @@ def process_job(job):
                 # mark status as "failed" and Job.error =
                 # "Timed out"
                 try:
-                    NS._int.wclient.write(job_status_key,
-                                          "failed",
-                                          prevValue="new")
+                    etcd_utils.write(job_status_key,
+                                     "failed",
+                                     prevValue="new")
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
@@ -141,7 +141,7 @@ def process_job(job):
             # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            NS._int.wclient.write(_job_valid_until_key,
+            etcd_utils.write(_job_valid_until_key,
                                   int(_now_plus_10_epoch))
 
     job = Job(job_id=jid).load()
@@ -177,10 +177,10 @@ def process_job(job):
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
                              type=NS.type)
-            NS._int.wclient.write(job_status_key, "processing",
-                                  prevValue="new")
-            NS._int.wclient.write(job_lock_key,
-                                  json.dumps(lock_info))
+            etcd_utils.write(job_status_key, "processing",
+                             prevValue="new")
+            etcd_utils.write(job_lock_key,
+                             json.dumps(lock_info))
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
             # agent
@@ -218,7 +218,7 @@ def process_job(job):
             )
             the_flow.run()
             try:
-                NS._int.wclient.write(job_status_key,
+                etcd_utils.write(job_status_key,
                                       "finished",
                                       prevValue="processing")
             except etcd.EtcdCompareFailed:
@@ -281,7 +281,7 @@ def process_job(job):
                 )
 
             try:
-                NS._int.wclient.write(job_status_key,
+                etcd_utils.write(job_status_key,
                                       "failed",
                                       prevValue="processing")
             except etcd.EtcdCompareFailed:
