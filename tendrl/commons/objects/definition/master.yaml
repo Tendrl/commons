@@ -1106,6 +1106,9 @@ namespace.tendrl:
         output:
           help: output of the job execution
           type: dict
+        timeout:
+          help: Job is timed out after 10 mins if yes
+          type: String
       enabled: true
       list: /queue
       value: /queue

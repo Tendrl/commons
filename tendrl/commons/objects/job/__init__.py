@@ -4,7 +4,8 @@ from tendrl.commons import objects
 class Job(objects.BaseObject):
     def __init__(self, job_id=None, payload=None,
                  status=None, errors=None, children=None,
-                 locked_by=None, output=None, *args, **kwargs):
+                 locked_by=None, output=None, timeout=None,
+                 *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
         self.job_id = job_id
         self.status = status
@@ -13,6 +14,7 @@ class Job(objects.BaseObject):
         self.children = children
         self.locked_by = locked_by
         self.output = output or {}
+        self.timeout = timeout or "yes"
         self.value = 'queue/{0}'
 
     def save(self):
