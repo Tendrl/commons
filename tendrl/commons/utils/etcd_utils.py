@@ -39,9 +39,13 @@ def read(key):
 '''
 
 
-def write(key, value, quorum=True):
+def write(key, value, quorum=True, prevValue=None):
     try:
-        NS._int.wclient.write(key, value, quorum=quorum)
+        if prevValue:
+            NS._int.wclient.write(key, value, quorum=quorum,
+                                  prevValue=prevValue)
+        else:
+            NS._int.wclient.write(key, value, quorum=quorum)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
         if type(ex) != etcd.EtcdKeyNotFound:
             NS._int.wreconnect()
