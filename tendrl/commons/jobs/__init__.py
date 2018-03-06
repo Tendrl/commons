@@ -141,7 +141,8 @@ def process_job(job):
             # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            etcd_utils.write(_job_valid_until_key,int(_now_plus_10_epoch))
+            etcd_utils.write(_job_valid_until_key,
+                             int(_now_plus_10_epoch))
 
     job = Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
@@ -219,8 +220,7 @@ def process_job(job):
             try:
                 etcd_utils.write(job_status_key,
                                  "finished",
-                                 prevValue="processing"
-                                )
+                                 prevValue="processing")
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'finished', " \
@@ -283,8 +283,7 @@ def process_job(job):
             try:
                 etcd_utils.write(job_status_key,
                                  "failed",
-                                 prevValue="processing"
-                                )
+                                 prevValue="processing")
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'failed', current" \
