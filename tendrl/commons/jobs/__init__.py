@@ -15,6 +15,7 @@ from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import alert_utils
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
@@ -41,7 +42,7 @@ class JobConsumerThread(threading.Thread):
 
             time.sleep(_job_sync_interval)
             try:
-                jobs = NS._int.client.read("/queue")
+                jobs = etcd_utils.read("/queue")
             except etcd.EtcdKeyNotFound:
                 continue
 
@@ -62,7 +63,7 @@ def process_job(job):
     NS.node_context = NS.node_context.load()
     # Check job not already locked by some agent
     try:
-        _locked_by = NS._int.client.read(job_lock_key).value
+        _locked_by = etcd_utils.read(job_lock_key).value
         if _locked_by:
             return
     except etcd.EtcdKeyNotFound:
@@ -70,9 +71,18 @@ def process_job(job):
 
     # Check job not already "finished", or "processing"
     try:
-        _status = NS._int.client.read(job_status_key).value
+        _status = etcd_utils.read(job_status_key).value
         if _status in ["finished", "processing"]:
             return
+    except etcd.EtcdKeyNotFound:
+        pass
+    
+    try:
+        _job_timeout_key = "/queue/%s/timeout" % jid
+        _timeout = None
+        _timeout = etcd_utils.read(_job_timeout_key).value
+        if _timeout:
+            _timeout = _timeout.lower()
     except etcd.EtcdKeyNotFound:
         pass
 
@@ -80,11 +90,12 @@ def process_job(job):
     # >10 min old "new" jobs are timed out and marked as
     # "failed" (the parent job of these jobs will also be
     # marked as "failed")
-    if "tendrl/monitor" in NS.node_context.tags:
+    if "tendrl/monitor" in NS.node_context.tags and \
+        _timeout == "yes":
         _job_valid_until_key = "/queue/%s/valid_until" % jid
         _valid_until = None
         try:
-            _valid_until = NS._int.client.read(
+            _valid_until = etcd_utils.read(
                 _job_valid_until_key).value
         except etcd.EtcdKeyNotFound:
             pass
@@ -166,10 +177,10 @@ def process_job(job):
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
                              type=NS.type)
-            NS._int.wclient.write(job_lock_key,
-                                  json.dumps(lock_info))
             NS._int.wclient.write(job_status_key, "processing",
                                   prevValue="new")
+            NS._int.wclient.write(job_lock_key,
+                                  json.dumps(lock_info))
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
             # agent
