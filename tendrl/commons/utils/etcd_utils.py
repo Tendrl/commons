@@ -18,8 +18,7 @@ def read(key, **kwargs):
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
         if type(ex) in [etcd.EtcdKeyNotFound,
                         etcd.EtcdCompareFailed,
-                        etcd.EtcdAlreadyExist
-                       ]:
+                        etcd.EtcdAlreadyExist]:
             raise ex
         else:
             NS._int.reconnect()
@@ -55,8 +54,8 @@ def write(key, value, quorum=True, **kwargs):
             NS._int.wreconnect()
             return NS._int.wclient.write(key, value,
                                          quorum=quorum,
-                                         **kwargs
-                                        )
+                                         **kwargs)
+
 
 '''
    Refresh connection
