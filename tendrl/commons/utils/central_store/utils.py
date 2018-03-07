@@ -95,10 +95,10 @@ def watch(obj, key):
             for change in NS._int.client.eternal_watch(key):
                 prev_val = None
                 cur_val = None
-                if change._prev_node:
+                if hasattr(change, "_prev_node"):
                     prev_val = change._prev_node.value
 
-                if change.value:
+                if hasattr(change, "value"):
                     cur_val = change.value
 
                 is_deleted = prev_val is None and cur_val is None
