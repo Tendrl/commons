@@ -12,15 +12,18 @@ import etcd
 '''
 
 
-def read(key):
+def read(key, **kwargs):
     try:
-        return NS._int.client.read(key)
+        return NS._int.client.read(key, **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-        if type(ex) != etcd.EtcdKeyNotFound:
-            NS._int.reconnect()
-            return NS._int.client.read(key)
+        if type(ex) in [etcd.EtcdKeyNotFound,
+                        etcd.EtcdCompareFailed,
+                        etcd.EtcdAlreadyExist
+                       ]:
+            raise ex
         else:
-            raise etcd.EtcdKeyNotFound
+            NS._int.reconnect()
+            return NS._int.client.read(key, **kwargs)
 
 
 '''
@@ -39,20 +42,21 @@ def read(key):
 '''
 
 
-def write(key, value, quorum=True, prevValue=None):
+def write(key, value, quorum=True, **kwargs):
     try:
-        if prevValue:
-            NS._int.wclient.write(key, value, quorum=quorum,
-                                  prevValue=prevValue)
-        else:
-            NS._int.wclient.write(key, value, quorum=quorum)
+        return NS._int.wclient.write(key, value, quorum=quorum,
+                                     **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-        if type(ex) != etcd.EtcdKeyNotFound:
-            NS._int.wreconnect()
-            NS._int.wclient.write(key, value, quorum=quorum)
+        if type(ex) in [etcd.EtcdKeyNotFound,
+                        etcd.EtcdCompareFailed,
+                        etcd.EtcdAlreadyExist]:
+            raise ex
         else:
-            raise etcd.EtcdKeyNotFound
-
+            NS._int.wreconnect()
+            return NS._int.wclient.write(key, value,
+                                         quorum=quorum,
+                                         **kwargs
+                                        )
 
 '''
    Refresh connection
@@ -67,15 +71,19 @@ def write(key, value, quorum=True, prevValue=None):
 '''
 
 
-def refresh(value, ttl):
+def refresh(value, ttl, **kwargs):
     try:
-        NS._int.wclient.refresh(value, ttl=ttl)
+        NS._int.wclient.refresh(value, ttl=ttl,
+                                **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-        if type(ex) != etcd.EtcdKeyNotFound:
-            NS._int.wreconnect()
-            NS._int.wclient.refresh(value, ttl=ttl)
+        if type(ex) in [etcd.EtcdKeyNotFound,
+                        etcd.EtcdCompareFailed,
+                        etcd.EtcdAlreadyExist]:
+            raise ex
         else:
-            raise etcd.EtcdKeyNotFound
+            NS._int.wreconnect()
+            NS._int.wclient.refresh(value, ttl=ttl,
+                                    **kwargs)
 
 
 '''
@@ -90,12 +98,14 @@ def refresh(value, ttl):
 '''
 
 
-def delete(key):
+def delete(key, **kwargs):
     try:
-        return NS._int.wclient.delete(key)
+        return NS._int.wclient.delete(key, **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-        if type(ex) != etcd.EtcdKeyNotFound:
-            NS._int.wreconnect()
-            return NS._int.wclient.delete(key)
+        if type(ex) in [etcd.EtcdKeyNotFound,
+                        etcd.EtcdCompareFailed,
+                        etcd.EtcdAlreadyExist]:
+            raise ex
         else:
-            raise etcd.EtcdKeyNotFound
+            NS._int.wreconnect()
+            return NS._int.wclient.delete(key, **kwargs)
