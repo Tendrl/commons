@@ -1,5 +1,5 @@
 Name: tendrl-commons
-Version: 1.6.0
+Version: 1.6.1
 Release: 1%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
@@ -48,6 +48,9 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
+* Wed Mar 07 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.1-1
+- Auto expand clusters managed by Tendrl
+
 * Sat Feb 17 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.0-1
 - API to un-manage clusters managed by Tendrl
 
