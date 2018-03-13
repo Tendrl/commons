@@ -4,13 +4,13 @@ from tendrl.commons import objects
 class ClusterAlertCounters(objects.BaseObject):
     def __init__(
         self,
-        warn_count=0,
+        alert_count=0,
         integration_id=None,
         *args,
         **kwargs
     ):
         super(ClusterAlertCounters, self).__init__(*args, **kwargs)
-        self.warning_count = warn_count
+        self.alert_count = alert_count
         self.integration_id = integration_id
         self.value = '/clusters/{0}/alert_counters'
 
