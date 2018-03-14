@@ -68,8 +68,8 @@ class AlertUtils(object):
         return (
             alert1.alert_id == alert2.alert_id and
             str(alert1.acked) == alert2.acked and
-           alert_severity_map[alert1.severity] == \
-               alert_severity_map[alert2.severity]
+            alert_severity_map[alert1.severity] == alert_severity_map[
+                alert2.severity]
         )
 
     def update(self, new_alert, existing_alert):
