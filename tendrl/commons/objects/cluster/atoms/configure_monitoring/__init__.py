@@ -153,11 +153,4 @@ class ConfigureMonitoring(objects.BaseAtom):
             node_id=NS.node_context.node_id,
             enabled=True
         ).restart()
-        _cluster = NS.tendrl.objects.Cluster(
-            integration_id=NS.tendrl_context.integration_id
-        ).load()
-        _cluster.status = ""
-        _cluster.current_job['status'] = "finished"
-        _cluster.save()
-
         return True

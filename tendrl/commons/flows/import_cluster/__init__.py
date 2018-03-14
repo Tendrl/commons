@@ -43,6 +43,11 @@ class ImportCluster(flows.BaseFlow):
                     integration_id_index_key).value
                 self.parameters["Node[]"] = json.loads(_node_ids)
             except etcd.EtcdKeyNotFound:
+                _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id).load()
+                _cluster.status = ""
+                _cluster.current_job['status'] = 'failed'
+                _cluster.save()
                 raise FlowExecutionFailedError("Cluster with "
                                                "integration_id "
                                                "(%s) not found, cannot "
@@ -80,6 +85,8 @@ class ImportCluster(flows.BaseFlow):
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id
             ).load()
+            _cluster.status = ""
+            _cluster.current_job['status'] = "finished"
             _cluster.is_managed = "yes"
             _cluster.save()
         except (FlowExecutionFailedError,
