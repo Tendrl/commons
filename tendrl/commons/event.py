@@ -11,7 +11,10 @@ from tendrl.commons.message import Message
 
 class Event(object):
     def __init__(self, message, socket_path=None):
-        if message.publisher == "node_agent":
+        # node_agent log messages other than notice
+        # priority are directly pushed into logger
+        if message.publisher == "node_agent" and \
+                message.priority != "notice":
             try:
                 json_str = Message.to_json(message)
                 message = Message.from_json(json_str)
