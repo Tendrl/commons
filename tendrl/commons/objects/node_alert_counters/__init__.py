@@ -4,13 +4,13 @@ from tendrl.commons import objects
 class NodeAlertCounters(objects.BaseObject):
     def __init__(
         self,
-        warn_count=0,
+        alert_count=0,
         node_id=None,
         *args,
         **kwargs
     ):
         super(NodeAlertCounters, self).__init__(*args, **kwargs)
-        self.warning_count = warn_count
+        self.alert_count = alert_count
         self.node_id = node_id
         self.value = '/nodes/{0}/alert_counters'
 
@@ -23,7 +23,7 @@ class NodeAlertCounters(objects.BaseObject):
     def save(self, *args, **kwargs):
         if NS.tendrl_context.integration_id:
             NS.tendrl.objects.ClusterNodeAlertCounters(
-                warn_count=self.warning_count,
+                alert_count=self.alert_count,
                 node_id=self.node_id,
                 integration_id=NS.tendrl_context.integration_id
             ).save()
