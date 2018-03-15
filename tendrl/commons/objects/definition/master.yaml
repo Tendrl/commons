@@ -1129,8 +1129,8 @@ namespace.tendrl:
     ClusterAlertCounters:
       enabled: True
       attrs:
-        warning_count:
-          help: "Count of warning alerts for the cluster"
+        alert_count:
+          help: "Count of alerts for the cluster"
           type: int
         integration_id:
           help: "Id of the cluster"
@@ -1141,8 +1141,8 @@ namespace.tendrl:
     NodeAlertCounters:
       enabled: True
       attrs:
-        warning_count:
-          help: "Count of warning alerts for the node"
+        alert_count:
+          help: "Count of alerts for the node"
           type: int
         integration_id:
           help: "Id of the node"
@@ -1153,8 +1153,8 @@ namespace.tendrl:
     ClusterNodeAlertCounters:
       enabled: True
       attrs:
-        warning_count:
-          help: "Count of warning alerts for the cluster node"
+        alert_count:
+          help: "Count of alerts for the cluster node"
           type: int
         node_id:
           help: "Id of the node"
