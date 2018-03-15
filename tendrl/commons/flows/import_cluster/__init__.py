@@ -43,6 +43,11 @@ class ImportCluster(flows.BaseFlow):
                     integration_id_index_key).value
                 self.parameters["Node[]"] = json.loads(_node_ids)
             except etcd.EtcdKeyNotFound:
+                _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id).load()
+                _cluster.status = ""
+                _cluster.current_job['status'] = 'failed'
+                _cluster.save()
                 raise FlowExecutionFailedError("Cluster with "
                                                "integration_id "
                                                "(%s) not found, cannot "
@@ -55,31 +60,13 @@ class ImportCluster(flows.BaseFlow):
                     'Cluster.volume_profiling_flag']
                 _cluster.save()
 
-                # Try to claim "provisioner/:integration_id" tag
-                try:
-                    _tag = "provisioner/%s" % _cluster.integration_id
-                    _index_key = "/indexes/tags/%s" % _tag
-                    _node_id = json.dumps([NS.node_context.node_id])
-                    NS._int.wclient.write(_index_key, _node_id,
-                                          prevExist=False)
-                    # TODO(shtripat) ceph-installer is auto detected and
-                    #  provisioner/$integration_id
-                    # tag is set , below is not required for ceph
-                    current_tags = list(NS.node_context.tags)
-                    new_tags = ['provisioner/%s' % integration_id]
-                    new_tags += current_tags
-                    new_tags = list(set(new_tags))
-                    if new_tags != current_tags:
-                        NS.node_context.tags = new_tags
-                        NS.node_context.save()
-                except etcd.EtcdAlreadyExist:
-                    pass
-
         try:
             super(ImportCluster, self).run()
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id
             ).load()
+            _cluster.status = ""
+            _cluster.current_job['status'] = "finished"
             _cluster.is_managed = "yes"
             _cluster.save()
         except (FlowExecutionFailedError,

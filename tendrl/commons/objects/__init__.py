@@ -6,8 +6,8 @@ import hashlib
 import json
 import six
 import sys
-import time
 import threading
+import time
 import types
 
 from tendrl.commons.event import Event
