@@ -132,6 +132,17 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
+                _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=integration_id
+                ).load()
+                _cluster.locked_by = {}
+                _cluster.status = ""
+                _cluster.current_job = {
+                    'job_id': self.job_id,
+                    'job_name': self.__class__.__name__,
+                    'status': 'failed'
+                }
+                _cluster.save()
                 return False
             time.sleep(10)
             finished = True
