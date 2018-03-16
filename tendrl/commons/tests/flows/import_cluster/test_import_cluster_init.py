@@ -70,6 +70,13 @@ def return_pass(param):
     )
 
 
+def return_job(param):
+    return NS.tendrl.objects.Job(
+        job_id="sfdsdf",
+        payload={'parent': "xxxx"}
+    )
+
+
 def read(key):
     if key == 'indexes/tags/tendrl/integration/None':
         raise etcd.EtcdKeyNotFound
@@ -129,8 +136,17 @@ def test_run():
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(Cmd, 'run', return_value=True):
-                with patch.object(objects.BaseObject, 'load', return_pass):
-                    import_cluster.run()
+                with patch.object(
+                    NS.tendrl.objects.Cluster,
+                    'load',
+                    return_pass
+                ):
+                    with patch.object(
+                        NS.tendrl.objects.Job,
+                        'load',
+                        return_job
+                    ):
+                        import_cluster.run()
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(Cmd, 'run', return_value=False):
