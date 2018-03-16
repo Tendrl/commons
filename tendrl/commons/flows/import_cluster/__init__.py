@@ -62,13 +62,19 @@ class ImportCluster(flows.BaseFlow):
 
         try:
             super(ImportCluster, self).run()
-            _cluster = NS.tendrl.objects.Cluster(
-                integration_id=NS.tendrl_context.integration_id
-            ).load()
-            _cluster.status = ""
-            _cluster.current_job['status'] = "finished"
-            _cluster.is_managed = "yes"
-            _cluster.save()
+            # Check if this job is parent and then only set status
+            # This could be called from parent import cluster or
+            # even from expand cluster flow. We should not set the
+            # cluster's current job status from child jobs
+            _job = NS.tendrl.objects.Job(job_id=self.job_id).load()
+            if 'parent' not in _job.payload:
+                _cluster = NS.tendrl.objects.Cluster(
+                    integration_id=NS.tendrl_context.integration_id
+                ).load()
+                _cluster.status = ""
+                _cluster.current_job['status'] = "finished"
+                _cluster.is_managed = "yes"
+                _cluster.save()
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
                 Exception) as ex:
