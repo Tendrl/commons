@@ -76,6 +76,9 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
 
         job_ids = []
         new_peers = []
+        # Remove the current node from list as its already participating
+        # in cluster for sure
+        node_ids.remove(NS.node_context.node_id)
         for node_id in node_ids:
             _cnc = NS.tendrl.objects.ClusterNodeContext(
                 node_id=node_id
