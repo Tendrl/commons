@@ -158,6 +158,7 @@ class BaseObject(object):
 
     @thread_safe
     def load_all(self):
+        ins = []
         self.render()
         value = '/'.join(self.value.split('/')[:-1])
         try:
@@ -167,8 +168,7 @@ class BaseObject(object):
                         NS._int.reconnect()
                         etcd_resp = NS._int.client.read(value)
                     else:
-                        return None
-        ins = []
+                        return ins
         for item in etcd_resp.leaves:
             # When directory is not empty then NS._int.client.read(key)
             # will return key + directory id as new key. If directory is
