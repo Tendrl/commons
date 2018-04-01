@@ -2,7 +2,8 @@ from tendrl.commons import objects
 
 
 class Cluster(objects.BaseObject):
-    def __init__(self, integration_id=None, public_network=None,
+    def __init__(self, integration_id=None, short_name=None,
+                 public_network=None,
                  cluster_network=None, node_configuration=None,
                  conf_overrides=None, node_identifier=None,
                  last_sync=None, is_managed=None, current_job=dict(),
@@ -12,6 +13,7 @@ class Cluster(objects.BaseObject):
                  *args, **kwargs):
         super(Cluster, self).__init__(*args, **kwargs)
         self.integration_id = integration_id
+        self.short_name = short_name
         self.public_network = public_network
         self.cluster_network = cluster_network
         self.node_configuration = node_configuration

@@ -64,6 +64,8 @@ namespace.tendrl:
         mandatory:
           - TendrlContext.integration_id
           - Cluster.volume_profiling_flag
+        optional:
+          - Cluster.short_name
       pre_run:
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
@@ -72,6 +74,7 @@ namespace.tendrl:
         - tendrl.objects.Cluster.atoms.ConfigureMonitoring
         - tendrl.objects.Service.atoms.CheckServiceStatus
         - tendrl.objects.Cluster.atoms.CheckSyncDone
+        - tendrl.objects.Cluster.atoms.SetupClusterAlias
       run: tendrl.flows.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
@@ -119,6 +122,18 @@ namespace.tendrl:
       list: /clusters
       value: clusters/$TendrlContext.integration_id
       atoms:
+        SetupClusterAlias:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendlrContext.integration_id
+            optional:
+              - Cluster.short_name
+          name: setup cluster alias in graphite
+          run: tendrl.objects.Cluster.atoms.SetupClusterAlias
+          type: Update
+          uuid: 333c3333-3c33-33c3-333c-c33cc34444cc
+          help: setup cluster alias in graphite
         StopMonitoringServices:
           enabled: true
           inputs:
@@ -211,6 +226,7 @@ namespace.tendrl:
           inputs:
             mandatory:
               - TendrlContext.integration_id
+              - Cluster.short_name
           name: import cluster
           run: tendrl.objects.Cluster.atoms.ImportCluster
           type: Create
@@ -249,6 +265,9 @@ namespace.tendrl:
       attrs:
         integration_id:
           help: integration id
+          type: String
+        short_name:
+          help: Cluster short name
           type: String
         public_network:
           help: Public Network cidr of the cluster
