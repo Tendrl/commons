@@ -162,23 +162,23 @@ class BaseObject(object):
         self.render()
         value = '/'.join(self.value.split('/')[:-1])
         try:
-            etcd_resp = NS._int.client.read(value)
-        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                    if type(ex) != etcd.EtcdKeyNotFound:
-                        NS._int.reconnect()
-                        etcd_resp = NS._int.client.read(value)
-                    else:
-                        return ins
-        for item in etcd_resp.leaves:
-            # When directory is not empty then NS._int.client.read(key)
-            # will return key + directory id as new key. If directory is
-            # empty then it will return key only. When directory is
-            # not present then it will raise EtcdKeyNotFound
-            if item.key.strip("/") != value.strip("/"):
-                # if dir is empty then item.key and value is same
-                self.value = item.key
-                ins.append(self.load())
-                time.sleep(1)
+            etcd_resp = etcd_utils.read(value)
+            for item in etcd_resp.leaves:
+                # When directory is not empty then NS._int.client.read(key)
+                # will return key + directory id as new key. If directory is
+                # empty then it will return key only. When directory is
+                # not present then it will raise EtcdKeyNotFound
+                if item.key.strip("/") != value.strip("/"):
+                    # if dir is empty then item.key and value is same
+                    self.value = item.key
+                    ins.append(self.load())
+                    time.sleep(1)
+        except etcd.EtcdKeyNotFound as ex:
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Error in load_all.err: %s" % ex}
+            )
         return ins
 
     @thread_safe
