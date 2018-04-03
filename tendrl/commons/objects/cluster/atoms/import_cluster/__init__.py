@@ -8,7 +8,6 @@ from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -49,9 +48,11 @@ class ImportCluster(objects.BaseAtom):
                                    }
                         _job_id = str(uuid.uuid4())
                         cluster_nodes.append(_job_id)
-                        Job(job_id=_job_id,
+                        NS.tendrl.objects.Job(
+                            job_id=_job_id,
                             status="new",
-                            payload=payload).save()
+                            payload=payload
+                        ).save()
                         logger.log(
                             "info",
                             NS.publisher_id,
@@ -131,7 +132,9 @@ class ImportCluster(objects.BaseAtom):
                 # Wait for (no of nodes) * 6 minutes for import to complete
                 wait_count = (len(node_list) - 1) * 36
                 while True:
-                    parent_job = Job(job_id=self.parameters['job_id']).load()
+                    parent_job = NS.tendrl.objects.Job(
+                        job_id=self.parameters['job_id']
+                    ).load()
                     if loop_count >= wait_count:
                         logger.log(
                             "info",
@@ -146,7 +149,9 @@ class ImportCluster(objects.BaseAtom):
                     time.sleep(10)
                     finished = True
                     for child_job_id in parent_job.children:
-                        child_job = Job(job_id=child_job_id).load()
+                        child_job = NS.tendrl.objects.Job(
+                            job_id=child_job_id
+                        ).load()
                         if child_job.status != "finished":
                             finished = False
                             break

@@ -6,7 +6,6 @@ import etcd
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
@@ -102,7 +101,9 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 "type": "node"
             }
             _job_id = str(uuid.uuid4())
-            Job(job_id=_job_id, status="new", payload=payload).save()
+            NS.tendrl.objects.Job(
+                job_id=_job_id, status="new", payload=payload
+            ).save()
             logger.log(
                 "info",
                 NS.publisher_id,
@@ -150,7 +151,7 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
             time.sleep(10)
             finished = True
             for job_id in job_ids:
-                job = Job(job_id=job_id).load()
+                job = NS.tendrl.objects.Job(job_id=job_id).load()
                 if job.status != "finished":
                     finished = False
                     break

@@ -13,7 +13,6 @@ from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons.objects import AtomExecutionFailedError
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import alert_utils
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
@@ -116,7 +115,7 @@ def process_job(job):
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
-                    job = Job(job_id=jid).load()
+                    job = NS.tendrl.objects.Job(job_id=jid).load()
                     _msg = str("Timed-out (>10min as 'new')")
                     job.errors = _msg
                     job.save()
@@ -144,7 +143,7 @@ def process_job(job):
             etcd_utils.write(_job_valid_until_key,
                              int(_now_plus_10_epoch))
 
-    job = Job(job_id=jid).load()
+    job = NS.tendrl.objects.Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
             job.status == "new":
         # Job routing

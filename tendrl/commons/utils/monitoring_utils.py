@@ -1,7 +1,5 @@
 import uuid
 
-from tendrl.commons.objects.job import Job
-
 
 def update_dashboard(res_name, res_type, integration_id, action):
     _job_id = str(uuid.uuid4())
@@ -19,7 +17,7 @@ def update_dashboard(res_name, res_type, integration_id, action):
         "parameters": _params,
         "type": "monitoring"
     }
-    Job(
+    NS.tendrl.objects.Job(
         job_id=_job_id,
         status="new",
         payload=_job_payload
@@ -44,7 +42,7 @@ def delete_resource_from_graphite(res_name, res_type, integration_id, action):
         "parameters": _params,
         "type": "monitoring"
     }
-    Job(
+    NS.tendrl.objects.Job(
         job_id=_job_id,
         status="new",
         payload=_job_payload
