@@ -172,7 +172,7 @@ class BaseObject(object):
                     # if dir is empty then item.key and value is same
                     self.value = item.key
                     ins.append(self.load())
-                    time.sleep(1)
+                    time.sleep(0.3)
         except etcd.EtcdKeyNotFound as ex:
             logger.log(
                 "debug",
