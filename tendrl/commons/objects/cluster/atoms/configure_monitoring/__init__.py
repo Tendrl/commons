@@ -52,6 +52,7 @@ class ConfigureMonitoring(objects.BaseAtom):
             subprocess.check_call(
                 [
                     "tendrl-monitoring-config-manager",
+                    NS.node_context.fqdn,
                     plugin_name,
                     json.dumps(plugin_params)
                 ]
@@ -103,7 +104,7 @@ class ConfigureMonitoring(objects.BaseAtom):
         plugin_params = {
             "graphite_host": graphite_host,
             "graphite_port": graphite_port,
-            "hostname": NS.node_context.fqdn,
+            "fqdn": NS.node_context.fqdn,
             "integration_id": NS.tendrl_context.integration_id,
             "node_id": NS.node_context.node_id,
             "logging_socket_path": NS.config.data['logging_socket_path'],
