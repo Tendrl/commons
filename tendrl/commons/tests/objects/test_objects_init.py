@@ -1,7 +1,6 @@
 import __builtin__
 import etcd
 from etcd import Client
-import importlib
 import json
 import maps
 import mock
@@ -12,7 +11,8 @@ import pytest
 from tendrl.commons import objects
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
-from tendrl.commons.tests.fixtures.client import Client as dummy_client
+from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import log_utils as logger
 
 
 class BaseObject_Child(objects.BaseObject):
@@ -348,26 +348,25 @@ def test_exists():
 
 def test_load_all():
     tendrlNS = init()
-    NS._int.reconnect = type("Dummy", (object,), {})
-    NS._int.client = importlib.import_module(
-        "tendrl.commons.tests.fixtures.client").Client()
+    NS.publisher_id = "test"
     with patch.object(__builtin__, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
-        with patch.object(dummy_client, "read", return_value=maps.NamedDict(
+        with patch.object(etcd_utils, "read", return_value=maps.NamedDict(
                 leaves={})):
             obj.load_all()
-        with patch.object(dummy_client, "read", return_value=maps.NamedDict(
+        with patch.object(etcd_utils, "read", return_value=maps.NamedDict(
                 leaves=[maps.NamedDict(key='test_value')])):
             with patch.object(BaseObject_Child, 'load', return_value="tst"):
                 ret = obj.load_all()
                 assert isinstance(ret, list)
-        with patch.object(dummy_client, "read", read):
+        with patch.object(etcd_utils, "read", read):
             with pytest.raises(etcd.EtcdConnectionFailed):
                 obj.load_all()
-        with patch.object(dummy_client, "read", read_fn):
-            ret = obj.load_all()
-            assert ret is None
+        with patch.object(etcd_utils, "read", read_fn):
+            with patch.object(logger, "log"):
+                ret = obj.load_all()
+                assert ret == []
 
 
 def test_constructor_BaseAtom():
