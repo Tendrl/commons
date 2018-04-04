@@ -144,9 +144,9 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
 def acquire_node_lock(parameters):
     # check node_id is present
     for node in parameters['Node[]']:
-        try:
-            NS._int.client.read("/nodes/%s" % node)
-        except EtcdKeyNotFound:
+        if not NS.tendrl.objects.NodeContext(
+            node_id=node
+        ).exists():
             raise FlowExecutionFailedError(
                 "Unknown Node %s, cannot lock" %
                 node)
@@ -158,33 +158,38 @@ def acquire_node_lock(parameters):
     if "parent" in job.payload:
         p_job_id = job.payload['parent']
 
-    for node in parameters['Node[]']:
-        key = "/nodes/%s/locked_by" % node
+    for node_id in parameters['Node[]']:
+        nc = NS.tendrl.objects.NodeContext(node_id=node_id).load()
         try:
-            lock_owner_job = NS._int.client.read(key).value
+            lock_owner_job = nc.locked_by
             # If the parent job has aquired lock on participating nodes,
             # dont you worry child job :)
-            if p_job_id == lock_owner_job:
-                continue
-            else:
-                raise FlowExecutionFailedError("Cannot proceed further, "
-                                               "Node (%s) is already locked "
-                                               "by Job (%s)" % (node,
-                                                                lock_owner_job)
-                                               )
+            if p_job_id is not None and lock_owner_job is not None:
+                if p_job_id == lock_owner_job:
+                    continue
+                else:
+                    raise FlowExecutionFailedError(
+                        "Cannot proceed further, "
+                        "Node (%s) is already locked "
+                        "by Job (%s)" % (
+                            node_id,
+                            lock_owner_job
+                        )
+                    )
         except EtcdKeyNotFound:
             # To check what are all the nodes are already locked
             continue
 
-    for node in parameters['Node[]']:
-        try:
-            lock_owner_job = NS._int.client.read(key).value
-            if p_job_id == lock_owner_job:
-                continue
-        except EtcdKeyNotFound:
+    for node_id in parameters['Node[]']:
+        nc = NS.tendrl.objects.NodeContext(node_id=node_id).load()
+        lock_owner_job = nc.locked_by
+        if p_job_id is not None and lock_owner_job is not None and \
+            p_job_id == lock_owner_job:
+            continue
+        else:
             lock_owner_job = str(parameters["job_id"])
-            key = "nodes/%s/locked_by" % node
-            NS._int.client.write(key, lock_owner_job)
+            nc.locked_by = lock_owner_job
+            nc.save()
             logger.log(
                 "info",
                 NS.publisher_id,
@@ -196,17 +201,18 @@ def acquire_node_lock(parameters):
 
 
 def release_node_lock(parameters):
-    for node in parameters['Node[]']:
-        key = "/nodes/%s/locked_by" % node
+    for node_id in parameters['Node[]']:
+        nc = NS.tendrl.objects.NodeContext(node_id=node_id).load()
         try:
-            lock_owner_job = NS._int.client.read(key).value
+            lock_owner_job = nc.locked_by
             if lock_owner_job == parameters['job_id']:
-                NS._int.client.delete(key)
+                nc.locked_by = None
+                nc.save()
                 logger.log(
                     "info",
                     NS.publisher_id,
                     {"message": "Released lock (%s) on (%s)" %
-                                (lock_owner_job, node)},
+                                (lock_owner_job, node_id)},
                     job_id=parameters['job_id'],
                     flow_id=parameters['flow_id']
                 )

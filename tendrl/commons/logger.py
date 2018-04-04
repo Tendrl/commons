@@ -1,5 +1,7 @@
 import logging
+
 from tendrl.commons.message import Message
+from tendrl.commons.utils import etcd_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -38,11 +40,11 @@ class Logger(object):
                 self._logger(self.message.payload["message"])
 
     def push_operation(self):
-        NS._int.wclient.write(
+        etcd_utils.write(
             "/messages/jobs/%s" % self.message.job_id,
             Message.to_json(self.message),
             append=True)
-        NS._int.client.refresh(
+        etcd_utils.refresh(
             "/messages/jobs/%s" % self.message.job_id,
             ttl=NS.config.data['message_retention_time']
         )

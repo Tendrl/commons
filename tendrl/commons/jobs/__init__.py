@@ -57,7 +57,7 @@ class JobConsumerThread(threading.Thread):
 
 def process_job(job):
     jid = job.key.split('/')[-1]
-    job_status_key = "/queue/%s/status" % jid
+    job_obj = NS.tendrl.objects.Job(job_id=jid).load()
     job_lock_key = "/queue/%s/locked_by" % jid
     NS.node_context = NS.node_context.load()
     # Check job not already locked by some agent
@@ -70,16 +70,14 @@ def process_job(job):
 
     # Check job not already "finished", or "processing"
     try:
-        _status = etcd_utils.read(job_status_key).value
-        if _status in ["finished", "processing"]:
+        if job_obj.status in ["finished", "processing"]:
             return
     except etcd.EtcdKeyNotFound:
         pass
 
     try:
-        _job_timeout_key = "/queue/%s/timeout" % jid
         _timeout = None
-        _timeout = etcd_utils.read(_job_timeout_key).value
+        _timeout = job_obj.timeout
         if _timeout:
             _timeout = _timeout.lower()
     except etcd.EtcdKeyNotFound:
@@ -90,12 +88,10 @@ def process_job(job):
     # "failed" (the parent job of these jobs will also be
     # marked as "failed")
     if "tendrl/monitor" in NS.node_context.tags and \
-            _timeout == "yes":
-        _job_valid_until_key = "/queue/%s/valid_until" % jid
+        _timeout == "yes":
         _valid_until = None
         try:
-            _valid_until = etcd_utils.read(
-                _job_valid_until_key).value
+            _valid_until = job_obj.valid_until
         except etcd.EtcdKeyNotFound:
             pass
 
@@ -109,9 +105,8 @@ def process_job(job):
                 # mark status as "failed" and Job.error =
                 # "Timed out"
                 try:
-                    etcd_utils.write(job_status_key,
-                                     "failed",
-                                     prevValue="new")
+                    job_obj.status = "failed"
+                    job_obj.save()
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
@@ -140,8 +135,8 @@ def process_job(job):
             # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            etcd_utils.write(_job_valid_until_key,
-                             int(_now_plus_10_epoch))
+            job_obj.valid_util = int(_now_plus_10_epoch)
+            job_obj.save()
 
     job = NS.tendrl.objects.Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
@@ -169,17 +164,14 @@ def process_job(job):
             )
             return
 
-        job_status_key = "/queue/%s/status" % job.job_id
-        job_lock_key = "/queue/%s/locked_by" % job.job_id
         try:
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
                              type=NS.type)
-            etcd_utils.write(job_status_key, "processing",
-                             prevValue="new")
-            etcd_utils.write(job_lock_key,
-                             json.dumps(lock_info))
+            job.status = "processing"
+            job.locked_by = json.dumps(lock_info)
+            job.save()
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
             # agent
@@ -217,9 +209,8 @@ def process_job(job):
             )
             the_flow.run()
             try:
-                etcd_utils.write(job_status_key,
-                                 "finished",
-                                 prevValue="processing")
+                job.status = "finished"
+                job.save()
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'finished', " \
@@ -282,9 +273,8 @@ def process_job(job):
                 )
 
             try:
-                etcd_utils.write(job_status_key,
-                                 "failed",
-                                 prevValue="processing")
+                job.status = "failed"
+                job.save()
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'failed', current" \

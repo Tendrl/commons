@@ -3,6 +3,7 @@ import time
 import uuid
 
 from tendrl.commons import objects
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -18,7 +19,7 @@ class StopIntegrationServices(objects.BaseAtom):
 
         try:
             # Get the cluster nodes
-            nodes = NS._int.client.read("/clusters/%s/nodes" % integration_id)
+            nodes = etcd_utils.read("/clusters/%s/nodes" % integration_id)
             child_job_ids = []
             node_ids = []
             for node in nodes.leaves:

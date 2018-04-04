@@ -2,6 +2,7 @@ import etcd
 
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import etcd_utils
 
 
 class IsNodeTendrlManaged(objects.BaseAtom):
@@ -16,7 +17,7 @@ class IsNodeTendrlManaged(objects.BaseAtom):
         for node_id in node_ids:
             # Check if node has the OS details populated
             try:
-                os_details = NS._int.client.read("nodes/%s/Os" % node_id)
+                os_details = etcd_utils.read("nodes/%s/Os" % node_id)
                 if os_details.leaves is None:
                     raise AtomExecutionFailedError(
                         "Node doesnt have OS details populated"
@@ -28,7 +29,7 @@ class IsNodeTendrlManaged(objects.BaseAtom):
 
             # Check if node has the CPU details populated
             try:
-                cpu_details = NS._int.client.read("nodes/%s/Cpu" % node_id)
+                cpu_details = etcd_utils.read("nodes/%s/Cpu" % node_id)
                 if cpu_details.leaves is None:
                     raise AtomExecutionFailedError(
                         "Node doesnt have CPU details populated"
@@ -40,8 +41,9 @@ class IsNodeTendrlManaged(objects.BaseAtom):
 
             # Check if node has the Memory populated
             try:
-                memory_details = NS._int.client.read("nodes/%s/Memory" %
-                                                     node_id)
+                memory_details = etcd_utils.read(
+                    "nodes/%s/Memory" % node_id
+                )
                 if memory_details.leaves is None:
                     raise AtomExecutionFailedError(
                         "Node doesnt have Memory details populated"
@@ -53,7 +55,7 @@ class IsNodeTendrlManaged(objects.BaseAtom):
 
             # Check if node has networks details populated
             try:
-                networks = NS._int.client.read("nodes/%s/Networks" % node_id)
+                networks = etcd_utils.read("nodes/%s/Networks" % node_id)
                 if networks.leaves is None:
                     raise AtomExecutionFailedError(
                         "Node doesnt have network details populated"

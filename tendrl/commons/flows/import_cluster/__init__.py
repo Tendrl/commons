@@ -5,6 +5,7 @@ import re
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import etcd_utils
 
 
 class ImportCluster(flows.BaseFlow):
@@ -68,7 +69,7 @@ class ImportCluster(flows.BaseFlow):
             try:
                 integration_id_index_key = \
                     "indexes/tags/tendrl/integration/%s" % integration_id
-                _node_ids = NS._int.client.read(
+                _node_ids = etcd_utils.read(
                     integration_id_index_key).value
                 self.parameters["Node[]"] = json.loads(_node_ids)
             except etcd.EtcdKeyNotFound:

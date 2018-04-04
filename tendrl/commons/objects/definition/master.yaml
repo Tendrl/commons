@@ -936,6 +936,8 @@ namespace.tendrl:
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
       attrs:
+        node_id:
+          type: String
         cmd_str:
           type: String
         fqdn:
@@ -950,7 +952,7 @@ namespace.tendrl:
       attrs:
         interface:
           help: "network interface name"
-          type: List
+          type: String
         ipv4:
           help: "ipv4 addresses"
           type: List
@@ -1061,6 +1063,9 @@ namespace.tendrl:
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String
+        ipv4_addr:
+          help: IP address of node
+          type: String
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
@@ -1084,6 +1089,9 @@ namespace.tendrl:
         - ipv4_addr
     ClusterNodeContext:
       attrs:
+        integration_id:
+          help: integration_id of cluster
+          type: String
         fqdn:
           help: "FQDN of the Tendrl managed node"
           type: String
@@ -1102,6 +1110,8 @@ namespace.tendrl:
         first_sync_done:
           help: "Flag to mention if first round of sync is done for cluster data"
           type: String
+      watch_attrs:
+        - status
 
       enabled: true
       list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/NodeContext
@@ -1130,6 +1140,9 @@ namespace.tendrl:
         timeout:
           help: Job is timed out after 10 mins if yes
           type: String
+        valid_until:
+         help: job valid until
+         type: int
       enabled: true
       list: /queue
       value: /queue
@@ -1212,5 +1225,278 @@ namespace.tendrl:
       value: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/Peers/$Peer.peer_uuid
       list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/Peers
       help: Gluster cluster peers
+    GlusterBrick:
+      attrs:
+        integration_id:
+          help: integration_id of cluster
+          type: String
+        devices:
+          help: the underlying devices for the brick
+          type: List
+        partitions:
+          help: the underlying partitions for the brick
+          type: List
+        name:
+          help: name of the brick
+          type: String
+        node_id:
+          help: node_id of the node on which brick recides
+          type: String
+        mount_path:
+          help: mount point of the brick
+          type: String
+        brick_path:
+          help: Brick path
+          type: int
+        disk_type:
+          help: type of the disk(raid10/raid6/jbods)
+          type: String
+        disk_count:
+          help: disk count in case the disk is a raid device
+          type: String
+        stripe_size:
+          help: stripe size in case disk is a raid device
+          type: String
+        size:
+          help: size of the underlying device
+          type: String
+        lv:
+          help: The underlying lv name of the brick
+          type: String
+        pv:
+          help: The underlying pv name of the brick
+          type: String
+        vg:
+          help: The underlying vg name of the brick
+          type: String
+        pool:
+          help: The underlying pool name of the brick
+          type: String
+        vol_id:
+          help: Volume id
+          type: String
+        vol_name:
+          help: Volume name
+          type: String
+        used:
+          help: whether the brick is part of a volume
+          type: Boolean
+        sequence_number:
+          help: Sequence number amongst gluster replica-set
+          type: Integer
+        hostname:
+          help: Name of the host
+          type: String
+        port:
+          help: Brick port
+          type: int
+        status:
+          help: Status of the brick
+          type: String
+        fqdn:
+          help: Fqdn of node on which brick recides
+          type: String
+        brick_dir:
+          help: Directory of brick
+          type: String
+        filesystem_type:
+          help: File system type
+          type: String
+        mount_opts:
+          help: Mount options
+          type: String
+        utilization:
+          help: Brick utilization
+          type: json
+        client_count:
+          help: no of client connections
+          type: int
+        is_arbiter:
+          help: Flag to mention if brick is arbiter
+          type: int
+        deleted:
+          help: if the entity is deleted
+          type: Boolean
+        deleted_at:
+          help: deletion time
+          type: String
+      enabled: true
+      value: clusters/$TendrlContext.integration_id/Bricks/all/$Brick.fqdn/$Brick.brick_dir
+      list:  clusters/$TendrlContext.integration_id/Bricks/all/$Brick.fqdn
+      help: gluster brick details
+      watch_attrs:
+        - status
+    GlusterVolume:
+      attrs:
+        integration_id:
+          help: integration_id of cluster
+          type: String
+        arbiter_count:
+          help: "Arbiter count of volume"
+          type: Integer
+        bricks:
+          help: "List of brick mnt_paths for volume"
+          type: List
+        fix_layout:
+          help: "Whether the volume layout has to be fixed after rebalance"
+          type: Boolean
+        disperse_count:
+          help: "Disperse count of volume"
+          type: Integer
+        tuned_profile:
+          help: "The tuning profile the volume"
+          type: String
+        disperse_data_count:
+          help: "Disperse data count of volume"
+          type: Integer
+        force:
+          help: "If force execute the action"
+          type: Boolean
+        action:
+          help: "action that has to be performed on volume"
+          type: String
+        redundancy_count:
+          help: "Redundancy count of volume"
+          type: Integer
+        replica_count:
+          help: "Replica count of volume"
+          type: Integer
+        stripe_count:
+          help: "Stripe count of volume"
+          type: Integer
+        transport:
+          help: "Transport type for volume"
+          type: String
+        vol_id:
+          help: "ID of the gluster volume"
+          type: String
+        volname:
+          help: "Name of gluster volume"
+          type: String
+        vol_type:
+          help: "Type of the volume"
+          type: String
+        subvol_count:
+          help: "Count of subvolumes"
+          type: Integer
+        subvol_size:
+          help: "Count of bricks in subvolumes"
+          type: Integer
+        brick_count:
+          help: "Count of bricks"
+          type: Integer
+        cluster_id:
+          help: "UUID of the cluster"
+          type: String
+        snapd_inited:
+          help: "If snapd is initialized"
+          type: String
+        status:
+          help: "Status of the volume"
+          type: String
+        state:
+          help: state of the volume
+          type: String
+        snap_count:
+          help: "Count of the snapshots"
+          type: Integer
+        snapd_status:
+          help: "Status of snapd"
+          type: String
+        options:
+          help: "options list for volume"
+          type: Dict
+        quorum_status:
+          help: "Quorum status"
+          type: String
+        usable_capacity:
+          help: "total capacity of the volume"
+          type: int
+        used_capacity:
+          help: "used capacity of the volume"
+          type: int
+        pcnt_used:
+          help: "percentage of space used in volume"
+          type: int
+        total_inode_capacity:
+          help: "total inode"
+          type: int
+        used_inode_capacity:
+          help: "inode used"
+          type: int
+        pcnt_inode_used:
+          help: "inode used percentage"
+          type: int
+        profiling_enabled:
+          help: Whether profiling is enabled
+          type: String
+        client_count:
+          help: No of client connections
+        rebal_estimated_time:
+          help: Estimated time left for rebalance to complete
+          type: int
+        deleted:
+          help: if the entity is deleted
+          type: Boolean
+        deleted_at:
+          help: deletion time
+          type: String
+        current_job:
+          help: Current job on the volume
+          type: json
+        locked_by:
+          help: job details which locks the volume
+          type: json
+      enabled: true
+      value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/
+      list: clusters/$TendrlContext.integration_id/Volumes
+      help: gluster volume
+    GlobalDetails:
+      attrs:
+        integration_id:
+          help: Uuid of the cluster
+          type: String
+        status:
+          help: status of the cluster
+          type: String
+        connection_count:
+          help: total connection count
+          type: Integer
+        connection_active:
+          help: no.of connections active
+          type: Integer
+        volume_up_degraded:
+          help: no.of volumes degraded
+          type: Integer
+        peer_count:
+          help: no of peers in cluster
+          type: Integer
+        vol_count:
+          help: no of volumes in cluster
+          type: Integer
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/GlobalDetails
+      value: clusters/$TendrlContext.integration_id/GlobalDetails
+      help: Clustr global details
+      watch_attrs:
+        - status
+    GeoReplicationSession:
+      attrs:
+        vol_id:
+          help: Volume id
+          type: String
+        session_id:
+          help: "unique id of geo replication session"
+          type: String
+        pairs:
+          help: "geo replication session pair list"
+          type: List
+        session_status:
+          help: "aggregated status of geo-replication session"
+          type: String
+      enabled: true
+      value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/GeoReplicationSessions/$GeoReplicationPair.session_id
+      list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/GeoReplicationSessions
+      help: gluster volume geo replication session details
 
 tendrl_schema_version: 0.3

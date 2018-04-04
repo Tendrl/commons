@@ -3,6 +3,7 @@ import time
 
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import etcd_utils
 
 
 class IsClusterImportReady(objects.BaseAtom):
@@ -20,7 +21,7 @@ class IsClusterImportReady(objects.BaseAtom):
             try:
                 integration_id_index_key = \
                     "indexes/tags/tendrl/integration/%s" % integration_id
-                _node_ids = NS._int.client.read(
+                _node_ids = etcd_utils.read(
                     integration_id_index_key
                 ).value
                 if _node_ids:

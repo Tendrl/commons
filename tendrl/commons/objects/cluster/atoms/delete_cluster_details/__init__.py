@@ -1,6 +1,7 @@
 import etcd
 
 from tendrl.commons import objects
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -36,7 +37,7 @@ class DeleteClusterDetails(objects.BaseAtom):
         etcd_keys_to_delete.append(
             "/alerting/clusters/%s" % integration_id
         )
-        nodes = NS._int.client.read(
+        nodes = etcd_utils.read(
             "/clusters/%s/nodes" % integration_id
         )
         node_ids = []
@@ -49,7 +50,7 @@ class DeleteClusterDetails(objects.BaseAtom):
 
         # Find the alerting/alerts entries to be deleted
         try:
-            cluster_alert_ids = NS._int.client.read(
+            cluster_alert_ids = etcd_utils.read(
                 "/alerting/clusters"
             )
             for entry in cluster_alert_ids.leaves:
@@ -62,7 +63,7 @@ class DeleteClusterDetails(objects.BaseAtom):
             pass
 
         try:
-            node_alert_ids = NS._int.client.read(
+            node_alert_ids = etcd_utils.read(
                 "/alerting/nodes"
             )
             for entry in node_alert_ids.leaves:
@@ -77,7 +78,7 @@ class DeleteClusterDetails(objects.BaseAtom):
         # Remove the cluster details
         for key in list(set(etcd_keys_to_delete)):
             try:
-                NS._int.client.delete(key, recursive=True)
+                etcd_utils.delete(key, recursive=True)
             except etcd.EtcdKeyNotFound:
                 logger.log(
                     "debug",
