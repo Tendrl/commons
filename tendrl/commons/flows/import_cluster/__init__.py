@@ -32,7 +32,7 @@ class ImportCluster(flows.BaseFlow):
                     integration_id=entry.key.split('/')[-1]
                 ).load()
                 if _cluster.short_name and short_name and \
-                    _cluster.short_name == short_name:
+                    _cluster.short_name == short_name.strip().lower():
                     raise FlowExecutionFailedError(
                         "Cluster with name: %s already exists" % short_name
                     )
@@ -53,6 +53,8 @@ class ImportCluster(flows.BaseFlow):
 
             if short_name not in [None, ""]:
                 _cluster.short_name = short_name
+            else:
+                _cluster.short_name = integration_id
             _cluster.status = "importing"
             _cluster.current_job = {
                 'job_id': self.job_id,

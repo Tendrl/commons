@@ -15,20 +15,6 @@ class SetupClusterAlias(objects.BaseAtom):
         if "provisioner/%s" % integration_id not in NS.node_context.tags:
             return True
 
-        short_name = self.parameters.get('Cluster.short_name', None)
-        if short_name in [None, ""]:
-            logger.log(
-                "debug",
-                NS.publisher_id,
-                {
-                    "message": "No need to create alias"
-                    "as short_name not provided for cluster"
-                },
-                job_id=self.parameters['job_id'],
-                flow_id=self.parameters['flow_id']
-            )
-            return True
-
         _job_id = str(uuid.uuid4())
         payload = {
             "tags": ["tendrl/integration/monitoring"],
@@ -49,7 +35,7 @@ class SetupClusterAlias(objects.BaseAtom):
         while True:
             if loop_count >= wait_count:
                 logger.log(
-                    "info",
+                    "error",
                     NS.publisher_id,
                     {
                         "message": "Setting up cluster alias"
