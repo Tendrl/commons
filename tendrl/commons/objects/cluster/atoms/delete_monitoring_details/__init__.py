@@ -2,7 +2,6 @@ import time
 import uuid
 
 from tendrl.commons import objects
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -20,7 +19,7 @@ class DeleteMonitoringDetails(objects.BaseAtom):
             "parameters": self.parameters,
             "type": "monitoring"
         }
-        Job(
+        NS.tendrl.objects.Job(
             job_id=_job_id,
             status="new",
             payload=payload
@@ -45,7 +44,7 @@ class DeleteMonitoringDetails(objects.BaseAtom):
                 return False
             time.sleep(5)
             finished = True
-            job = Job(job_id=_job_id).load()
+            job = NS.tendrl.objects.Job(job_id=_job_id).load()
             if job.status != "finished":
                 finished = False
             if finished:
