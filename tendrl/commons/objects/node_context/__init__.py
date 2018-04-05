@@ -20,7 +20,7 @@ class NodeContext(objects.BaseObject):
 
     def __init__(self, node_id=None, fqdn=None, ipv4_addr=None,
                  tags=None, status=None, sync_status=None,
-                 last_sync=None, updated_at=None,
+                 last_sync=None, updated_at=None, pkey=None,
                  *args, **kwargs):
         super(NodeContext, self).__init__(*args, **kwargs)
         self.node_id = node_id or self._get_node_id() or self._create_node_id()
@@ -48,6 +48,7 @@ class NodeContext(objects.BaseObject):
         self.sync_status = sync_status
         self.last_sync = last_sync
         self.updated_at = updated_at or str(time_utils.now())
+        self.pkey = pkey or self.fqdn
         self.value = 'nodes/{0}/NodeContext'
 
     def _create_node_id(self):
