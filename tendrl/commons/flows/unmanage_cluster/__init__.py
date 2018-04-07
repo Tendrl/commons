@@ -18,10 +18,10 @@ class UnmanageCluster(flows.BaseFlow):
                     raise FlowExecutionFailedError(
                         "Cluster is already in un-managed state"
                     )
-        if ('job_id' in _cluster.locked_by and
-            _cluster.locked_by['job_id'] != "") or \
-            (_cluster.current_job['status'] == 'in_progress' and
-             _cluster.status in ['importing', 'unmanaging', 'expanding']):
+        if _cluster.current_job['status'] == 'in_progress' and \
+            ('job_id' in _cluster.locked_by and
+            _cluster.locked_by['job_id'] != "") and \
+            (_cluster.status in ['importing', 'unmanaging', 'expanding']):
             raise FlowExecutionFailedError(
                 "Another job in progress for cluster."
                 " Please wait till the job finishes "
