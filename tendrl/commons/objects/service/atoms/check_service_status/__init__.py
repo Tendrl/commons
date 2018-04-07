@@ -10,7 +10,7 @@ class CheckServiceStatus(BaseAtom):
         logger.log(
             "info",
             NS.publisher_id,
-            {"message": "Checking status of service %s on node %s" % (
+            {"message": "Checking status of %s on %s" % (
                 service_name,
                 NS.node_context.fqdn)},
             job_id=self.parameters['job_id'],
@@ -22,7 +22,7 @@ class CheckServiceStatus(BaseAtom):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Service %s running on node %s" % (
+                {"message": "%s running on %s" % (
                     service_name,
                     NS.node_context.fqdn)},
                 job_id=self.parameters['job_id'],
@@ -33,8 +33,8 @@ class CheckServiceStatus(BaseAtom):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Failed to check status of service %s on "
-                 "node %s" % (
+                {"message": "Failed to check status of %s on "
+                 "%s" % (
                      service_name,
                      NS.node_context.fqdn)},
                 job_id=self.parameters['job_id'],

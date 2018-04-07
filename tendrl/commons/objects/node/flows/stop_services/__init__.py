@@ -17,8 +17,8 @@ class StopServices(flows.BaseFlow):
                     "debug",
                     NS.publisher_id,
                     {
-                        "message": "Service %s not running on "
-                        "node %s" % (service, NS.node_context.fqdn)
+                        "message": "%s not running on "
+                        "%s" % (service, NS.node_context.fqdn)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],

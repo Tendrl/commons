@@ -38,7 +38,7 @@ def import_gluster(parameters):
         NS.publisher_id,
         {
             'message': "Installing tendrl-gluster-integration on "
-            "Node %s" % NS.node_context.fqdn
+            "%s" % NS.node_context.fqdn
         },
         job_id=parameters['job_id'],
         flow_id=parameters['flow_id'],
@@ -59,7 +59,7 @@ def import_gluster(parameters):
         out, err = runner.run()
         if out['rc'] != 0:
             err_msg = "Could not install tendrl-gluster-integration " \
-                "on Node %s. Error: %s" % (NS.node_context.fqdn, out['msg'])
+                "on %s. Error: %s" % (NS.node_context.fqdn, out['msg'])
             logger.log(
                 "error",
                 NS.publisher_id,
@@ -85,8 +85,8 @@ def import_gluster(parameters):
         "info",
         NS.publisher_id,
         {
-            "message": "Generating configuration for "
-            "tendrl-gluster-integration on Node %s" %
+            "message": "Generating tendrl-gluster-integration "
+            "configuration on %s" %
             NS.node_context.fqdn
         },
         job_id=parameters['job_id'],
@@ -134,7 +134,7 @@ def import_gluster(parameters):
         "info",
         NS.publisher_id,
         {
-            "message": "Running tendrl-gluster-integration on Node "
+            "message": "Running tendrl-gluster-integration on "
             "%s" % NS.node_context.fqdn
         },
         job_id=parameters['job_id'],

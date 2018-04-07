@@ -108,11 +108,11 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 "info",
                 NS.publisher_id,
                 {
-                    "message": "Importing (job: %s) Node %s "
-                    "to cluster %s" % (
+                    "message": "ImportCluster %s (jobID: %s) : "
+                    "importing host %s" % (
+                        integration_id,
                         _job_id,
-                        node_id,
-                        integration_id
+                        node_id
                     )
                 },
                 job_id=self.parameters['job_id']
@@ -130,7 +130,7 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                     NS.publisher_id,
                     {
                         "message": "Import jobs not yet complete "
-                        "on all new nodes. Timing out. (%s, %s)" %
+                        "on all new nodes %s on cluster %s. Timing out. " %
                         (str(node_ids), integration_id)
                     },
                     job_id=self.parameters['job_id'],
@@ -177,8 +177,8 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
             "info",
             NS.publisher_id,
             {
-                "message": "Newly detected node(s) added to the cluster."
-                "(nodes: %s) (integration_id: %s)" % (
+                "message": "Newly detected nodes: %s added to the "
+                "cluster %s)" % (
                     str(new_peers),
                     integration_id
                 ),

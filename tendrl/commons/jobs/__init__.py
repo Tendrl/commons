@@ -90,7 +90,7 @@ def process_job(job):
     # "failed" (the parent job of these jobs will also be
     # marked as "failed")
     if "tendrl/monitor" in NS.node_context.tags and \
-        _timeout == "yes":
+            _timeout == "yes":
         _job_valid_until_key = "/queue/%s/valid_until" % jid
         _valid_until = None
         try:
@@ -201,7 +201,7 @@ def process_job(job):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Processing Job %s" %
+                {"message": "Starting Job %s" %
                             job.job_id},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
@@ -210,8 +210,8 @@ def process_job(job):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Running Flow %s" %
-                            job.payload['run']},
+                {"message": "Running %s" %
+                            job.payload['run'].rpartition('.')[2]},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
@@ -229,10 +229,10 @@ def process_job(job):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Job (%s):  Finished "
-                            "Flow %s" % (
+                {"message": "Job (%s) for %s finished. "
+                            % (
                                 job.job_id,
-                                job.payload['run'])},
+                                job.payload['run'].rpartition('.')[2])},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id'],
             )

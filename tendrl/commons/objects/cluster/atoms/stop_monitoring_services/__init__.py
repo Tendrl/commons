@@ -45,7 +45,7 @@ class StopMonitoringServices(objects.BaseAtom):
                     NS.publisher_id,
                     {
                         "message": "Stop tendrl services (job: %s) "
-                        "on node %s of cluster %s" %
+                        "on host %s in cluster %s" %
                         (_job_id, node_id, integration_id)
                     },
                     job_id=self.parameters['job_id'],
@@ -61,10 +61,9 @@ class StopMonitoringServices(objects.BaseAtom):
                         "info",
                         NS.publisher_id,
                         {
-                            "message": "Stop service jobs not yet "
-                            "complete on all nodes. Timing out. "
-                            "(%s, %s)" %
-                            (str(node_ids), integration_id)
+                            "message": "Stop service jobs on cluster(%s) not "
+                            "yet complete on all nodes(%s). Timing out. "
+                            % (integration_id, str(node_ids))
                         },
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id'],

@@ -56,9 +56,9 @@ class ImportCluster(objects.BaseAtom):
                         logger.log(
                             "info",
                             NS.publisher_id,
-                            {"message": "Importing (job: %s) Node %s "
-                                        "to cluster %s" %
-                             (_job_id, node, integration_id)},
+                            {"message": "ImportCluster %s (jobID: %s) :"
+                                        "importing host %s" %
+                             (integration_id, _job_id, node)},
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )
@@ -75,7 +75,7 @@ class ImportCluster(objects.BaseAtom):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Check: Minimum required version ("
+                {"message": "Checking minimum required version ("
                             "%s.%s.%s) of Gluster Storage" %
                  (req_maj_ver, req_min_ver, req_rel)},
                 job_id=self.parameters['job_id'],
@@ -122,9 +122,9 @@ class ImportCluster(objects.BaseAtom):
                 logger.log(
                     "info",
                     NS.publisher_id,
-                    {"message": "Waiting for participant nodes %s to "
-                                "be "
-                     "imported %s" % (node_list, integration_id)},
+                    {"message": "ImportCluster %s waiting for hosts %s "
+                                "to be "
+                     "imported" % (integration_id, node_list)},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
@@ -139,9 +139,9 @@ class ImportCluster(objects.BaseAtom):
                         logger.log(
                             "info",
                             NS.publisher_id,
-                            {"message": "Import jobs not yet complete "
-                             "on all nodes. Timing out. (%s, %s)" %
-                             (str(node_list), integration_id)},
+                            {"message": "Import jobs on cluster(%s) not yet "
+                             "complete on all nodes(%s). Timing out." %
+                             (integration_id, str(node_list))},
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )

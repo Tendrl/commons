@@ -34,8 +34,8 @@ class DeleteMonitoringDetails(objects.BaseAtom):
                     "info",
                     NS.publisher_id,
                     {
-                        "message": "Clear monitoring data "
-                        "not yet complete. Timing out. (%s)" %
+                        "message": "Clearing monitoring data for cluster "
+                        "(%s) not yet complete. Timing out." %
                         integration_id
                     },
                     job_id=self.parameters['job_id'],

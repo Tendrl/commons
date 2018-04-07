@@ -15,7 +15,7 @@ def expand_gluster(parameters):
     logger.log(
         "info",
         NS.publisher_id,
-        {"message": "Setting up gluster nodes %s" %
+        {"message": "Setting up gluster nodes for cluster %s" %
                     parameters['TendrlContext.integration_id']},
         job_id=parameters['job_id'],
         flow_id=parameters['flow_id'],
@@ -49,8 +49,8 @@ def expand_gluster(parameters):
     logger.log(
         "info",
         NS.publisher_id,
-        {"message": "Expanded Gluster Cluster %s."
-         " New nodes are: %s" % (
+        {"message": "Expanded Gluster Cluster %s"
+         " with nodes %s" % (
              parameters['TendrlContext.integration_id'],
              ",".join(node_ips))},
         job_id=parameters['job_id'],

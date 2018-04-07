@@ -164,7 +164,7 @@ class ExpandCluster(flows.BaseFlow):
                 NS.publisher_id,
                 {"message": "Please wait while Tendrl imports ("
                             "job_id: %s) newly expanded "
-                 "%s storage nodes %s" % (
+                 "%s storage nodes in cluster %s" % (
                      _job_id,
                      sds_pkg_name,
                      integration_id)},

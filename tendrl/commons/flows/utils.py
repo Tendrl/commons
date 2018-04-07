@@ -133,7 +133,7 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
         logger.log(
             "info",
             NS.publisher_id,
-            {"message": "Created SSH setup job %s for node %s" %
+            {"message": "Created SSH setup job(jobID: %s) for %s" %
                         (_job_id, node)},
             job_id=parameters['job_id'],
             flow_id=parameters['flow_id']
@@ -188,7 +188,7 @@ def acquire_node_lock(parameters):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Acquired lock (%s) for Node (%s)" % (
+                {"message": "Acquired lock (%s) on (%s)" % (
                     lock_owner_job, node)},
                 job_id=parameters['job_id'],
                 flow_id=parameters['flow_id']
@@ -205,7 +205,7 @@ def release_node_lock(parameters):
                 logger.log(
                     "info",
                     NS.publisher_id,
-                    {"message": "Released lock (%s) for Node (%s)" %
+                    {"message": "Released lock (%s) on (%s)" %
                                 (lock_owner_job, node)},
                     job_id=parameters['job_id'],
                     flow_id=parameters['flow_id']
