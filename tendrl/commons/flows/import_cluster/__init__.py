@@ -16,11 +16,12 @@ class ImportCluster(flows.BaseFlow):
             integration_id = self.parameters['TendrlContext.integration_id']
             short_name = self.parameters.get('Cluster.short_name', None)
             if short_name:
-                if not re.match('^[a-zA-Z0-9][A-Za-z0-9_]*$', short_name):
+                if not re.match('^[a-zA-Z0-9][A-Za-z0-9_]*$', short_name) or
+                    len(short_name) > 64:
                     raise FlowExecutionFailedError(
                         "Invalid cluster short_name: %s. "
-                        "Only alpha numeric and underscore "
-                        "allowed for short name" %
+                        "Only alpha-numeric and underscore "
+                        "allowed for short name, max length 64 chars" %
                         short_name
                     )
             # Check for uniqueness of cluster short name
