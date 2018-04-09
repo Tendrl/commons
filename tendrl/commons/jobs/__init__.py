@@ -239,7 +239,9 @@ def process_job(job):
             if job.payload.get('parent') is None:
                 alert_utils.alert_job_status(
                     "finished",
-                    "Job finished successfully (job_id: %s)" % job.job_id,
+                    "%s (job ID: %s) completed successfully " % (
+                        job.payload['run'].rpartition('.')[2],
+                        job.job_id),
                     integration_id=NS.tendrl_context.integration_id or
                     job.payload['parameters'].get(
                         'TendrlContext.integration_id'
