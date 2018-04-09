@@ -9,7 +9,6 @@ from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.expand_cluster import gluster_help
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -155,9 +154,11 @@ class ExpandCluster(flows.BaseFlow):
             # release lock before import cluster
             flow_utils.release_node_lock(self.parameters)
 
-            Job(job_id=_job_id,
+            NS.tendrl.objects.Job(
+                job_id=_job_id,
                 status="new",
-                payload=payload).save()
+                payload=payload
+            ).save()
             logger.log(
                 "info",
                 NS.publisher_id,

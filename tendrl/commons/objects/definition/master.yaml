@@ -95,7 +95,6 @@ namespace.tendrl:
           - TendrlContext.integration_id
       pre_run:
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
-        - tendrl.objects.Cluster.atoms.IsClusterManaged
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
       run: tendrl.flows.UnmanageCluster
@@ -1184,4 +1183,32 @@ namespace.tendrl:
       value: /clusters/{0}/nodes/{1}/alert_counters
       list: /clusters/{0}/nodes/{1}/alert_counters
       help: "Cluster Alert Counter"
+    GlusterPeer:
+      enabled: true
+      attrs:
+        hostname:
+          help: "Gluster Peer hostname"
+          type: String
+        peer_uuid:
+          help: "Gluster Peer uuid"
+          type: String
+        state:
+          help: "Gluster Peer state"
+          type: String
+        connected:
+          help: Connected status of peer
+          type: String
+        update:
+          help: "Last Peer update time"
+          type: String
+        deleted:
+          help: "if the entity is deleted"
+          type: Boolean
+        deleted_at:
+          help: deletion time
+          type: String
+      value: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/Peers/$Peer.peer_uuid
+      list: clusters/$TendrlContext.integration_id/nodes/$NodeContext.node_id/Peers
+      help: Gluster cluster peers
+
 tendrl_schema_version: 0.3

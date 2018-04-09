@@ -1,7 +1,6 @@
 import __builtin__
 import importlib
 import maps
-import mock
 from mock import patch
 
 from tendrl.commons.objects.cluster.atoms.delete_monitoring_details \
@@ -33,8 +32,6 @@ def init():
     NS._int.wclient = obj.Client()
 
 
-@mock.patch('tendrl.commons.objects.job.Job.save',
-            mock.Mock(return_value=None))
 def test_run():
     init()
     obj = DeleteMonitoringDetails()
@@ -45,7 +42,7 @@ def test_run():
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS, "tendrl_context", maps.NamedDict())
     NS.tendrl_context['integration_id'] = "rete"
-    setattr(NS.tendrl, "objects", maps.NamedDict())
-    with patch.object(Job, 'save', save):
+    setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job))
+    with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(Job, 'load', load_job):
             obj.run()

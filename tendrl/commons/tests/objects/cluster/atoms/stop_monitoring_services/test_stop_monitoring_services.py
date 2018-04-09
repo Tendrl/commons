@@ -65,8 +65,6 @@ def init():
     NS._int.wclient = obj.Client()
 
 
-@mock.patch('tendrl.commons.objects.job.Job.save',
-            mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
@@ -81,14 +79,17 @@ def test_run():
     obj.parameters["job_id"] = "test_job_id"
     obj.parameters["flow_id"] = "test_flow_id"
     NS.publisher_id = "test"
-    with patch.object(Job, 'save', save):
+    setattr(NS, "tendrl", maps.NamedDict())
+    setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job))
+    with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(NS._int.client, 'read', read):
             with patch.object(Job, 'load', load_finished_job):
                 ret_val = obj.run()
                 assert ret_val is True
-    with patch.object(Job, 'save', save):
+    with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(NS._int.client, 'read', read):
-            with patch.object(Job, 'load', load_unfinished_job):
+            with patch.object(
+                    NS.tendrl.objects.Job, 'load', load_unfinished_job):
                 with patch.object(time, 'sleep', sleep):
                     ret_val = obj.run()
                     assert ret_val is False

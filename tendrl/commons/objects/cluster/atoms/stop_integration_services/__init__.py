@@ -2,7 +2,6 @@ import etcd
 import time
 import uuid
 
-from tendrl.commons.jobs import Job
 from tendrl.commons import objects
 from tendrl.commons.utils import log_utils as logger
 
@@ -35,7 +34,7 @@ class StopIntegrationServices(objects.BaseAtom):
                     "parent": self.parameters["job_id"],
                     "type": "node"
                 }
-                Job(
+                NS.tendrl.objects.Job(
                     job_id=_job_id,
                     status="new",
                     payload=payload
@@ -74,7 +73,9 @@ class StopIntegrationServices(objects.BaseAtom):
                 time.sleep(5)
                 finished = True
                 for child_job_id in child_job_ids:
-                    child_job = Job(job_id=child_job_id).load()
+                    child_job = NS.tendrl.objects.Job(
+                        job_id=child_job_id
+                    ).load()
                     if child_job.status != "finished":
                         finished = False
                         break

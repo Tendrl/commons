@@ -4,7 +4,6 @@ import uuid
 from etcd import EtcdKeyNotFound
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.objects.job import Job
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils.ssh import authorize_key
@@ -125,7 +124,7 @@ def gluster_create_ssh_setup_jobs(parameters, skip_current_node=False):
             "type": "node"
         }
         _job_id = str(uuid.uuid4())
-        Job(
+        NS.tendrl.objects.Job(
             job_id=_job_id,
             status="new",
             payload=payload
@@ -152,7 +151,9 @@ def acquire_node_lock(parameters):
                 "Unknown Node %s, cannot lock" %
                 node)
     # check job is parent or child
-    job = Job(job_id=parameters['job_id']).load()
+    job = NS.tendrl.objects.Job(
+        job_id=parameters['job_id']
+    ).load()
     p_job_id = None
     if "parent" in job.payload:
         p_job_id = job.payload['parent']
