@@ -21,7 +21,8 @@ class SetupClusterAlias(objects.BaseAtom):
             "run": "monitoring.flows.SetupClusterAlias",
             "status": "new",
             "parameters": self.parameters,
-            "type": "monitoring"
+            "type": "monitoring",
+            "parent": self.parameters['job_id']
         }
         Job(
             job_id=_job_id,
