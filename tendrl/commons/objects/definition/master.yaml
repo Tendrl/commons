@@ -92,7 +92,6 @@ namespace.tendrl:
           - TendrlContext.integration_id
       pre_run:
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
-        - tendrl.objects.Cluster.atoms.IsClusterManaged
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
       run: tendrl.flows.UnmanageCluster
