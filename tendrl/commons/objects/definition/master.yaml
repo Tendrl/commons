@@ -1080,6 +1080,8 @@ namespace.tendrl:
       help: Node Context
       watch_attrs:
         - status
+        - fqdn
+        - ipv4_addr
     ClusterNodeContext:
       attrs:
         fqdn:
