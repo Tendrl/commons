@@ -24,8 +24,9 @@ class NodeContext(objects.BaseObject):
                  *args, **kwargs):
         super(NodeContext, self).__init__(*args, **kwargs)
         self.node_id = node_id or self._get_node_id() or self._create_node_id()
-        self.fqdn = fqdn or socket.getfqdn()
-        self.ipv4_addr = ipv4_addr or socket.gethostbyname(self.fqdn)
+        self.fqdn = fqdn
+        if self.fqdn:
+            self.ipv4_addr = ipv4_addr or socket.gethostbyname(self.fqdn)
 
         curr_tags = []
         try:
