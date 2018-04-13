@@ -18,6 +18,9 @@ class ImportCluster(objects.BaseAtom):
     def run(self):
         try:
             integration_id = self.parameters['TendrlContext.integration_id']
+            _cluster = NS.tendrl.objects.Cluster(
+                integration_id=integration_id
+            ).load()
 
             # Lock nodes
             flow_utils.acquire_node_lock(self.parameters)
@@ -58,7 +61,7 @@ class ImportCluster(objects.BaseAtom):
                             NS.publisher_id,
                             {"message": "ImportCluster %s (jobID: %s) :"
                                         "importing host %s" %
-                             (integration_id, _job_id, node)},
+                             (_cluster.short_name, _job_id, node)},
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )
@@ -124,7 +127,7 @@ class ImportCluster(objects.BaseAtom):
                     NS.publisher_id,
                     {"message": "ImportCluster %s waiting for hosts %s "
                                 "to be "
-                     "imported" % (integration_id, node_list)},
+                     "imported" % (_cluster.short_name, node_list)},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
@@ -141,7 +144,7 @@ class ImportCluster(objects.BaseAtom):
                             NS.publisher_id,
                             {"message": "Import jobs on cluster(%s) not yet "
                              "complete on all nodes(%s). Timing out." %
-                             (integration_id, str(node_list))},
+                             (_cluster.short_name, str(node_list))},
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )

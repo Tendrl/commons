@@ -167,7 +167,9 @@ class ExpandCluster(flows.BaseFlow):
                  "%s storage nodes in cluster %s" % (
                      _job_id,
                      sds_pkg_name,
-                     integration_id)},
+                     NS.tendrl.objects.Cluster(
+                            integration_id=integration_id
+                     ).load().short_name)},
                 job_id=self.parameters['job_id'],
                 flow_id=self.parameters['flow_id']
             )

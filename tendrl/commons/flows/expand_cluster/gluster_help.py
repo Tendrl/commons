@@ -12,11 +12,14 @@ def get_node_ips(parameters):
 def expand_gluster(parameters):
     node_ips = get_node_ips(parameters)
     plugin = NS.gluster_provisioner.get_plugin()
+    cluster = NS.tendrl.objects.Cluster(
+        integration_id=parameters['TendrlContext.integration_id']
+    ).load()
     logger.log(
         "info",
         NS.publisher_id,
         {"message": "Setting up gluster nodes for cluster %s" %
-                    parameters['TendrlContext.integration_id']},
+                    cluster.short_name},
         job_id=parameters['job_id'],
         flow_id=parameters['flow_id'],
     )
@@ -31,7 +34,7 @@ def expand_gluster(parameters):
         "info",
         NS.publisher_id,
         {"message": "Expanding gluster cluster %s" %
-         parameters['TendrlContext.integration_id']},
+         cluster.short_name},
         job_id=parameters['job_id'],
         flow_id=parameters['flow_id']
     )
@@ -51,7 +54,7 @@ def expand_gluster(parameters):
         NS.publisher_id,
         {"message": "Expanded Gluster Cluster %s"
          " with nodes %s" % (
-             parameters['TendrlContext.integration_id'],
+             cluster.short_name,
              ",".join(node_ips))},
         job_id=parameters['job_id'],
         flow_id=parameters['flow_id']
