@@ -126,8 +126,7 @@ class ImportCluster(objects.BaseAtom):
                     "info",
                     NS.publisher_id,
                     {"message": "ImportCluster %s waiting for hosts %s "
-                                "to be "
-                     "imported" % (_cluster.short_name, node_list)},
+                        "to be imported" % (_cluster.short_name, node_list)},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
