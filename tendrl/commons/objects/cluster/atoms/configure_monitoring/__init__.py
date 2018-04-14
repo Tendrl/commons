@@ -38,11 +38,10 @@ class ConfigureMonitoring(objects.BaseAtom):
             "info",
             NS.get("publisher_id", None),
             {
-                "message": "Starting configuration of %s on %s with %s"
-                "as conf parameters" % (
+                "message": "Starting configuration of %s on %s "
+                % (
                     plugin_name,
-                    NS.node_context.fqdn,
-                    json.dumps(plugin_params).encode('utf-8')
+                    NS.node_context.fqdn
                 )
             },
             job_id=self.parameters['job_id'],

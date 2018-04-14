@@ -31,7 +31,7 @@ class CheckClusterNodesUp(BaseAtom):
                 logger.log(
                     "info",
                     NS.publisher_id,
-                    {"message": "Checking if nodes %s are up" % str(node_ids)},
+                    {"message": "Checking status of nodes %s" % str(node_ids)},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
@@ -53,7 +53,7 @@ class CheckClusterNodesUp(BaseAtom):
                     logger.log(
                         "info",
                         NS.publisher_id,
-                        {"message": "Status of nodes %s are up" % nodes_up},
+                        {"message": "Nodes %s are up" % nodes_up},
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id']
                     )
@@ -61,7 +61,7 @@ class CheckClusterNodesUp(BaseAtom):
                     logger.log(
                         "info",
                         NS.publisher_id,
-                        {"message": "Status of nodes %s are down" %
+                        {"message": "Nodes %s are down" %
                          nodes_down},
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id']

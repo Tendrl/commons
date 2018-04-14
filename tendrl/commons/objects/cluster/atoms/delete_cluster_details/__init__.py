@@ -83,7 +83,7 @@ class DeleteClusterDetails(objects.BaseAtom):
                     "debug",
                     NS.publisher_id,
                     {
-                        "message": "The key: %s not found for deletion" %
+                        "message": "%s key not found for deletion" %
                         key
                     },
                     job_id=self.parameters['job_id'],

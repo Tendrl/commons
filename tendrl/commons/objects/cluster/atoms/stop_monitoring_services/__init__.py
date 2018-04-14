@@ -12,6 +12,9 @@ class StopMonitoringServices(objects.BaseAtom):
 
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
+        _cluster = NS.tendrl.objects.Cluster(
+            integration_id=integration_id
+        ).load()
 
         try:
             # Get the cluster nodes
@@ -45,8 +48,8 @@ class StopMonitoringServices(objects.BaseAtom):
                     NS.publisher_id,
                     {
                         "message": "Stop tendrl services (job: %s) "
-                        "on node %s of cluster %s" %
-                        (_job_id, node_id, integration_id)
+                        "on host %s in cluster %s" %
+                        (_job_id, node_id, _cluster.short_name)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
@@ -61,10 +64,9 @@ class StopMonitoringServices(objects.BaseAtom):
                         "info",
                         NS.publisher_id,
                         {
-                            "message": "Stop service jobs not yet "
-                            "complete on all nodes. Timing out. "
-                            "(%s, %s)" %
-                            (str(node_ids), integration_id)
+                            "message": "Stop service jobs on cluster(%s) not "
+                            "yet complete on all nodes(%s). Timing out. "
+                            % (_cluster.short_name, str(node_ids))
                         },
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id'],
