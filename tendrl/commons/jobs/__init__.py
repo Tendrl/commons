@@ -211,7 +211,7 @@ def process_job(job):
                 "info",
                 NS.publisher_id,
                 {"message": "Running %s" %
-                            job.payload['run'].rpartition('.')[2]},
+                            job.payload['run'].split('.')[-1]},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
@@ -232,7 +232,7 @@ def process_job(job):
                 {"message": "Job (%s) for %s finished. "
                             % (
                                 job.job_id,
-                                job.payload['run'].rpartition('.')[2])},
+                                job.payload['run'].split('.')[-1])},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id'],
             )
@@ -240,7 +240,7 @@ def process_job(job):
                 alert_utils.alert_job_status(
                     "finished",
                     "%s (job ID: %s) completed successfully " % (
-                        job.payload['run'].rpartition('.')[2],
+                        job.payload['run'].split('.')[-1],
                         job.job_id),
                     integration_id=NS.tendrl_context.integration_id or
                     job.payload['parameters'].get(
