@@ -1,4 +1,4 @@
-import re
+import subprocess
 import time
 import uuid
 
@@ -67,14 +67,42 @@ class ImportCluster(objects.BaseAtom):
                         )
             # Check if minimum required version of underlying gluster
             # cluster met. If not fail the import task
-            cluster_ver = \
-                NS.tendrl_context.sds_version.split('.')
-            maj_ver = cluster_ver[0]
-            min_ver = re.findall(r'\d+', cluster_ver[1])[0]
+            # A sample output from "rpm -qa | grep glusterfs-server"
+            # looks as below
+            # `glusterfs-server-3.8.4-54.4.el7rhgs.x86_64`
+            # In case of upstream build the format could be as below
+            # `glusterfs-server-4.1dev-0.203.gitc3e1a2e.el7.centos.x86_64`
+            # `glusterfs-server-3.12.8-0.0.el7.centos.x86_64.rpm`
+            cmd = subprocess.Popen(
+                'rpm -qa | grep glusterfs-server',
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            out, err = cmd.communicate()
+            if out in [None, ""] or err:
+                raise AtomExecutionFailedError(
+                    "Failed to detect underlying cluster version"
+                )
+            lines = out.split('\n')
+            build_no = None
+            req_build_no = None
+            ver_det = lines[0].split('glusterfs-server-')[-1].split('.')
+            maj_ver = ver_det[0]
+            min_ver = ver_det[1]
+            if 'dev' in min_ver:
+                min_ver = min_ver[0]
+            rel = ver_det[2]
+            if '-' in rel:
+                build_no = rel.split('-')[-1]
+                rel = rel.split('-')[0]
             reqd_gluster_ver = NS.compiled_definitions.get_parsed_defs()[
                 'namespace.tendrl'
             ]['min_reqd_gluster_ver']
             req_maj_ver, req_min_ver, req_rel = reqd_gluster_ver.split('.')
+            if '-' in req_rel:
+                req_build_no = req_rel.split('-')[-1]
+                req_rel = req_rel.split('-')[0]
             logger.log(
                 "info",
                 NS.publisher_id,
@@ -89,8 +117,11 @@ class ImportCluster(objects.BaseAtom):
                 ver_check_failed = True
             else:
                 if int(maj_ver) == int(req_maj_ver) and \
-                        int(min_ver) < int(req_min_ver):
-                        ver_check_failed = True
+                    (int(min_ver) < int(req_min_ver) or
+                     int(rel) < int(req_rel) or
+                     (build_no is not None and req_build_no is not None and
+                      int(build_no) < int(req_build_no))):
+                    ver_check_failed = True
 
             if ver_check_failed:
                 logger.log(
