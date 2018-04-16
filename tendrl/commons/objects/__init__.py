@@ -7,7 +7,6 @@ import json
 import six
 import sys
 import threading
-import time
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
@@ -142,7 +141,6 @@ class BaseObject(object):
                 # if dir is empty then item.key and value is same
                 self.value = item.key
                 ins.append(self.load())
-                time.sleep(1)
         return ins
 
     @thread_safe
