@@ -30,6 +30,8 @@ class BaseObject(object):
     def __init__(self, *args, **kwargs):
         self._ttl = None
         self._lock = threading.RLock()
+        self.hash = None
+        self._rendered = None
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
@@ -82,16 +84,16 @@ class BaseObject(object):
 
     @thread_safe
     def save(self, update=True, ttl=None):
+        rendered_obj = self.render()
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store(ttl=ttl):
                 return
-
         watchables = self._defs.get("watch_attrs", [])
         if self.__class__.__name__ in ['Config', 'Definition'] or \
             len(watchables) > 0:
-            for item in self.render():
+            for item in rendered_obj:
                 if item['name'] in watchables:
                     _type = self._defs.get("attrs", {}).get(
                         item['name'],
@@ -111,7 +113,6 @@ class BaseObject(object):
                             )
                     etcd_utils.write(item['key'], item['value'], quorum=True)
 
-        self.render()
         data_key = self.value + '/data'
         etcd_utils.write(data_key, self.json)
         updated_at_key = self.value + '/updated_at'
@@ -146,16 +147,16 @@ class BaseObject(object):
 
     @thread_safe
     def load(self):
+        self.render()
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store():
                 return self
 
-        self.render()
         key = self.value + '/data'
         try:
-            val_str = NS._int.client.read(key).value
+            val_str = etcd_utils.read(key).value
         except etcd.EtcdKeyNotFound:
             return self
         loc_dict = json.loads(val_str)
@@ -185,15 +186,11 @@ class BaseObject(object):
     @thread_safe
     def exists(self):
         self.render()
-        _exists = False
+        _exists = True
         try:
-            NS._int.client.read("/{0}".format(self.value))
-            _exists = True
-        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-            if type(ex) != etcd.EtcdKeyNotFound:
-                NS._int.reconnect()
-                NS._int.client.read("/{0}".format(self.value))
-                _exists = True
+            etcd_utils.read("/{0}".format(self.value))
+        except etcd.EtcdKeyNotFound as ex:
+            _exists = False
         return _exists
 
     @thread_safe
@@ -222,7 +219,9 @@ class BaseObject(object):
         :returns: The structure to use for setting.
         :rtype: list(dict{key=str,value=any})
         """
-
+        old_hash = self.hash
+        if old_hash == self._hash():
+            return self._rendered
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
@@ -233,7 +232,8 @@ class BaseObject(object):
                 for i in items:
                     i['key'] = '/{0}/{1}'.format(self.value, i['key'])
                     rendered.append(i)
-        return rendered
+        self._rendered = rendered
+        return self._rendered
 
     @property
     @thread_safe
@@ -270,12 +270,7 @@ class BaseObject(object):
             self.hash = self._hash()
             _hash_key = "/{0}/hash".format(self.value)
             _stored_hash = None
-            try:
-                _stored_hash = NS._int.client.read(_hash_key).value
-            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                if type(ex) != etcd.EtcdKeyNotFound:
-                    NS._int.reconnect()
-                    _stored_hash = NS._int.client.read(_hash_key).value
+            _stored_hash = etcd_utils.read(_hash_key).value
             if self.hash == _stored_hash:
                 # No changes in stored object and current object,
                 # dont save current object to central store
@@ -292,12 +287,7 @@ class BaseObject(object):
     def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
-        try:
-            NS._int.wclient.delete(_hash_key)
-        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-            if type(ex) != etcd.EtcdKeyNotFound:
-                NS._int.reconnect()
-                NS._int.wclient.delete(_hash_key)
+        etcd_utils.delete(_hash_key)
 
     @thread_safe
     def _copy_vars(self):
@@ -314,7 +304,6 @@ class BaseObject(object):
 
     @thread_safe
     def watch_attrs(self):
-        self.render()
         if self.value:
             watchables = self._defs.get("watch_attrs", [])
             for attr in watchables:
