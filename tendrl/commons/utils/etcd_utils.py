@@ -12,9 +12,9 @@ import etcd
 '''
 
 
-def read(key, **kwargs):
+def read(key, quorum=True, **kwargs):
     try:
-        return NS._int.client.read(key, **kwargs)
+        return NS._int.client.read(key, quorum=quorum, **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
         if type(ex) in [etcd.EtcdKeyNotFound,
                         etcd.EtcdCompareFailed,
@@ -22,7 +22,8 @@ def read(key, **kwargs):
             raise ex
         else:
             NS._int.reconnect()
-            return NS._int.client.read(key, **kwargs)
+            return NS._int.client.read(key, quorum=quorum,
+                                       **kwargs)
 
 
 '''
@@ -70,9 +71,9 @@ def write(key, value, quorum=True, **kwargs):
 '''
 
 
-def refresh(value, ttl, **kwargs):
+def refresh(value, ttl, quorum=True, **kwargs):
     try:
-        NS._int.wclient.refresh(value, ttl=ttl,
+        NS._int.wclient.refresh(value, ttl=ttl, quorum=quorum,
                                 **kwargs)
     except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
         if type(ex) in [etcd.EtcdKeyNotFound,
@@ -82,7 +83,7 @@ def refresh(value, ttl, **kwargs):
         else:
             NS._int.wreconnect()
             NS._int.wclient.refresh(value, ttl=ttl,
-                                    **kwargs)
+                                    quorum=quorum, **kwargs)
 
 
 '''
