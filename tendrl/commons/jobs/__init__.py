@@ -57,6 +57,7 @@ class JobConsumerThread(threading.Thread):
 
 def process_job(job):
     jid = job.key.split('/')[-1]
+    job_obj = NS.tendrl.objects.Job(job_id=jid).load()
     job_status_key = "/queue/%s/status" % jid
     job_lock_key = "/queue/%s/locked_by" % jid
     NS.node_context = NS.node_context.load()
@@ -77,9 +78,8 @@ def process_job(job):
         pass
 
     try:
-        _job_timeout_key = "/queue/%s/timeout" % jid
         _timeout = None
-        _timeout = etcd_utils.read(_job_timeout_key).value
+        _timeout = job_obj.timeout
         if _timeout:
             _timeout = _timeout.lower()
     except etcd.EtcdKeyNotFound:
@@ -90,12 +90,10 @@ def process_job(job):
     # "failed" (the parent job of these jobs will also be
     # marked as "failed")
     if "tendrl/monitor" in NS.node_context.tags and \
-            _timeout == "yes":
-        _job_valid_until_key = "/queue/%s/valid_until" % jid
+        _timeout == "yes":
         _valid_until = None
         try:
-            _valid_until = etcd_utils.read(
-                _job_valid_until_key).value
+            _valid_until = job_obj.valid_until
         except etcd.EtcdKeyNotFound:
             pass
 
@@ -112,6 +110,7 @@ def process_job(job):
                     etcd_utils.write(job_status_key,
                                      "failed",
                                      prevValue="new")
+                    
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
@@ -140,8 +139,8 @@ def process_job(job):
             # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            etcd_utils.write(_job_valid_until_key,
-                             int(_now_plus_10_epoch))
+            job_obj.valid_util = int(_now_plus_10_epoch)
+            job_obj.save()
 
     job = NS.tendrl.objects.Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
@@ -178,8 +177,8 @@ def process_job(job):
                              type=NS.type)
             etcd_utils.write(job_status_key, "processing",
                              prevValue="new")
-            etcd_utils.write(job_lock_key,
-                             json.dumps(lock_info))
+            job.locked_by = json.dumps(lock_info)
+            job.save()
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
             # agent

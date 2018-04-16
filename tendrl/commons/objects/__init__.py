@@ -7,8 +7,6 @@ import json
 import six
 import sys
 import threading
-import time
-import types
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
@@ -31,6 +29,8 @@ class BaseObject(object):
     def __init__(self, *args, **kwargs):
         self._ttl = None
         self._lock = threading.RLock()
+        self.hash = None
+        self._rendered = None
         # Tendrl internal objects should populate their own self._defs
         if not hasattr(self, "internal"):
             self._defs = BaseObject.load_definition(self)
@@ -83,74 +83,43 @@ class BaseObject(object):
 
     @thread_safe
     def save(self, update=True, ttl=None):
-        self.render()
+        rendered_obj = self.render()
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store(ttl=ttl):
                 return
-        if update:
-            current_obj = self.load()
-            for attr, val in vars(self).iteritems():
-                if isinstance(val, (types.FunctionType,
-                                    types.BuiltinFunctionType,
-                                    types.MethodType, types.BuiltinMethodType,
-                                    types.UnboundMethodType)) or \
-                        attr.startswith("_") or attr in ['value', 'list']:
-                    continue
-
-                if val is None and hasattr(current_obj, attr):
-                    # if self.attr is None, use attr value from central
-                    # store (i.e. current_obj.attr)
-                    if getattr(current_obj, attr):
-                        setattr(self, attr, getattr(current_obj, attr))
-
-        self.updated_at = str(time_utils.now())
-        for item in self.render():
-            '''
-                Note: Log messages in this file have try-except
-                blocks to run
-                in the condition when the node_agent has not been
-                started and
-                name spaces are being created.
-            '''
-            try:
-                logger.log(
-                    "debug",
-                    NS.publisher_id,
-                    {"message": "Writing %s to %s" %
-                                (item['key'], item['value'])}
-                )
-            except KeyError:
-                sys.stdout.write(
-                    "Writing %s to %s \n" %
-                    (item['key'], item['value'])
-                )
-            # convert list, dict (json) to python based on definitions
-            _type = self._defs.get("attrs", {}).get(item['name'],
-                                                    {}).get("type")
-            if _type:
-                if _type.lower() in ['json', 'list']:
-                    if item['value']:
+        watchables = self._defs.get("watch_attrs", [])
+        if self.__class__.__name__ in ['Config', 'Definition'] or \
+            len(watchables) > 0:
+            for item in rendered_obj:
+                if item['name'] in watchables:
+                    _type = self._defs.get("attrs", {}).get(
+                        item['name'],
+                        {}
+                    ).get("type")
+                    if _type and _type.lower() in ['json', 'list'] and \
+                        item['value']:
                         try:
                             item['value'] = json.dumps(item['value'])
-                        except ValueError as ex:
+                        except ValueError:
                             _msg = "Error save() attr %s for object %s" % \
                                    (item['name'], self.__name__)
-                            Event(
-                                ExceptionMessage(
-                                    priority="debug",
-                                    publisher=NS.publisher_id,
-                                    payload={"message": _msg,
-                                             "exception": ex
-                                             }
-                                )
+                            logger.log(
+                                "debug",
+                                NS.publisher_id,
+                                {"message": _msg}
                             )
-            try:
-                NS._int.wclient.write(item['key'], item['value'], quorum=True)
-            except (etcd.EtcdConnectionFailed, etcd.EtcdException):
-                NS._int.wreconnect()
-                NS._int.wclient.write(item['key'], item['value'], quorum=True)
+                    etcd_utils.write(item['key'], item['value'], quorum=True)
+
+        data_key = self.value + '/data'
+        etcd_utils.write(data_key, self.json)
+        updated_at_key = self.value + '/updated_at'
+        hash_key = self.value + '/hash'
+        etcd_utils.write(updated_at_key, str(time_utils.now()))
+        if hasattr(self, 'hash'):
+            etcd_utils.write(hash_key, self.hash)
+
         if ttl:
             etcd_utils.refresh(self.value, ttl)
 
@@ -158,115 +127,68 @@ class BaseObject(object):
 
     @thread_safe
     def load_all(self):
-        ins = []
         self.render()
         value = '/'.join(self.value.split('/')[:-1])
-        try:
-            etcd_resp = etcd_utils.read(value)
-            for item in etcd_resp.leaves:
-                # When directory is not empty then NS._int.client.read(key)
-                # will return key + directory id as new key. If directory is
-                # empty then it will return key only. When directory is
-                # not present then it will raise EtcdKeyNotFound
-                if item.key.strip("/") != value.strip("/"):
-                    # if dir is empty then item.key and value is same
-                    self.value = item.key
-                    ins.append(self.load())
-                    time.sleep(0.3)
-        except etcd.EtcdKeyNotFound as ex:
-            logger.log(
-                "debug",
-                NS.publisher_id,
-                {"message": "Error in load_all.err: %s" % ex}
-            )
+        etcd_resp = etcd_utils.read(value)
+
+        ins = []
+        for item in etcd_resp.leaves:
+            # When directory is not empty then NS._int.client.read(key)
+            # will return key + directory id as new key. If directory is
+            # empty then it will return key only. When directory is
+            # not present then it will raise EtcdKeyNotFound
+            if item.key.strip("/") != value.strip("/"):
+                # if dir is empty then item.key and value is same
+                self.value = item.key
+                ins.append(self.load())
         return ins
 
     @thread_safe
     def load(self):
+        self.render()
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store():
                 return self
 
-        _copy = self._copy_vars()
-        # Check if self.value already set, use it
-        if self.value.find('{') < 0:
-            _copy.value = self.value
-        for item in _copy.render():
-            try:
-                logger.log(
-                    "debug",
-                    NS.publisher_id,
-                    {"message": "Reading %s" % item['key']}
-                )
-            except KeyError:
-                sys.stdout.write("Reading %s \n" % item['key'])
-
-            try:
-                etcd_resp = NS._int.client.read(item['key'], quorum=True)
-            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                if type(ex) == etcd.EtcdKeyNotFound:
-                    continue
+        key = self.value + '/data'
+        try:
+            val_str = etcd_utils.read(key).value
+        except etcd.EtcdKeyNotFound:
+            return self
+        loc_dict = json.loads(val_str)
+        for attr_name, attr_val in vars(self).iteritems():
+            if not attr_name.startswith('_') and \
+                attr_name not in ["value", "list"]:
+                _type = self._defs.get("attrs", {}).get(
+                    attr_name,
+                    {}
+                ).get("type")
+                if loc_dict.get(attr_name) in [None, ""]:
+                    if _type and _type.lower() == 'list':
+                        setattr(self, attr_name, list())
+                    if _type and _type.lower() == 'json':
+                        setattr(self, attr_name, dict())
                 else:
-                    NS._int.reconnect()
-                    etcd_resp = NS._int.client.read(item['key'], quorum=True)
-
-            value = etcd_resp.value
-            if item['dir']:
-                key = item['key'].split('/')[-1]
-                dct = dict(key=value)
-                if hasattr(_copy, item['name']):
-                    dct = getattr(_copy, item['name'])
-                    if type(dct) == dict:
-                        dct[key] = value
+                    if _type and _type.lower() in ['list']:
+                        setattr(
+                            self,
+                            attr_name,
+                            json.loads(loc_dict[attr_name])
+                        )
                     else:
-                        setattr(_copy, item['name'], dct)
-                else:
-                    setattr(_copy, item['name'], dct)
-                continue
-
-            # convert list, dict (json) to python based on definitions
-            _type = self._defs.get("attrs", {}).get(item['name'],
-                                                    {}).get("type")
-            if _type:
-                if _type.lower() in ['json', 'list']:
-                    if value:
-                        try:
-                            value = json.loads(value.decode('utf-8'))
-                        except ValueError as ex:
-                            _msg = "Error load() attr %s for object %s" % \
-                                   (item['name'], self.__name__)
-                            Event(
-                                ExceptionMessage(
-                                    priority="debug",
-                                    publisher=NS.publisher_id,
-                                    payload={"message": _msg,
-                                             "exception": ex
-                                             }
-                                )
-                            )
-                    else:
-                        if _type.lower() == "list":
-                            value = list()
-                        if _type.lower() == "json":
-                            value = dict()
-
-            setattr(_copy, item['name'], value)
-        return _copy
+                        setattr(self, attr_name, loc_dict[attr_name])
+        return self
 
     @thread_safe
     def exists(self):
         self.render()
-        _exists = False
+        _exists = True
         try:
-            NS._int.client.read("/{0}".format(self.value))
-            _exists = True
-        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-            if type(ex) != etcd.EtcdKeyNotFound:
-                NS._int.reconnect()
-                NS._int.client.read("/{0}".format(self.value))
-                _exists = True
+            etcd_utils.read("/{0}".format(self.value))
+        except etcd.EtcdKeyNotFound as ex:
+            _exists = False
         return _exists
 
     @thread_safe
@@ -295,7 +217,9 @@ class BaseObject(object):
         :returns: The structure to use for setting.
         :rtype: list(dict{key=str,value=any})
         """
-
+        old_hash = self.hash
+        if old_hash == self._hash():
+            return self._rendered
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
@@ -306,7 +230,8 @@ class BaseObject(object):
                 for i in items:
                     i['key'] = '/{0}/{1}'.format(self.value, i['key'])
                     rendered.append(i)
-        return rendered
+        self._rendered = rendered
+        return self._rendered
 
     @property
     @thread_safe
@@ -338,18 +263,12 @@ class BaseObject(object):
 
     @thread_safe
     def hash_compare_with_central_store(self, ttl=None):
-        self.render()
         try:
             # Generate current in memory object hash
-            self._hash()
+            self.hash = self._hash()
             _hash_key = "/{0}/hash".format(self.value)
             _stored_hash = None
-            try:
-                _stored_hash = NS._int.client.read(_hash_key).value
-            except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-                if type(ex) != etcd.EtcdKeyNotFound:
-                    NS._int.reconnect()
-                    _stored_hash = NS._int.client.read(_hash_key).value
+            _stored_hash = etcd_utils.read(_hash_key).value
             if self.hash == _stored_hash:
                 # No changes in stored object and current object,
                 # dont save current object to central store
@@ -366,12 +285,7 @@ class BaseObject(object):
     def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
-        try:
-            NS._int.wclient.delete(_hash_key)
-        except (etcd.EtcdConnectionFailed, etcd.EtcdException) as ex:
-            if type(ex) != etcd.EtcdKeyNotFound:
-                NS._int.reconnect()
-                NS._int.wclient.delete(_hash_key)
+        etcd_utils.delete(_hash_key)
 
     @thread_safe
     def _copy_vars(self):
@@ -388,7 +302,6 @@ class BaseObject(object):
 
     @thread_safe
     def watch_attrs(self):
-        self.render()
         if self.value:
             watchables = self._defs.get("watch_attrs", [])
             for attr in watchables:

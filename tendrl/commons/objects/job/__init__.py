@@ -5,6 +5,7 @@ class Job(objects.BaseObject):
     def __init__(self, job_id=None, payload=None,
                  status=None, errors=None, children=None,
                  locked_by=None, output=None, timeout=None,
+                 valid_until=None,
                  *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
         self.job_id = job_id
@@ -15,6 +16,7 @@ class Job(objects.BaseObject):
         self.locked_by = locked_by
         self.output = output or {}
         self.timeout = timeout or "yes"
+        self.valid_until = valid_until
         self.value = 'queue/{0}'
 
     def save(self):

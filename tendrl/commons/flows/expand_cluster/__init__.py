@@ -41,8 +41,8 @@ class ExpandCluster(flows.BaseFlow):
                 time.sleep(3)
                 all_status = {}
                 for job_id in ssh_job_ids:
-                    all_status[job_id] = NS._int.client.read(
-                        "/queue/%s/status" % job_id).value
+                    job = NS.tendrl.objects.Job(job_id=job_id).load()
+                    all_status[job_id] = job.status
 
                 _failed = {_jid: status for _jid, status in
                            all_status.iteritems() if status == "failed"}
@@ -94,14 +94,13 @@ class ExpandCluster(flows.BaseFlow):
                 dc = ""
                 for node in self.parameters['Node[]']:
                     try:
-                        dc = NS._int.client.read(
-                            "/nodes/%s/DetectedCluster/detected_cluster_id"
-                            % node
-                        ).value
+                        dc = NS.tendrl.objects.DetectedCluster(
+                            node_id=node
+                        ).load()
                         if not detected_cluster:
-                            detected_cluster = dc
+                            detected_cluster = dc.detected_cluster_id
                         else:
-                            if detected_cluster != dc:
+                            if detected_cluster != dc.detected_cluster_id:
                                 all_status.append(False)
                                 different_cluster_id = True
                                 break
@@ -112,7 +111,7 @@ class ExpandCluster(flows.BaseFlow):
                     raise FlowExecutionFailedError(
                         "Seeing different detected cluster id in"
                         " different nodes. %s and %s" % (
-                            detected_cluster, dc)
+                            detected_cluster, dc.detected_cluster_id)
                     )
 
                 if all_status:
@@ -125,15 +124,12 @@ class ExpandCluster(flows.BaseFlow):
             new_params['TendrlContext.integration_id'] = integration_id
 
             # Get node context for one of the nodes from list
-            sds_pkg_name = NS._int.client.read(
-                "nodes/%s/DetectedCluster/"
-                "sds_pkg_name" % self.parameters['Node[]'][0]
-            ).value
+            dc = NS.tendrl.objects.DetectedCluster(
+                node_id=self.parameters['Node[]'][0]
+            ).load()
+            sds_pkg_name = dc.sds_pkg_name
             new_params['import_after_expand'] = True
-            sds_pkg_version = NS._int.client.read(
-                "nodes/%s/DetectedCluster/sds_pkg_"
-                "version" % self.parameters['Node[]'][0]
-            ).value
+            sds_pkg_version = dc.sds_pkg_version
             new_params['DetectedCluster.sds_pkg_name'] = \
                 sds_pkg_name
             new_params['DetectedCluster.sds_pkg_version'] = \

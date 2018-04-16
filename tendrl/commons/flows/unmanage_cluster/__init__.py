@@ -22,8 +22,7 @@ class UnmanageCluster(flows.BaseFlow):
             (
                 'job_id' in _cluster.locked_by and
                 _cluster.locked_by['job_id'] != ""
-            ) and \
-            (
+            ) and (
                 _cluster.status in ['importing', 'unmanaging', 'expanding']
             ):
             raise FlowExecutionFailedError(
