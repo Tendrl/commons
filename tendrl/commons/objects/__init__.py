@@ -289,9 +289,9 @@ class BaseObject(object):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
         try:
-           etcd_utils.delete(_hash_key)
+            etcd_utils.delete(_hash_key)
         except etcd.EtcdKeyNotFound:
-           pass
+            pass
 
     @thread_safe
     def _copy_vars(self):
