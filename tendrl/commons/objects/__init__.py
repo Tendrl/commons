@@ -187,7 +187,7 @@ class BaseObject(object):
         _exists = True
         try:
             etcd_utils.read("/{0}".format(self.value))
-        except etcd.EtcdKeyNotFound as ex:
+        except etcd.EtcdKeyNotFound:
             _exists = False
         return _exists
 
