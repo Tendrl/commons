@@ -1143,16 +1143,10 @@ namespace.tendrl:
         valid_until:
          help: job valid until
          type: int
-        locked_by:
-         help: locked by which tendrl service
-         type: String
       enabled: true
       list: /queue
       value: /queue
       help: "jobs"
-      watch_attrs:
-        - status
-        - locked_by
     Platform:
       attrs:
         kernel_version:

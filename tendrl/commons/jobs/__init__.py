@@ -58,7 +58,6 @@ class JobConsumerThread(threading.Thread):
 def process_job(job):
     jid = job.key.split('/')[-1]
     job_obj = NS.tendrl.objects.Job(job_id=jid).load()
-    job_status_key = "/queue/%s/status" % jid
     job_lock_key = "/queue/%s/locked_by" % jid
     NS.node_context = NS.node_context.load()
     # Check job not already locked by some agent
@@ -71,11 +70,8 @@ def process_job(job):
 
     # Check job not already "finished", or "processing"
     try:
-        _status = etcd_utils.read(job_status_key).value
-        if _status in ["finished", "processing"]:
+        if job_obj.status in ["finished", "processing"]:
             return
-        if _status == "":
-            etcd_utils.write(job_status_key, "new")
     except etcd.EtcdKeyNotFound:
         pass
 
@@ -109,9 +105,6 @@ def process_job(job):
                 # mark status as "failed" and Job.error =
                 # "Timed out"
                 try:
-                    etcd_utils.write(job_status_key,
-                                     "failed",
-                                     prevValue="new")
                     job_obj = job_obj.load()
                     job_obj.status = "failed"
                     job_obj.save()
@@ -173,15 +166,11 @@ def process_job(job):
             )
             return
 
-        job_status_key = "/queue/%s/status" % job.job_id
-        job_lock_key = "/queue/%s/locked_by" % job.job_id
         try:
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
                              type=NS.type)
-            etcd_utils.write(job_status_key, "processing",
-                             prevValue="new")
             job = job.load()
             job.locked_by = json.dumps(lock_info)
             job.status = "processing"
@@ -223,9 +212,6 @@ def process_job(job):
             )
             the_flow.run()
             try:
-                etcd_utils.write(job_status_key,
-                                 "finished",
-                                 prevValue="processing")
                 job = job.load()
                 job.status = "finished"
                 job.save()
@@ -291,9 +277,6 @@ def process_job(job):
                 )
 
             try:
-                etcd_utils.write(job_status_key,
-                                 "failed",
-                                 prevValue="processing")
                 job = job.load()
                 job.status = "failed"
                 job.save()
