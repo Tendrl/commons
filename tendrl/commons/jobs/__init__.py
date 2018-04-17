@@ -74,6 +74,8 @@ def process_job(job):
         _status = etcd_utils.read(job_status_key).value
         if _status in ["finished", "processing"]:
             return
+        if _status == "":
+            etcd_utils.write(job_status_key, "new")
     except etcd.EtcdKeyNotFound:
         pass
 

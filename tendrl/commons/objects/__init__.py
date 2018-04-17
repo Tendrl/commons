@@ -83,12 +83,12 @@ class BaseObject(object):
 
     @thread_safe
     def save(self, update=True, ttl=None):
-        rendered_obj = self.render()
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store(ttl=ttl):
                 return
+        rendered_obj = self.render()
         watchables = self._defs.get("watch_attrs", [])
         if self.__class__.__name__ in ['Config', 'Definition'] or \
             len(watchables) > 0:
@@ -218,7 +218,7 @@ class BaseObject(object):
         :rtype: list(dict{key=str,value=any})
         """
         old_hash = self.hash
-        if old_hash == self._hash():
+        if old_hash == self._hash() and self._rendered:
             return self._rendered
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
@@ -288,7 +288,10 @@ class BaseObject(object):
     def invalidate_hash(self):
         self.render()
         _hash_key = "/{0}/hash".format(self.value)
-        etcd_utils.delete(_hash_key)
+        try:
+           etcd_utils.delete(_hash_key)
+        except etcd.EtcdKeyNotFound:
+           pass
 
     @thread_safe
     def _copy_vars(self):
