@@ -110,7 +110,8 @@ def process_job(job):
                     etcd_utils.write(job_status_key,
                                      "failed",
                                      prevValue="new")
-                    
+                    job_obj.status = "failed"
+                    job_obj.save()
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
@@ -178,6 +179,7 @@ def process_job(job):
             etcd_utils.write(job_status_key, "processing",
                              prevValue="new")
             job.locked_by = json.dumps(lock_info)
+            job.status = "processing"
             job.save()
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
@@ -219,6 +221,8 @@ def process_job(job):
                 etcd_utils.write(job_status_key,
                                  "finished",
                                  prevValue="processing")
+                job.status = "finished"
+                job.save()
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'finished', " \
@@ -284,6 +288,8 @@ def process_job(job):
                 etcd_utils.write(job_status_key,
                                  "failed",
                                  prevValue="processing")
+                job.status = "failed"
+                job.save()
             except etcd.EtcdCompareFailed:
                 # This should not happen!
                 _msg = "Cannot mark job as 'failed', current" \
