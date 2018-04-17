@@ -12,6 +12,7 @@ namespace.tendrl:
     tendrl-gluster-integration: "tendrl/integration/gluster"
     glusterd: "gluster/server"
     gluster-provisioner: "provisioner/gluster"
+    tendrl-monitoring-integration: "tendrl/integration/monitoring"
   flows:
     ConfigureMonitoring:
       tags:
