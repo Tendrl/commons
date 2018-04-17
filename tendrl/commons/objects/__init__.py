@@ -127,20 +127,23 @@ class BaseObject(object):
 
     @thread_safe
     def load_all(self):
-        self.render()
-        value = '/'.join(self.value.split('/')[:-1])
-        etcd_resp = etcd_utils.read(value)
-
         ins = []
-        for item in etcd_resp.leaves:
-            # When directory is not empty then NS._int.client.read(key)
-            # will return key + directory id as new key. If directory is
-            # empty then it will return key only. When directory is
-            # not present then it will raise EtcdKeyNotFound
-            if item.key.strip("/") != value.strip("/"):
-                # if dir is empty then item.key and value is same
-                self.value = item.key
-                ins.append(self.load())
+        try:
+            self.render()
+            value = '/'.join(self.value.split('/')[:-1])
+            etcd_resp = etcd_utils.read(value)
+
+            for item in etcd_resp.leaves:
+                # When directory is not empty then NS._int.client.read(key)
+                # will return key + directory id as new key. If directory is
+                # empty then it will return key only. When directory is
+                # not present then it will raise EtcdKeyNotFound
+                if item.key.strip("/") != value.strip("/"):
+                    # if dir is empty then item.key and value is same
+                    self.value = item.key
+                    ins.append(self.load())
+        except etcd.EtcdKeyNotFound:
+            pass
         return ins
 
     @thread_safe
