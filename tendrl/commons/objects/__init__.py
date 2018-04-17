@@ -155,34 +155,36 @@ class BaseObject(object):
             if self.hash_compare_with_central_store():
                 return self
 
-        key = self.value + '/data'
+        _copy = self._copy_vars()
+        # Check if self.value already set, use it
+        if self.value.find('{') < 0:
+            _copy.value = self.value
+        key = _copy.value + '/data'
         try:
             val_str = etcd_utils.read(key).value
         except etcd.EtcdKeyNotFound:
             return self
         loc_dict = json.loads(val_str)
-        for attr_name, attr_val in vars(self).iteritems():
-            if not attr_name.startswith('_') and \
-                attr_name not in ["value", "list"]:
-                _type = self._defs.get("attrs", {}).get(
-                    attr_name,
-                    {}
-                ).get("type")
-                if loc_dict.get(attr_name) in [None, ""]:
-                    if _type and _type.lower() == 'list':
-                        setattr(self, attr_name, list())
-                    if _type and _type.lower() == 'json':
-                        setattr(self, attr_name, dict())
+        for attr_name, attr_val in vars(_copy).iteritems():
+            _type = self._defs.get("attrs", {}).get(
+                attr_name,
+                {}
+            ).get("type")
+            if loc_dict.get(attr_name) in [None, ""]:
+                if _type and _type.lower() == 'list':
+                    setattr(_copy, attr_name, list())
+                if _type and _type.lower() == 'json':
+                    setattr(_copy, attr_name, dict())
+            else:
+                if _type and _type.lower() in ['list']:
+                    setattr(
+                        _copy,
+                        attr_name,
+                        json.loads(loc_dict[attr_name])
+                    )
                 else:
-                    if _type and _type.lower() in ['list']:
-                        setattr(
-                            self,
-                            attr_name,
-                            json.loads(loc_dict[attr_name])
-                        )
-                    else:
-                        setattr(self, attr_name, loc_dict[attr_name])
-        return self
+                    setattr(_copy, attr_name, loc_dict[attr_name])
+        return _copy
 
     @thread_safe
     def exists(self):
