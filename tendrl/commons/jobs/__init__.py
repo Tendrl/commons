@@ -112,7 +112,6 @@ def process_job(job):
                                      prevValue="new")
                     job_obj.status = "failed"
                     job_obj.save()
-                    
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
