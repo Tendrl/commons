@@ -76,7 +76,10 @@ class GlusterBrick(objects.BaseObject):
 
     def save(self, update=True, ttl=None):
         if not self.hash_compare_with_central_store():
-            _volume = NS.gluster.objects.Volume(vol_id=self.vol_id)
+            _volume = NS.tendrl.objects.GlusterVolume(
+                self.integration_id,
+                vol_id=self.vol_id
+            ).load()
             _volume.invalidate_hash()
 
         super(GlusterBrick, self).save(update)

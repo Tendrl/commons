@@ -49,3 +49,6 @@ class Job(objects.BaseObject):
     def render(self):
         self.value = self.value.format(self.job_id)
         return super(Job, self).render()
+
+    def on_change(self, attr, prev_value, current_value):
+        return

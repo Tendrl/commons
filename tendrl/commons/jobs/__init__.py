@@ -74,6 +74,8 @@ def process_job(job):
         _status = etcd_utils.read(job_status_key).value
         if _status in ["finished", "processing"]:
             return
+        if _status == "":
+            etcd_utils.write(job_status_key, "new")
     except etcd.EtcdKeyNotFound:
         pass
 
@@ -110,6 +112,7 @@ def process_job(job):
                     etcd_utils.write(job_status_key,
                                      "failed",
                                      prevValue="new")
+                    job_obj = job_obj.load()
                     job_obj.status = "failed"
                     job_obj.save()
                 except etcd.EtcdCompareFailed:
@@ -140,6 +143,7 @@ def process_job(job):
             # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
+            job_obj = job_obj.load()
             job_obj.valid_util = int(_now_plus_10_epoch)
             job_obj.save()
 
@@ -178,6 +182,7 @@ def process_job(job):
                              type=NS.type)
             etcd_utils.write(job_status_key, "processing",
                              prevValue="new")
+            job = job.load()
             job.locked_by = json.dumps(lock_info)
             job.status = "processing"
             job.save()
@@ -221,6 +226,7 @@ def process_job(job):
                 etcd_utils.write(job_status_key,
                                  "finished",
                                  prevValue="processing")
+                job = job.load()
                 job.status = "finished"
                 job.save()
             except etcd.EtcdCompareFailed:
@@ -288,6 +294,7 @@ def process_job(job):
                 etcd_utils.write(job_status_key,
                                  "failed",
                                  prevValue="processing")
+                job = job.load()
                 job.status = "failed"
                 job.save()
             except etcd.EtcdCompareFailed:
