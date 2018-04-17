@@ -268,7 +268,10 @@ class BaseObject(object):
             self.hash = self._hash()
             _hash_key = "/{0}/hash".format(self.value)
             _stored_hash = None
-            _stored_hash = etcd_utils.read(_hash_key).value
+            try:
+                _stored_hash = etcd_utils.read(_hash_key).value
+            except etcd.EtcdKeyNotFound:
+                return False
             if self.hash == _stored_hash:
                 # No changes in stored object and current object,
                 # dont save current object to central store
