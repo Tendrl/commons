@@ -147,7 +147,7 @@ class NodeContext(objects.BaseObject):
                         {"message": _msg % _job_id}
                     )
 
-                if _tc.sds_name == "gluster":
+                if _tc.sds_name in ["gluster", "RHGS"]:
                     bricks = etcd_utils.read(
                         "clusters/{0}/Bricks/all/{1}".format(
                             _tc.integration_id,

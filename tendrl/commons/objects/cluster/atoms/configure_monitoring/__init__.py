@@ -129,7 +129,7 @@ class ConfigureMonitoring(objects.BaseAtom):
                 node_plugin,
                 plugin_params
             )
-        if NS.tendrl_context.sds_name == 'gluster':
+        if NS.tendrl_context.sds_name in ['gluster', 'RHGS']:
             plugin_params['is_provisioner_node'] = False
             if "provisioner/%s" % (
                 NS.tendrl_context.integration_id
