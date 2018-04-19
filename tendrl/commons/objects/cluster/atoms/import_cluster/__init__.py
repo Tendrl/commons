@@ -116,13 +116,19 @@ class ImportCluster(objects.BaseAtom):
             if int(maj_ver) < int(req_maj_ver):
                 ver_check_failed = True
             else:
-                if int(maj_ver) == int(req_maj_ver) and \
-                    (int(min_ver) < int(req_min_ver) or
-                     int(rel) < int(req_rel) or
-                     (build_no is not None and req_build_no is not None and
-                      int(build_no) < int(req_build_no))):
-                    ver_check_failed = True
-
+                if int(maj_ver) == int(req_maj_ver):
+                    if int(min_ver) < int(req_min_ver):
+                        ver_check_failed = True
+                    else:
+                        if int(min_ver) == int(req_min_ver):
+                            if int(rel) < int(req_rel):
+                                ver_check_failed = True
+                            else:
+                                if int(rel) == int(req_rel):
+                                    if build_no is not None and \
+                                        req_build_no is not None and \
+                                        int(build_no) < int(req_build_no):
+                                        ver_check_failed = True
             if ver_check_failed:
                 logger.log(
                     "error",
