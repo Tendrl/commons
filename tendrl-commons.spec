@@ -1,6 +1,6 @@
 Name: tendrl-commons
 Version: 1.6.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
 Source0: %{name}-%{version}.tar.gz
@@ -48,6 +48,9 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
+* Fri Apr 20 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.3-2
+- Bugfixes (https://github.com/Tendrl/commons/milestone/6)
+
 * Wed Apr 18 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.3-1
 - Support gluster nodes/bricks with fqdn, IP and short names
 - Serialize/deserialize Tendrl objects

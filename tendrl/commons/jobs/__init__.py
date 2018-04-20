@@ -160,7 +160,7 @@ def process_job(job):
                     NS.node_context.tags, jid,
                     _job_tags)
             logger.log(
-                "info",
+                "debug",
                 NS.publisher_id,
                 {"message": _msg}
             )

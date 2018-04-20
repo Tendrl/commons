@@ -67,7 +67,7 @@ class AlertUtils(object):
     def equals(self, alert1, alert2):
         return (
             alert1.alert_id == alert2.alert_id and
-            str(alert1.acked) == alert2.acked and
+            str(alert1.acked).lower() == str(alert2.acked).lower() and
             alert_severity_map[alert1.severity] == alert_severity_map[
                 alert2.severity]
         )

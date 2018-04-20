@@ -14,7 +14,7 @@ class DeleteClusterDetails(objects.BaseAtom):
 
         etcd_keys_to_delete = []
         etcd_keys_to_delete.append(
-            "/clusters/%s/Peers" % integration_id
+            "/clusters/%s/nodes" % integration_id
         )
         etcd_keys_to_delete.append(
             "/clusters/%s/Bricks" % integration_id
