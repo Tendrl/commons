@@ -56,9 +56,9 @@ class StopMonitoringServices(objects.BaseAtom):
                     flow_id=self.parameters['flow_id'],
                 )
 
-            # Wait for (no of nodes) * 10 secs for stop service job to complete
+            # Wait for (no of nodes) * 15 secs for stop service job to complete
             loop_count = 0
-            wait_count = (len(child_job_ids)) * 2
+            wait_count = (len(child_job_ids)) * 3
             while True:
                 if loop_count >= wait_count:
                     logger.log(
