@@ -1151,6 +1151,8 @@ namespace.tendrl:
       list: /queue
       value: /queue
       help: "jobs"
+      watch_attrs:
+        - locked_by
     Platform:
       attrs:
         kernel_version:

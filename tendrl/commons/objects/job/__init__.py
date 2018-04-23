@@ -19,7 +19,7 @@ class Job(objects.BaseObject):
         self.valid_until = valid_until
         self.value = 'queue/{0}'
 
-    def save(self):
+    def save(self, ttl=None):
         if "parent" in self.payload:
             # Load parent job
             _parent = Job(job_id=self.payload['parent']).load()
@@ -44,7 +44,7 @@ class Job(objects.BaseObject):
                 _parent.status = "failed"
                 _parent.save()
 
-        super(Job, self).save()
+        super(Job, self).save(ttl=ttl)
 
     def render(self):
         self.value = self.value.format(self.job_id)
