@@ -60,7 +60,7 @@ class JobConsumerThread(threading.Thread):
                     pass
 
                 _job_thread = threading.Thread(
-                    target=process_job, args=(job)
+                    target=process_job, args=(jid)
                 )
                 _job_thread.daemon = True
                 _job_thread.start()
@@ -70,8 +70,7 @@ class JobConsumerThread(threading.Thread):
         self._complete.set()
 
 
-def process_job(job):
-    jid = job.key.split('/')[-1]
+def process_job(jid):
     job_obj = NS.tendrl.objects.Job(job_id=jid).load()
     NS.node_context = NS.node_context.load()
     # Check job not already "finished", or "processing"
