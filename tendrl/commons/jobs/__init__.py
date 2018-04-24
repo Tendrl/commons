@@ -19,6 +19,9 @@ from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils import time_utils
 
 
+DEFAULT_JOB_TTL = 172800
+
+
 class JobConsumerThread(threading.Thread):
 
     def __init__(self):
@@ -46,7 +49,19 @@ class JobConsumerThread(threading.Thread):
                 continue
 
             for job in jobs.leaves:
-                _job_thread = threading.Thread(target=process_job, args=(job,))
+                # Check job not already locked by some agent
+                jid = job.key.split('/')[-1]
+                job_lock_key = "/queue/%s/locked_by" % jid
+                try:
+                    _locked_by = etcd_utils.read(job_lock_key).value
+                    if _locked_by:
+                        continue
+                except etcd.EtcdKeyNotFound:
+                    pass
+
+                _job_thread = threading.Thread(
+                    target=process_job, args=(jid,)
+                )
                 _job_thread.daemon = True
                 _job_thread.start()
                 _job_thread.join()
@@ -55,19 +70,9 @@ class JobConsumerThread(threading.Thread):
         self._complete.set()
 
 
-def process_job(job):
-    jid = job.key.split('/')[-1]
+def process_job(jid):
     job_obj = NS.tendrl.objects.Job(job_id=jid).load()
-    job_lock_key = "/queue/%s/locked_by" % jid
     NS.node_context = NS.node_context.load()
-    # Check job not already locked by some agent
-    try:
-        _locked_by = etcd_utils.read(job_lock_key).value
-        if _locked_by:
-            return
-    except etcd.EtcdKeyNotFound:
-        pass
-
     # Check job not already "finished", or "processing"
     try:
         if job_obj.status in ["finished", "processing"]:
@@ -174,7 +179,7 @@ def process_job(job):
             job = job.load()
             job.locked_by = json.dumps(lock_info)
             job.status = "processing"
-            job.save()
+            job.save(ttl=DEFAULT_JOB_TTL)
         except etcd.EtcdCompareFailed:
             # job is already being processed by some tendrl
             # agent

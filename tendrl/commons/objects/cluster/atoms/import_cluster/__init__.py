@@ -74,7 +74,7 @@ class ImportCluster(objects.BaseAtom):
             # `glusterfs-server-4.1dev-0.203.gitc3e1a2e.el7.centos.x86_64`
             # `glusterfs-server-3.12.8-0.0.el7.centos.x86_64.rpm`
             cmd = subprocess.Popen(
-                'rpm -qa | grep glusterfs-server',
+                'rpm -q glusterfs-server',
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

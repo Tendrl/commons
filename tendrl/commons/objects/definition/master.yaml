@@ -1070,9 +1070,6 @@ namespace.tendrl:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
-        updated_at:
-          help: "last updated time of node context"
-          type: String
         tags:
           help: "The tags associated with this node"
           type: List
@@ -1098,9 +1095,6 @@ namespace.tendrl:
           type: String
         node_id:
           help: "Tendrl ID for the managed node"
-          type: String
-        updated_at:
-          help: "last updated time of node context"
           type: String
         tags:
           help: "The tags associated with this node"
@@ -1151,6 +1145,8 @@ namespace.tendrl:
       list: /queue
       value: /queue
       help: "jobs"
+      watch_attrs:
+        - locked_by
     Platform:
       attrs:
         kernel_version:

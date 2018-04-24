@@ -17,7 +17,8 @@ class Logger(object):
 
     def __init__(self, message):
         self.message = message
-        if self.message.job_id is not None:
+        if self.message.job_id is not None and \
+                self.message.priority != "debug":
             self.push_message()
             """ If job_id is present then
             it is considered as operation
