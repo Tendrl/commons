@@ -259,8 +259,6 @@ class BaseObject(object):
 
     @thread_safe
     def _hash(self):
-        self.updated_at = None
-
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
         self.hash = hashlib.md5(_obj_str).hexdigest()

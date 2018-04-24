@@ -1,13 +1,12 @@
 from tendrl.commons import objects
 from tendrl.commons.utils import etcd_utils
-from tendrl.commons.utils import time_utils
 
 
 class ClusterNodeContext(objects.BaseObject):
 
     def __init__(self, integration_id=None,
                  node_id=None, fqdn=None, ipv4_addr=None,
-                 updated_at=None, tags=None, status=None,
+                 tags=None, status=None,
                  sync_status=None, last_sync=None,
                  first_sync_done=None, is_managed=None,
                  *args, **kwargs):
@@ -17,7 +16,6 @@ class ClusterNodeContext(objects.BaseObject):
         self.node_id = node_id or _node_context.node_id
         self.fqdn = fqdn or _node_context.fqdn
         self.ipv4_addr = ipv4_addr or _node_context.ipv4_addr
-        self.updated_at = updated_at or str(time_utils.now())
         self.tags = tags or _node_context.tags
         self.status = status or _node_context.status
         self.sync_status = sync_status or _node_context.sync_status
