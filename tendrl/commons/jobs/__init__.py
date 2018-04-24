@@ -60,7 +60,7 @@ class JobConsumerThread(threading.Thread):
                     pass
 
                 _job_thread = threading.Thread(
-                    target=process_job, args=(jid)
+                    target=process_job, args=(jid,)
                 )
                 _job_thread.daemon = True
                 _job_thread.start()
