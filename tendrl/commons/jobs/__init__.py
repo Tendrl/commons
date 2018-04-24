@@ -73,7 +73,6 @@ class JobConsumerThread(threading.Thread):
 def process_job(job):
     jid = job.key.split('/')[-1]
     job_obj = NS.tendrl.objects.Job(job_id=jid).load()
-    
     NS.node_context = NS.node_context.load()
     # Check job not already "finished", or "processing"
     try:
