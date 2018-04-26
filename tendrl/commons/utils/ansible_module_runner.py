@@ -71,6 +71,7 @@ class AnsibleRunner(object):
                     modname,
                     self.module_path,
                     self.argument_dict,
+                    None,
                     task_vars={}
                 )
         except Exception as e:
