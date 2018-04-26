@@ -61,7 +61,6 @@ class DeleteClusterDetails(objects.BaseAtom):
         except etcd.EtcdKeyNotFound:
             # No cluster alerts, continue
             pass
-
         try:
             node_alert_ids = etcd_utils.read(
                 "/alerting/nodes"
@@ -91,5 +90,11 @@ class DeleteClusterDetails(objects.BaseAtom):
                     flow_id=self.parameters['flow_id'],
                 )
                 continue
+        # remove short name
+        cluster = NS.tendrl.objects.Cluster(
+            integration_id=integration_id
+        ).load()
+        cluster.short_name = ""
+        cluster.save()
 
         return True
