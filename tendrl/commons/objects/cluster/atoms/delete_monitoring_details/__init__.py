@@ -31,7 +31,7 @@ class DeleteMonitoringDetails(objects.BaseAtom):
         while True:
             if loop_count >= wait_count:
                 logger.log(
-                    "info",
+                    "error",
                     NS.publisher_id,
                     {
                         "message": "Clearing monitoring data for cluster "
