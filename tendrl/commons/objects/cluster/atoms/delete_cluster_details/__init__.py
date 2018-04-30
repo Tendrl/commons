@@ -51,7 +51,7 @@ class DeleteClusterDetails(objects.BaseAtom):
         # Find the alerting/alerts entries to be deleted
         try:
             cluster_alert_ids = etcd_utils.read(
-                "/alerting/clusters"
+                "/alerting/clusters/%s" % integration_id	
             )
             for entry in cluster_alert_ids.leaves:
                 ca_id = entry.key.split("/")[-1]
