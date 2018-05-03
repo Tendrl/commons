@@ -44,14 +44,26 @@ class DeleteClusterDetails(objects.BaseAtom):
         for node in nodes.leaves:
             node_id = node.key.split("/")[-1]
             node_ids.append(node_id)
+            key = "/alerting/nodes/%s" % node_id
             etcd_keys_to_delete.append(
-                "/alerting/nodes/%s" % node_id
+                key
             )
+            try:
+                # delete node alerts from /alerting/alerts
+                node_alerts = etcd_utils.read(key)
+                for node_alert in node_alerts.leaves:
+                    etcd_keys_to_delete.append(
+                        "/alerting/alerts/%s" % node_alert.key.split(
+                            "/")[-1]
+                    )
+            except etcd.EtcdKeyNotFound:
+                # No node alerts, continue
+                pass
 
         # Find the alerting/alerts entries to be deleted
         try:
             cluster_alert_ids = etcd_utils.read(
-                "/alerting/clusters"
+                "/alerting/clusters/%s" % integration_id
             )
             for entry in cluster_alert_ids.leaves:
                 ca_id = entry.key.split("/")[-1]
@@ -60,18 +72,6 @@ class DeleteClusterDetails(objects.BaseAtom):
                 )
         except etcd.EtcdKeyNotFound:
             # No cluster alerts, continue
-            pass
-        try:
-            node_alert_ids = etcd_utils.read(
-                "/alerting/nodes"
-            )
-            for entry in node_alert_ids.leaves:
-                na_id = entry.key.split("/")[-1]
-                etcd_keys_to_delete.append(
-                    "/alerting/alerts/%s" % na_id
-                )
-        except etcd.EtcdKeyNotFound:
-            # No node alerts, continue
             pass
 
         # Remove the cluster details
