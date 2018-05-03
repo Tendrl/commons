@@ -172,6 +172,15 @@ def process_job(jid):
             return
 
         try:
+            try:
+                job_status_key = "/queue/%s/status" % job.job_id
+                etcd_utils.write(job_status_key,
+                                 "processing",
+                                 prevValue="new")
+            except etcd.EtcdKeyNotFound:
+                # if status watchable attribute not present
+                # then it will be created when job save happens
+                pass
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
