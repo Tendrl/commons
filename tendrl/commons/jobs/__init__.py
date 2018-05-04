@@ -39,6 +39,12 @@ class JobConsumerThread(threading.Thread):
         while not self._complete.is_set():
             _job_sync_interval = 5
             NS.node_context = NS.node_context.load()
+            NS.tendrl_context = NS.tendrl_context.load()
+            if "tendrl/monitor" not in NS.node_context.tags:
+                if NS.tendrl_context.integration_id is None or \
+                        NS.node_context.fqdn is None:
+                    time.sleep(_job_sync_interval)
+                    continue
             if "tendrl/monitor" in NS.node_context.tags:
                 _job_sync_interval = 3
 
@@ -172,6 +178,15 @@ def process_job(jid):
             return
 
         try:
+            try:
+                job_status_key = "/queue/%s/status" % job.job_id
+                etcd_utils.write(job_status_key,
+                                 "processing",
+                                 prevValue="new")
+            except etcd.EtcdKeyNotFound:
+                # if status watchable attribute not present
+                # then it will be created when job save happens
+                pass
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              tags=NS.node_context.tags,
