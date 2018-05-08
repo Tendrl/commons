@@ -149,21 +149,21 @@ class BaseObject(object):
     @thread_safe
     def load(self):
         self.render()
-        if "Message" not in self.__class__.__name__:
-            # If local object.hash is equal to
-            # central_store object.hash, return
-            if self.hash_compare_with_central_store():
-                return self
-
         _copy = self._copy_vars()
         # Check if self.value already set, use it
         if self.value.find('{') < 0:
             _copy.value = self.value
+        if "Message" not in _copy.__class__.__name__:
+            # If local object.hash is equal to
+            # central_store object.hash, return
+            if self.hash_compare_with_central_store():
+                return _copy
+
         key = _copy.value + '/data'
         try:
             val_str = etcd_utils.read(key).value
         except etcd.EtcdKeyNotFound:
-            return self
+            return _copy
         loc_dict = json.loads(val_str)
         for attr_name, attr_val in vars(_copy).iteritems():
             _type = self._defs.get("attrs", {}).get(
