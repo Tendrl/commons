@@ -209,6 +209,14 @@ def process_job(jid):
                     obj_name, flow_name)
             else:
                 runnable_flow = current_ns.ns.get_flow(flow_name)
+            
+            job = job.load()
+            lock_info = dict(node_id=NS.node_context.node_id,
+                             fqdn=NS.node_context.fqdn,
+                             tags=NS.node_context.tags,
+                             type=NS.type)
+            if job.locked_by != lock_info:
+                return
 
             the_flow = runnable_flow(parameters=job.payload[
                 'parameters'], job_id=job.job_id)
@@ -229,13 +237,8 @@ def process_job(jid):
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
-            job = job.load()
-            lock_info = dict(node_id=NS.node_context.node_id,
-                             fqdn=NS.node_context.fqdn,
-                             tags=NS.node_context.tags,
-                             type=NS.type)
-            if job.locked_by == lock_info:
-                the_flow.run()
+            
+            the_flow.run()
 
             try:
                 job = job.load()
