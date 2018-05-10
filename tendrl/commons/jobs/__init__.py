@@ -77,18 +77,22 @@ class JobConsumerThread(threading.Thread):
 
 
 def process_job(jid):
-    job_obj = NS.tendrl.objects.Job(job_id=jid).load()
+    job = NS.tendrl.objects.Job(job_id=jid).load()
+    if job.status in [None, ""]:
+        job.status = "new"
+        job.save()
+
     NS.node_context = NS.node_context.load()
     # Check job not already "finished", or "processing"
     try:
-        if job_obj.status in ["finished", "processing"]:
+        if job.status in ["finished", "processing"]:
             return
     except etcd.EtcdKeyNotFound:
         pass
 
     try:
         _timeout = None
-        _timeout = job_obj.timeout
+        _timeout = job.timeout
         if _timeout:
             _timeout = _timeout.lower()
     except etcd.EtcdKeyNotFound:
@@ -100,11 +104,7 @@ def process_job(jid):
     # marked as "failed")
     if "tendrl/monitor" in NS.node_context.tags and \
         _timeout == "yes":
-        _valid_until = None
-        try:
-            _valid_until = job_obj.valid_until
-        except etcd.EtcdKeyNotFound:
-            pass
+        _valid_until = job.valid_until
 
         if _valid_until:
             _now_epoch = (time_utils.now() -
@@ -116,9 +116,9 @@ def process_job(jid):
                 # mark status as "failed" and Job.error =
                 # "Timed out"
                 try:
-                    job_obj = job_obj.load()
-                    job_obj.status = "failed"
-                    job_obj.save()
+                    job = job.load()
+                    job.status = "failed"
+                    job.save()
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
@@ -144,12 +144,11 @@ def process_job(jid):
             _now_plus_10 = time_utils.now() + datetime.timedelta(minutes=10)
             _epoch_start = datetime.datetime(1970, 1, 1).replace(tzinfo=utc)
 
-            # noinspection PyTypeChecker
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            job_obj = job_obj.load()
-            job_obj.valid_util = int(_now_plus_10_epoch)
-            job_obj.save()
+            job = job.load()
+            job.valid_util = int(_now_plus_10_epoch)
+            job.save()
 
     job = NS.tendrl.objects.Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
@@ -192,7 +191,7 @@ def process_job(jid):
                              tags=NS.node_context.tags,
                              type=NS.type)
             job = job.load()
-            job.locked_by = json.dumps(lock_info)
+            job.locked_by = lock_info
             job.status = "processing"
             job.save(ttl=DEFAULT_JOB_TTL)
         except etcd.EtcdCompareFailed:
@@ -210,6 +209,14 @@ def process_job(jid):
                     obj_name, flow_name)
             else:
                 runnable_flow = current_ns.ns.get_flow(flow_name)
+            
+            job = job.load()
+            lock_info = dict(node_id=NS.node_context.node_id,
+                             fqdn=NS.node_context.fqdn,
+                             tags=NS.node_context.tags,
+                             type=NS.type)
+            if job.locked_by != lock_info:
+                return
 
             the_flow = runnable_flow(parameters=job.payload[
                 'parameters'], job_id=job.job_id)
@@ -230,7 +237,9 @@ def process_job(jid):
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
+            
             the_flow.run()
+
             try:
                 job = job.load()
                 job.status = "finished"
