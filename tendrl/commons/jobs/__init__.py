@@ -60,7 +60,8 @@ class JobConsumerThread(threading.Thread):
                 try:
                     _locked_by = etcd_utils.read(job_lock_key).value
                     if _locked_by:
-                        continue
+                        if json.loads(_locked_by):
+                            continue
                 except etcd.EtcdKeyNotFound:
                     pass
 
