@@ -17,6 +17,7 @@ class DeleteMonitoringDetails(objects.BaseAtom):
             "run": "monitoring.flows.DeleteMonitoringData",
             "status": "new",
             "parameters": self.parameters,
+            "parent": self.parameters['job_id'],
             "type": "monitoring"
         }
         NS.tendrl.objects.Job(

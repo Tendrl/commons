@@ -1140,7 +1140,7 @@ namespace.tendrl:
          type: int
         locked_by:
          help: locked by which tendrl service
-         type: String
+         type: json
       enabled: true
       list: /queue
       value: /queue
