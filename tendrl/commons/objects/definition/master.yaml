@@ -94,6 +94,8 @@ namespace.tendrl:
       inputs:
         mandatory:
           - TendrlContext.integration_id
+        optional:
+          - Cluster.delete_telemetry_data
       pre_run:
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
       post_run:
