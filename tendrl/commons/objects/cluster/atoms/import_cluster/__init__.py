@@ -186,15 +186,15 @@ class ImportCluster(objects.BaseAtom):
                         )
                         return False
                     time.sleep(10)
-                    finished = True
+                    completed = True
                     for child_job_id in parent_job.children:
                         child_job = NS.tendrl.objects.Job(
                             job_id=child_job_id
                         ).load()
-                        if child_job.status != "finished":
-                            finished = False
+                        if child_job.status not in ["finished", "failed"]:
+                            completed = False
                             break
-                    if finished:
+                    if completed:
                         break
                     else:
                         loop_count += 1
