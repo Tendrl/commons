@@ -111,10 +111,17 @@ class NodeContext(objects.BaseObject):
                     "WARNING",
                     node_id=self.node_id
                 )
-
                 _tc = NS.tendrl.objects.TendrlContext(
                     node_id=self.node_id
                 ).load()
+                # Load cluster_node_context will load node_context
+                # and it will be updated with latest values
+                cluster_node_context = NS.tendrl.objects.ClusterNodeContext(
+                    node_id=self.node_id,
+                    integration_id=_tc.integration_id
+                )
+                cluster_node_context.save()
+                del cluster_node_context
                 _tag = "provisioner/%s" % _tc.integration_id
                 if _tag in self.tags:
                     _index_key = "/indexes/tags/%s" % _tag
@@ -161,3 +168,13 @@ class NodeContext(objects.BaseObject):
                             )
                         except (etcd.EtcdAlreadyExist, etcd.EtcdKeyNotFound):
                             pass
+            elif current_value == "UP":
+                msg = "{0} is UP".format(self.fqdn)
+                event_utils.emit_event(
+                    "node_status",
+                    "UP",
+                    msg,
+                    "node_{0}".format(self.fqdn),
+                    "INFO",
+                    node_id=self.node_id
+                )

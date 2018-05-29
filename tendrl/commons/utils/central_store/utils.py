@@ -103,6 +103,7 @@ def watch(obj, key):
 
                 is_deleted = prev_val is None and cur_val is None
                 if prev_val != cur_val or is_deleted:
+                    obj = obj.load()
                     attr = key.rstrip("/").split("/")[-1]
                     obj.on_change(attr, prev_val,
                                   cur_val)
