@@ -304,8 +304,9 @@ class TendrlNS(object):
                        {"message": "Setup NodeContext for namespace."
                                    "%s" % self.ns_name})
             self.current_ns.node_context = \
-                self.current_ns.objects.NodeContext(status="UP")
+                self.current_ns.objects.NodeContext().load()
             NS.node_context = self.current_ns.node_context
+            NS.node_context.status = "UP"
 
         # TendrlContext, if the namespace has implemented its own
         if "TendrlContext" in self.current_ns.objects:

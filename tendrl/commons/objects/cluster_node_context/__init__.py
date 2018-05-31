@@ -11,7 +11,7 @@ class ClusterNodeContext(objects.BaseObject):
                  first_sync_done=None, is_managed=None,
                  *args, **kwargs):
         super(ClusterNodeContext, self).__init__(*args, **kwargs)
-        _node_context = NS.node_context.load()
+        _node_context = NS.tendrl.objects.NodeContext(node_id=node_id).load()
         self.integration_id = integration_id
         self.node_id = node_id or _node_context.node_id
         self.fqdn = fqdn or _node_context.fqdn

@@ -35,6 +35,7 @@ class ImportCluster(flows.BaseFlow):
                     integration_id=entry.key.split('/')[-1]
                 ).load()
                 if _cluster.short_name and short_name and \
+                    _cluster.is_managed == 'yes' and \
                     _cluster.short_name == short_name.strip().lower():
                     raise FlowExecutionFailedError(
                         "Cluster with name: %s already exists" % short_name
