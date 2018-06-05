@@ -95,10 +95,16 @@ class NodeContext(objects.BaseObject):
         status = self.value + "/status"
         if ttl:
             self._ttl = ttl
-            etcd_utils.refresh(status, ttl)
+            try:
+                etcd_utils.refresh(status, ttl)
+            except etcd.EtcdKeyNotFound:
+                pass
 
     def on_change(self, attr, prev_value, current_value):
         if attr == "status":
+            _tc = NS.tendrl.objects.TendrlContext(
+                node_id=self.node_id
+            ).load()
             if current_value is None:
                 self.status = "DOWN"
                 self.save()
@@ -109,11 +115,9 @@ class NodeContext(objects.BaseObject):
                     msg,
                     "node_{0}".format(self.fqdn),
                     "WARNING",
-                    node_id=self.node_id
+                    node_id=self.node_id,
+                    integration_id=_tc.integration_id
                 )
-                _tc = NS.tendrl.objects.TendrlContext(
-                    node_id=self.node_id
-                ).load()
                 # Load cluster_node_context will load node_context
                 # and it will be updated with latest values
                 cluster_node_context = NS.tendrl.objects.ClusterNodeContext(
@@ -195,5 +199,6 @@ class NodeContext(objects.BaseObject):
                     msg,
                     "node_{0}".format(self.fqdn),
                     "INFO",
-                    node_id=self.node_id
+                    node_id=self.node_id,
+                    integration_id=_tc.integration_id
                 )
