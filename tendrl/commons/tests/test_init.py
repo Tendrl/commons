@@ -15,12 +15,19 @@ import yaml
 from tendrl.commons import objects
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
+from tendrl.commons.utils import etcd_utils
 
 
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+@patch.object(node.NodeContext, 'load')
+def init(patch_node_load,
+         patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -34,6 +41,9 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
+    patch_etcd_utils_read.return_value=maps.NamedDict(
+        value='{"status": "UP", "pkey": "tendrl-node-1", "node_id": "15", "ipv4_addr": "172.28.128.37", "tags": "[\\"my_tag\\"]", "sync_status": "done", "locked_by": "fd", "fqdn": "tendrl-node-1", "last_sync": "date"}')
+    patch_node_load.return_value = node.NodeContext
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -67,6 +77,8 @@ def test_list_modules_in_package_path():
          'tendrl.commons.objects.cluster_alert'),
         ('cluster_alert_counters',
          'tendrl.commons.objects.cluster_alert_counters'),
+        ('cluster_node_alert_counters',
+         'tendrl.commons.objects.cluster_node_alert_counters'),
         ('cluster_node_context',
          'tendrl.commons.objects.cluster_node_context'),
         ('cluster_tendrl_context',
@@ -75,13 +87,18 @@ def test_list_modules_in_package_path():
         ('definition', 'tendrl.commons.objects.definition'),
         ('detected_cluster', 'tendrl.commons.objects.detected_cluster'),
         ('disk', 'tendrl.commons.objects.disk'),
+        ('geo_replication_session',
+         'tendrl.commons.objects.geo_replication_session'),
+        ('global_details',
+         'tendrl.commons.objects.global_details'),
+        ('gluster_brick', 'tendrl.commons.objects.gluster_brick'),
+        ('gluster_volume', 'tendrl.commons.objects.gluster_volume'),
+        ('gluster_peer', 'tendrl.commons.objects.gluster_peer'),
         ('job', 'tendrl.commons.objects.job'),
         ('memory', 'tendrl.commons.objects.memory'),
         ('node', 'tendrl.commons.objects.node'),
         ('node_alert',
          'tendrl.commons.objects.node_alert'),
-        ('node_alert_counters',
-         'tendrl.commons.objects.notification_only_alert'),
         ('node_context', 'tendrl.commons.objects.node_context'),
         ('node_network', 'tendrl.commons.objects.node_network'),
         ('notification_only_alert',
@@ -90,8 +107,8 @@ def test_list_modules_in_package_path():
         ('platform', 'tendrl.commons.objects.platform'),
         ('service', 'tendrl.commons.objects.service'),
         ('tendrl_context', 'tendrl.commons.objects.tendrl_context'),
-        ('virtual_disk', 'tendrl.commons.objects.virtual_disk'),
-        ('gluster_peer', 'tendrl.commons.objects.gluster_peer')]
+        ('virtual_disk', 'tendrl.commons.objects.virtual_disk')
+    ]
     ns_objects_path = os.path.join(os.path.dirname(os.path.abspath(__file__)).
                                    rsplit('/', 1)[0], "objects")
     ns_objects_prefix = "tendrl.commons.objects."
@@ -99,7 +116,7 @@ def test_list_modules_in_package_path():
                                                  ns_objects_prefix)
 
     # TO-DISCUSS : modules is hard coded and might change in future
-    assert len(ret) == len(modules) + 1
+    assert len(ret) == len(modules)
     ret = tendrlNS._list_modules_in_package_path("test", "test")
     assert len(ret) == 0
 

@@ -55,6 +55,7 @@ class BaseObject(object):
                 ".%s \n" % (self._ns.ns_name, self.__class__.__name__)
             )
         try:
+            print self.__class__.__name__
             return self._ns.get_obj_definition(self.__class__.__name__)
         except KeyError as ex:
             msg = "Could not find definitions (.yml) for " \

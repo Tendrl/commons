@@ -41,12 +41,12 @@ class Plugin(object):
         return True
 
     def create_gluster_cluster(self, *args, **kwargs):
-        if args[0][0] == "test":
+        if args[0][0] == "test_ip":
             return False
         return True
 
     def expand_gluster_cluster(self, *args, **kwargs):
-        if args[0][0] == "test":
+        if args[0][0] == "test_ip":
             return False
         return True
 
