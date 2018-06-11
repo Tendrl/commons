@@ -11,6 +11,7 @@ from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
 import tendrl.commons.objects.node_context as node
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons import TendrlNS
 
 
@@ -80,10 +81,33 @@ def return_job(param):
 def read(key):
     if key == 'indexes/tags/tendrl/integration/None':
         raise etcd.EtcdKeyNotFound
+    elif key == 'indexes/tags/tendrl/integration/' \
+                '94ac63ba-de73-4e7f-8dfa-9010d9554084':
+        node_ids = maps.NamedDict()
+        node_ids['value'] = '["bc4cad92-b7e3-4c63-b820-a439db3a0516",' \
+                            '"a71af0e5-5241-4856-9e9c-22627a466b8d"]'
+        return node_ids
     else:
-        return maps.NamedDict(
-            value=u'["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]'
-        )
+        return etcd.EtcdResult(node={'newKey': False,
+                                     'raft_index': 449389,
+                                     '_children': [{u'createdIndex': 1657,
+                                                    u'modifiedIndex': 1657,
+                                                    u'dir': True,
+                                                    u'key': u'/clusters/'
+                                                            u'b7d4b5ae-d33d-'
+                                                            u'49cf-ae6d-5d6bb'
+                                                            u'494ece7'}
+                                                   ],
+                                     'createdIndex': 1657,
+                                     'modifiedIndex': 1657,
+                                     'value': None,
+                                     'etcd_index': 101021,
+                                     'expiration': None,
+                                     'key': u'/clusters',
+                                     'ttl': None,
+                                     'action': u'get',
+                                     'dir': True
+                                     })
 
 
 def save(*args):
@@ -93,7 +117,11 @@ def save(*args):
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+def init(patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -111,6 +139,16 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.publisher_id = "node_context"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -128,25 +166,27 @@ def test_run():
         import_cluster = ImportCluster(parameters=param)
     with patch.object(objects.BaseObject, 'load', return_fail):
         with patch.object(NS._int.client, 'read', read):
-            with pytest.raises(FlowExecutionFailedError):
-                import_cluster.run()
+            with patch.object(etcd_utils, 'read', read):
+                with pytest.raises(FlowExecutionFailedError):
+                    import_cluster.run()
     param['TendrlContext.integration_id'] = \
         '94ac63ba-de73-4e7f-8dfa-9010d9554084'
     import_cluster._defs['pre_run'] = ['tendrl.objects.Node.atoms.Cmd']
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(Cmd, 'run', return_value=True):
-                with patch.object(
-                    NS.tendrl.objects.Cluster,
-                    'load',
-                    return_pass
-                ):
+                with patch.object(etcd_utils, 'read', read):
                     with patch.object(
-                        NS.tendrl.objects.Job,
+                        NS.tendrl.objects.Cluster,
                         'load',
-                        return_job
+                        return_pass
                     ):
-                        import_cluster.run()
+                        with patch.object(
+                            NS.tendrl.objects.Job,
+                            'load',
+                            return_job
+                        ):
+                            import_cluster.run()
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(Cmd, 'run', return_value=False):
