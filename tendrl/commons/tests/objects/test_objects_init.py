@@ -94,7 +94,11 @@ def write(*args, **kwargs):
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+def init(patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -109,6 +113,16 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -173,9 +187,8 @@ def test_save():
                     mock_read.return_value = maps.NamedDict(value=hash_obj)
                     obj.save(True)
             with patch.object(Client, "write", return_value=True):
-                with patch.object(objects.BaseObject, "_hash", hash):
-                    with patch.object(Client, "read",
-                                      return_value=maps.NamedDict(value="")):
+                with patch.object(Client, "read",
+                                  return_value=maps.NamedDict(value="")):
                         obj.save(True)
             with patch.object(Client, "write", return_value=True):
                 with patch.object(objects.BaseObject, "_hash",
@@ -203,14 +216,13 @@ def test_save():
                                   return_value=maps.NamedDict(value="")):
                     with patch.object(objects.BaseObject, "_hash",
                                       return_value="hash"):
-                        with patch.object(json, "dumps", dumps):
-                            with pytest.raises(etcd.EtcdConnectionFailed):
-                                obj._defs = maps.NamedDict(
-                                    attrs=maps.NamedDict(
-                                        hash=maps.NamedDict(type="json")))
-                                obj.__name__ = "Test"
-                                NS.publisher_id = "node_context"
-                                obj.save(False)
+                        with pytest.raises(etcd.EtcdConnectionFailed):
+                            obj._defs = maps.NamedDict(
+                                attrs=maps.NamedDict(
+                                    hash=maps.NamedDict(type="json")))
+                            obj.__name__ = "Test"
+                            NS.publisher_id = "node_context"
+                            obj.save(False)
 
             with patch.object(Client, "write", return_value=True):
                 with patch.object(Client, "read") as mock_read:
@@ -268,9 +280,10 @@ def test_load():
                             hash=maps.NamedDict(type='')))
                         with pytest.raises(etcd.EtcdConnectionFailed):
                             obj.load()
-                with patch.object(Client, "read",
+                with patch.object(etcd_utils, "read",
                                   return_value=maps.NamedDict(
-                                      value="test_value")):
+                                      {'value': '{"test_key": "test_value"}'})
+                                  ):
                     with patch.object(objects.BaseObject, 'render',
                                       return_value=[{'value':
                                                      "9fb712695c0f42dbf2ed"
@@ -283,7 +296,8 @@ def test_load():
                         obj.load()
                 with patch.object(Client, "read",
                                   return_value=maps.NamedDict(
-                                      value="test_value")):
+                                      {'value': '{"test_key": "test_value"}'})
+                                  ):
                     with patch.object(objects.BaseObject, 'render',
                                       return_value=[{'value':
                                                      "9fb712695c0f42dbf2ed"
@@ -312,7 +326,11 @@ def test_load():
                 'value': '9', 'dir': True, 'name': 'hash', 'key': '/1/hash'}]):
             with patch.object(Client, "read", return_value=maps.NamedDict(
                     value="Test")):
-                obj.load()
+                with patch.object(Client, "read",
+                                  return_value=maps.NamedDict(
+                                      {'value': '{"test_key": "test_value"}'})
+                                  ):
+                    obj.load()
     with patch.object(objects.BaseObject, 'load_definition',
                       return_value=maps.NamedDict()):
         obj = BaseObject_Child()
@@ -321,10 +339,16 @@ def test_load():
             with patch.object(Client, "read",
                               return_value=maps.NamedDict(value="Test")):
                 with patch.object(__builtin__, "hasattr", return_value=True):
-                    obj.test = "test_variable"
-                    obj.load()
-                    obj.test = {"test": "test_var"}
-                    obj.load()
+                    with patch.object(Client, "read",
+                                      return_value=maps.NamedDict(
+                                          {'value':
+                                               '{"test_key": "test_value"}'
+                                           })
+                                      ):
+                        obj.test = "test_variable"
+                        obj.load()
+                        obj.test = {"test": "test_var"}
+                        obj.load()
 
 
 def test_exists():
