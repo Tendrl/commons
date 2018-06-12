@@ -225,7 +225,6 @@ def test_run():
                         with patch.object(NS.tendrl.objects.Job,
                                           'load',
                                           return_job):
-                        # import pdb; pdb.set_trace();
                             unmanage_cluster.run()
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
