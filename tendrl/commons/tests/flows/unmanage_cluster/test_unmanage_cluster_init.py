@@ -5,15 +5,16 @@ import mock
 from mock import patch
 import pytest
 
+from tendrl.commons import objects
+from tendrl.commons import TendrlNS
+
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.unmanage_cluster import UnmanageCluster
-from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.cluster.atoms.is_cluster_managed \
     import IsClusterManaged
 import tendrl.commons.objects.node_context as node
 from tendrl.commons.utils import etcd_utils
-from tendrl.commons import TendrlNS
 
 
 def get_obj_definition(*args, **kwargs):

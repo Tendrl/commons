@@ -4,9 +4,9 @@ import importlib
 import maps
 from mock import patch
 
-from tendrl.commons.objects.cluster import Cluster
 from tendrl.commons.objects.cluster.atoms.delete_cluster_details \
     import DeleteClusterDetails
+from tendrl.commons.objects.cluster import Cluster
 
 
 def nodes():

@@ -1,7 +1,6 @@
 import __builtin__
 import etcd
 from etcd import Client
-import json
 import maps
 import mock
 from mock import patch
@@ -341,8 +340,9 @@ def test_load():
                 with patch.object(__builtin__, "hasattr", return_value=True):
                     with patch.object(Client, "read",
                                       return_value=maps.NamedDict(
-                                          {'value':
-                                               '{"test_key": "test_value"}'
+                                          {'value': '{'
+                                                    '"test_key": "test_value"'
+                                                    '}'
                                            })
                                       ):
                         obj.test = "test_variable"

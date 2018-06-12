@@ -41,8 +41,16 @@ def init(patch_node_load,
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
-    patch_etcd_utils_read.return_value=maps.NamedDict(
-        value='{"status": "UP", "pkey": "tendrl-node-1", "node_id": "15", "ipv4_addr": "172.28.128.37", "tags": "[\\"my_tag\\"]", "sync_status": "done", "locked_by": "fd", "fqdn": "tendrl-node-1", "last_sync": "date"}')
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     patch_node_load.return_value = node.NodeContext
     tendrlNS = TendrlNS()
     return tendrlNS

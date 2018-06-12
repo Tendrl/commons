@@ -141,7 +141,8 @@ def init():
     NS.config["data"] = maps.NamedDict()
     obj = importlib.import_module("tendrl.commons.tests.fixtures.nodecontext")
     NS.node_context = obj.NodeContext()
-    obj = importlib.import_module("tendrl.commons.tests.fixtures.tendrlcontext")
+    obj = importlib.import_module("tendrl.commons.tests.fixtures.tendrlcontext"
+                                  )
     NS.tendrl_context = obj.TendrlContext()
     NS.publisher_id = "node_context"
 

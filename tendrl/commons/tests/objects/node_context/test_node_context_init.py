@@ -98,7 +98,8 @@ def test_get_node_id(patch_etcd_utils_read,
 def test_render(patch_etcd_utils_read,
                 patch_get_node_id,
                 patch_write,
-                patch_read,patch_client):
+                patch_read,
+                patch_client):
     setattr(__builtin__, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1

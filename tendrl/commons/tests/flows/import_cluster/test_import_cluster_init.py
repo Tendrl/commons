@@ -5,14 +5,15 @@ import mock
 from mock import patch
 import pytest
 
+import tendrl.commons.objects.node_context as node
+
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster import ImportCluster
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
-import tendrl.commons.objects.node_context as node
-from tendrl.commons.utils import etcd_utils
 from tendrl.commons import TendrlNS
+from tendrl.commons.utils import etcd_utils
 
 
 def get_obj_definition(*args, **kwargs):
