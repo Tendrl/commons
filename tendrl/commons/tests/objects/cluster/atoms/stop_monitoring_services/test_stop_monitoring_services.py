@@ -30,7 +30,7 @@ def nodes():
     return obj
 
 
-def hash():
+def return_hash():
     obj = EtcdResult(
         **{
             u'action': u'GET',
@@ -79,7 +79,7 @@ def read(*args, **kwargs):
         if args[0] == "/clusters/test_uuid/nodes":
             return nodes()
         elif args[0] == "/clusters/test_uuid/hash":
-            return hash()
+            return return_hash()
         elif args[0] == "clusters/test_uuid/data":
             return data()
     else:
