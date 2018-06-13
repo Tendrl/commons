@@ -11,6 +11,7 @@ from tendrl.commons.flows.expand_cluster import ExpandCluster
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.tests.fixtures.client import Client
+from tendrl.commons.utils import etcd_utils
 
 
 def read_failed(*args):
@@ -36,7 +37,13 @@ def get_parsed_defs():
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+@patch.object(node.NodeContext, 'load')
+def init(patch_node_load,
+         patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -54,6 +61,17 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.publisher_id = "node_context"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_node_load.return_value = node.NodeContext
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -72,7 +90,8 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.flows.utils.acquire_node_lock',
             mock.Mock(return_value=None))
-def test_expand_cluster():
+@patch.object(etcd_utils, 'read')
+def test_expand_cluster(patch_etcd_utils_read):
     expand_cluster = ExpandCluster()
     param = maps.NamedDict()
     param['TendrlContext.integration_id'] = None
@@ -92,11 +111,22 @@ def test_expand_cluster():
     param["flow_id"] = "test_flow_id"
     param['Node[]'] = ['test_node']
     param["job_id"] = "test_id"
+    param['TendrlContext.integration_id'] = None
     NS._int.client = importlib.import_module(
         "tendrl.commons.tests.fixtures.client").Client()
     NS.gluster_provisioner = importlib.import_module(
         "tendrl.commons.tests.fixtures.plugin").Plugin()
     NS.tendrl_context = maps.NamedDict(integration_id="")
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     with patch.object(Client, "read", read_failed):
         with pytest.raises(FlowExecutionFailedError):
             expand_cluster.run()

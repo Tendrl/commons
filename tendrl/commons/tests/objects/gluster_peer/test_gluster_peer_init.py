@@ -56,6 +56,13 @@ def test_gluster_peer():
          'key': '/clusters/77deef29-b8e5-4dc5-8247-21e2a40'
                 '9a66a/nodes/1/Peers/53dfa0fa-edb2-4966-80b9-86ca9'
                 '81c7fcb/hostname'
+         },
+        {'dir': False,
+         'name': 'hash',
+         'value': '60273f6314c5cd257ba27415bceee68d',
+         'key': '/clusters/77deef29-b8e5-4dc5-8247-21e2a409a66a'
+                '/nodes/1/Peers/53dfa0fa-edb2-4966-80b9-86ca'
+                '981c7fcb/hash'
          }
     ]
     for result in obj.render():

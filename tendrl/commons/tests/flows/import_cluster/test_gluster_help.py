@@ -11,7 +11,9 @@ import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import ansible_module_runner
 from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils.service_status import ServiceStatus
+
 
 '''Dummy Functions'''
 
@@ -35,7 +37,11 @@ def open(*args, **kwargs):
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+def init(patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -52,12 +58,23 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
+    NS.node_context['fqdn'] = "test_fqdn"
     NS.config.data['package_source_type'] = 'test pip'
     NS.config.data['tags'] = "test"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
     NS.config.data['sync_interval'] = 30
     NS.compiled_definitions = mock.MagicMock()
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -70,6 +87,7 @@ def init(patch_get_node_id, patch_read, patch_client):
             mock.Mock(return_value=None))
 def test_import_gluster():
     tendrlNS = init()
+    # import pdb; pdb.set_trace();
     NS.compiled_definitions = tendrlNS.current_ns.definitions
     parameters = maps.NamedDict(job_id=1, flow_id=1)
     ret_val, err = gluster_help.import_gluster(parameters)

@@ -10,6 +10,7 @@ import tendrl.commons.objects.node_context as node
 from tendrl.commons.objects.service import Service
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -40,7 +41,11 @@ def mock_log(*args, **kwargs):
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+def init(patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -59,6 +64,16 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.publisher_id = "node_context"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     tendrlNS = TendrlNS()
     return tendrlNS
 

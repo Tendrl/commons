@@ -13,6 +13,7 @@ from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
+from tendrl.commons.utils import etcd_utils
 
 
 ''' Global Variables'''
@@ -117,7 +118,13 @@ def get_flow_definition(*args, **kwargs):
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+@patch.object(node.NodeContext, 'load')
+def init(patch_node_load,
+         patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -133,6 +140,17 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.config["data"] = maps.NamedDict()
     NS.config.data['tags'] = "test"
     NS.publisher_id = "node_context"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_node_load.return_value = node.NodeContext
     tendrlNS = TendrlNS()
     return tendrlNS
 
