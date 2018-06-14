@@ -25,7 +25,7 @@ def to_tendrl_field(name, value, tendrl_type=None):
 
 
 def wreconnect():
-    sys.stderr.write("Error connecting to central store (etcd), trying "
+    sys.stderr.write("\nError connecting to central store (etcd), trying "
                      "again...")
     time.sleep(2)
     NS._int.wclient = None
@@ -39,7 +39,7 @@ def wreconnect():
 
 
 def reconnect():
-    sys.stderr.write("Error connecting to central store (etcd), trying "
+    sys.stderr.write("\nError connecting to central store (etcd), trying "
                      "again...")
     time.sleep(2)
     NS._int.client = None
@@ -60,7 +60,7 @@ def read(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             reconnect()
-
+    sys.stderr.write("\n")
     thread.interrupt_main()
 
 
@@ -72,7 +72,7 @@ def write(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             wreconnect()
-
+    sys.stderr.write("\n")
     thread.interrupt_main()
 
 
@@ -84,7 +84,7 @@ def delete(*args, **kws):
         except etcd.EtcdConnectionFailed:
             _tries += 1
             wreconnect()
-
+    sys.stderr.write("\n")
     thread.interrupt_main()
 
 
