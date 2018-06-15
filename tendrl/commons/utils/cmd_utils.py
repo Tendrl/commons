@@ -71,7 +71,7 @@ class Command(object):
                     )
                 )
             except KeyError:
-                sys.stderr.write("could not run the command %s. Error: %s" %
+                sys.stderr.write("could not run the command %s. Error: %s\n" %
                                  (self.attributes["_raw_params"], str(e))
                                  )
             return "", str(e.message), -1

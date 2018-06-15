@@ -138,7 +138,7 @@ class ExceptionMessage(Message):
                     priority=priority, publisher=publisher, payload=payload,
                     caller=caller)
             else:
-                err = "Exception field is not found in payload"
+                err = "Exception field is not found in payload\n"
                 sys.stderr.write(err)
         else:
             err = "Given exception is not a subclass of " \

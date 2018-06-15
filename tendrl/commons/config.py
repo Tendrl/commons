@@ -11,7 +11,7 @@ class ConfigNotFound(Exception):
 def load_config(module, yaml_cfg_file_path):
     if not os.path.exists(yaml_cfg_file_path):
         err = ConfigNotFound(
-            "Configuration for module: %s not found at %s" %
+            "Configuration for module: %s not found at %s\n" %
             (module, yaml_cfg_file_path)
         )
         sys.stderr.write(str(err))
