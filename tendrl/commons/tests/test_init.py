@@ -13,6 +13,7 @@ import yaml
 
 
 from tendrl.commons import objects
+from tendrl.commons.objects import BaseObject
 import tendrl.commons.objects.node_context as node
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import etcd_utils
@@ -22,9 +23,7 @@ from tendrl.commons.utils import etcd_utils
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
 @patch.object(etcd_utils, 'read')
-@patch.object(node.NodeContext, 'load')
-def init(patch_node_load,
-         patch_etcd_utils_read,
+def init(patch_etcd_utils_read,
          patch_get_node_id,
          patch_read,
          patch_client):
@@ -49,9 +48,15 @@ def init(patch_node_load,
               '"tags": "[\\"my_tag\\"]",'
               '"sync_status": "done",'
               '"locked_by": "fd",'
-              '"fqdn": "tendrl-node-test",'
+              '"fqdn": "",'
               '"last_sync": "date"}')
-    patch_node_load.return_value = node.NodeContext
+    with patch.object(etcd_utils, "read") as utils_read:
+        utils_read.return_value = maps.NamedDict(
+            value='{"tags":[]}'
+        )
+        with patch.object(BaseObject, "load") as node_load:
+            node.load = MagicMock()
+            node_load.return_value = node
     tendrlNS = TendrlNS()
     return tendrlNS
 
