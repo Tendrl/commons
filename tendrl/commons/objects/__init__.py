@@ -83,11 +83,13 @@ class BaseObject(object):
 
     @thread_safe
     def save(self, update=True, ttl=None):
+        hash_key_changed = True
         if "Message" not in self.__class__.__name__:
             # If local object.hash is equal to
             # central_store object.hash, return
             if self.hash_compare_with_central_store(ttl=ttl):
-                return
+                # No change in hashkey
+                hash_key_changed = False
         rendered_obj = self.render()
         watchables = self._defs.get("watch_attrs", [])
         if self.__class__.__name__ in ['Config', 'Definition'] or \
@@ -111,17 +113,17 @@ class BaseObject(object):
                                 {"message": _msg}
                             )
                     etcd_utils.write(item['key'], item['value'], quorum=True)
+        if hash_key_changed:
+            data_key = self.value + '/data'
+            etcd_utils.write(data_key, self.json)
+            updated_at_key = self.value + '/updated_at'
+            hash_key = self.value + '/hash'
+            etcd_utils.write(updated_at_key, str(time_utils.now()))
+            if hasattr(self, 'hash'):
+                etcd_utils.write(hash_key, self.hash)
 
-        data_key = self.value + '/data'
-        etcd_utils.write(data_key, self.json)
-        updated_at_key = self.value + '/updated_at'
-        hash_key = self.value + '/hash'
-        etcd_utils.write(updated_at_key, str(time_utils.now()))
-        if hasattr(self, 'hash'):
-            etcd_utils.write(hash_key, self.hash)
-
-        if ttl:
-            etcd_utils.refresh(self.value, ttl)
+            if ttl:
+                etcd_utils.refresh(self.value, ttl)
 
         self.watch_attrs()
 

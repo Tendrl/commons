@@ -12,6 +12,7 @@ from tendrl.commons.jobs import JobConsumerThread
 from tendrl.commons.objects.job import Job
 from tendrl.commons.tests.fixtures.client import Client
 from tendrl.commons.tests.fixtures.ns import NameSpace
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import time_utils
 
 test_job = JobConsumerThread()
@@ -30,7 +31,7 @@ def read_none(*args, **kwargs):
 
 def read(*args, **kwargs):
     test_job._complete._Event__flag = True
-    if args[1] == "/queue":
+    if args[0] == "/queue":
         raise etcd.EtcdKeyNotFound
 
 
@@ -140,6 +141,9 @@ def init():
     NS.config["data"] = maps.NamedDict()
     obj = importlib.import_module("tendrl.commons.tests.fixtures.nodecontext")
     NS.node_context = obj.NodeContext()
+    obj = importlib.import_module("tendrl.commons.tests.fixtures.tendrlcontext"
+                                  )
+    NS.tendrl_context = obj.TendrlContext()
     NS.publisher_id = "node_context"
 
 
@@ -163,9 +167,10 @@ def test_run():
     obj = importlib.import_module("tendrl.commons.tests.fixtures.ns")
     NS.commons = maps.NamedDict(ns=obj.NameSpace())
     with patch.object(Client, 'read', read_value):
-        global test_job
-        test_job.run()
-        test_job._complete._Event__flag = False
+        with patch.object(etcd_utils, 'read', read):
+            global test_job
+            test_job.run()
+            test_job._complete._Event__flag = False
     with patch.object(Job, "load", load):
         with patch.object(Client, 'read', read_none):
             global test_job
@@ -173,10 +178,11 @@ def test_run():
             test_job.run()
             test_job._complete._Event__flag = False
     with patch.object(Job, "load", load):
-        with patch.object(Client, 'read', read):
-            global test_job
-            test_job.run()
-            test_job._complete._Event__flag = False
+        with patch.object(Client, 'read', read_value):
+            with patch.object(etcd_utils, 'read', read):
+                global test_job
+                test_job.run()
+                test_job._complete._Event__flag = False
     with patch.object(Job, "load", load):
         with patch.object(Client, 'read', _read):
             global test_job

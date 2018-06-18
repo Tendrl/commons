@@ -5,14 +5,16 @@ import mock
 from mock import patch
 import pytest
 
+from tendrl.commons import objects
+from tendrl.commons import TendrlNS
+
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.unmanage_cluster import UnmanageCluster
-from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.cluster.atoms.is_cluster_managed \
     import IsClusterManaged
 import tendrl.commons.objects.node_context as node
-from tendrl.commons import TendrlNS
+from tendrl.commons.utils import etcd_utils
 
 
 def get_obj_definition(*args, **kwargs):
@@ -80,6 +82,63 @@ def return_pass(param):
     )
 
 
+def return_cluster(param):
+    return NS.tendrl.objects.Cluster(
+        integration_id='13ced2a7-cd12-4063-bf6c-a8226b0789a0',
+        status=None,
+        is_managed='yes',
+        locked_by={}
+    )
+
+
+def save_cluster(*args):
+    pass
+
+
+def return_job(param):
+    return maps.NamedDict({
+        "status": "in_progress",
+        "valid_until": "",
+        "errors": "",
+        "job_id": "parent_job",
+        "locked_by": {
+            "node_id": "test_node_1",
+            "type": "node",
+            "fqdn": "",
+            "tags": ["tendrl/integration/monitoring",
+                     "tendrl/node_28c93b1d-361c-4b32-acc0-f405d2a05eca",
+                     "tendrl/central-store", "tendrl/server", "tendrl/monitor",
+                     "tendrl/node"]
+        },
+        "children": ["job_1",
+                     "job_2",
+                     "job_3",
+                     "job_4",
+                     "job_5"],
+        "timeout": "yes",
+        "output": {},
+        "payload": {
+            "status": "in_progress",
+            "username": "admin",
+            "run": "tendrl.flows.UnmanageCluster",
+            "name": "UnmanageCluster",
+            "parameters": {
+                "TendrlContext.integration_id":
+                    "94ac63ba-de73-4e7f-8dfa-9010d9554084",
+                "cluster_id": "94ac63ba-de73-4e7f-8dfa-9010d9554084"
+            },
+            "tags": ["tendrl/monitor"],
+            "created_at": "2018-06-11T07:21:52Z",
+            "created_from": "API",
+            "type": "node"
+        }
+    })
+
+
+def save_job(*args):
+    pass
+
+
 def read(key):
     if key == 'indexes/tags/tendrl/integration/None':
         raise etcd.EtcdKeyNotFound
@@ -96,7 +155,11 @@ def save(*args):
 @patch.object(etcd, "Client")
 @patch.object(etcd.Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
-def init(patch_get_node_id, patch_read, patch_client):
+@patch.object(etcd_utils, 'read')
+def init(patch_etcd_utils_read,
+         patch_get_node_id,
+         patch_read,
+         patch_client):
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -116,6 +179,16 @@ def init(patch_get_node_id, patch_read, patch_client):
     NS.publisher_id = "node_context"
     NS.config.data['etcd_port'] = 8085
     NS.config.data['etcd_connection'] = "Test Connection"
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
     tendrlNS = TendrlNS()
     return tendrlNS
 
@@ -144,10 +217,16 @@ def test_run():
         'tendrl.objects.Cluster.atoms.IsClusterManaged'
     ]
     with patch.object(NS._int.client, 'read', read):
-        with patch.object(objects.BaseObject, 'save', save):
-            with patch.object(IsClusterManaged, 'run', return_value=True):
-                with patch.object(objects.BaseObject, 'load', return_pass):
-                    unmanage_cluster.run()
+        with patch.object(NS.tendrl.objects.Cluster, 'save', save_cluster):
+            with patch.object(NS.tendrl.objects.Job, 'save', save_job):
+                with patch.object(IsClusterManaged, 'run', return_value=True):
+                    with patch.object(NS.tendrl.objects.Cluster,
+                                      'load',
+                                      return_cluster):
+                        with patch.object(NS.tendrl.objects.Job,
+                                          'load',
+                                          return_job):
+                            unmanage_cluster.run()
     with patch.object(NS._int.client, 'read', read):
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(IsClusterManaged, 'run', return_value=False):

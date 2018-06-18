@@ -56,5 +56,6 @@ def emit_event(resource, curr_value, msg, instance,
     logger.log(
         "notice",
         "alerting",
-        payload
+        payload,
+        integration_id=integration_id
     )
