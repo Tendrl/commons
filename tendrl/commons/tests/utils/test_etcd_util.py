@@ -81,3 +81,23 @@ def test_refresh():
                       raise_etcdkeynotfound) as mock_refresh:
         with pytest.raises(etcd.EtcdKeyNotFound):
             etcd_utils.refresh("test_value", 1)
+
+
+def test_delete():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.wclient = importlib.import_module("tendrl.commons"
+                                              ".tests.fixtures."
+                                              "client").Client()
+    NS._int.wreconnect = type("Dummy", (object,), {})
+    with patch.object(Client, "delete") as mock_delete:
+        etcd_utils.delete("key")
+        assert mock_delete.assert_called
+    with patch.object(Client, "delete",
+                      raise_etcdconnectionfailed) as mock_delete:
+        with pytest.raises(etcd.EtcdConnectionFailed):
+            etcd_utils.delete("key")
+    with patch.object(Client, "delete",
+                      raise_etcdkeynotfound) as mock_delete:
+        with pytest.raises(etcd.EtcdKeyNotFound):
+            etcd_utils.delete("key")
