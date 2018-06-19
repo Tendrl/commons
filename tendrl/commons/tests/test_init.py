@@ -14,10 +14,12 @@ import yaml
 
 from tendrl.commons import objects
 import tendrl.commons.objects.node_context as node
+import tendrl.commons.objects.tendrl_context as tendrl_context
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import etcd_utils
 
 
+@patch.object(tendrl_context.TendrlContext, "load")
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
@@ -27,7 +29,9 @@ def init(patch_node_load,
          patch_etcd_utils_read,
          patch_get_node_id,
          patch_read,
-         patch_client):
+         patch_client,
+         tc):
+    tc.return_value = tendrl_context.TendrlContext
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -461,6 +465,7 @@ def test_setup_common_objects(monkeypatch):
         tendrlNS.current_ns.objects["Config"] = obj_cls[1]
     with patch.object(etcd, "Client", return_value=etcd.Client()) as client:
         tendrlNS.current_ns.objects.pop("NodeContext")
+        NS.tendrl.objects.TendrlContext.load = MagicMock()
         tendrlNS.setup_common_objects()
         assert NS._int.client is not None
         assert NS._int.wclient is not None
