@@ -1,4 +1,5 @@
 [
+  "tendrl/commons/tests/test_config.py::test_config", 
   "tendrl/commons/tests/test_init.py::test_constructor", 
   "tendrl/commons/tests/test_init.py::test_list_modules_in_package_path", 
   "tendrl/commons/tests/test_init.py::test_register_subclasses_to_ns", 
