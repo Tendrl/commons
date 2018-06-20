@@ -91,12 +91,12 @@ def test_constructor():
         assert mock_notification.called
 
 
-
 def test_push_event():
     message = init()
     log = Logger(message)
     message["priority"] = "error"
     log.push_event()
+
 
 def test_push_notification():
     message = init()
