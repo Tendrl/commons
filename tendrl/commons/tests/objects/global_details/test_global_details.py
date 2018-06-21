@@ -1,9 +1,9 @@
 import __builtin__
 import maps
-import mock
 from mock import patch
+
 from tendrl.commons.utils import etcd_utils
-from tendrl.commons.objects.global_details import GlobalDetails 
+from tendrl.commons.objects.global_details import GlobalDetails
 from tendrl.commons.objects.cluster_tendrl_context import ClusterTendrlContext
 
 # test __init__

@@ -1,10 +1,6 @@
 import __builtin__
 import maps
-import mock
 from mock import patch
-
-import etcd
-from etcd import Client
 
 from tendrl.commons.objects.cluster_node_context import ClusterNodeContext
 from tendrl.commons.tests.fixtures.nodecontext import NodeContext
@@ -54,7 +50,7 @@ def test_render(monkeypatch):
 	assert cluster_node_context.render() is not None
 
 # Testing save
-@patch.object(Cluster, 'load')			# simulates 'load' method for 'Cluster' object 
+@patch.object(Cluster, 'load')			# simulates 'load' method for 'Cluster' object
 @patch.object(etcd_utils, 'read')		# simulates 'read' method from 'etcd_utils'
 @patch.object(etcd_utils, 'write')		# simulates 'write' method from 'etcd_utils'
 @patch.object(etcd_utils, 'refresh')	# simulates 'refresh' method from 'etcd_utils'

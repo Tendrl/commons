@@ -1,11 +1,7 @@
 import __builtin__
 import maps
-import mock
-from mock import patch
 import pytest
-
-import etcd
-from etcd import Client
+from mock import patch
 
 from tendrl.commons.flows.configure_monitoring import ConfigureMonitoring
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -52,7 +48,7 @@ def get_obj_definition(*args, **kwargs):
         'uuid': 'test_uuid'}
     return def_obj
 
-@patch.object(Cluster, 'load')		# simulates 'load' method for 'Cluster' object 
+@patch.object(Cluster, 'load')		# simulates 'load' method for 'Cluster' object
 @patch.object(etcd_utils, 'read')	# simulates 'read' method from 'etcd_utils'
 def test_run_fail(patch_cluster_load, patch_etcd_utils_read):
 	setattr(__builtin__, "NS", maps.NamedDict())

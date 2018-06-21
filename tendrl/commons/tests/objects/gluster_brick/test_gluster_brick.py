@@ -1,6 +1,5 @@
 import __builtin__
 import maps
-import mock
 from mock import patch
 
 from tendrl.commons.utils import etcd_utils
@@ -40,7 +39,7 @@ def test_save(patch_etcd_utils_refresh, patch_etcd_utils_write, patch_etcd_utils
 	NS.node_context.node_id = 1
 
 	gluster_brick_obj = GlusterBrick(integration_id="test_integration_id", fqdn="test_fqdn")
-	
+
 	# with ttl
 	gluster_brick_obj.save(ttl="test")
 	# without ttl

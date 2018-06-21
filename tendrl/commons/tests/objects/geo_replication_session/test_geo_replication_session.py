@@ -23,7 +23,7 @@ def test_render():
 	# TODO: Find out why
 	NS.node_context = maps.NamedDict()
 	NS.node_context.node_id = 1
-	
+
 	vol_id = "test_vol_id"
 	geo_replication_sesh = GeoReplicationSession(vol_id)
 	geo_replication_sesh.render()
