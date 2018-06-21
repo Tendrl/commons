@@ -87,7 +87,7 @@ def test_get_node_id(patch_etcd_utils_read,
                 mock.mock_open(
                     read_data="8eccbee-1e88-4232-9877-61d0ea595930"
                               "").return_value]
-            NodeContext()
+            NodeContext()._get_node_id()
 
 
 @patch.object(etcd, "Client")
@@ -127,6 +127,76 @@ def test_render(patch_etcd_utils_read,
     with patch.object(etcd.Client, "read", return_value=etcd.Client()):
         node_context = NodeContext()
         node_context.render()
+
+
+@patch.object(etcd, "Client")
+@patch.object(etcd.Client, "read")
+@patch.object(etcd.Client, "write")
+@patch.object(NodeContext, '_get_node_id')
+@patch.object(etcd_utils, 'read')
+@patch.object(etcd_utils, 'write')  # simulate 'write' method from 'etcd_utils'
+@patch.object(etcd_utils, 'refresh')  # simulates refresh method
+def test_save(patch_etcd_utils_refresh,
+              patch_etcd_utils_write,
+              patch_etcd_utils_read,
+              patch_get_node_id,
+              patch_write,
+              patch_read,
+              patch_client):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
+    patch_get_node_id.return_value = 1
+    patch_client.return_value = etcd.Client()
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.etcd_kwargs = {
+        'port': 1,
+        'host': 2,
+        'allow_reconnect': True}
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict()
+    NS.config.data['tags'] = "test"
+    NS._int.watchers = dict()
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_write.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_refresh.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    with patch.object(etcd.Client, "read", return_value=etcd.Client()):
+        node_context = NodeContext()
+        node_context.render()
+        node_context.save()
+        node_context.save(ttl="test")
+    with patch.object(etcd_utils, "refresh",
+                      side_effect=etcd.EtcdKeyNotFound()):
+        node_context = NodeContext()
+        node_context.save(False, "2")
 
 
 @patch.object(etcd, "Client")
@@ -179,3 +249,215 @@ def test_create_node_id(patch_etcd_utils_read,
                 with patch.object(os, "makedirs", return_value=True):
                     node_context._create_node_id()
         f.close()
+
+
+"""
+@patch.object(etcd, "Client")
+@patch.object(etcd.Client, "read")
+@patch.object(etcd.Client, "write")
+@patch.object(NodeContext, '_get_node_id')
+@patch.object(etcd_utils, 'read')
+@patch.object(etcd_utils, 'write')  # simulate 'write' method from 'etcd_utils'
+@patch.object(etcd_utils, 'refresh')  # simulates refresh method
+def test_on_change(patch_etcd_utils_refresh,
+                   patch_etcd_utils_write,
+                   patch_etcd_utils_read,
+                   patch_get_node_id,
+                   patch_write,
+                   patch_read,
+                   patch_client):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
+    NS.node_context.tags = ["tendrl/monitor"]
+    patch_get_node_id.return_value = 1
+    patch_client.return_value = etcd.Client()
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.etcd_kwargs = {
+        'port': 1,
+        'host': 2,
+        'allow_reconnect': True}
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict()
+    NS.config.data['tags'] = "test"
+    NS._int.watchers = dict()
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_write.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_refresh.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    with patch.object(etcd.Client, "read", return_value=etcd.Client()):
+        node_context = NodeContext()
+        node_context.render()
+        node_context.save()
+        node_context.save(ttl="test")
+        node_context.on_change("status", 0, 1)
+        node_context.on_change("status", 0, None)"""
+
+
+@patch.object(etcd, "Client")
+@patch.object(etcd.Client, "read")
+@patch.object(etcd.Client, "write")
+@patch.object(NodeContext, '_get_node_id')
+@patch.object(etcd_utils, 'read')
+@patch.object(etcd_utils, 'write')  # simulate 'write' method from 'etcd_utils'
+@patch.object(etcd_utils, 'refresh')  # simulates refresh method
+def test_update_cluster_details1(patch_etcd_utils_refresh,
+                                 patch_etcd_utils_write,
+                                 patch_etcd_utils_read,
+                                 patch_get_node_id,
+                                 patch_write,
+                                 patch_read,
+                                 patch_client):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
+    NS.node_context.tags = ["tendrl/monitor"]
+    patch_get_node_id.return_value = 1
+    patch_client.return_value = etcd.Client()
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.etcd_kwargs = {
+        'port': 1,
+        'host': 2,
+        'allow_reconnect': True}
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict()
+    NS.config.data['tags'] = "test"
+    NS._int.watchers = dict()
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        leaves=[maps.NamedDict(key="test/job")],
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_write.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_refresh.return_value = maps.NamedDict(
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    with patch.object(etcd.Client, "read", return_value=etcd.Client()):
+        node_context = NodeContext()
+        node_context.render()
+        node_context.save()
+        node_context.save(ttl="test")
+        node_context.update_cluster_details(0)
+
+
+# Tried to cover past the if/return statement but so far am unable to
+# Figure out how to have that if fail
+"""
+@patch.object(etcd, "Client")
+@patch.object(etcd.Client, "read")
+@patch.object(etcd.Client, "write")
+@patch.object(NodeContext, '_get_node_id')
+@patch.object(etcd_utils, 'read')
+@patch.object(etcd_utils, 'write')  # simulate 'write' method from 'etcd_utils'
+@patch.object(etcd_utils, 'refresh')  # simulates refresh method
+def test_update_cluster_details2(patch_etcd_utils_refresh,
+                                 patch_etcd_utils_write,
+                                 patch_etcd_utils_read,
+                                 patch_get_node_id,
+                                 patch_write,
+                                 patch_read,
+                                 patch_client):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = 1
+    NS.node_context.tags = ["tendrl/monitor"]
+    patch_get_node_id.return_value = 1
+    patch_client.return_value = etcd.Client()
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.etcd_kwargs = {
+        'port': 1,
+        'host': 2,
+        'allow_reconnect': True}
+    NS._int.client = etcd.Client(**NS._int.etcd_kwargs)
+    NS["config"] = maps.NamedDict()
+    NS.config["data"] = maps.NamedDict()
+    NS.config.data['tags'] = "test"
+    NS._int.watchers = dict()
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        leaves=[maps.NamedDict(key="status")],
+        value='{"status": "down",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_write.return_value = maps.NamedDict(
+        value='{"status": "down",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    patch_etcd_utils_refresh.return_value = maps.NamedDict(
+        value='{"status": "down",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"last_sync": "date"}')
+    with patch.object(etcd.Client, "read", return_value=etcd.Client()):
+        node_context = NodeContext()
+        node_context.render()
+        node_context.save()
+        node_context.save(ttl="test")
+        node_context.update_cluster_details("test_integration_id")
+        """
