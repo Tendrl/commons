@@ -1,6 +1,6 @@
-import maps
 import etcd
-from tendrl.commons.objects.cluster.atoms.check_cluster_available import CheckClusterAvailable
+import maps
+from tendrl.commons.objects.cluster.atoms.check_cluster_available import CheckClusterAvailable  # noqa
 from tendrl.commons.objects.cluster import Cluster
 
 

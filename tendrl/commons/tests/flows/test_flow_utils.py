@@ -26,7 +26,7 @@ def test_install_gdeploy_exception():
 
 def test_intall_gdeploy_exception2():
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
-                      side_effect=ansible_module_runner.AnsibleExecutableGenerationFailed):
+                      side_effect=ansible_module_runner.AnsibleExecutableGenerationFailed):  # noqa
         with pytest.raises(FlowExecutionFailedError):
             utils.install_gdeploy()
 
@@ -79,7 +79,7 @@ def test_install_python_gdeploy_exception():
     NS.config.data['package_source_type'] = 'rpm'
     NS.publisher_id = "node_context"
     with patch.object(ansible_module_runner, 'AnsibleRunner',
-                      side_effect=ansible_module_runner.AnsibleModuleNotFound):
+                      side_effect = ansible_module_runner.AnsibleModuleNotFound):  # noqa
         with pytest.raises(ansible_module_runner.AnsibleModuleNotFound):
             utils.install_python_gdeploy()
 
@@ -133,7 +133,8 @@ def test_gluster_create_ssh_setup_jobs_fails2():
             "tendrl.commons.tests.fixtures.plugin").Plugin()
         with patch.object(NS.gluster_provisioner, 'setup',
                           return_value=["", ""]):
-            utils.gluster_create_ssh_setup_jobs(testParams, skip_current_node=True)
+            utils.gluster_create_ssh_setup_jobs(testParams,
+                                                skip_current_node=True)
 
 
 class MockNodeContext(object):
