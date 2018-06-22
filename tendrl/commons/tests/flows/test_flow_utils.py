@@ -39,8 +39,7 @@ def test_install_pyton_gdeploy_pip():
     NS.config["data"] = maps.NamedDict()
     NS.config.data['package_source_type'] = 'pip'
     NS.publisher_id = "node_context"
-    with pytest.raises(FlowExecutionFailedError):
-        utils.install_python_gdeploy()
+    utils.install_python_gdeploy()
 
 def test_install_pyton_gdeploy_rpm():
     setattr(__builtin__, "NS", maps.NamedDict())
@@ -131,13 +130,37 @@ def test_gluster_create_ssh_setup_jobs_fails2():
                           return_value=["",""]) as foo:
             utils.gluster_create_ssh_setup_jobs(testParams, skip_current_node=True)
 
+
+
+class MockNodeContext(object):
+    def __init__(self, node_id=None, status=None):
+        self.locked_by = None
+    def load(self):
+        self.status = 'UP'
+        return self
+    def save(self):
+        pass
+    def exists(self):
+        return True
+
+class MockJob(object):
+    def __init__(self, job_id=None):
+        self.locked_by = None
+    def load(self):
+        self.payload = {}
+        return self
+
+
 def test_acquire_node_lock():
     testParams = maps.NamedDict()
     testParams['Node[]'] = [0]
-    testParams["job_id"] = ""
+    testParams["job_id"] = "1"
     testParams["flow_id"] = "test_id"
     setattr(__builtin__, "NS", maps.NamedDict())
+
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
-
+    NS.tendrl.objects.NodeContext = MockNodeContext
+    NS.tendrl.objects.Job = MockJob
+    NS.publisher_id = 0
     utils.acquire_node_lock(testParams)
