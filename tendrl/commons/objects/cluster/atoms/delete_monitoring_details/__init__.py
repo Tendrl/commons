@@ -20,6 +20,16 @@ class DeleteMonitoringDetails(objects.BaseAtom):
             "parent": self.parameters['job_id'],
             "type": "monitoring"
         }
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {
+                "message": "Creating job for monitoring integration to delete"
+                           " monitoring data."
+            },
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id'],
+        )
         NS.tendrl.objects.Job(
             job_id=_job_id,
             status="new",

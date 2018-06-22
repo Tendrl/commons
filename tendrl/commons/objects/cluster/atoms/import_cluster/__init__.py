@@ -81,6 +81,13 @@ class ImportCluster(objects.BaseAtom):
             )
             out, err = cmd.communicate()
             if out in [None, ""] or err:
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Failed to detect underlying cluster version"},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
+                )
                 raise AtomExecutionFailedError(
                     "Failed to detect underlying cluster version"
                 )
@@ -153,6 +160,15 @@ class ImportCluster(objects.BaseAtom):
                 )
             ret_val, err = import_gluster(self.parameters)
             if not ret_val:
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Error importing the cluster (integration_id:"
+                                " %s). Error: %s" % (integration_id, err)
+                     },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
+                )
                 raise AtomExecutionFailedError(
                     "Error importing the cluster (integration_id: %s). "
                     "Error: %s" % (integration_id, err)
@@ -177,7 +193,7 @@ class ImportCluster(objects.BaseAtom):
                     ).load()
                     if loop_count >= wait_count:
                         logger.log(
-                            "info",
+                            "error",
                             NS.publisher_id,
                             {"message": "Import jobs on cluster(%s) not yet "
                              "complete on all nodes(%s). Timing out." %

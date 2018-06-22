@@ -3,6 +3,7 @@ import time
 
 from tendrl.commons import objects
 from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import log_utils as logger
 
 
 class CheckSyncDone(objects.BaseAtom):
@@ -17,6 +18,17 @@ class CheckSyncDone(objects.BaseAtom):
         loop_count = 0
         while True:
             if loop_count >= 72:
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Timing out import job, Cluster data still "
+                                "not fully updated (node: %s) "
+                                "(integration_id: %s)"
+                                % (integration_id,NS.node_context.node_id)
+                     },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
+                )
                 raise AtomExecutionFailedError(
                     "Timing out import job, Cluster data still not "
                     "fully updated (node: %s) "
