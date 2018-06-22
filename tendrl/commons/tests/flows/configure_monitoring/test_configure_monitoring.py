@@ -1,12 +1,13 @@
 import __builtin__
 import maps
-import pytest
 from mock import patch
+import pytest
 
 from tendrl.commons.flows.configure_monitoring import ConfigureMonitoring
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
-from tendrl.commons.utils import etcd_utils
 from tendrl.commons.objects.cluster import Cluster
+from tendrl.commons.utils import etcd_utils
+
 
 # basic flow attributes from test_flows_init.py
 def get_obj_definition(*args, **kwargs):
@@ -48,44 +49,51 @@ def get_obj_definition(*args, **kwargs):
         'uuid': 'test_uuid'}
     return def_obj
 
-@patch.object(Cluster, 'load')		# simulates 'load' method for 'Cluster' object
-@patch.object(etcd_utils, 'read')	# simulates 'read' method from 'etcd_utils'
+
+# simulates 'load' method for 'Cluster' object
+@patch.object(Cluster, 'load')
+# simulates 'read' method from 'etcd_utils'
+@patch.object(etcd_utils, 'read')
 def test_run_fail(patch_cluster_load, patch_etcd_utils_read):
-	setattr(__builtin__, "NS", maps.NamedDict())
-	setattr(NS, "_int", maps.NamedDict())
-	NS.publisher_id = "node_context"
-	NS.tendrl = maps.NamedDict()
-	NS.tendrl_context = maps.NamedDict()
-	NS.tendrl_context.integration_id = "test_integration_id"
-	NS.tendrl.objects = maps.NamedDict()
-	NS.tendrl.objects.Cluster = Cluster
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    NS.publisher_id = "node_context"
+    NS.tendrl = maps.NamedDict()
+    NS.tendrl_context = maps.NamedDict()
+    NS.tendrl_context.integration_id = "test_integration_id"
+    NS.tendrl.objects = maps.NamedDict()
+    NS.tendrl.objects.Cluster = Cluster
 
-	configure_obj = ConfigureMonitoring()
+    configure_obj = ConfigureMonitoring()
 
-	# should fail: unmanaged cluster
-	with pytest.raises(FlowExecutionFailedError):
-		configure_obj.run()
+    # should fail: unmanaged cluster
+    with pytest.raises(FlowExecutionFailedError):
+        configure_obj.run()
 
-@patch.object(Cluster, 'load')		# simulates 'load' method for 'Cluster' object 
-@patch.object(etcd_utils, 'read')	# simulates 'read' method from 'etcd_utils'
+
+# simulates 'load' method for 'Cluster' object
+@patch.object(Cluster, 'load')
+# simulates 'read' method from 'etcd_utils'
+@patch.object(etcd_utils, 'read')
 def test_run_success(patch_cluster_load, patch_etcd_utils_read):
-	setattr(__builtin__, "NS", maps.NamedDict())
-	setattr(NS, "_int", maps.NamedDict())
-	NS.publisher_id = "node_context"
-	NS.tendrl = maps.NamedDict()
-	NS.tendrl_context = maps.NamedDict()
-	NS.tendrl_context.integration_id = "test_integration_id"
-	NS.tendrl.objects = maps.NamedDict()
-	NS.tendrl.objects.Cluster = Cluster
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    NS.publisher_id = "node_context"
+    NS.tendrl = maps.NamedDict()
+    NS.tendrl_context = maps.NamedDict()
+    NS.tendrl_context.integration_id = "test_integration_id"
+    NS.tendrl.objects = maps.NamedDict()
+    NS.tendrl.objects.Cluster = Cluster
 
-	# simulates 'read' op to force 'is_managed' branch
-	patch_etcd_utils_read.return_value = maps.NamedDict(
-		integration_id = "test_integration_id",
-		is_managed = "yes"
-	)
+    # simulates 'read' op to force 'is_managed' branch
+    patch_etcd_utils_read.return_value = maps.NamedDict(
+        integration_id="test_integration_id",
+        is_managed="yes"
+    )
 
-	configure_obj = ConfigureMonitoring()
-	configure_obj._defs = get_obj_definition()	# object cannot do final initialization without this
+    configure_obj = ConfigureMonitoring()
+    # object cannot do final initialization without this
+    configure_obj._defs = get_obj_definition()
 
-	# should succeed: cluster is managed
-	configure_obj.run()
+    # should succeed: cluster is managed
+    configure_obj.run()
