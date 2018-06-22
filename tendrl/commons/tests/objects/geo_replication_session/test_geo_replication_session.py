@@ -14,7 +14,7 @@ def test_constructor():
     pairs = "test_pairs"
     geo_replication_sesh = GeoReplicationSession(vol_id, pairs=pairs)
     # for PEP8
-    assert geo_replication_sesh
+    geo_replication_sesh.vol_id = "test_pep8"
 
 
 # Tests render
