@@ -31,7 +31,7 @@ class CheckClusterAvailable(objects.BaseAtom):
 
             retry_count += 1
             time.sleep(1)
-            if retry_count == 600:
+            if retry_count == 6:  # 600
                 logger.log(
                     "error",
                     NS.publisher_id,
