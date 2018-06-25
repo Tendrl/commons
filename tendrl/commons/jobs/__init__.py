@@ -1,5 +1,4 @@
 import datetime
-import json
 import threading
 import time
 import traceback
@@ -50,24 +49,17 @@ class JobConsumerThread(threading.Thread):
 
             time.sleep(_job_sync_interval)
             try:
-                jobs = etcd_utils.read("/queue")
+                jobs = NS.tendrl.objects.Job().load_all()
             except etcd.EtcdKeyNotFound:
                 continue
 
-            for job in jobs.leaves:
+            for job in jobs:
                 # Check job not already locked by some agent
-                jid = job.key.split('/')[-1]
-                job_lock_key = "/queue/%s/locked_by" % jid
-                try:
-                    _locked_by = etcd_utils.read(job_lock_key).value
-                    if _locked_by:
-                        if json.loads(_locked_by):
-                            continue
-                except etcd.EtcdKeyNotFound:
-                    pass
+                if job.locked_by or job.job_id in [None, '']:
+                    continue
 
                 _job_thread = threading.Thread(
-                    target=process_job, args=(jid,)
+                    target=process_job, args=(job.job_id,)
                 )
                 _job_thread.daemon = True
                 _job_thread.start()
