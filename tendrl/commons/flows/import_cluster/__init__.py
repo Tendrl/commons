@@ -98,7 +98,7 @@ class ImportCluster(flows.BaseFlow):
             # even from expand cluster flow. We should not set the
             # cluster's current job status from child jobs
             _job = NS.tendrl.objects.Job(job_id=self.job_id).load()
-            if 'parent' not in _job.payload:
+            if 'parent' not in _job.payload and _job.status != "failed":
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
