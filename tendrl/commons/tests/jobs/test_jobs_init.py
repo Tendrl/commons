@@ -10,10 +10,13 @@ from pytz import utc
 
 from tendrl.commons.jobs import JobConsumerThread
 from tendrl.commons.objects.job import Job
+from tendrl.commons.jobs import process_job
 from tendrl.commons.tests.fixtures.client import Client
 from tendrl.commons.tests.fixtures.ns import NameSpace
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import time_utils
+
+
 
 test_job = JobConsumerThread()
 
@@ -257,3 +260,6 @@ def test_stop():
     test_job = JobConsumerThread()
     test_job.stop()
     assert test_job._complete._Event__flag
+
+def test_process_job():
+    process_job(1)
