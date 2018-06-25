@@ -20,7 +20,7 @@ class Job(objects.BaseObject):
         self.value = 'queue/{0}'
 
     def save(self, ttl=None):
-        if "parent" in self.payload:
+        if self.payload and "parent" in self.payload:
             # Load parent job
             _parent = Job(job_id=self.payload['parent']).load()
             _children = []
