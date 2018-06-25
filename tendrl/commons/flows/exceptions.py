@@ -1,8 +1,9 @@
-
-
 class FlowNotImplementedError(NotImplementedError):
-    pass
+    def __init___(self, err):
+        self.message = "run function not implemented. %s".format(err)
 
 
 class FlowExecutionFailedError(Exception):
-    pass
+    def __init___(self, err):
+        self.message = "Flow Execution failed. Error:" + \
+                       " %s".format(err)
