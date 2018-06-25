@@ -20,7 +20,6 @@ from tendrl.commons import TendrlNS
 from tendrl.commons.utils import etcd_utils
 
 
-# init that does have the built in attribute
 @patch.object(tendrl_context.TendrlContext, "load")
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
