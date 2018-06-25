@@ -314,7 +314,7 @@ class TendrlNS(object):
                        {"message": "Setup TendrlContext for namespace."
                                    "%s" % self.ns_name})
             self.current_ns.tendrl_context = \
-                self.current_ns.objects.TendrlContext()
+                self.current_ns.objects.TendrlContext().load()
             NS.tendrl_context = self.current_ns.tendrl_context
 
     def _create_ns(self):
