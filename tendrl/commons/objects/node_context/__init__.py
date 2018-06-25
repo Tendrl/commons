@@ -105,7 +105,12 @@ class NodeContext(objects.BaseObject):
             _tc = NS.tendrl.objects.TendrlContext(
                 node_id=self.node_id
             ).load()
-            if current_value is None:
+            # Check node is managed
+            _cnc = NS.tendrl.objects.ClusterNodeContext(
+                node_id=self.node_id,
+                integration_id=_tc.integration_id
+            ).load()
+            if current_value is None and str(_cnc.is_managed).lower() == "yes":
                 self.status = "DOWN"
                 self.save()
                 msg = "Node {0} is DOWN".format(self.fqdn)
@@ -120,20 +125,14 @@ class NodeContext(objects.BaseObject):
                 )
                 # Load cluster_node_context will load node_context
                 # and it will be updated with latest values
-                _cnc_old = \
-                    NS.tendrl.objects.ClusterNodeContext(
-                        node_id=self.node_id,
-                        integration_id=_tc.integration_id
-                    ).load()
                 _cnc_new = \
                     NS.tendrl.objects.ClusterNodeContext(
                         node_id=self.node_id,
                         integration_id=_tc.integration_id,
-                        first_sync_done=_cnc_old.first_sync_done,
-                        is_managed=_cnc_old.is_managed
+                        first_sync_done=_cnc.first_sync_done,
+                        is_managed=_cnc.is_managed
                     )
                 _cnc_new.save()
-                del _cnc_old
                 del _cnc_new
                 # Update cluster details
                 self.update_cluster_details(_tc.integration_id)
@@ -183,7 +182,8 @@ class NodeContext(objects.BaseObject):
                             )
                         except (etcd.EtcdAlreadyExist, etcd.EtcdKeyNotFound):
                             pass
-            elif current_value == "UP":
+            elif current_value == "UP" and str(
+                    _cnc.is_managed).lower() == "yes":
                 msg = "{0} is UP".format(self.fqdn)
                 event_utils.emit_event(
                     "node_status",
@@ -194,6 +194,7 @@ class NodeContext(objects.BaseObject):
                     node_id=self.node_id,
                     integration_id=_tc.integration_id
                 )
+            del _cnc
 
     def update_cluster_details(self, integration_id):
         try:
@@ -201,12 +202,18 @@ class NodeContext(objects.BaseObject):
                 "/clusters/%s/nodes" % integration_id
             )
             for node in nodes.leaves:
-                status = etcd_utils.read(
-                    "%s/NodeContext/status" % node.key
-                ).value
+                _cnc = NS.tendrl.objects.ClusterNodeContext(
+                    node_id=node.key.split("/")[-1],
+                    integration_id=integration_id
+                ).load()
                 # Verify all nodes in a cluster are down
-                if status.lower() != "down":
+                if str(_cnc.status).lower() != "down" and \
+                        str(_cnc.is_managed).lower() == "yes":
+                    # Any one managed node not down don't update
+                    # cluster details, No need to consider unmanaged
+                    # nodes
                     return
+            # when all managed nodes are down update cluster details
             global_details = NS.tendrl.objects.GlobalDetails(
                 integration_id=integration_id
             ).load()

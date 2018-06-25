@@ -111,9 +111,8 @@ class AnsibleRunner(object):
             result = json.loads(out)
 
         except (subprocess.CalledProcessError, ValueError) as ex:
-            result = repr(ex)
-            err = result
+            result = {'stderr': repr(ex)}
+            err = repr(ex)
         finally:
             os.remove(_temp_file.name)
-
         return result, err

@@ -1,12 +1,10 @@
-import __builtin__
-import datetime
 import etcd
-import importlib
 import maps
-import mock
+from mock import MagicMock
 from mock import patch
-from pytz import utc
-
+import threading
+import time
+import mock
 
 from tendrl.commons.jobs import JobConsumerThread
 from tendrl.commons.objects.job import Job
@@ -20,138 +18,30 @@ from tendrl.commons.utils import time_utils
 
 test_job = JobConsumerThread()
 
+from tendrl.commons import jobs
+from tendrl.commons.objects import BaseObject
+from tendrl.commons.tests import test_init
+from tendrl.commons.utils import alert_utils
+from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import log_utils as logger
 
-def read_value(*args, **kwargs):
-    test_job._complete._Event__flag = True
-    return maps.NamedDict(
-        leaves=[maps.NamedDict(key="test/job")], value="Test Value")
-
-
-def read_none(*args, **kwargs):
-    test_job._complete._Event__flag = True
-    return maps.NamedDict(leaves=[maps.NamedDict(key="test/job")], value=False)
+JOB_SET = True
 
 
-def read(*args, **kwargs):
-    test_job._complete._Event__flag = True
-    if args[0] == "/queue":
+def is_set():
+    global JOB_SET
+    JOB_SET = not JOB_SET
+    return JOB_SET
+
+
+def read(param):
+    key = "/queue/%s/locked_by" % "808a4162-4b70-4ff0-b218-45dbe371e545"
+    if param == key:
         raise etcd.EtcdKeyNotFound
-
-
-status_flag = 0
-status_valid = 0
-
-
-def _read(*args, **kwargs):
-    test_job._complete._Event__flag = True
-    global status_flag
-    global status_valid
-    if args[1] == "/queue/job/status" and status_flag == 0:
-        status_flag = 1
-        return maps.NamedDict(
-            leaves=[maps.NamedDict(key="test/job")], value="finished")
-    elif args[1] == "/queue/job/status" and status_flag == 1:
-        status_flag = 2
-        return maps.NamedDict(
-            leaves=[maps.NamedDict(key="test/job")], value="unfinished")
-    elif args[1] == "/queue/job/status" and status_flag == 2:
-        raise etcd.EtcdKeyNotFound
-    elif args[1] == "/queue" or args[1] == "/queue/job/locked_by":
-        return maps.NamedDict(
-            leaves=[maps.NamedDict(key="test/job")], value=False)
-    elif args[1] == "/queue/job/valid_until" and status_valid == 0:
-        status_valid = 1
-        return maps.NamedDict(
-            leaves=[maps.NamedDict(key="test/job")], value=False)
-    elif args[1] == "/queue/job/valid_until" and status_valid == 1:
-        return maps.NamedDict(
-            leaves=[
-                maps.NamedDict(
-                    key="test/job")],
-            value=(
-                time_utils.now() -
-                datetime.datetime(
-                    1970,
-                    1,
-                    1).replace(
-                        tzinfo=utc)).total_seconds())
-
-
-def load(*args):
-    obj = importlib.import_module("tendrl.commons.tests.fixtures.client")
-    obj = obj.Client()
-    if args[0] == "tag":
-        obj.payload = maps.NamedDict(
-            type="Test_type",
-            tags=["Test_tag"],
-            run="tendrl.commons.objects.node.flows.test_flow",
-            parameters="Test_param")
-    elif args[0] == "node":
-        obj.payload = maps.NamedDict(
-            type="Test_type",
-            tags=["Test_tag"],
-            node_ids=["Test_node"],
-            run="tendrl.commons.objects.node.flows.test_flow",
-            parameters="Test_param")
-    elif args[0] == "no_obj_name":
-        obj.payload = maps.NamedDict(
-            type="Test_type",
-            tags=["Test_tag"],
-            run="tendrl.commons.flows.test_flow",
-            parameters="Test_param")
-    else:
-        obj.payload = maps.NamedDict(type="Test_type")
-    obj.status = "new"
-    obj.job_id = 1
-    return obj
-
-
-def write(*args, **kwargs):
-    raise etcd.EtcdCompareFailed
-
-
-def run(*args, **kwargs):
-    raise Exception
-
-
-def status_write(*args, **kwargs):
-    if args[1] == "/queue/1/status" and args[2] == "finished":
-        raise etcd.EtcdCompareFailed
-    else:
-        return True
-
-
-def failed_write(*args, **kwargs):
-    if args[0] == "no_err":
-        return True
-    if args[1] == "/queue/1/status" and args[2] == "failed":
-        raise etcd.EtcdCompareFailed
-    else:
-        return True
-
-
-def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
-    setattr(NS, "_int", maps.NamedDict())
-    NS._int.etcd_kwargs = {
-        'port': 1,
-        'host': 2,
-        'allow_reconnect': True}
-    obj = importlib.import_module("tendrl.commons.tests.fixtures.client")
-    NS._int.client = obj.Client()
-    NS._int.wclient = obj.Client()
-    NS["config"] = maps.NamedDict()
-    NS.config["data"] = maps.NamedDict()
-    obj = importlib.import_module("tendrl.commons.tests.fixtures.nodecontext")
-    NS.node_context = obj.NodeContext()
-    obj = importlib.import_module("tendrl.commons.tests.fixtures.tendrlcontext"
-                                  )
-    NS.tendrl_context = obj.TendrlContext()
-    NS.publisher_id = "node_context"
 
 
 def test_constructor():
-    test_job = JobConsumerThread()
+    test_job = jobs.JobConsumerThread()
     assert not test_job._complete._Event__flag
 
 
@@ -263,3 +153,96 @@ def test_stop():
 
 def test_process_job():
     process_job(1)
+
+@patch.object(threading, "Thread")
+@patch.object(time, "sleep")
+@patch.object(etcd_utils, "read", read)
+@patch.object(BaseObject, "load_all")
+def test_job_consumer_thread(load_all, sleep, thread):
+    test_init.init()
+    thread.return_value = MagicMock()
+    sleep.return_value = None
+    job = NS.tendrl.objects.Job(
+        job_id="808a4162-4b70-4ff0-b218-45dbe371e545",
+        status="new",
+        payload={"status": "new"}
+    )
+    load_all.return_value = [job]
+    NS.publisher_id = "testing"
+    obj = jobs.JobConsumerThread()
+    with patch.object(NS.node_context, "load") as nc_load:
+        NS.node_context.fqdn = "tendrl-node-1"
+        nc_load.return_value = NS.node_context
+        with patch.object(NS.tendrl_context, "load") as tc_load:
+            with patch.object(obj._complete, "is_set", is_set):
+                NS.tendrl_context.integration_id = \
+                    "b0b18359-3444-40b7-aa99-853f1b7308de"
+                tc_load.return_value = NS.tendrl_context
+                obj.run()
+
+
+@patch.object(logger, "log")
+def test_process_job_fail(log):
+    # no tag match
+    test_init.init()
+    NS.type = "node"
+    NS.publisher_id = "pytest"
+    NS.tendrl.objects.Job.load = MagicMock()
+    job = NS.tendrl.objects.Job(
+        job_id="808a4162-4b70-4ff0-b218-45dbe371e545",
+        payload={"status": "new", "type": "node"}
+    )
+    NS.tendrl.objects.Job.load.return_value = job
+    with patch.object(job, "save") as save:
+        save.return_value = None
+        with patch.object(NS.node_context, "load") as nc_load:
+            nc_load.return_value = NS.node_context
+            jobs.process_job("808a4162-4b70-4ff0-b218-45dbe371e545")
+            log.assert_called_with(
+                'debug',
+                'pytest',
+                {'message': u"Node (test_node_id)(type: node)"
+                 "(tags: [u'my_tag']) will not process "
+                 "job-808a4162-4b70-4ff0-b218-45dbe371e545 (tags: )"}
+            )
+
+
+@patch.object(alert_utils, "alert_job_status")
+@patch.object(jobs, "_extract_fqdn")
+@patch.object(etcd_utils, "write")
+@patch.object(logger, "log")
+def test_process_job_pass(log, write, extract_fqdn, alert_util):
+    test_init.init()
+    NS.get_obj_flow = MagicMock()
+    curr_ns = maps.NamedDict(ns=NS)
+    extract_fqdn.return_value = (curr_ns, "import", "cluster")
+    write.return_value = None
+    NS.type = "node"
+    NS.publisher_id = "pytest"
+    NS.tendrl.objects.Job.load = MagicMock()
+    job = NS.tendrl.objects.Job(
+        job_id="808a4162-4b70-4ff0-b218-45dbe371e545",
+        payload={"status": "new",
+                 "type": "node",
+                 "tags": ["testing"],
+                 "run": "testing",
+                 "parameters": {"flow_id": ""}}
+    )
+    job.locked_by = dict(node_id=NS.node_context.node_id,
+                         fqdn=NS.node_context.fqdn,
+                         tags=NS.node_context.tags,
+                         type=NS.type)
+    NS.node_context.tags = ["testing"]
+    NS.tendrl.objects.Job.load.return_value = job
+    with patch.object(job, "save") as save:
+        save.return_value = None
+        with patch.object(NS.node_context, "load") as nc_load:
+            nc_load.return_value = NS.node_context
+            jobs.process_job("808a4162-4b70-4ff0-b218-45dbe371e545")
+            alert_util.assert_called_with(
+                'finished',
+                'testing (job ID: 808a4162-4b70-4ff0-b218-45dbe371e545) '
+                'completed successfully ',
+                cluster_name=None,
+                integration_id=None
+            )
