@@ -1,4 +1,3 @@
-import etcd
 import time
 
 from tendrl.commons import objects
@@ -30,14 +29,11 @@ class CheckSyncDone(objects.BaseAtom):
                 )
                 return False
             time.sleep(5)
-            try:
-                _cnc = NS.tendrl.objects.ClusterNodeContext(
-                    node_id=NS.node_context.node_id
-                ).load()
-                if _cnc.first_sync_done is not None and \
+            _cnc = NS.tendrl.objects.ClusterNodeContext(
+                node_id=NS.node_context.node_id
+            ).load()
+            if _cnc.first_sync_done is not None and \
                     _cnc.first_sync_done.lower() == "yes":
-                    break
-            except etcd.EtcdKeyNotFound:
-                loop_count += 1
-                continue
+                break
+            loop_count += 1
         return True
