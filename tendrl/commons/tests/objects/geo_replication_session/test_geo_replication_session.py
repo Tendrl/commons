@@ -1,5 +1,6 @@
 import __builtin__
 import maps
+import uuid
 
 from tendrl.commons.objects.geo_replication_session \
     import GeoReplicationSession
@@ -23,11 +24,11 @@ def test_render():
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
 
-    # IMPORTANT: Without the following two lines, this tests somehow
+    # TODO($username) Without the following two lines, this tests somehow
     # causes an error in "test_gluster_peer_init.py"
     # Find out why
     NS.node_context = maps.NamedDict()
-    NS.node_context.node_id = 1
+    NS.node_context.node_id = str(uuid.uuid4())
 
     vol_id = "test_vol_id"
     geo_replication_sesh = GeoReplicationSession(vol_id)

@@ -1,6 +1,7 @@
 import __builtin__
 import maps
 from mock import patch
+import uuid
 
 from tendrl.commons.objects.cluster_tendrl_context import ClusterTendrlContext
 from tendrl.commons.objects.global_details import GlobalDetails
@@ -13,11 +14,11 @@ def test_render():
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
 
-    # IMPORTANT: Without the following two lines, this tests somehow
+    # TODO($username) Without the following two lines, this tests somehow
     # causes an error in "test_gluster_peer_init.py"
     # Find out why
     NS.node_context = maps.NamedDict()
-    NS.node_context.node_id = 1
+    NS.node_context.node_id = str(uuid.uuid4())
 
     gd_obj = GlobalDetails()
     gd_obj.render()
@@ -42,11 +43,11 @@ def test_save(patch_etcd_utils_delete,
     NS.tendrl_context.integration_id = "test_integration_id"
     NS._int.watchers = maps.NamedDict()
 
-    # IMPORTANT: Without the following two lines, this tests somehow
+    # TODO($username) Without the following two lines, this tests somehow
     # causes an error in "test_gluster_peer_init.py"
     # Find out why
     NS.node_context = maps.NamedDict()
-    NS.node_context.node_id = 1
+    NS.node_context.node_id = str(uuid.uuid4())
 
     gd_obj = GlobalDetails()
 
@@ -85,11 +86,11 @@ def test_on_change(patch_etcd_utils_refresh,
         value='{"integration_id" : "test_integration_id"}'
     )
 
-    # IMPORTANT: Without the following two lines, this tests somehow
+    # TODO($username) Without the following two lines, this tests somehow
     # causes an error in "test_gluster_peer_init.py"
     # Find out why
     NS.node_context = maps.NamedDict()
-    NS.node_context.node_id = 1
+    NS.node_context.node_id = str(uuid.uuid4())
 
     gd_obj = GlobalDetails()
 
