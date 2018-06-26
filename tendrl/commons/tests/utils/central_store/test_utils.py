@@ -104,3 +104,21 @@ def test_delete(patch_client):
         'allow_reconnect': True}
     wreconnect()
     delete()
+
+
+"""
+@patch.object(etcd, "Client")
+def test_watch(patch_client):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    NS._int.client = "Temp_obj"
+    NS._int.client.eternal_watch = {}
+    patch_client.return_value = etcd.Client()
+    NS._int.etcd_kwargs = {
+        'port': 1,
+        'host': 2,
+        'allow_reconnect': True}
+    obj = importlib.import_module(
+        "tendrl.commons.objects.cluster_node_context")
+    watch(obj, "test_key")
+"""

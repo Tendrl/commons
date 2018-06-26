@@ -101,14 +101,8 @@ def test_constructor_Messsage():
     msg = Message(priority="info", publisher="node_context", payload={
                   "message": "Test Message"}, node_id="Test id")
     assert msg.node_id == "Test id"
-    # sys.path.append('/usr/lib64/collectd')
-    # del(sys.modules["tendrl.commons.message"])
-    # mod = importlib.import_module("tendrl.commons.message")
-    # sys.path.remove('/usr/lib64/collectd')
-    # del(sys.modules["tendrl.commons.message"])
     msg = Message("info", "node_context", payload={
         "exception": "Test Message"}, caller=obj_caller)
-    # assert msg.node_id == "Test id"
 
 
 def test_format_exception():
