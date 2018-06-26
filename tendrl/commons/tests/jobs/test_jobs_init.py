@@ -233,7 +233,13 @@ def test_process_job_pass(log, write, extract_fqdn, alert_util):
                          tags=NS.node_context.tags,
                          type=NS.type)
     NS.node_context.tags = ["testing"]
+    NS.tendrl_context = maps.NamedDict()
+    NS.tendrl_context.integration_id = None
+    NS.tendrl_context.cluster_name = None
     NS.tendrl.objects.Job.load.return_value = job
+    NS.config = maps.NamedDict()
+    NS.config.data = maps.NamedDict()
+    NS.config.data.logging_socket_path = "tests/path"
     with patch.object(job, "save") as save:
         save.return_value = None
         with patch.object(NS.node_context, "load") as nc_load:
