@@ -7,7 +7,6 @@ from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -88,9 +87,7 @@ class ImportCluster(objects.BaseAtom):
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
-                raise AtomExecutionFailedError(
-                    "Failed to detect underlying cluster version"
-                )
+                return False
             lines = out.split('\n')
             build_no = None
             req_build_no = None
@@ -149,15 +146,8 @@ class ImportCluster(objects.BaseAtom):
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
+                return False
 
-                raise AtomExecutionFailedError(
-                    "Detected gluster version: %s"
-                    " is lesser than required version: %s" %
-                    (
-                        NS.tendrl_context.sds_version,
-                        reqd_gluster_ver
-                    )
-                )
             ret_val, err = import_gluster(self.parameters)
             if not ret_val:
                 logger.log(
@@ -169,10 +159,7 @@ class ImportCluster(objects.BaseAtom):
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
-                raise AtomExecutionFailedError(
-                    "Error importing the cluster (integration_id: %s). "
-                    "Error: %s" % (integration_id, err)
-                )
+                return False
 
             if len(node_list) > 1:
                 logger.log(

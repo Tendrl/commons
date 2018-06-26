@@ -1,8 +1,9 @@
 import etcd
 import json
 import re
-import traceback
 import sys
+import traceback
+
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError

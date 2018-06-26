@@ -16,7 +16,7 @@ class StopServices(flows.BaseFlow):
                 NS.publisher_id,
                 {
                     "message": "Stopping service %s on node %s" %
-                               (service, NS.node_context.node_id    )
+                               (service, NS.node_context.node_id)
                 },
                 job_id=self.parameters['job_id'],
                 flow_id=self.parameters['flow_id'],
