@@ -4,6 +4,19 @@ from mock import MagicMock
 from mock import patch
 import threading
 import time
+import mock
+
+from tendrl.commons.jobs import JobConsumerThread
+from tendrl.commons.objects.job import Job
+from tendrl.commons.jobs import process_job
+from tendrl.commons.tests.fixtures.client import Client
+from tendrl.commons.tests.fixtures.ns import NameSpace
+from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import time_utils
+
+
+
+test_job = JobConsumerThread()
 
 from tendrl.commons import jobs
 from tendrl.commons.objects import BaseObject
@@ -30,6 +43,115 @@ def test_constructor():
     test_job = jobs.JobConsumerThread()
     assert not test_job._complete._Event__flag
 
+
+@mock.patch('tendrl.commons.event.Event.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('tendrl.commons.message.Message.__init__',
+            mock.Mock(return_value=None))
+@mock.patch('time.sleep',
+            mock.Mock(return_value=True))
+@mock.patch('tendrl.commons.objects.BaseObject.__init__',
+            mock.Mock(return_value=True))
+def test_run():
+    init()
+    NS.node_context.fqdn = "Test"
+    NS.node_context.node_id = "1"
+    obj = importlib.import_module("tendrl.commons.tests.fixtures.ns")
+    NS.commons = maps.NamedDict(ns=obj.NameSpace())
+    with patch.object(Client, 'read', read_value):
+        with patch.object(etcd_utils, 'read', read):
+            global test_job
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', read_none):
+            global test_job
+            NS.type = "Test_type"
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', read_value):
+            with patch.object(etcd_utils, 'read', read):
+                global test_job
+                test_job.run()
+                test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', _read):
+            global test_job
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', _read):
+            global test_job
+            NS.node_context.tags = "tendrl/monitor"
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', _read):
+            global test_job
+            NS.node_context.tags = "tendrl/monitor"
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load", load):
+        with patch.object(Client, 'read', _read):
+            global test_job
+            NS.node_context.tags = "tendrl/monitor"
+            test_job.run()
+            test_job._complete._Event__flag = False
+            with patch.object(Client, 'write', write):
+                test_job.run()
+                test_job._complete._Event__flag = False
+            NS.node_context.tags = ""
+            NS.type = "Test"
+            test_job.run()
+            test_job._complete._Event__flag = False
+    with patch.object(Job, "load") as mock_load:
+        mock_load.return_value = load("tag")
+        with patch.object(Client, 'read', _read):
+            global test_job
+            NS.type = "Test_type"
+            NS.node_context.tags = "No_tag"
+            test_job.run()
+            test_job._complete._Event__flag = False
+            NS.node_context.tags = "Test_tag"
+            test_job.run()
+            test_job._complete._Event__flag = False
+            mock_load.return_value = load("node")
+            NS.node_context.node_id = "Test_node"
+            test_job.run()
+            test_job._complete._Event__flag = False
+            mock_load.return_value = load("no_obj_name")
+            test_job.run()
+            test_job._complete._Event__flag = False
+            with patch.object(Client, "write", write):
+                test_job.run()
+                test_job._complete._Event__flag = False
+            with patch.object(Client, "write", status_write):
+                test_job.run()
+                test_job._complete._Event__flag = False
+            with patch.object(Client, "write", failed_write):
+                with patch.object(NameSpace, "run", run):
+                    test_job.run()
+                    test_job._complete._Event__flag = False
+            with patch.object(Client, "write", failed_write("no_err")):
+                with patch.object(NameSpace, "run", run):
+                    test_job.run()
+                    test_job._complete._Event__flag = False
+    test_job = JobConsumerThread()
+    test_job._complete._Event__flag = True
+    test_job.run()
+    NS.node_context.tags = "tendrl/monitor"
+    test_job._complete._Event__flag = True
+    test_job.run()
+
+
+def test_stop():
+    test_job = JobConsumerThread()
+    test_job.stop()
+    assert test_job._complete._Event__flag
+
+def test_process_job():
+    process_job(1)
 
 @patch.object(threading, "Thread")
 @patch.object(time, "sleep")
