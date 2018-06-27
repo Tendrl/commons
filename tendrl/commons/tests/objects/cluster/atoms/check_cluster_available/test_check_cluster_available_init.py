@@ -1,7 +1,8 @@
 import etcd
 import maps
 import pytest
-from tendrl.commons.objects.cluster.atoms.check_cluster_available import CheckClusterAvailable  # noqa
+from tendrl.commons.objects.cluster.atoms.check_cluster_available import \
+    CheckClusterAvailable
 from tendrl.commons.objects import AtomExecutionFailedError
 
 
