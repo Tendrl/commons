@@ -1,8 +1,11 @@
 import __builtin__
 import maps
+from mock import patch
 
+from tendrl.commons.objects.cluster import Cluster
 from tendrl.commons.objects.cluster_node_context import ClusterNodeContext
 from tendrl.commons.tests.fixtures.nodecontext import NodeContext
+from tendrl.commons.utils import etcd_utils
 
 
 def load(*args):
@@ -28,6 +31,7 @@ def test_constructor(monkeypatch):
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
     NS.tendrl.objects.NodeContext = NodeContext
+
     cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
     assert cluster_node_context.status
     cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
@@ -41,7 +45,40 @@ def test_render(monkeypatch):
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
     NS.tendrl.objects.NodeContext = NodeContext
+
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = 1
     cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
     assert cluster_node_context.render() is not None
+
+
+# Testing save
+# simulates 'load' method for 'Cluster' object
+@patch.object(Cluster, 'load')
+# simulates 'read' method from 'etcd_utils'
+@patch.object(etcd_utils, 'read')
+# simulates 'write' method from 'etcd_utils'
+@patch.object(etcd_utils, 'write')
+# simulates 'refresh' method from 'etcd_utils'
+@patch.object(etcd_utils, 'refresh')
+def test_save(patch_cluster_load,
+              patch_etcd_utils_read,
+              patch_etcd_utils_write,
+              patch_etcd_utils_refresh,
+              monkeypatch):
+    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(NS, "_int", maps.NamedDict())
+    monkeypatch.setattr(NodeContext, 'load', load)
+    NS.tendrl = maps.NamedDict()
+    NS.tendrl_context = maps.NamedDict()
+    NS.tendrl_context.integration_id = "test_integration_id"
+    NS.tendrl.objects = maps.NamedDict()
+    NS.tendrl.objects.NodeContext = NodeContext
+    NS._int.watchers = maps.NamedDict()
+
+    cluster_node_context = ClusterNodeContext(ipv4_addr="127.0.0.1")
+
+    # Test with ttl
+    cluster_node_context.save(ttl="test")
+    # Test without ttl
+    cluster_node_context.save()
