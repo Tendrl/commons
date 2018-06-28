@@ -6,7 +6,7 @@ class test_StateSyncThread(SdsSyncThread):
         super(test_StateSyncThread, self).__init__()
 
     def run(self):
-        pass
+        super(test_StateSyncThread, self).run()
 
     def stop(self):
         super(test_StateSyncThread, self).stop()
