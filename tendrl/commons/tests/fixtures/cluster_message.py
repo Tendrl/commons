@@ -23,3 +23,12 @@ class NodeMessage(object):
 
     def save(self):
         pass
+
+
+class NotificationMessage(object):
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def save(self):
+        pass

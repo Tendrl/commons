@@ -66,7 +66,6 @@ def init(patch_etcd_utils_read,
 
 
 def test_constructor():
-
     with patch.object(TendrlNS, 'setup_common_objects') as \
             mocked_method:
         mocked_method.return_value = None

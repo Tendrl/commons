@@ -84,6 +84,11 @@ def test_constructor():
     log = Logger(message)
     message["integration_id"] = None
     log = Logger(message)
+    message["job_id"] = None
+    message["priority"] = "notice"
+    with patch.object(Logger, 'push_notification') as mock_notification:
+        log = Logger(message)
+        assert mock_notification.called
 
 
 def test_push_event():
@@ -91,6 +96,13 @@ def test_push_event():
     log = Logger(message)
     message["priority"] = "error"
     log.push_event()
+
+
+def test_push_notification():
+    message = init()
+    log = Logger(message)
+    message["priority"] = "error"
+    log.push_notification()
 
 
 def test_push_message():

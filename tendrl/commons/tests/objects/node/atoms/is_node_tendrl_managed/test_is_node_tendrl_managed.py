@@ -9,6 +9,7 @@ import pytest
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.is_node_tendrl_managed import \
     IsNodeTendrlManaged
+from tendrl.commons.utils import etcd_utils
 
 
 def read(*args, **kwargs):
@@ -25,7 +26,8 @@ def test_constructor():
 
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
-def test_run(mock_read, mock_client):
+@patch.object(etcd_utils, "read")
+def test_run(mock_etcd_read, mock_read, mock_client):
     mock_read.return_value = read()
     mock_client.return_value = etcd.Client()
     obj = IsNodeTendrlManaged()
@@ -48,3 +50,18 @@ def test_run(mock_read, mock_client):
         obj.run()
     with patch.object(Client, "read", read):
         obj.run()
+    mock_etcd_read.return_value = maps.NamedDict(
+        leaves=None,
+        value='{"status": "UP",'
+              '"pkey": "tendrl-node-test",'
+              '"node_id": "test_node_id",'
+              '"ipv4_addr": "test_ip",'
+              '"tags": "[\\"my_tag\\"]",'
+              '"sync_status": "done",'
+              '"locked_by": "fd",'
+              '"fqdn": "tendrl-node-test",'
+              '"leaves: None",'
+              '"last_sync": "date"}')
+    with pytest.raises(AtomExecutionFailedError):
+        with patch.object(etcd_utils, "read", read):
+            obj.run()
