@@ -25,6 +25,8 @@ from tendrl.commons.objects import BaseObject
 from tendrl.commons.tests import test_init
 from tendrl.commons.utils import alert_utils
 from tendrl.commons.utils import etcd_utils
+from tendrl.commons.utils import log_utils as logger
+
 
 JOB_SET = True
 
