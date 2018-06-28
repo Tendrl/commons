@@ -24,7 +24,7 @@ def test_render():
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
 
-    # TODO($username) Without the following two lines, this tests somehow
+    # TODO(nathan-weinberg) Without the following two lines, this tests somehow
     # causes an error in "test_gluster_peer_init.py"
     # Find out why
     NS.node_context = maps.NamedDict()
