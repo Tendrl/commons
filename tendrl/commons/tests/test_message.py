@@ -73,10 +73,11 @@ def test_contructor_ExceptionMessage():
     ExceptionMessage(priority="info", publisher="node_context",
                               payload={"message": "Test Exception Message",
                                        "exception": ex})
-
-    # ex_msg = ExceptionMessage(priority = "info",publisher =
-    # "node_context", payload = '{"message":"Test Exception Message",
-    # "exception":"Test Exception"}')
+    # Next exception hits the part of the constructor
+    # when "exception" is in the payload but there is no
+    # actual exception in it
+    ExceptionMessage(priority="info", publisher="node_context", payload={
+        "message": "Test Exception Message", "exception": ""})
 
 
 def test_constructor_Messsage():
@@ -100,11 +101,8 @@ def test_constructor_Messsage():
     msg = Message(priority="info", publisher="node_context", payload={
                   "message": "Test Message"}, node_id="Test id")
     assert msg.node_id == "Test id"
-    # sys.path.append('/usr/lib64/collectd')
-    # del(sys.modules["tendrl.commons.message"])
-    # mod = importlib.import_module("tendrl.commons.message")
-    # sys.path.remove('/usr/lib64/collectd')
-    # del(sys.modules["tendrl.commons.message"])
+    msg = Message("info", "node_context", payload={
+        "exception": "Test Message"}, caller=obj_caller)
 
 
 def test_format_exception():
