@@ -5,6 +5,8 @@ from mock import patch
 import threading
 import time
 import mock
+import uuid
+
 
 from tendrl.commons.jobs import JobConsumerThread
 from tendrl.commons.objects.job import Job
@@ -55,7 +57,7 @@ def test_constructor():
 def test_run():
     init()
     NS.node_context.fqdn = "Test"
-    NS.node_context.node_id = "1"
+    NS.node_context.node_id = str(uuid.uuid4())
     obj = importlib.import_module("tendrl.commons.tests.fixtures.ns")
     NS.commons = maps.NamedDict(ns=obj.NameSpace())
     with patch.object(Client, 'read', read_value):
