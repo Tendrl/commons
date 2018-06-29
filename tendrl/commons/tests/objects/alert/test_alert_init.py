@@ -1,6 +1,7 @@
 import __builtin__
 import maps
 from mock import patch
+
 from tendrl.commons import objects
 from tendrl.commons.objects.alert import Alert
 from tendrl.commons.objects.alert import AlertUtils
