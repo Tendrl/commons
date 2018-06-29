@@ -119,7 +119,7 @@ def test_to_obj():
                       "significance": "Test_sig",
                       "ackedby": "Test_ackedby",
                       "acked": "Test_acked",
-                      "ack_comment":[],
+                      "ack_comment": [],
                       "acked_at": "Test_acked_at",
                       "pid": 0,
                       "source": "Test_source",
