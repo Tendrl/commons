@@ -4,6 +4,7 @@ import pytest
 import subprocess
 
 from mock import patch
+
 from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.cluster.atoms.configure_monitoring import \
     ConfigureMonitoring
