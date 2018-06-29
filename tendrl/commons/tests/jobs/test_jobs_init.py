@@ -128,5 +128,4 @@ def test_process_job_pass(log, write, extract_fqdn, alert_util):
                 'testing (job ID: 808a4162-4b70-4ff0-b218-45dbe371e545) '
                 'completed successfully ',
                 cluster_name=None,
-                integration_id=None
-)
+                integration_id=None)
