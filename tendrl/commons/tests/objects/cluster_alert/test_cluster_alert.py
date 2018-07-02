@@ -1,11 +1,8 @@
-import __builtin__
-import maps
-from tendrl.commons.objects import cluster_alert
+from tendrl.commons.objects.cluster_alert import ClusterAlert
 
 
-def test_ClusterAlert():
-    setattr(__builtin__, "NS", maps.NamedDict())
-    NS.tendrl_context = maps.NamedDict(integration_id="",
-                                       cluster_name="test_name",
-                                       sds_name="Test_sds")
-    assert(cluster_alert.ClusterAlert("Test Alert"))
+def test_render():
+    cluster_alert_obj = ClusterAlert(
+        tags={'integration_id': 'test_uuid'}
+    )
+    cluster_alert_obj.render()
