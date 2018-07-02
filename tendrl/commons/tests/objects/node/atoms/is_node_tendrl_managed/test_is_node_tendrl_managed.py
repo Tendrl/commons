@@ -65,3 +65,6 @@ def test_run(mock_etcd_read, mock_read, mock_client):
     with pytest.raises(AtomExecutionFailedError):
         with patch.object(etcd_utils, "read", read):
             obj.run()
+    with pytest.raises(AtomExecutionFailedError):
+        with patch.object(etcd_utils.read, "leaves", None):
+            obj.run()
