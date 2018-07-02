@@ -3,22 +3,13 @@ import importlib
 import maps
 from mock import patch
 
-from tendrl.commons.objects.cluster.atoms.delete_monitoring_details \
-    import DeleteMonitoringDetails
-from tendrl.commons.objects.cluster import Cluster
+from tendrl.commons.objects.cluster.atoms.setup_cluster_alias \
+    import SetupClusterAlias
 from tendrl.commons.objects.job import Job
-
-
-def test_constructor():
-    DeleteMonitoringDetails()
 
 
 def save(*args):
     pass
-
-
-def load(*args):
-    return Cluster(short_name="test_short_name")
 
 
 def load_job_finished(*args):
@@ -40,30 +31,38 @@ def init():
     NS._int.client = obj.Client()
     NS._int.wclient = obj.Client()
 
+    NS.node_context = maps.NamedDict()
+    NS.node_context.tags = maps.NamedDict()
+    NS._int.watchers = maps.NamedDict()
+
 
 def test_run():
     init()
-    obj = DeleteMonitoringDetails()
-    assert obj.parameters is not None
-    obj.parameters = maps.NamedDict()
-    obj.parameters["TendrlContext.integration_id"] = \
-        "test_uuid"
-    obj.parameters['job_id'] = "test_job_id"
+    sca_obj = SetupClusterAlias()
+    sca_obj.parameters = maps.NamedDict()
+    sca_obj.parameters['TendrlContext.integration_id'] = \
+        'test_uuid'
+    sca_obj.parameters['job_id'] = 'test_job_id'
+
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS, "tendrl_context", maps.NamedDict())
     NS.tendrl_context['integration_id'] = "rete"
-    setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job, Cluster=Cluster))
+    setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job))
 
-    # success
+    # provisioner not in tags
     with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(Job, 'load', load_job_finished):
-            obj.run()
+            sca_obj.run()
 
-    # failure
+    # provisioner in tags, success
+    NS.node_context.tags = "provisioner/test_uuid"
+    with patch.object(NS.tendrl.objects.Job, 'save', save):
+        with patch.object(Job, 'load', load_job_finished):
+            sca_obj.run()
+
+    # provisoner in tags, failure
     NS.publisher_id = maps.NamedDict()
-    obj.parameters['flow_id'] = 'test_flow_id'
-
+    sca_obj.parameters['flow_id'] = 'test_flow_id'
     with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(Job, 'load', load_job_new):
-            with patch.object(NS.tendrl.objects.Cluster, 'load', load):
-                obj.run()
+            sca_obj.run()
