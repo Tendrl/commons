@@ -1,11 +1,9 @@
 import __builtin__
 import maps
-import pytest
 import subprocess
 
 from mock import patch
 
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.cluster.atoms.configure_monitoring import \
     ConfigureMonitoring
 
@@ -49,5 +47,6 @@ def test_configure_plugin_fail(patch_check_call):
     test.parameters = maps.NamedDict()
     test.parameters['job_id'] = 1729
     test.parameters['flow_id'] = 13
-    with pytest.raises(AtomExecutionFailedError):
-        test.run()
+    ret_val = test.run()
+    if ret_val:
+        raise AssertionError

@@ -34,11 +34,15 @@ def test_run(mock_etcd_read, mock_read, mock_client):
     assert obj.parameters is not None
     obj.parameters = maps.NamedDict()
     obj.parameters["Node[]"] = []
+    obj.parameters['job_id'] = "test_job_id"
+    obj.parameters['flow_id'] = "test_flow_id"
     with pytest.raises(AtomExecutionFailedError):
         obj.run()
     obj.parameters["Node[]"] = ["Test_node"]
     setattr(__builtin__, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
+    setattr(NS, "node_context", maps.NamedDict())
+    NS.node_context["fqdn"] = "test_fqdn"
     NS._int.etcd_kwargs = {
         'port': 1,
         'host': 2,
@@ -62,9 +66,12 @@ def test_run(mock_etcd_read, mock_read, mock_client):
               '"fqdn": "tendrl-node-test",'
               '"leaves: None",'
               '"last_sync": "date"}')
-    with pytest.raises(AtomExecutionFailedError):
-        with patch.object(etcd_utils, "read", read):
-            obj.run()
-    with pytest.raises(AtomExecutionFailedError):
-        with patch.object(etcd_utils.read, "leaves", None):
-            obj.run()
+
+    with patch.object(etcd_utils, "read", read):
+        ret_val = obj.run()
+        if ret_val:
+            raise AssertionError
+    with patch.object(etcd_utils.read, "leaves", None):
+        ret_val = obj.run()
+        if ret_val:
+            raise AssertionError
