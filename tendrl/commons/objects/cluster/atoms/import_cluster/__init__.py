@@ -171,6 +171,7 @@ class ImportCluster(objects.BaseAtom):
                 # Wait for (no of nodes) * 6 minutes for import to complete
                 wait_count = (len(node_list) - 1) * 36
                 while True:
+                    child_jobs_failed = []
                     parent_job = NS.tendrl.objects.Job(
                         job_id=self.parameters['job_id']
                     ).load()
@@ -193,13 +194,23 @@ class ImportCluster(objects.BaseAtom):
                         ).load()
                         if child_job.status not in ["finished", "failed"]:
                             completed = False
-                            break
+                        elif child_job.status == "failed":
+                            child_jobs_failed.append(child_job.job_id)
                     if completed:
                         break
                     else:
                         loop_count += 1
                         continue
-
+                if len(child_jobs_failed) > 0:
+                    _msg = "Child jobs failed %s" % child_jobs_failed
+                    logger.log(
+                        "error",
+                        NS.publisher_id,
+                        {"message": _msg},
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id']
+                    )
+                    return False
         except Exception as ex:
             # For traceback
             Event(
