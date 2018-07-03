@@ -72,6 +72,13 @@ class StopMonitoringServices(objects.BaseAtom):
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id'],
                     )
+                    for child_job_id in child_job_ids:
+                        child_job = NS.tendrl.objects.Job(
+                            job_id=child_job_id
+                        ).load()
+                        if child_job.status not in ["finished", "failed"]:
+                            child_job.status = "failed"
+                            child_job.save()
                     return False
                 time.sleep(5)
                 finished = True
