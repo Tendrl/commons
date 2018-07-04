@@ -214,7 +214,7 @@ class ImportCluster(objects.BaseAtom):
                         loop_count += 1
                         continue
                 if len(child_jobs_failed) > 0:
-                    _msg = "Child jobs failed %s" % child_jobs_failed
+                    _msg = "Child jobs failed are %s" % child_jobs_failed
                     logger.log(
                         "error",
                         NS.publisher_id,

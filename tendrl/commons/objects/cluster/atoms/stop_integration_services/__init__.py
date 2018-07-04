@@ -60,6 +60,7 @@ class StopIntegrationServices(objects.BaseAtom):
             loop_count = 0
             wait_count = (len(child_job_ids)) * 2
             while True:
+                child_jobs_failed = []
                 if loop_count >= wait_count:
                     logger.log(
                         "info",
@@ -79,14 +80,25 @@ class StopIntegrationServices(objects.BaseAtom):
                     child_job = NS.tendrl.objects.Job(
                         job_id=child_job_id
                     ).load()
-                    if child_job.status != "finished":
+                    if child_job.status not in ["finished", "failed"]:
                         finished = False
-                        break
+                    elif child_job.status == "failed":
+                        child_jobs_failed.append(child_job.job_id)
                 if finished:
                     break
                 else:
                     loop_count += 1
                     continue
+            if len(child_jobs_failed) > 0:
+                _msg = "Child jobs failed are %s" % child_jobs_failed
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": _msg},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
+                )
+                return False
         except etcd.EtcdKeyNotFound:
             pass
 
