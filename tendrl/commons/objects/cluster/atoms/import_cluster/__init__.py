@@ -188,6 +188,18 @@ class ImportCluster(objects.BaseAtom):
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )
+                        # Marking child jobs as failed which did not complete
+                        # as the parent job has timed out. This has to be done
+                        # explicitly because these jobs will still be processed
+                        # by the node-agent, and will keep it busy, which might
+                        # defer the new jobs or lead to their timeout.
+                        for child_job_id in parent_job.children:
+                            child_job = NS.tendrl.objects.Job(
+                                job_id=child_job_id
+                            ).load()
+                            if child_job.status not in ["finished", "failed"]:
+                                child_job.status = "failed"
+                                child_job.save()
                         return False
                     time.sleep(10)
                     completed = True
