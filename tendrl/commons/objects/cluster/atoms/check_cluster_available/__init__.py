@@ -4,7 +4,6 @@ import etcd
 
 
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -41,6 +40,4 @@ class CheckClusterAvailable(objects.BaseAtom):
                     flow_id=self.parameters['flow_id'],
                     integration_id=NS.tendrl_context.integration_id
                 )
-                raise AtomExecutionFailedError(
-                    "Cluster data sync still incomplete. Timing out"
-                )
+                return False

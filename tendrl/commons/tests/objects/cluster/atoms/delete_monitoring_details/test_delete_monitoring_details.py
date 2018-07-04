@@ -49,12 +49,12 @@ def test_run():
     obj.parameters["TendrlContext.integration_id"] = \
         "test_uuid"
     obj.parameters['job_id'] = "test_job_id"
+    obj.parameters['flow_id'] = "test_flow_id"
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS, "tendrl_context", maps.NamedDict())
     NS.tendrl_context['integration_id'] = "rete"
     setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job, Cluster=Cluster))
-
-    # success
+    NS.publisher_id = "publisher"
     with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(Job, 'load', load_job_finished):
             obj.run()

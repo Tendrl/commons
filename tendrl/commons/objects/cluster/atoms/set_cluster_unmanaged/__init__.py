@@ -10,7 +10,16 @@ class SetClusterUnmanaged(objects.BaseAtom):
 
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
-
+        logger.log(
+            "info",
+            NS.get("publisher_id", None),
+            {
+                "message": "Setting cluster %s is_managed to \"no\":" %
+                           integration_id
+            },
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id']
+        )
         try:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
@@ -22,8 +31,8 @@ class SetClusterUnmanaged(objects.BaseAtom):
                 "error",
                 NS.get("publisher_id", None),
                 {
-                    "message": "Error setting cluster"
-                    "is_managed \"no\": (%s)" % (
+                    "message": "Error setting cluster %s"
+                    "is_managed  to \"no\":" % (
                         integration_id
                     )
                 },

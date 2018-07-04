@@ -5,7 +5,6 @@ import subprocess
 
 
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils.service import Service
 
@@ -141,12 +140,19 @@ class ConfigureMonitoring(objects.BaseAtom):
                     plugin_params
                 )
         if not plugin_config_success:
-            raise AtomExecutionFailedError(
-                "Collectd configuration failed for node %s from cluster %s" % (
-                    NS.node_context.fqdn,
-                    NS.tendrl_context.integration_id
-                )
+            logger.log(
+                "error",
+                NS.get("publisher_id", None),
+                {
+                    "message": "Collectd configuration failed for node %s from"
+                               " cluster %s" %
+                               (NS.node_context.fqdn,
+                                NS.tendrl_context.integration_id)
+                },
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
+            return False
         err, success = Service(
             'collectd',
             publisher_id='node_agent',
