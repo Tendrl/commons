@@ -48,7 +48,7 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
-* Mon Jul 04 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.3-8
+* Wed Jul 04 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.3-8
 - Bugfixes (https://github.com/Tendrl/commons/milestone/10)
 
 * Mon Jun 18 2018 Shubhendu Tripathi <shtripat@redhat.com> - 1.6.3-7
