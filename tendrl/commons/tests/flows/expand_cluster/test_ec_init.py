@@ -130,3 +130,9 @@ def test_expand_cluster(patch_etcd_utils_read):
     with patch.object(Client, "read", read_failed):
         with pytest.raises(FlowExecutionFailedError):
             expand_cluster.run()
+    param['TendrlContext.integration_id'] = "Test id"
+    param['TendrlContext.sds_name'] = "gluster"
+    NS.node_context = maps.NamedDict()
+    NS.node_context.node_id = "Test id"
+    with pytest.raises(FlowExecutionFailedError):
+        expand_cluster.run()

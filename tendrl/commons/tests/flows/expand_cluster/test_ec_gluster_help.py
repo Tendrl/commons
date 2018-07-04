@@ -25,6 +25,19 @@ def test_get_node_ips():
     assert ret[0] == "test_ip"
 
 
+class mock_plugin(object):
+    def setup_gluster_node(self, node_ips, repo=None):
+        return True
+
+    def expand_gluster_cluster(self, node):
+        return False
+
+
+class mock_provisioner(object):
+    def get_plugin(self):
+        return mock_plugin()
+
+
 @mock.patch('tendrl.commons.event.Event.__init__',
             mock.Mock(return_value=None))
 @mock.patch('tendrl.commons.message.Message.__init__',
@@ -77,3 +90,6 @@ def test_expand_gluster(patch_cluster_load, patch_etcd_utils_read):
               '"cluster_network": "127.0.0.1/24"}'
     )
     gluster_help.expand_gluster(param)
+    NS.gluster_provisioner = mock_provisioner()
+    with pytest.raises(FlowExecutionFailedError):
+        gluster_help.expand_gluster(param)
