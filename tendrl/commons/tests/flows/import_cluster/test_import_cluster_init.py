@@ -10,7 +10,6 @@ import tendrl.commons.objects.node_context as node
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.import_cluster import ImportCluster
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.node.atoms.cmd import Cmd
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import etcd_utils
@@ -192,5 +191,5 @@ def test_run():
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(Cmd, 'run', return_value=False):
                 with patch.object(objects.BaseObject, 'load', return_pass):
-                    with pytest.raises(AtomExecutionFailedError):
+                    with pytest.raises(FlowExecutionFailedError):
                         import_cluster.run()

@@ -1,5 +1,7 @@
 import abc
 import six
+import sys
+import traceback
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -250,8 +252,13 @@ class BaseFlow(object):
                     parameters=self.parameters
                 ).run()
                 return ret_val
-            except AtomExecutionFailedError as ex:
-                raise ex
+            except AtomExecutionFailedError:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                raise FlowExecutionFailedError(str(
+                    traceback.format_exception(exc_type,
+                                               exc_value,
+                                               exc_traceback)
+                ))
 
         except (KeyError, AttributeError) as ex:
             _msg = "Could not find atom {0}".format(atom_fqdn)
