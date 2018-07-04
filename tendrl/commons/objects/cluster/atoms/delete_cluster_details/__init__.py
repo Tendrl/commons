@@ -10,6 +10,15 @@ class DeleteClusterDetails(objects.BaseAtom):
         super(DeleteClusterDetails, self).__init__(*args, **kwargs)
 
     def run(self):
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {
+                "message": "Deleting cluster details."
+            },
+            job_id=self.parameters['job_id'],
+            flow_id=self.parameters['flow_id'],
+        )
         integration_id = self.parameters['TendrlContext.integration_id']
 
         etcd_keys_to_delete = []

@@ -7,7 +7,6 @@ from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -81,9 +80,14 @@ class ImportCluster(objects.BaseAtom):
             )
             out, err = cmd.communicate()
             if out in [None, ""] or err:
-                raise AtomExecutionFailedError(
-                    "Failed to detect underlying cluster version"
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Failed to detect underlying cluster version"},
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
+                return False
             lines = out.split('\n')
             build_no = None
             req_build_no = None
@@ -142,21 +146,20 @@ class ImportCluster(objects.BaseAtom):
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
+                return False
 
-                raise AtomExecutionFailedError(
-                    "Detected gluster version: %s"
-                    " is lesser than required version: %s" %
-                    (
-                        NS.tendrl_context.sds_version,
-                        reqd_gluster_ver
-                    )
-                )
             ret_val, err = import_gluster(self.parameters)
             if not ret_val:
-                raise AtomExecutionFailedError(
-                    "Error importing the cluster (integration_id: %s). "
-                    "Error: %s" % (integration_id, err)
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Error importing the cluster (integration_id:"
+                                " %s). Error: %s" % (integration_id, err)
+                     },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
+                return False
 
             if len(node_list) > 1:
                 logger.log(
@@ -171,12 +174,13 @@ class ImportCluster(objects.BaseAtom):
                 # Wait for (no of nodes) * 6 minutes for import to complete
                 wait_count = (len(node_list) - 1) * 36
                 while True:
+                    child_jobs_failed = []
                     parent_job = NS.tendrl.objects.Job(
                         job_id=self.parameters['job_id']
                     ).load()
                     if loop_count >= wait_count:
                         logger.log(
-                            "info",
+                            "error",
                             NS.publisher_id,
                             {"message": "Import jobs on cluster(%s) not yet "
                              "complete on all nodes(%s). Timing out." %
@@ -184,6 +188,18 @@ class ImportCluster(objects.BaseAtom):
                             job_id=self.parameters['job_id'],
                             flow_id=self.parameters['flow_id']
                         )
+                        # Marking child jobs as failed which did not complete
+                        # as the parent job has timed out. This has to be done
+                        # explicitly because these jobs will still be processed
+                        # by the node-agent, and will keep it busy, which might
+                        # defer the new jobs or lead to their timeout.
+                        for child_job_id in parent_job.children:
+                            child_job = NS.tendrl.objects.Job(
+                                job_id=child_job_id
+                            ).load()
+                            if child_job.status not in ["finished", "failed"]:
+                                child_job.status = "failed"
+                                child_job.save()
                         return False
                     time.sleep(10)
                     completed = True
@@ -193,13 +209,23 @@ class ImportCluster(objects.BaseAtom):
                         ).load()
                         if child_job.status not in ["finished", "failed"]:
                             completed = False
-                            break
+                        elif child_job.status == "failed":
+                            child_jobs_failed.append(child_job.job_id)
                     if completed:
                         break
                     else:
                         loop_count += 1
                         continue
-
+                if len(child_jobs_failed) > 0:
+                    _msg = "Child jobs failed are %s" % child_jobs_failed
+                    logger.log(
+                        "error",
+                        NS.publisher_id,
+                        {"message": _msg},
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id']
+                    )
+                    return False
         except Exception as ex:
             # For traceback
             Event(

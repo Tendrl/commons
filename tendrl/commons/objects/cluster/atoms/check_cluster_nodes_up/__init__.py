@@ -1,7 +1,6 @@
 import etcd
 import json
 
-from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects import BaseAtom
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
@@ -69,6 +68,14 @@ class CheckClusterNodesUp(BaseAtom):
             # no need to check for child job
             return all_node_status_up
         except (etcd.EtcdKeyNotFound, TypeError) as ex:
-            raise FlowExecutionFailedError(
-                "Error checking status of nodes .error: %s" % str(ex)
+            logger.log(
+                "error",
+                NS.get("publisher_id", None),
+                {
+                    "message": "Error checking status of nodes. Error: %s"
+                               % str(ex)
+                },
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
             )
+            return False

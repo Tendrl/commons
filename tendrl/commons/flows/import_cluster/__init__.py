@@ -1,6 +1,9 @@
 import etcd
 import json
 import re
+import sys
+import traceback
+
 
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
@@ -98,7 +101,7 @@ class ImportCluster(flows.BaseFlow):
             # even from expand cluster flow. We should not set the
             # cluster's current job status from child jobs
             _job = NS.tendrl.objects.Job(job_id=self.job_id).load()
-            if 'parent' not in _job.payload:
+            if 'parent' not in _job.payload and _job.status != "failed":
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
@@ -109,6 +112,7 @@ class ImportCluster(flows.BaseFlow):
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
                 Exception) as ex:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id).load()
             _cluster.status = ""
@@ -121,4 +125,8 @@ class ImportCluster(flows.BaseFlow):
             if _errors:
                 _cluster.errors = _errors
             _cluster.save()
-            raise ex
+            raise FlowExecutionFailedError(str(
+                traceback.format_exception(exc_type,
+                                           exc_value,
+                                           exc_traceback)
+            ))

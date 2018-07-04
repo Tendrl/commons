@@ -10,7 +10,6 @@ from tendrl.commons import TendrlNS
 
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.flows.unmanage_cluster import UnmanageCluster
-from tendrl.commons.objects import AtomExecutionFailedError
 from tendrl.commons.objects.cluster.atoms.is_cluster_managed \
     import IsClusterManaged
 import tendrl.commons.objects.node_context as node
@@ -231,5 +230,5 @@ def test_run():
         with patch.object(objects.BaseObject, 'save', save):
             with patch.object(IsClusterManaged, 'run', return_value=False):
                 with patch.object(objects.BaseObject, 'load', return_pass):
-                    with pytest.raises(AtomExecutionFailedError):
+                    with pytest.raises(FlowExecutionFailedError):
                         unmanage_cluster.run()

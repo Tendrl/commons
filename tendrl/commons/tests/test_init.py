@@ -13,21 +13,24 @@ import yaml
 
 
 from tendrl.commons import objects
+from tendrl.commons.objects import BaseObject
 import tendrl.commons.objects.node_context as node
+import tendrl.commons.objects.tendrl_context as tendrl_context
 from tendrl.commons import TendrlNS
 from tendrl.commons.utils import etcd_utils
 
 
+@patch.object(tendrl_context.TendrlContext, "load")
 @patch.object(etcd, "Client")
 @patch.object(Client, "read")
 @patch.object(node.NodeContext, '_get_node_id')
 @patch.object(etcd_utils, 'read')
-@patch.object(node.NodeContext, 'load')
-def init(patch_node_load,
-         patch_etcd_utils_read,
+def init(patch_etcd_utils_read,
          patch_get_node_id,
          patch_read,
-         patch_client):
+         patch_client,
+         tc):
+    tc.return_value = tendrl_context.TendrlContext
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
@@ -49,15 +52,20 @@ def init(patch_node_load,
               '"tags": "[\\"my_tag\\"]",'
               '"sync_status": "done",'
               '"locked_by": "fd",'
-              '"fqdn": "tendrl-node-test",'
+              '"fqdn": "",'
               '"last_sync": "date"}')
-    patch_node_load.return_value = node.NodeContext
+    with patch.object(etcd_utils, "read") as utils_read:
+        utils_read.return_value = maps.NamedDict(
+            value='{"tags":[]}'
+        )
+        with patch.object(BaseObject, "load") as node_load:
+            node.load = MagicMock()
+            node_load.return_value = node
     tendrlNS = TendrlNS()
     return tendrlNS
 
 
 def test_constructor():
-
     with patch.object(TendrlNS, 'setup_common_objects') as \
             mocked_method:
         mocked_method.return_value = None
@@ -461,6 +469,7 @@ def test_setup_common_objects(monkeypatch):
         tendrlNS.current_ns.objects["Config"] = obj_cls[1]
     with patch.object(etcd, "Client", return_value=etcd.Client()) as client:
         tendrlNS.current_ns.objects.pop("NodeContext")
+        NS.tendrl.objects.TendrlContext.load = MagicMock()
         tendrlNS.setup_common_objects()
         assert NS._int.client is not None
         assert NS._int.wclient is not None

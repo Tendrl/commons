@@ -11,6 +11,16 @@ class StopServices(flows.BaseFlow):
         super(StopServices, self).run()
         services = self.parameters['Services[]']
         for service in services:
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {
+                    "message": "Stopping service %s on node %s" %
+                               (service, NS.node_context.node_id)
+                },
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id'],
+            )
             srv = NS.tendrl.objects.Service(service=service)
             if not srv.running:
                 logger.log(
@@ -18,7 +28,7 @@ class StopServices(flows.BaseFlow):
                     NS.publisher_id,
                     {
                         "message": "%s not running on "
-                        "%s" % (service, NS.node_context.fqdn)
+                        "%s" % (service, NS.node_context.node_id)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
@@ -34,7 +44,8 @@ class StopServices(flows.BaseFlow):
                     NS.publisher_id,
                     {
                         "message": "Could not stop %s"
-                        " service. Error: %s" % (service, err)
+                        " service on %s. Error: %s" % (service, err,
+                                                       NS.node_context.node_id)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
@@ -50,7 +61,8 @@ class StopServices(flows.BaseFlow):
                     NS.publisher_id,
                     {
                         "message": "Could not disable %s"
-                        " service. Error: %s" % (service, err)
+                        " service on %s. Error: %s" % (service, err,
+                                                       NS.node_context.node_id)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
