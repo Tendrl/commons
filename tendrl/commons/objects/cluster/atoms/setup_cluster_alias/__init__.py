@@ -34,6 +34,7 @@ class SetupClusterAlias(objects.BaseAtom):
         loop_count = 0
         wait_count = 24
         while True:
+            child_job_failed = False
             if loop_count >= wait_count:
                 logger.log(
                     "error",
@@ -50,12 +51,24 @@ class SetupClusterAlias(objects.BaseAtom):
             time.sleep(5)
             finished = True
             job = Job(job_id=_job_id).load()
-            if job.status != "finished":
+            if job.status not in ["finished", "failed"]:
                 finished = False
+            elif job.status == "failed":
+                child_job_failed = True
             if finished:
                 break
             else:
                 loop_count += 1
                 continue
-
+        if child_job_failed:
+            _msg = "Child job setting up cluster alias " \
+                   "failed %s" % _job_id
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": _msg},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
+            )
+            return False
         return True

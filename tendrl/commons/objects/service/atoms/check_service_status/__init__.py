@@ -31,7 +31,7 @@ class CheckServiceStatus(BaseAtom):
             return True
         else:
             logger.log(
-                "info",
+                "error",
                 NS.publisher_id,
                 {"message": "Failed to check status of %s on "
                  "%s" % (

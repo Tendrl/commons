@@ -124,6 +124,7 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
         # Wait for (no of nodes) * 6 minutes for import to complete
         wait_count = len(job_ids) * 36
         while True:
+            child_jobs_failed = []
             if loop_count >= wait_count:
                 logger.log(
                     "info",
@@ -152,15 +153,25 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
             finished = True
             for job_id in job_ids:
                 job = NS.tendrl.objects.Job(job_id=job_id).load()
-                if job.status != "finished":
+                if job.status not in ["finished", "failed"]:
                     finished = False
-                    break
+                elif job.status == "failed":
+                    child_jobs_failed.append(job.job_id)
             if finished:
                 break
             else:
                 loop_count += 1
                 continue
-
+        if len(child_jobs_failed) > 0:
+            _msg = "Child jobs failed are %s" % child_jobs_failed
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": _msg},
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
+            )
+            return False
         _cluster = NS.tendrl.objects.Cluster(
             integration_id=integration_id
         ).load()

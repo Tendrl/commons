@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 from tendrl.commons import flows
 from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects import AtomExecutionFailedError
@@ -70,6 +73,7 @@ class UnmanageCluster(flows.BaseFlow):
         except (FlowExecutionFailedError,
                 AtomExecutionFailedError,
                 Exception) as ex:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
             ).load()
@@ -88,4 +92,8 @@ class UnmanageCluster(flows.BaseFlow):
             if _errors:
                 _cluster.errors = _errors
             _cluster.save()
-            raise ex
+            raise FlowExecutionFailedError(str(
+                traceback.format_exception(exc_type,
+                                           exc_value,
+                                           exc_traceback)
+            ))

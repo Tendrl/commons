@@ -1,8 +1,7 @@
-import etcd
 import time
 
 from tendrl.commons import objects
-from tendrl.commons.objects import AtomExecutionFailedError
+from tendrl.commons.utils import log_utils as logger
 
 
 class CheckSyncDone(objects.BaseAtom):
@@ -17,23 +16,24 @@ class CheckSyncDone(objects.BaseAtom):
         loop_count = 0
         while True:
             if loop_count >= 72:
-                raise AtomExecutionFailedError(
-                    "Timing out import job, Cluster data still not "
-                    "fully updated (node: %s) "
-                    "(integration_id: %s)" % (
-                        integration_id,
-                        NS.node_context.node_id
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Timing out import job, Cluster data still "
+                                "not fully updated (node: %s) "
+                                "(integration_id: %s)"
+                                % (integration_id, NS.node_context.node_id)
+                     },
+                    job_id=self.parameters['job_id'],
+                    flow_id=self.parameters['flow_id']
                 )
+                return False
             time.sleep(5)
-            try:
-                _cnc = NS.tendrl.objects.ClusterNodeContext(
-                    node_id=NS.node_context.node_id
-                ).load()
-                if _cnc.first_sync_done is not None and \
+            _cnc = NS.tendrl.objects.ClusterNodeContext(
+                node_id=NS.node_context.node_id
+            ).load()
+            if _cnc.first_sync_done is not None and \
                     _cnc.first_sync_done.lower() == "yes":
-                    break
-            except etcd.EtcdKeyNotFound:
-                loop_count += 1
-                continue
+                break
+            loop_count += 1
         return True

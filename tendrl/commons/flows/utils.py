@@ -194,7 +194,7 @@ def acquire_node_lock(parameters):
                 "info",
                 NS.publisher_id,
                 {"message": "Acquired lock (%s) on (%s)" % (
-                    lock_owner_job, node)},
+                    lock_owner_job, node_id)},
                 job_id=parameters['job_id'],
                 flow_id=parameters['flow_id']
             )
