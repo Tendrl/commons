@@ -7,6 +7,7 @@ from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import objects
+from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -162,6 +163,16 @@ class ImportCluster(objects.BaseAtom):
                 return False
 
             if len(node_list) > 1:
+                # find number of volumes in a cluster
+                cmd = cmd_utils.Command('gluster volume list')
+                out, err, rc = cmd.run()
+                # default intervel is 8 min
+                # 5 sec sleep for one count increment (480 / 5)
+                wait_count = 96
+                if not err:
+                    volumes = out.split("\n")
+                    # 15 sec for each volume
+                    wait_count = wait_count + (len(volumes) * 3)
                 logger.log(
                     "info",
                     NS.publisher_id,
@@ -172,7 +183,6 @@ class ImportCluster(objects.BaseAtom):
                 )
                 loop_count = 0
                 # Wait for (no of nodes) * 6 minutes for import to complete
-                wait_count = (len(node_list) - 1) * 36
                 while True:
                     child_jobs_failed = []
                     parent_job = NS.tendrl.objects.Job(

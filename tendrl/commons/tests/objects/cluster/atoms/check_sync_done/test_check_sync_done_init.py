@@ -1,7 +1,9 @@
 import __builtin__
 import maps
+from mock import patch
 
 from tendrl.commons.objects.cluster.atoms.check_sync_done import CheckSyncDone
+from tendrl.commons.utils.ansible_module_runner import AnsibleRunner
 
 
 class MockCNC(object):
@@ -19,9 +21,12 @@ def init():
     NS.tendrl.objects.ClusterNodeContext = MockCNC
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = "test"
+    NS.publisher_id = "pytest"
 
 
-def test_check_sync_done():
+@patch.object(AnsibleRunner, "run")
+def test_check_sync_done(run):
+    run.return_value = ({"stdout": "test_volume", "rc": 0}, '')
     init()
     test = CheckSyncDone()
     test.parameters = maps.NamedDict()
