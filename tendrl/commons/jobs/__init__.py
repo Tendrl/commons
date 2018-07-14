@@ -78,7 +78,9 @@ def process_job(jid):
     NS.node_context = NS.node_context.load()
     # Check job not already "finished", or "processing"
     try:
-        if job.status in ["finished", "processing"]:
+        if job.status in ["finished",
+                          "processing",
+                          "failed"]:
             return
     except etcd.EtcdKeyNotFound:
         pass
@@ -96,7 +98,7 @@ def process_job(jid):
     # "failed" (the parent job of these jobs will also be
     # marked as "failed")
     if "tendrl/monitor" in NS.node_context.tags and \
-        _timeout == "yes":
+        _timeout == "yes" and job.status == "new":
         _valid_until = job.valid_until
 
         if _valid_until:
@@ -110,28 +112,31 @@ def process_job(jid):
                 # "Timed out"
                 try:
                     job = job.load()
-                    job.status = "failed"
-                    job.save()
+                    if job.status == "new":
+                        job.status = "failed"
+                        job.save()
                 except etcd.EtcdCompareFailed:
                     pass
                 else:
                     job = NS.tendrl.objects.Job(job_id=jid).load()
-                    _msg = str("Timed-out (>10min as 'new')")
-                    job.errors = _msg
-                    job.save()
-                    if job.payload.get('parent') is None:
-                        alert_utils.alert_job_status(
-                            "failed",
-                            "Job timed out (job_id: %s)" % jid,
-                            integration_id=NS.tendrl_context.integration_id or
-                            job.payload['parameters'].get(
-                                'TendrlContext.integration_id'
-                            ),
-                            cluster_name=NS.tendrl_context.cluster_name or
-                            job.payload['parameters'].get(
-                                'TendrlContext.cluster_name'
+                    if job.status == "new":
+                        _msg = str("Timed-out (>10min as 'new')")
+                        job.errors = _msg
+                        job.save()
+                        if job.payload.get('parent') is None:
+                            integration_id = NS.tendrl_context.integration_id
+                            alert_utils.alert_job_status(
+                                "failed",
+                                "Job timed out (job_id: %s)" % jid,
+                                integration_id=integration_id or
+                                job.payload['parameters'].get(
+                                    'TendrlContext.integration_id'
+                                ),
+                                cluster_name=NS.tendrl_context.cluster_name or
+                                job.payload['parameters'].get(
+                                    'TendrlContext.cluster_name'
+                                )
                             )
-                        )
                     return
         else:
             _now_plus_10 = time_utils.now() + datetime.timedelta(minutes=10)
@@ -139,9 +144,12 @@ def process_job(jid):
 
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
+            time.sleep(7)
             job = job.load()
-            job.valid_util = int(_now_plus_10_epoch)
-            job.save()
+            if job.status == "new":
+                # To avoid  server and storage node do save same time
+                job.valid_until = int(_now_plus_10_epoch)
+                job.save()
 
     job = NS.tendrl.objects.Job(job_id=jid).load()
     if job.payload["type"] == NS.type and \
@@ -181,7 +189,6 @@ def process_job(jid):
                 pass
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
-                             tags=NS.node_context.tags,
                              type=NS.type)
             job = job.load()
             job.locked_by = lock_info
@@ -206,7 +213,6 @@ def process_job(jid):
             job = job.load()
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
-                             tags=NS.node_context.tags,
                              type=NS.type)
             if job.locked_by != lock_info:
                 return

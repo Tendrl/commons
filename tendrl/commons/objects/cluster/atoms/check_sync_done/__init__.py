@@ -1,6 +1,7 @@
 import time
 
 from tendrl.commons import objects
+from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import log_utils as logger
 
 
@@ -10,12 +11,19 @@ class CheckSyncDone(objects.BaseAtom):
 
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
-
-        # wait for 360 sec to complete the first round of sync of
+        cmd = cmd_utils.Command('gluster volume list')
+        out, err, rc = cmd.run()
+        # default intervel is 6 min
+        # 5 sec sleep for one count increment (360 / 5)
+        wait_count = 72
+        if not err:
+            volumes = out.split("\n")
+            # 15 sec for each volume
+            wait_count = wait_count + (len(volumes) * 3)
         # cluster data
         loop_count = 0
         while True:
-            if loop_count >= 72:
+            if loop_count >= wait_count:
                 logger.log(
                     "error",
                     NS.publisher_id,
