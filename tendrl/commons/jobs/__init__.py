@@ -189,7 +189,6 @@ def process_job(jid):
                 pass
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
-                             tags=NS.node_context.tags,
                              type=NS.type)
             job = job.load()
             job.locked_by = lock_info
@@ -214,7 +213,6 @@ def process_job(jid):
             job = job.load()
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
-                             tags=NS.node_context.tags,
                              type=NS.type)
             if job.locked_by != lock_info:
                 return
