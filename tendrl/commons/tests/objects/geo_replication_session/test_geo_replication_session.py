@@ -8,6 +8,9 @@ from tendrl.commons.objects.geo_replication_session \
 
 # Testing __init__
 def test_constructor():
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.tendrl_context = maps.NamedDict()
+    NS.tendrl_context.integration_id = "test_integration_id"
     vol_id = "test_vol_id"
     # without pairs
     geo_replication_sesh = GeoReplicationSession(vol_id)
