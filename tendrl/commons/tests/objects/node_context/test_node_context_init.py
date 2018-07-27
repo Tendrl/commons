@@ -492,8 +492,9 @@ def test_on_change(patch_get_node_id,
 
     with patch.object(etcd.Client, "read", return_value=etcd.Client()):
         node_context = NodeContext()
-        node_context.on_change("status", "test_prev_value",
-                               current_value=None)
+        with patch.object(node_context, "save", return_value=None):
+            node_context.on_change("status", "test_prev_value",
+                                   current_value=None)
     with patch.object(etcd.Client, "read", return_value=etcd.Client()):
         node_context = NodeContext()
         node_context.on_change("status", "test_prev_value",

@@ -26,6 +26,11 @@ class MockKey(object):
         return "test_error", "test_error"
 
 
+class MockKeySuccess(object):
+    def run(self):
+        return True, ""
+
+
 def test_install_gdeploy():
     NS.publisher_id = "node_context"
     with pytest.raises(FlowExecutionFailedError):
@@ -131,7 +136,7 @@ def test_gluster_create_ssh_setup_jobs_fails():
             job_id=1,
             status="",
             payload=maps.NamedDict()
-        ).save()
+        )
         NS.gluster_provisioner = importlib.import_module(
             "tendrl.commons.tests.fixtures.plugin").Plugin()
         with patch.object(NS.gluster_provisioner, 'setup',
@@ -156,7 +161,7 @@ def test_gluster_create_ssh_setup_jobs_fails2():
             job_id=1,
             status="",
             payload=maps.NamedDict()
-        ).save()
+        )
         NS.gluster_provisioner = importlib.import_module(
             "tendrl.commons.tests.fixtures.plugin").Plugin()
         with patch.object(NS.gluster_provisioner, 'setup',
@@ -191,8 +196,13 @@ def test_gluster_create_ssh_setup_jobs_succeeds():
                                                 skip_current_node=True)
         with patch.object(NS.gluster_provisioner, 'setup',
                           return_value=["", ""]):
-            utils.gluster_create_ssh_setup_jobs(testParams,
-                                                skip_current_node=False)
+            with patch.object(authorize_key, 'AuthorizeKey',
+                              return_value=MockKeySuccess()):
+                with patch.object(Job, 'save') as save:
+                    save.return_value = None
+                    utils.gluster_create_ssh_setup_jobs(
+                        testParams,
+                        skip_current_node=False)
 
 
 class MockNodeContextExists(object):
