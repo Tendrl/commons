@@ -59,14 +59,13 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 integration_id=integration_id
             ).load()
             _cluster.locked_by = {}
-            _cluster.status = ""
+            _cluster.status = "expand_pending"
             _cluster.current_job = {
                 'job_id': self.job_id,
                 'job_name': self.__class__.__name__,
                 'status': 'failed'
             }
             _cluster.save()
-
             raise FlowExecutionFailedError(
                 "Cluster with integration_id "
                 "(%s) not found, cannot "
@@ -141,14 +140,18 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                     integration_id=integration_id
                 ).load()
                 _cluster.locked_by = {}
-                _cluster.status = ""
+                _cluster.status = "expand_pending"
                 _cluster.current_job = {
                     'job_id': self.job_id,
                     'job_name': self.__class__.__name__,
                     'status': 'failed'
                 }
                 _cluster.save()
-                return False
+                raise FlowExecutionFailedError(
+                    "Failed to expand cluster with integration_id "
+                    "(%s)" % integration_id
+                )
+
             time.sleep(10)
             finished = True
             for job_id in job_ids:
@@ -171,7 +174,21 @@ class ExpandClusterWithDetectedPeers(flows.BaseFlow):
                 job_id=self.parameters['job_id'],
                 flow_id=self.parameters['flow_id']
             )
-            return False
+            _cluster = NS.tendrl.objects.Cluster(
+                integration_id=integration_id
+            ).load()
+            _cluster.status = "expand_pending"
+            _cluster.locked_by = {}
+            _cluster.current_job = {
+                'status': "failed",
+                'job_name': self.__class__.__name__,
+                'job_id': self.job_id
+            }
+            _cluster.save()
+            raise FlowExecutionFailedError(
+                "Failed to expand cluster with integration_id "
+                "(%s)" % integration_id
+            )
         _cluster = NS.tendrl.objects.Cluster(
             integration_id=integration_id
         ).load()

@@ -127,14 +127,16 @@ def test_expand_cluster_with_detected_peers(patch_etcd_utils_read,
     param['TendrlContext.integration_id'] = "integration_id"
     param['TendrlContext.sds_name'] = "test_sds"
     # Run call that covers through about half of the method
-    expand_cluster_with_detected_peers.run()
+    with pytest.raises(FlowExecutionFailedError):
+        expand_cluster_with_detected_peers.run()
     # Checks for error that is called when EtcdKeyNotFound
     with patch.object(etcd_utils, "read", read):
         with pytest.raises(FlowExecutionFailedError):
             expand_cluster_with_detected_peers.run()
     # Change is managed so that the if statement (Line 85-87) gets covered
     NS.tendrl.objects.ClusterNodeContext = MockCNCManaged
-    expand_cluster_with_detected_peers.run()
+    with pytest.raises(FlowExecutionFailedError):
+        expand_cluster_with_detected_peers.run()
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',
