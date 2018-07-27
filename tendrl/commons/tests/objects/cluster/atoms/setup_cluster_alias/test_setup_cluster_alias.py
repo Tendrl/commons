@@ -16,8 +16,8 @@ def load_job_finished(*args):
     return Job(job_id="uuid", status='finished')
 
 
-def load_job_new(*args):
-    return Job(job_id="uuid", status='new')
+def load_job_failed(*args):
+    return Job(job_id="uuid", status='failed')
 
 
 def init():
@@ -64,5 +64,5 @@ def test_run():
     NS.publisher_id = maps.NamedDict()
     sca_obj.parameters['flow_id'] = 'test_flow_id'
     with patch.object(NS.tendrl.objects.Job, 'save', save):
-        with patch.object(Job, 'load', load_job_new):
+        with patch.object(Job, 'load', load_job_failed):
             sca_obj.run()

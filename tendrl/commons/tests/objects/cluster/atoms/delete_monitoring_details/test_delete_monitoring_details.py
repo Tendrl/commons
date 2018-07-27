@@ -25,8 +25,8 @@ def load_job_finished(*args):
     return Job(job_id="uuid", status='finished')
 
 
-def load_job_new(*args):
-    return Job(job_id="uuid", status='new')
+def load_job_failed(*args):
+    return Job(job_id="uuid", status='failed')
 
 
 def init():
@@ -55,7 +55,7 @@ def test_run():
     NS.tendrl_context['integration_id'] = "rete"
     setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job, Cluster=Cluster))
     NS.publisher_id = "publisher"
-    with patch.object(NS.tendrl.objects.Job, 'save', save):
+    with patch.object(Job, 'save', save):
         with patch.object(Job, 'load', load_job_finished):
             obj.run()
 
@@ -64,6 +64,5 @@ def test_run():
     obj.parameters['flow_id'] = 'test_flow_id'
 
     with patch.object(NS.tendrl.objects.Job, 'save', save):
-        with patch.object(Job, 'load', load_job_new):
-            with patch.object(NS.tendrl.objects.Cluster, 'load', load):
-                obj.run()
+        with patch.object(Job, 'load', load_job_failed):
+            obj.run()
