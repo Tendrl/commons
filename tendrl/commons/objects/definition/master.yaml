@@ -836,7 +836,7 @@ namespace.tendrl:
           - rebalance_status_update_failed
           - georep_checkpoint_completed
           - quorum
-          - svc_connecion
+          - svc_connection
           - ec_min_bricks_up
           - afr_quorum_state
           - afr_subvol_state
