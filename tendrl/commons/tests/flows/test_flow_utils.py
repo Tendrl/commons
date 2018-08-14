@@ -263,6 +263,7 @@ class MockJob(object):
         self.payload = None
 
     def load(self):
+        self.status = "processing"
         self.payload = {"parent": "Test payload"}
         return self
 
