@@ -13,7 +13,7 @@ BuildRequires: python-mock
 BuildRequires: python-six
 BuildRequires: systemd
 
-Requires: ansible
+Requires: ansible >= 2.5
 Requires: python-maps
 Requires: python-dateutil
 Requires: python-dns
