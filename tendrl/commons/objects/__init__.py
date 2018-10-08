@@ -263,7 +263,7 @@ class BaseObject(object):
     def _hash(self):
         # Above items cant be part of hash
         _obj_str = "".join(sorted(self.json))
-        self.hash = hashlib.md5(_obj_str).hexdigest()
+        self.hash = hashlib.sha512(_obj_str).hexdigest()
         return self.hash
 
     @thread_safe
