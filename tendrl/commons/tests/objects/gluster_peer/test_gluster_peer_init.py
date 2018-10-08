@@ -59,7 +59,9 @@ def test_gluster_peer():
          },
         {'dir': False,
          'name': 'hash',
-         'value': '60273f6314c5cd257ba27415bceee68d',
+         'value': 'dfc2af50c23cdb7d3677782fd46041994d66538fecb82f51'
+                  'eb155199b9e325a18c8cd6221bd2996ce3c973f42d81d988'
+                  '812e366627cedd51cbda995912641605',
          'key': '/clusters/77deef29-b8e5-4dc5-8247-21e2a409a66a'
                 '/nodes/1/Peers/53dfa0fa-edb2-4966-80b9-86ca'
                 '981c7fcb/hash'
