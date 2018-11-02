@@ -142,30 +142,6 @@ class NodeContext(objects.BaseObject):
                     self.tags.remove(_tag)
                     self.save()
                     etcd_utils.delete(_index_key)
-                    _msg = "node_sync, STALE provisioner node "\
-                        "found! re-configuring monitoring "\
-                        "(job-id: %s) on this node"
-                    payload = {
-                        "tags": ["tendrl/node_%s" % self.node_id],
-                        "run": "tendrl.flows.ConfigureMonitoring",
-                        "status": "new",
-                        "parameters": {
-                            'TendrlContext.integration_id': _tc.integration_id
-                        },
-                        "type": "node"
-                    }
-                    _job_id = str(uuid.uuid4())
-                    NS.tendrl.objects.Job(
-                        job_id=_job_id,
-                        status="new",
-                        payload=payload
-                    ).save()
-                    logger.log(
-                        "debug",
-                        NS.publisher_id,
-                        {"message": _msg % _job_id}
-                    )
-
                 if _tc.sds_name in ["gluster", "RHGS"]:
                     bricks = etcd_utils.read(
                         "clusters/{0}/Bricks/all/{1}".format(
