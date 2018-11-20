@@ -3,6 +3,8 @@ import time
 import uuid
 
 from tendrl.commons.event import Event
+from tendrl.commons.flows.import_cluster.gluster_help \
+    import enable_disable_volume_profiling
 from tendrl.commons.flows.import_cluster.gluster_help import import_gluster
 from tendrl.commons.flows import utils as flow_utils
 from tendrl.commons.message import ExceptionMessage
@@ -36,6 +38,34 @@ class ImportCluster(objects.BaseAtom):
             cluster_nodes = []
             if len(node_list) > 1:
                 # This is the master node for this flow
+                # Find number of volumes in the cluster to run profiling job
+                cmd = cmd_utils.Command('gluster volume list')
+                out, err, rc = cmd.run()
+                if not err:
+                    volumes = filter(None, out.split("\n"))
+                    ret_val, err = enable_disable_volume_profiling(
+                        volumes, self.parameters)
+                    if not ret_val:
+                        logger.log(
+                            "error",
+                            NS.publisher_id,
+                            {"message": "Failed to %s profiling. Error: %s"
+                                        % (_cluster.volume_profiling_flag, err)
+                             },
+                            job_id=self.parameters['job_id'],
+                            flow_id=self.parameters['flow_id']
+                        )
+                        return False
+                else:
+                    logger.log(
+                        "error",
+                        NS.publisher_id,
+                        {"message": "Failed to fetch volumes info for "
+                                    "enable/disable profiling."},
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id']
+                    )
+                    return False
                 for node in node_list:
                     if NS.node_context.node_id != node:
                         new_params = self.parameters.copy()
