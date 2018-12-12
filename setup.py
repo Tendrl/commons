@@ -112,7 +112,7 @@ setup(
     license="LGPL-2.1+",
     zip_safe=False,
     install_requires=[
-        "ansible",
+        "ansible>=2.5",
         "psutil",
         "python-etcd",
         "python-dateutil",
