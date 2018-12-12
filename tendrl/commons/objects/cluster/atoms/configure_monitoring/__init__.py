@@ -92,12 +92,14 @@ class ConfigureMonitoring(objects.BaseAtom):
         self.parameters['Service.name'] = 'collectd'
         plugin_config_success = True
         graphite_host = (
-            NS.config.data.get('graphite_host') or
-            NS.config.data['etcd_connection']
+            NS.config.data.get(
+                'graphite_host'
+            ) or NS.config.data['etcd_connection']
         )
         graphite_port = (
-            NS.config.data.get('graphite_port') or
-            2003
+            NS.config.data.get(
+                'graphite_port'
+            ) or 2003
         )
         plugin_params = {
             "graphite_host": graphite_host,
