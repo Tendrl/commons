@@ -92,12 +92,14 @@ class ConfigureMonitoring(objects.BaseAtom):
         self.parameters['Service.name'] = 'collectd'
         plugin_config_success = True
         graphite_host = (
-            NS.config.data.get('graphite_host') or
-            NS.config.data['etcd_connection']
+            NS.config.data.get(
+                'graphite_host'
+            ) or NS.config.data['etcd_connection']
         )
         graphite_port = (
-            NS.config.data.get('graphite_port') or
-            2003
+            NS.config.data.get(
+                'graphite_port'
+            ) or 2003
         )
         plugin_params = {
             "graphite_host": graphite_host,
@@ -129,11 +131,6 @@ class ConfigureMonitoring(objects.BaseAtom):
                 plugin_params
             )
         if NS.tendrl_context.sds_name in ['gluster', 'RHGS']:
-            plugin_params['is_provisioner_node'] = False
-            if "provisioner/%s" % (
-                NS.tendrl_context.integration_id
-            ) in NS.node_context.tags:
-                plugin_params['is_provisioner_node'] = True
             for gluster_plugin in GLUSTER_CLUSTER_PLUGINS:
                 plugin_config_success &= self._configure_plugin(
                     gluster_plugin,
