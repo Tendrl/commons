@@ -104,7 +104,6 @@ class ConfigureMonitoring(objects.BaseAtom):
         plugin_params = {
             "graphite_host": graphite_host,
             "graphite_port": graphite_port,
-            "brick_path_separator": ":",
             "fqdn": NS.node_context.fqdn,
             "integration_id": NS.tendrl_context.integration_id,
             "node_id": NS.node_context.node_id,
