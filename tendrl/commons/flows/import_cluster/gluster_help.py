@@ -1,4 +1,6 @@
 import os
+import subprocess
+import time
 
 import pkg_resources
 from ruamel import yaml
@@ -186,3 +188,69 @@ def import_gluster(parameters):
         )
 
     return True, ""
+
+
+def enable_disable_volume_profiling(volumes, parameters):
+    try:
+        cluster = NS.tendrl.objects.Cluster(
+            integration_id=NS.tendrl_context.integration_id
+        ).load()
+        # Enable / disable based on cluster flag volume_profiling_flag
+        # should be done only once while first sync. Later the volume
+        # level volume_profiling_state should be set based on individual
+        # volume level values
+        if cluster.volume_profiling_flag == "enable":
+            logger.log("info",
+                       NS.publisher_id,
+                       {"message": "Starting profiling for volumes"},
+                       job_id=parameters['job_id'],
+                       flow_id=parameters['flow_id']
+                       )
+            for volume in volumes:
+                p = subprocess.Popen(
+                    ["gluster",
+                     "volume",
+                     "profile",
+                     volume,
+                     "start"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                retry = 1
+                while True:
+                    if p.poll() is not None:
+                        break
+                    elif retry > 10 and p.poll() is None:
+                        p.kill()
+                        break
+                    retry += 1
+                    time.sleep(0.5)
+        if cluster.volume_profiling_flag == "disable":
+            logger.log("info",
+                       NS.publisher_id,
+                       {"message": "Stopping profiling for volumes"},
+                       job_id=parameters['job_id'],
+                       flow_id=parameters['flow_id']
+                       )
+            for volume in volumes:
+                p = subprocess.Popen(
+                    ["gluster",
+                     "volume",
+                     "profile",
+                     volume,
+                     "stop"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                retry = 1
+                while True:
+                    if p.poll() is not None:
+                        break
+                    elif retry > 10 and p.poll() is None:
+                        p.kill()
+                        break
+                    retry += 1
+                    time.sleep(0.5)
+        return True, ""
+    except Exception as ex:
+        return False, str(ex)
