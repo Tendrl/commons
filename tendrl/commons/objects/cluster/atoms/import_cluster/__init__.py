@@ -58,14 +58,15 @@ class ImportCluster(objects.BaseAtom):
                         return False
                 else:
                     logger.log(
-                        "error",
+                        "warning",
                         NS.publisher_id,
-                        {"message": "Failed to fetch volumes info for "
-                                    "enable/disable profiling."},
+                        {"message": "Unable to find list of volumes in a "
+                                    "cluster, Skipping volume enable/disable "
+                                    "profiling flow. error: %s" % err},
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id']
                     )
-                    return False
+                    # continue the import flow
                 for node in node_list:
                     if NS.node_context.node_id != node:
                         new_params = self.parameters.copy()
