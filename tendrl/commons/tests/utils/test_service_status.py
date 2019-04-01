@@ -20,19 +20,19 @@ def test_constructor():
 
 def test_status():
     service_status = ServiceStatus("service_status")
-    ret = service_status.status()
+    ret, _ = service_status.status()
     assert ret is False
     with patch.object(cmd_utils.Command, 'run') as mock_run:
         mock_run.return_value = run(True)
-        ret = service_status.status()
+        ret, _ = service_status.status()
         assert ret is False
     with patch.object(cmd_utils.Command, 'run') as mock_run:
         mock_run.return_value = run(False)
-        ret = service_status.status()
+        ret, _ = service_status.status()
         assert ret is True
 
 
 def test_exists():
     service_status = ServiceStatus("service_status")
-    ret = service_status.exists()
+    ret, _ = service_status.exists()
     assert ret is False
