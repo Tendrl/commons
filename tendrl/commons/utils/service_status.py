@@ -24,14 +24,14 @@ class ServiceStatus(object):
             )
         )
         if rc == 0 and stdout.find('LoadState=loaded') >= 0:
-            return True
+            return True, stderr
         else:
-            return False
+            return False, stderr
 
     def status(self):
         stdout, stderr, rc = self._execute_service_command('is-active')
         if "inactive" in stdout:
-            return False
+            return False, stderr
         elif "active" in stdout:
-            return True
-        return False
+            return True, stderr
+        return False, stderr
