@@ -18,7 +18,7 @@ def test_constructor(monkeypatch):
         return "Thread Consuming Job"
     monkeypatch.setattr(jobs, 'JobConsumerThread', job_consume)
     manager = Manager("test")
-    assert manager._sds_sync_thread is "test"
+    assert manager._sds_sync_thread == "test"
     assert manager._message_handler_thread is None
     assert manager._job_consumer_thread == "Thread Consuming Job"
 
