@@ -130,6 +130,8 @@ def test_run():
     NS.publisher_id = "test"
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job))
+    setattr(NS, "config", maps.NamedDict(data={}))
+    NS.tendrl.objects.NodeContext = mock.MagicMock()
     NS.tendrl.objects.Cluster = Cluster
     with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(NS._int.client, 'read', read):
