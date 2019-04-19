@@ -17,7 +17,7 @@ class StopServices(flows.BaseFlow):
                 NS.publisher_id,
                 {
                     "message": "Stopping service %s on node %s" %
-                               (service, NS.node_context.node_id)
+                               (service, NS.node_context.fqdn)
                 },
                 job_id=self.parameters['job_id'],
                 flow_id=self.parameters['flow_id'],
@@ -39,7 +39,7 @@ class StopServices(flows.BaseFlow):
                         NS.publisher_id,
                         {
                             "message": "%s not running on "
-                            "%s" % (service, NS.node_context.node_id)
+                            "%s" % (service, NS.node_context.fqdn)
                         },
                         job_id=self.parameters['job_id'],
                         flow_id=self.parameters['flow_id'],
@@ -57,7 +57,7 @@ class StopServices(flows.BaseFlow):
                         "message": "Could not stop %s"
                         " service on %s. Error: %s" % (
                             service,
-                            NS.node_context.node_id,
+                            NS.node_context.fqdn,
                             err
                         )
                     },
@@ -76,7 +76,7 @@ class StopServices(flows.BaseFlow):
                         "message": "Could not disable %s"
                         " service on %s. Error: %s" % (
                             service,
-                            NS.node_context.node_id,
+                            NS.node_context.fqdn,
                             err
                         )
                     },

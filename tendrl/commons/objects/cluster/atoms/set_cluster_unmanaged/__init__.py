@@ -10,20 +10,20 @@ class SetClusterUnmanaged(objects.BaseAtom):
 
     def run(self):
         integration_id = self.parameters['TendrlContext.integration_id']
-        logger.log(
-            "info",
-            NS.get("publisher_id", None),
-            {
-                "message": "Setting cluster %s is_managed to \"no\":" %
-                           integration_id
-            },
-            job_id=self.parameters['job_id'],
-            flow_id=self.parameters['flow_id']
-        )
         try:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=integration_id
             ).load()
+            logger.log(
+                "info",
+                NS.get("publisher_id", None),
+                {
+                    "message": "Setting cluster %s is_managed to \"no\":" %
+                               _cluster.short_name
+                },
+                job_id=self.parameters['job_id'],
+                flow_id=self.parameters['flow_id']
+            )
             _cluster.is_managed = "no"
             _cluster.save()
         except etcd.EtcdKeyNotFound:
