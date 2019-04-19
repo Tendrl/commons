@@ -1,4 +1,5 @@
 import etcd
+import json
 
 from tendrl.commons import objects
 from tendrl.commons.utils import etcd_utils
@@ -83,6 +84,45 @@ class DeleteClusterDetails(objects.BaseAtom):
             # No cluster alerts, continue
             pass
 
+        try:
+            index_key = "/indexes/tags/tendrl/integration/%s" % integration_id
+            _node_ids = etcd_utils.read(
+                index_key
+            ).value
+            _node_ids = json.loads(_node_ids)
+            for _node_id in _node_ids[:]:
+                node_obj = NS.tendrl.objects.NodeContext(
+                    node_id=_node_id
+                ).load()
+                # Remove cluster indexes for down node
+                if node_obj.status.lower() == "down":
+                    _node_ids.remove(_node_id)
+                    # Removing down node details
+                    logger.log(
+                        "warning",
+                        NS.publisher_id,
+                        {
+                            "message": "Deleting down node %s details" %
+                                       node_obj.fqdn
+                        },
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id'],
+                    )
+                    etcd_keys_to_delete.append(
+                        "/nodes/%s" % _node_id
+                    )
+            etcd_utils.write(index_key, json.dumps(_node_ids))
+        except (
+            etcd.EtcdKeyNotFound,
+            ValueError,
+            TypeError,
+            AttributeError,
+            IndexError
+        ):
+            # If index details not present then we don't need to stop
+            # un-manage flow, Because when node-agent work properly these
+            # details are populated again by the node sync
+            pass
         # Remove the cluster details
         for key in list(set(etcd_keys_to_delete)):
             try:
@@ -105,5 +145,4 @@ class DeleteClusterDetails(objects.BaseAtom):
         ).load()
         cluster.short_name = ""
         cluster.save()
-
         return True
