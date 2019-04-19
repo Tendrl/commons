@@ -17,10 +17,10 @@ class UnmanageCluster(flows.BaseFlow):
         ).load()
         if _cluster.is_managed == "no":
             if _cluster.current_job['job_name'] == self.__class__.__name__ \
-                and _cluster.current_job['status'] == 'finished':
-                    raise FlowExecutionFailedError(
-                        "Cluster is already in un-managed state"
-                    )
+                    and _cluster.current_job['status'] == 'finished':
+                raise FlowExecutionFailedError(
+                    "Cluster is already in un-managed state"
+                )
         if _cluster.current_job['status'] == 'in_progress' and \
             (
                 'job_id' in _cluster.locked_by and

@@ -3,7 +3,11 @@ from dateutil import parser
 from inspect import getframeinfo
 from inspect import stack
 import json
+from ruamel import yaml
 import sys
+from tendrl.commons.utils.time_utils import now  # flake8:noqa
+import traceback
+
 is_collectd_imported = False
 if '/usr/lib64/collectd' in sys.path:
     is_collectd_imported = True
@@ -15,11 +19,6 @@ if is_collectd_imported:
 # https://github.com/collectd/collectd/issues/2179
 # An appropriate solution needs to be carved out
 
-
-from tendrl.commons.utils.time_utils import now  # flake8:noqa
-
-import traceback
-from ruamel import yaml
 
 class Message(object):
     """At the time of message object intialization
@@ -96,13 +95,13 @@ class Message(object):
         # Check payload type is dict
         if type(self.payload) != dict:
             return False
-        
+
         # Check mandatory fields
         if (self.priority not in priorities or
             self.node_id is None or
                 "message" not in self.payload):
             return False
-        
+
         if self.job_id is not None:
             if self.flow_id is None:
                 return False
@@ -119,7 +118,7 @@ class ExceptionMessage(Message):
         # skip last function call
         # This will give traceback upto before try function call
         formatted_stack = traceback.extract_stack()[:-2]
-        _, _ , exc_traceback = sys.exc_info()
+        _, _, exc_traceback = sys.exc_info()
         # This will give traceback inside try block
         recent_call = traceback.extract_tb(exc_traceback)
         caller = getframeinfo(stack()[1][0])
@@ -149,12 +148,13 @@ class ExceptionMessage(Message):
         tb = []
         for item in formatted_stack:
             file, line, function, statement = item
-            tb.append({"file" : file,
-                       "line" : line,
-                       "function" : function,
-                       "statement" : statement
+            tb.append({"file": file,
+                       "line": line,
+                       "function": function,
+                       "statement": statement
                        })
         return tb
+
 
 # To serialize when json contains old message object
 def serialize_message(obj):
