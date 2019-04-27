@@ -32,7 +32,7 @@ def log(log_priority, publisher_id, log_payload, job_id=None,
             )
         )
     except Exception:
-            if log_priority.lower() == "error":
-                sys.stderr.write(log_payload.get("message", "") + "\n")
-            else:
-                sys.stdout.write(log_payload.get("message", "") + "\n")
+        if log_priority.lower() == "error":
+            sys.stderr.write(log_payload.get("message", "") + "\n")
+        else:
+            sys.stdout.write(log_payload.get("message", "") + "\n")
