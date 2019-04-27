@@ -3,7 +3,9 @@ import etcd
 import maps
 import mock
 from mock import patch
+import pytest
 
+from tendrl.commons.flows.exceptions import FlowExecutionFailedError
 from tendrl.commons.objects.node.flows.stop_services import \
     StopServices
 import tendrl.commons.objects.node_context as node
@@ -27,11 +29,18 @@ def service_success(param):
 
 
 def service_failed(param):
-    return 'error', '', 0
+    return '', 'error', 0
 
 
 def service_info(*args, **kwargs):
-    return {"exists": True, "running": True}
+    return {"exists": True, "running": True, "error": []}
+
+
+def service_error(*args, **kwargs):
+    return {"exists": True,
+            "running": False,
+            "error": ["permission issue"]
+            }
 
 
 def mock_log(*args, **kwargs):
@@ -106,6 +115,6 @@ def test_run():
                 assert ret_val is True
     with patch.object(logger, 'log', mock_log):
         with patch.object(cmd_utils.Command, 'run', service_failed):
-            with patch.object(Service, 'get_service_info', service_info):
-                ret_val = obj.run()
-                assert ret_val is False
+            with patch.object(Service, 'get_service_info', service_error):
+                with pytest.raises(FlowExecutionFailedError):
+                    obj.run()

@@ -74,6 +74,7 @@ class ImportCluster(objects.BaseAtom):
                         # create same flow for each node in node list except
                         #  $this
                         payload = {"tags": ["tendrl/node_%s" % node],
+                                   "node_id": node,
                                    "run": "tendrl.flows.ImportCluster",
                                    "status": "new",
                                    "parameters": new_params,
@@ -115,7 +116,8 @@ class ImportCluster(objects.BaseAtom):
                 logger.log(
                     "error",
                     NS.publisher_id,
-                    {"message": "Failed to detect underlying cluster version"},
+                    {"message": "Failed to detect underlying cluster "
+                     "version. Error: %s" % err},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
@@ -220,15 +222,6 @@ class ImportCluster(objects.BaseAtom):
                         job_id=self.parameters['job_id']
                     ).load()
                     if loop_count >= wait_count:
-                        logger.log(
-                            "error",
-                            NS.publisher_id,
-                            {"message": "Import jobs on cluster(%s) not yet "
-                             "complete on all nodes(%s). Timing out." %
-                             (_cluster.short_name, str(node_list))},
-                            job_id=self.parameters['job_id'],
-                            flow_id=self.parameters['flow_id']
-                        )
                         # Marking child jobs as failed which did not complete
                         # as the parent job has timed out. This has to be done
                         # explicitly because these jobs will still be processed
@@ -239,10 +232,41 @@ class ImportCluster(objects.BaseAtom):
                                 job_id=child_job_id
                             ).load()
                             if child_job.status not in ["finished", "failed"]:
+                                if child_job.status in ["new", ""]:
+                                    node_id = child_job.payload.get(
+                                        "node_id", ""
+                                    )
+                                    node_obj = NS.tendrl.objects.NodeContext(
+                                        node_id=node_id
+                                    ).load()
+                                    logger.log(
+                                        "error",
+                                        NS.publisher_id,
+                                        {"message": "Import child job %s is "
+                                         "not yet picked by %s, Either node is"
+                                         " down or tendrl-node-agent service "
+                                         "is not running" % (
+                                             child_job.job_id,
+                                             node_obj.fqdn
+                                         )},
+                                        job_id=self.parameters['job_id'],
+                                        flow_id=self.parameters['flow_id']
+                                    )
                                 child_job.status = "failed"
                                 child_job.save()
+
+                        logger.log(
+                            "error",
+                            NS.publisher_id,
+                            {"message": "Import jobs on cluster(%s) not yet "
+                             "complete on all nodes(%s). Timing out." %
+                             (_cluster.short_name, str(node_list))},
+                            job_id=self.parameters['job_id'],
+                            flow_id=self.parameters['flow_id']
+                        )
+
                         return False
-                    time.sleep(10)
+                    time.sleep(5)
                     completed = True
                     for child_job_id in parent_job.children:
                         child_job = NS.tendrl.objects.Job(
