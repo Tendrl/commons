@@ -68,6 +68,7 @@ namespace.tendrl:
         optional:
           - Cluster.short_name
       pre_run:
+        - tendrl.objects.Node.atoms.CheckRequiredServicesRunning
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
@@ -83,6 +84,7 @@ namespace.tendrl:
     UnmanageCluster:
       tags:
         - "tendrl/monitor"
+        - "tendrl/integration/monitoring"
       atoms:
         - tendrl.objects.Cluster.atoms.SetClusterUnmanaged
         - tendrl.objects.Cluster.atoms.StopMonitoringServices
@@ -97,6 +99,7 @@ namespace.tendrl:
         optional:
           - Cluster.delete_telemetry_data
       pre_run:
+        - tendrl.objects.Node.atoms.CheckRequiredServicesRunning
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
@@ -378,12 +381,16 @@ namespace.tendrl:
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
+        node_id:
+          type: String
         running:
           type: String
         exists:
           type: String
         service:
           type: String
+        error:
+          type: List
       enabled: true
       list: nodes/$NodeContext.node_id/Services
       help: "Service"
@@ -938,6 +945,13 @@ namespace.tendrl:
           run: tendrl.objects.Node.atoms.Cmd
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
+        CheckRequiredServicesRunning:
+          help: Check all necessary services are running before import or unmanage
+          enabled: true
+          run: tendrl.objects.Node.atoms.CheckRequiredServicesRunning
+          type: check
+          uuid: aec1d8b6-0689-4b14-a7cb-d085a0e1d10c
+          version: 1
       attrs:
         node_id:
           type: String
