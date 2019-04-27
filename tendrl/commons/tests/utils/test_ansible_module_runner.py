@@ -24,18 +24,18 @@ def test_AnsibleExecutableGenerationFailed_constructor():
     ansible_obj = AnsibleExecutableGenerationFailed()
     assert ansible_obj.message == "Executabe could not be generated for " \
                                   "module None . Error: None"
-    ansible_obj = AnsibleExecutableGenerationFailed(module_path="Test\path",
+    ansible_obj = AnsibleExecutableGenerationFailed(module_path="Test\\path",
                                                     arguments="temp_args",
                                                     err="No Error")
     assert ansible_obj.message == "Executabe could not be generated for " \
-                                  "module Test\path . Error: No Error"
+                                  "module Test\\path . Error: No Error"
 
 
 def test_AnsibleModuleNotFound_constructor():
     ansible_obj = AnsibleModuleNotFound()
     assert ansible_obj.message == "Ansible module None not found"
-    ansible_obj = AnsibleModuleNotFound(module_path="Test\path")
-    assert ansible_obj.message == "Ansible module Test\path not found"
+    ansible_obj = AnsibleModuleNotFound(module_path="Test\\path")
+    assert ansible_obj.message == "Ansible module Test\\path not found"
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',

@@ -188,7 +188,7 @@ def test_save():
             with patch.object(Client, "write", return_value=True):
                 with patch.object(Client, "read",
                                   return_value=maps.NamedDict(value="")):
-                        obj.save(True)
+                    obj.save(True)
             with patch.object(Client, "write", return_value=True):
                 with patch.object(objects.BaseObject, "_hash",
                                   return_value=None):

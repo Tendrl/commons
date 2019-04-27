@@ -39,7 +39,9 @@ class JobConsumerThread(threading.Thread):
             _job_sync_interval = 5
             NS.node_context = NS.node_context.load()
             NS.tendrl_context = NS.tendrl_context.load()
-            if "tendrl/monitor" not in NS.node_context.tags:
+            if "tendrl/monitor" not in NS.node_context.tags and \
+                "tendrl/integration/monitoring" not in NS.node_context.tags:
+                # Storage node will enter in this block
                 if NS.tendrl_context.integration_id is None or \
                         NS.node_context.fqdn is None:
                     time.sleep(_job_sync_interval)
@@ -94,11 +96,10 @@ def process_job(jid):
         pass
 
     # tendrl-node-agent tagged as tendrl/monitor will ensure
-    # >10 min old "new" jobs are timed out and marked as
-    # "failed" (the parent job of these jobs will also be
-    # marked as "failed")
-    if "tendrl/monitor" in NS.node_context.tags and \
-        _timeout == "yes" and job.status == "new":
+    # >10 min old "new" parent jobs are timed out and marked
+    # as "failed"
+    if "tendrl/monitor" in NS.node_context.tags and _timeout == "yes" and \
+        job.status == "new" and job.payload.get('parent') is None:
         _valid_until = job.valid_until
 
         if _valid_until:
@@ -110,42 +111,31 @@ def process_job(jid):
                 # Job has "new" status since 10 minutes,
                 # mark status as "failed" and Job.error =
                 # "Timed out"
-                try:
-                    job = job.load()
-                    if job.status == "new":
-                        job.status = "failed"
-                        job.save()
-                except etcd.EtcdCompareFailed:
-                    pass
-                else:
-                    job = NS.tendrl.objects.Job(job_id=jid).load()
-                    if job.status == "new":
-                        _msg = str("Timed-out (>10min as 'new')")
-                        job.errors = _msg
-                        job.save()
-                        if job.payload.get('parent') is None:
-                            integration_id = NS.tendrl_context.integration_id
-                            alert_utils.alert_job_status(
-                                "failed",
-                                "Job timed out (job_id: %s)" % jid,
-                                integration_id=integration_id or
-                                job.payload['parameters'].get(
-                                    'TendrlContext.integration_id'
-                                ),
-                                cluster_name=NS.tendrl_context.cluster_name or
-                                job.payload['parameters'].get(
-                                    'TendrlContext.cluster_name'
-                                )
-                            )
-                    return
+                _msg = str("Timed-out (>10min as 'new')")
+                job.errors = _msg
+                job.status = "failed"
+                job.save()
+                integration_id = NS.tendrl_context.integration_id
+                alert_utils.alert_job_status(
+                    "failed",
+                    "Job timed out (job_id: %s)" % jid,
+                    integration_id=integration_id or
+                    job.payload['parameters'].get(
+                        'TendrlContext.integration_id'
+                    ),
+                    cluster_name=NS.tendrl_context.cluster_name or
+                    job.payload['parameters'].get(
+                        'TendrlContext.cluster_name'
+                    )
+                )
+                return
         else:
             _now_plus_10 = time_utils.now() + datetime.timedelta(minutes=10)
             _epoch_start = datetime.datetime(1970, 1, 1).replace(tzinfo=utc)
 
             _now_plus_10_epoch = (_now_plus_10 -
                                   _epoch_start).total_seconds()
-            time.sleep(7)
-            job = job.load()
+            job = NS.tendrl.objects.Job(job_id=jid).load()
             if job.status == "new":
                 # To avoid  server and storage node do save same time
                 job.valid_until = int(_now_plus_10_epoch)
@@ -190,7 +180,7 @@ def process_job(jid):
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              type=NS.type)
-            job = job.load()
+            job = NS.tendrl.objects.Job(job_id=jid).load()
             job.locked_by = lock_info
             job.status = "processing"
             job.save(ttl=DEFAULT_JOB_TTL)
@@ -209,8 +199,8 @@ def process_job(jid):
                     obj_name, flow_name)
             else:
                 runnable_flow = current_ns.ns.get_flow(flow_name)
-
-            job = job.load()
+            time.sleep(3)
+            job = NS.tendrl.objects.Job(job_id=jid).load()
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
                              type=NS.type)
@@ -219,11 +209,14 @@ def process_job(jid):
 
             the_flow = runnable_flow(parameters=job.payload[
                 'parameters'], job_id=job.job_id)
+            # Tendrl server does not have fqdn in node_context
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Starting Job %s" %
-                            job.job_id},
+                {"message": "Starting %s Job: %s on %s" %
+                    (job.payload['run'].split('.')[-1],
+                     job.job_id,
+                     NS.node_context.fqdn or "server")},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
@@ -231,8 +224,10 @@ def process_job(jid):
             logger.log(
                 "info",
                 NS.publisher_id,
-                {"message": "Running %s" %
-                            job.payload['run'].split('.')[-1]},
+                {"message": "Running %s job: %s on %s" %
+                    (job.payload['run'].split('.')[-1],
+                     job.job_id,
+                     NS.node_context.fqdn or "server")},
                 job_id=job.job_id,
                 flow_id=the_flow.parameters['flow_id']
             )
@@ -240,7 +235,7 @@ def process_job(jid):
             the_flow.run()
 
             try:
-                job = job.load()
+                job = NS.tendrl.objects.Job(job_id=jid).load()
                 job.status = "finished"
                 job.save()
             except etcd.EtcdCompareFailed:
@@ -305,7 +300,7 @@ def process_job(jid):
                 )
 
             try:
-                job = job.load()
+                job = NS.tendrl.objects.Job(job_id=jid).load()
                 job.status = "failed"
                 job.save()
             except etcd.EtcdCompareFailed:
@@ -314,7 +309,7 @@ def process_job(jid):
                        "job status invalid"
                 raise FlowExecutionFailedError(_msg)
             else:
-                job = job.load()
+                job = NS.tendrl.objects.Job(job_id=jid).load()
                 job.errors = _trace
                 if job.payload.get('parent') is None:
                     alert_utils.alert_job_status(
