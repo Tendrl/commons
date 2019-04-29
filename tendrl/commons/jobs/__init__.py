@@ -199,7 +199,7 @@ def process_job(jid):
                     obj_name, flow_name)
             else:
                 runnable_flow = current_ns.ns.get_flow(flow_name)
-            time.sleep(3)
+            time.sleep(2)
             job = NS.tendrl.objects.Job(job_id=jid).load()
             lock_info = dict(node_id=NS.node_context.node_id,
                              fqdn=NS.node_context.fqdn,
