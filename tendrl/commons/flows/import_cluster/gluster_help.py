@@ -60,8 +60,14 @@ def import_gluster(parameters):
     try:
         out, err = runner.run()
         if type(out) is dict and out.get('rc', 1) != 0:
+            if 'msg' in out:
+                err = out['msg']
+            elif 'stderr' in out:
+                err = out['stderr']
+            else:
+                err = out
             err_msg = "Could not install tendrl-gluster-integration " \
-                "on %s. Error: %s" % (NS.node_context.fqdn, out.get('msg', ''))
+                "on %s. Error: %s" % (NS.node_context.fqdn, err)
             logger.log(
                 "error",
                 NS.publisher_id,
