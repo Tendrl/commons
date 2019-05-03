@@ -1,9 +1,12 @@
 import os
 import subprocess
+import sys
 import tempfile
 
 import ansible.executor.module_common as module_common
 from ansible import modules
+from ansible.parsing.dataloader import DataLoader
+from ansible.template import Templar
 
 from tendrl.commons.utils import log_utils as logger
 
@@ -66,13 +69,16 @@ class AnsibleRunner(object):
         modname = os.path.basename(self.module_path)
         modname = os.path.splitext(modname)[0]
         try:
+            task_vars = {}
+            task_vars['ansible_python_interpreter'] = sys.executable if \
+                sys.executable else '/usr/bin/python'
             (module_data, module_style, shebang) = \
                 module_common.modify_module(
                     modname,
                     self.module_path,
                     self.argument_dict,
-                    None,
-                    task_vars={}
+                    Templar(loader=DataLoader()),
+                    task_vars=task_vars
                 )
         except Exception as e:
             logger.log(
