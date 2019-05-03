@@ -16,7 +16,7 @@ class CheckServiceStatus(BaseAtom):
             job_id=self.parameters['job_id'],
             flow_id=self.parameters['flow_id']
         )
-        response = ServiceStatus(service_name).status()
+        response, error = ServiceStatus(service_name).status()
         # and then check the response...
         if response:
             logger.log(
@@ -34,9 +34,10 @@ class CheckServiceStatus(BaseAtom):
                 "error",
                 NS.publisher_id,
                 {"message": "Failed to check status of %s on "
-                 "%s" % (
+                 "%s. Error: %s" % (
                      service_name,
-                     NS.node_context.fqdn)},
+                     NS.node_context.fqdn,
+                     error)},
                 job_id=self.parameters['job_id'],
                 flow_id=self.parameters['flow_id']
             )

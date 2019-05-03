@@ -114,7 +114,10 @@ class AnsibleRunner(object):
                                    stderr=subprocess.PIPE
                                    )
             out, err = cmd.communicate()
-            result = json.loads(out)
+            if err:
+                result = {'stderr': repr(err)}
+            else:
+                result = json.loads(out)
 
         except (subprocess.CalledProcessError, ValueError) as ex:
             result = {'stderr': repr(ex)}

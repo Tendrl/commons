@@ -107,7 +107,13 @@ def watch(obj, key):
                     attr = key.rstrip("/").split("/")[-1]
                     obj.on_change(attr, prev_val,
                                   cur_val)
-        except etcd.EtcdKeyNotFound:
+        except Exception as ex:
+            # etcd only keeps the responses of the most recent 1000
+            # events across all etcd keys, So we may receive a 401
+            # EventIndexCleared error.
+            if isinstance(ex, etcd.EtcdEventIndexCleared):
+                continue
+            # When watch crash then clear key from the watchers
             NS._int.watchers.pop(key, None)
             return
 

@@ -93,6 +93,11 @@ class NodeContext(objects.BaseObject):
     def save(self, update=True, ttl=None):
         super(NodeContext, self).save(update)
         status = self.value + "/status"
+        if self.status == "UP" and ttl is None:
+            # Set ttl always when node status in up
+            ttl = int(
+                NS.config.data.get("sync_interval", 60)
+            )
         if ttl:
             self._ttl = ttl
             try:
@@ -110,54 +115,61 @@ class NodeContext(objects.BaseObject):
                 node_id=self.node_id,
                 integration_id=_tc.integration_id
             ).load()
-            if current_value is None and str(_cnc.is_managed).lower() == "yes":
+            if current_value is None and _tc.integration_id:
                 self.status = "DOWN"
                 self.save()
-                msg = "Node {0} is DOWN".format(self.fqdn)
-                event_utils.emit_event(
-                    "node_status",
-                    self.status,
-                    msg,
-                    "node_{0}".format(self.fqdn),
-                    "WARNING",
-                    node_id=self.node_id,
-                    integration_id=_tc.integration_id
-                )
-                # Load cluster_node_context will load node_context
-                # and it will be updated with latest values
-                _cnc_new = \
-                    NS.tendrl.objects.ClusterNodeContext(
+                if str(_cnc.is_managed).lower() == "yes":
+                    msg = "Node {0} is DOWN".format(self.fqdn)
+                    event_utils.emit_event(
+                        "node_status",
+                        self.status,
+                        msg,
+                        "node_{0}".format(self.fqdn),
+                        "WARNING",
                         node_id=self.node_id,
-                        integration_id=_tc.integration_id,
-                        first_sync_done=_cnc.first_sync_done,
-                        is_managed=_cnc.is_managed
+                        integration_id=_tc.integration_id
                     )
-                _cnc_new.save()
-                del _cnc_new
-                # Update cluster details
-                self.update_cluster_details(_tc.integration_id)
-                _tag = "provisioner/%s" % _tc.integration_id
-                if _tag in self.tags:
-                    _index_key = "/indexes/tags/%s" % _tag
-                    self.tags.remove(_tag)
-                    self.save()
-                    etcd_utils.delete(_index_key)
-                if _tc.sds_name in ["gluster", "RHGS"]:
-                    bricks = etcd_utils.read(
-                        "clusters/{0}/Bricks/all/{1}".format(
-                            _tc.integration_id,
-                            self.fqdn
+                    # Load cluster_node_context will load node_context
+                    # and it will be updated with latest values
+                    _cnc_new = \
+                        NS.tendrl.objects.ClusterNodeContext(
+                            node_id=self.node_id,
+                            integration_id=_tc.integration_id,
+                            first_sync_done=_cnc.first_sync_done,
+                            is_managed=_cnc.is_managed
                         )
-                    )
-
-                    for brick in bricks.leaves:
+                    _cnc_new.save()
+                    del _cnc_new
+                    # Update cluster details
+                    self.update_cluster_details(_tc.integration_id)
+                    _tag = "provisioner/%s" % _tc.integration_id
+                    if _tag in self.tags:
+                        _index_key = "/indexes/tags/%s" % _tag
+                        self.tags.remove(_tag)
+                        self.save()
                         try:
-                            etcd_utils.write(
-                                "{0}/status".format(brick.key),
-                                "Stopped"
-                            )
-                        except (etcd.EtcdAlreadyExist, etcd.EtcdKeyNotFound):
+                            etcd_utils.delete(_index_key)
+                        except etcd.EtcdKeyNotFound:
                             pass
+                    if _tc.sds_name in ["gluster", "RHGS"]:
+                        bricks = etcd_utils.read(
+                            "clusters/{0}/Bricks/all/{1}".format(
+                                _tc.integration_id,
+                                self.fqdn
+                            )
+                        )
+
+                        for brick in bricks.leaves:
+                            try:
+                                etcd_utils.write(
+                                    "{0}/status".format(brick.key),
+                                    "Stopped"
+                                )
+                            except (
+                                etcd.EtcdAlreadyExist,
+                                etcd.EtcdKeyNotFound
+                            ):
+                                pass
             elif current_value == "UP" and str(
                     _cnc.is_managed).lower() == "yes":
                 msg = "{0} is UP".format(self.fqdn)

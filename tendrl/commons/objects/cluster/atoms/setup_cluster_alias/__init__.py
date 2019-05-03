@@ -36,13 +36,23 @@ class SetupClusterAlias(objects.BaseAtom):
         while True:
             child_job_failed = False
             if loop_count >= wait_count:
+                job = Job(job_id=_job_id).load()
+                if job.status in ["new", ""]:
+                    msg = ("Child job %s for setting up cluster alias not yet "
+                           "picked up by the server, Service "
+                           "tendrl-monitoring-integration may be down. "
+                           "Timing out. (%s)" % (
+                               job.job_id, integration_id
+                           ))
+                else:
+                    msg = ("Child job %s for setting up cluster alias not yet"
+                           "compeleted by the server. Timing out. (%s)" % (
+                               job.job_id, integration_id))
                 logger.log(
                     "error",
                     NS.publisher_id,
                     {
-                        "message": "Setting up cluster alias"
-                        "not yet complete. Timing out. (%s)" %
-                        integration_id
+                        "message": msg
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
