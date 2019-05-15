@@ -20,7 +20,7 @@ class Cluster(objects.BaseObject):
         self.conf_overrides = conf_overrides
         self.node_identifier = node_identifier
         self.last_sync = last_sync
-        self.is_managed = is_managed
+        self.is_managed = is_managed or "no"
         self.current_job = current_job
         self.status = status
         self.volume_profiling_flag = volume_profiling_flag

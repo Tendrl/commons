@@ -16,27 +16,42 @@ class StopIntegrationServices(objects.BaseAtom):
         _cluster = NS.tendrl.objects.Cluster(
             integration_id=integration_id
         ).load()
-
         try:
             # Get the cluster nodes
             nodes = etcd_utils.read("/clusters/%s/nodes" % integration_id)
             child_job_ids = []
-            node_ids = []
+            node_hostnames = []
             for node in nodes.leaves:
-                node_id = node.key.split("/")[-1]
-                node_ids.append(node_id)
+                node_obj = NS.tendrl.objects.NodeContext(
+                    node_id=node.key.split("/")[-1]
+                ).load()
+                if node_obj.status.lower() == "down":
+                    logger.log(
+                        "warning",
+                        NS.publisher_id,
+                        {
+                            "message": "Skipping stop integration service job "
+                            "creation for the node %s, Status of node is "
+                            "down" % node_obj.fqdn
+                        },
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id'],
+                    )
+                    continue
+                node_hostnames.append(node_obj.fqdn)
                 # Create jobs on nodes for stoping services
                 _job_id = str(uuid.uuid4())
                 params = {
                     "Services[]": ["tendrl-gluster-integration"]
                 }
                 payload = {
-                    "tags": ["tendrl/node_%s" % node_id],
+                    "tags": ["tendrl/node_%s" % node_obj.node_id],
                     "run": "tendrl.objects.Node.flows.StopServices",
                     "status": "new",
                     "parameters": params,
                     "parent": self.parameters["job_id"],
-                    "type": "node"
+                    "type": "node",
+                    "node_fqdn": node_obj.fqdn
                 }
                 NS.tendrl.objects.Job(
                     job_id=_job_id,
@@ -50,7 +65,7 @@ class StopIntegrationServices(objects.BaseAtom):
                     {
                         "message": "Stop tendrl services (job: %s) "
                         "on %s in cluster %s" %
-                        (_job_id, node_id, _cluster.short_name)
+                        (_job_id, node_obj.fqdn, _cluster.short_name)
                     },
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id'],
@@ -62,17 +77,6 @@ class StopIntegrationServices(objects.BaseAtom):
             while True:
                 child_jobs_failed = []
                 if loop_count >= wait_count:
-                    logger.log(
-                        "error",
-                        NS.publisher_id,
-                        {
-                            "message": "Stop service jobs on cluster(%s) not "
-                            "yet complete on all nodes(%s). Timing out. "
-                            % (_cluster.short_name, str(node_ids))
-                        },
-                        job_id=self.parameters['job_id'],
-                        flow_id=self.parameters['flow_id'],
-                    )
                     # Marking child jobs as failed which did not complete as
                     # the parent job has timed out. This has to be done
                     # explicitly because these jobs will still be processed
@@ -83,8 +87,34 @@ class StopIntegrationServices(objects.BaseAtom):
                             job_id=child_job_id
                         ).load()
                         if child_job.status not in ["finished", "failed"]:
+                            if child_job.status == "new":
+                                logger.log(
+                                    "error",
+                                    NS.publisher_id,
+                                    {
+                                        "message": "Job %s not yet picked by "
+                                        "a node %s, Either node is down or "
+                                        "node-agent service is down" % (
+                                            child_job_id,
+                                            child_job.payload.get("node_fqdn")
+                                        )
+                                    },
+                                    job_id=self.parameters['job_id'],
+                                    flow_id=self.parameters['flow_id'],
+                                )
                             child_job.status = "failed"
                             child_job.save()
+                    logger.log(
+                        "error",
+                        NS.publisher_id,
+                        {
+                            "message": "Stop service jobs on cluster(%s) not "
+                            "yet complete on all nodes(%s). Timing out. "
+                            % (_cluster.short_name, str(node_hostnames))
+                        },
+                        job_id=self.parameters['job_id'],
+                        flow_id=self.parameters['flow_id'],
+                    )
                     return False
                 time.sleep(5)
                 finished = True

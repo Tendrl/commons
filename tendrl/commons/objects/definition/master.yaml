@@ -69,6 +69,7 @@ namespace.tendrl:
           - Cluster.short_name
       pre_run:
         - tendrl.objects.Node.atoms.CheckRequiredServicesRunning
+        - tendrl.objects.GlusterPeer.atoms.GlusterServerPeerCheck
         - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
         - tendrl.objects.Node.atoms.IsNodeTendrlManaged
         - tendrl.objects.Cluster.atoms.ValidImportClusterParams
@@ -100,7 +101,6 @@ namespace.tendrl:
           - Cluster.delete_telemetry_data
       pre_run:
         - tendrl.objects.Node.atoms.CheckRequiredServicesRunning
-        - tendrl.objects.Cluster.atoms.CheckClusterNodesUp
       post_run:
         - tendrl.objects.Cluster.atoms.IsClusterImportReady
       run: tendrl.flows.UnmanageCluster
@@ -1204,6 +1204,17 @@ namespace.tendrl:
       list: /clusters/{0}/nodes/{1}/alert_counters
       help: "Cluster Alert Counter"
     GlusterPeer:
+      atoms:
+        GlusterServerPeerCheck:
+          enabled: true
+          inputs:
+            mandatory:
+              - TendrlContext.integration_id
+          name: "Check all gluster peer nodes are detected by tendrl"
+          help: "Check all gluster peer nodes are detected by tendrl"
+          run: tendrl.objects.GlusterPeer.atoms.GlusterServerPeerCheck
+          type: check
+          uuid: e60bb309-677d-407c-a880-6e848d0d5534
       enabled: true
       attrs:
         hostname:

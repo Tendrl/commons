@@ -31,10 +31,10 @@ class UnmanageCluster(flows.BaseFlow):
             raise FlowExecutionFailedError(
                 "Another job in progress for cluster."
                 " Please wait till the job finishes "
-                "(job_id: %s) (integration_id: %s) " %
+                "(job_id: %s) (cluster: %s) " %
                 (
                     _cluster.current_job['job_id'],
-                    _cluster.integration_id
+                    _cluster.short_name
                 )
             )
 

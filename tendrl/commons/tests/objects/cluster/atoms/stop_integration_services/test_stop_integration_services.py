@@ -136,6 +136,8 @@ def test_run():
     NS.publisher_id = "test"
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS.tendrl, "objects", maps.NamedDict(Job=Job))
+    setattr(NS, "config", maps.NamedDict(data={}))
+    NS.tendrl.objects.NodeContext = mock.MagicMock()
     NS.tendrl.objects.Cluster = Cluster
     with patch.object(NS.tendrl.objects.Job, 'save', save):
         with patch.object(NS._int.client, 'read', read):
@@ -153,6 +155,5 @@ def test_run():
             with patch.object(
                     NS.tendrl.objects.Job, 'load', load_unfinished_job):
                 with patch.object(time, 'sleep', sleep):
-                    # import pdb; pdb.set_trace();
                     ret_val = obj.run()
                     assert ret_val is False
