@@ -91,8 +91,6 @@ class NodeContext(objects.BaseObject):
         return super(NodeContext, self).render()
 
     def save(self, update=True, ttl=None):
-        super(NodeContext, self).save(update)
-        status = self.value + "/status"
         if self.status == "UP" and ttl is None:
             # Set ttl always when node status in up
             ttl = int(
@@ -100,10 +98,8 @@ class NodeContext(objects.BaseObject):
             )
         if ttl:
             self._ttl = ttl
-            try:
-                etcd_utils.refresh(status, ttl)
-            except etcd.EtcdKeyNotFound:
-                pass
+            self._attrs_with_ttl = ['status']
+        super(NodeContext, self).save(update)
 
     def on_change(self, attr, prev_value, current_value):
         if attr == "status" and "tendrl/monitor" in NS.node_context.tags:

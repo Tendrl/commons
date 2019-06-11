@@ -28,6 +28,7 @@ def thread_safe(thread_unsafe_method):
 class BaseObject(object):
     def __init__(self, *args, **kwargs):
         self._ttl = None
+        self._attrs_with_ttl = []
         self._lock = threading.RLock()
         self.hash = None
         self._rendered = None
@@ -112,7 +113,19 @@ class BaseObject(object):
                                 NS.publisher_id,
                                 {"message": _msg}
                             )
-                    etcd_utils.write(item['key'], item['value'], quorum=True)
+                    if self._ttl and item['name'] in self._attrs_with_ttl:
+                        etcd_utils.write(
+                            item['key'],
+                            item['value'],
+                            quorum=True,
+                            ttl=self._ttl
+                        )
+                    else:
+                        etcd_utils.write(
+                            item['key'],
+                            item['value'],
+                            quorum=True
+                        )
         if hash_key_changed:
             data_key = self.value + '/data'
             etcd_utils.write(data_key, self.json)
