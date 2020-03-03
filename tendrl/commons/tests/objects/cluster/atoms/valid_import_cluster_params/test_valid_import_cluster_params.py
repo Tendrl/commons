@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 
 from tendrl.commons.objects.cluster.atoms.valid_import_cluster_params \

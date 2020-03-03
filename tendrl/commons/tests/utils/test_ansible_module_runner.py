@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import ansible.executor.module_common as module_common
 import importlib
 import json
@@ -57,7 +57,7 @@ def test_AnsibleRunner_constructor():
             AnsibleRunner("Test_module")
         ansible_obj = AnsibleRunner("Test_module", ansible="test_ansible")
         assert "_ansible_selinux_special_fs" in \
-               ansible_obj.argument_dict.keys()
+               list(ansible_obj.argument_dict.keys())
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',
@@ -93,4 +93,4 @@ def test_module():
     importlib.import_module("tendrl.commons.utils.ansible_module_runner")
     with mock.patch.dict('sys.modules', {'json': None}):
         with mock.patch.dict('sys.modules', {'simplejson': json}):
-            reload(ansible_module_runner)
+            importlib.reload(ansible_module_runner)

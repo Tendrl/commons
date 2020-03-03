@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import importlib
 import inspect
@@ -120,7 +120,7 @@ class TendrlNS(object):
         defined_objs = defs.get("objects", {})
         defined_objs = {
             obj: val for obj,
-            val in defined_objs.iteritems() if "internal" not in val}
+            val in defined_objs.items() if "internal" not in val}
         if self.current_ns.objects:
             logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating registered (.py) "

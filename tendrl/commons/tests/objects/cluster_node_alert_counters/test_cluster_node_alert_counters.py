@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from tendrl.commons.objects import cluster_node_alert_counters
 

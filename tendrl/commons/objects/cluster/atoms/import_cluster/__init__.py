@@ -42,7 +42,7 @@ class ImportCluster(objects.BaseAtom):
                 cmd = cmd_utils.Command('gluster volume list')
                 out, err, rc = cmd.run()
                 if not err:
-                    volumes = filter(None, out.split("\n"))
+                    volumes = [_f for _f in out.split("\n") if _f]
                     ret_val, err = enable_disable_volume_profiling(
                         volumes, self.parameters)
                     if not ret_val:

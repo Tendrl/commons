@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 from etcd import Client
 import importlib

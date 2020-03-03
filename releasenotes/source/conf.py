@@ -41,8 +41,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'commons Release Notes'
-copyright = u'2016, Tendrl Project'
+project = 'commons Release Notes'
+copyright = '2016, Tendrl Project'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -194,8 +194,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'GlanceReleaseNotes.tex', u'Glance Release Notes Documentation',
-     u'Glance Developers', 'manual'),
+    ('index', 'GlanceReleaseNotes.tex', 'Glance Release Notes Documentation',
+     'Glance Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -224,8 +224,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'glancereleasenotes', u'Glance Release Notes Documentation',
-     [u'Glance Developers'], 1)
+    ('index', 'glancereleasenotes', 'Glance Release Notes Documentation',
+     ['Glance Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -238,8 +238,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'GlanceReleaseNotes', u'Glance Release Notes Documentation',
-     u'Glance Developers', 'GlanceReleaseNotes',
+    ('index', 'GlanceReleaseNotes', 'Glance Release Notes Documentation',
+     'Glance Developers', 'GlanceReleaseNotes',
      'One line description of project.',
      'Miscellaneous'),
 ]

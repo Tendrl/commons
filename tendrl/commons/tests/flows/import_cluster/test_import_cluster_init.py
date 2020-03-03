@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import maps
 import mock
@@ -90,22 +90,22 @@ def read(key):
     else:
         return etcd.EtcdResult(node={'newKey': False,
                                      'raft_index': 449389,
-                                     '_children': [{u'createdIndex': 1657,
-                                                    u'modifiedIndex': 1657,
-                                                    u'dir': True,
-                                                    u'key': u'/clusters/'
-                                                            u'b7d4b5ae-d33d-'
-                                                            u'49cf-ae6d-5d6bb'
-                                                            u'494ece7'}
+                                     '_children': [{'createdIndex': 1657,
+                                                    'modifiedIndex': 1657,
+                                                    'dir': True,
+                                                    'key': '/clusters/'
+                                                            'b7d4b5ae-d33d-'
+                                                            '49cf-ae6d-5d6bb'
+                                                            '494ece7'}
                                                    ],
                                      'createdIndex': 1657,
                                      'modifiedIndex': 1657,
                                      'value': None,
                                      'etcd_index': 101021,
                                      'expiration': None,
-                                     'key': u'/clusters',
+                                     'key': '/clusters',
                                      'ttl': None,
-                                     'action': u'get',
+                                     'action': 'get',
                                      'dir': True
                                      })
 

@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 from etcd import EtcdResult
 import importlib
 import maps
@@ -10,51 +10,51 @@ from tendrl.commons.objects.cluster import Cluster
 
 
 def nodes():
-    obj = EtcdResult(**{u'action': u'get',
-                        u'node': {u'createdIndex': 20521,
-                                  u'key': u'/clusters/test_uuid/nodes',
-                                  u'modifiedIndex': 20521,
-                                  u'nodes': [{u'createdIndex': 20521,
-                                              u'modifiedIndex': 20521,
-                                              u'key': u'/clusters/test_uuid'
-                                                      u'/nodes/test_node1',
-                                              u'dir': True}],
-                                  u'dir': True}}
+    obj = EtcdResult(**{'action': 'get',
+                        'node': {'createdIndex': 20521,
+                                  'key': '/clusters/test_uuid/nodes',
+                                  'modifiedIndex': 20521,
+                                  'nodes': [{'createdIndex': 20521,
+                                              'modifiedIndex': 20521,
+                                              'key': '/clusters/test_uuid'
+                                                      '/nodes/test_node1',
+                                              'dir': True}],
+                                  'dir': True}}
                      )
     return obj
 
 
 def cluster_alerts():
-    obj = EtcdResult(**{u'action': u'get',
-                        u'node': {u'createdIndex': 20521,
-                                  u'key': u'/clusters/test_uuid/nodes',
-                                  u'modifiedIndex': 20521,
-                                  u'nodes': [{u'createdIndex': 20521,
-                                              u'modifiedIndex': 20521,
-                                              u'key': u'/clusters/test_uuid'
-                                                      u'/nodes/test_node1',
-                                              u'dir': True}
+    obj = EtcdResult(**{'action': 'get',
+                        'node': {'createdIndex': 20521,
+                                  'key': '/clusters/test_uuid/nodes',
+                                  'modifiedIndex': 20521,
+                                  'nodes': [{'createdIndex': 20521,
+                                              'modifiedIndex': 20521,
+                                              'key': '/clusters/test_uuid'
+                                                      '/nodes/test_node1',
+                                              'dir': True}
                                              ],
-                                  u'dir': True}}
+                                  'dir': True}}
                      )
     return obj
 
 
 def node_alerts():
-    obj = EtcdResult(**{u'action': u'get',
-                        u'node': {u'createdIndex': 82420,
-                                  u'key': u'/alerting/nodes/test_node1',
-                                  u'modifiedIndex': 82420,
-                                  u'nodes': [{u'createdIndex': 82420,
-                                              u'modifiedIndex': 82420,
-                                              u'expiration': u'2018-06-14T15:'
-                                                             u'02:54.34944151'
-                                                             u'4Z',
-                                              u'key': u'/alerting/nodes/'
-                                                      u'test_node1/alert1',
-                                              u'ttl': 172684,
-                                              u'dir': True}],
-                                  u'dir': True}}
+    obj = EtcdResult(**{'action': 'get',
+                        'node': {'createdIndex': 82420,
+                                  'key': '/alerting/nodes/test_node1',
+                                  'modifiedIndex': 82420,
+                                  'nodes': [{'createdIndex': 82420,
+                                              'modifiedIndex': 82420,
+                                              'expiration': '2018-06-14T15:'
+                                                             '02:54.34944151'
+                                                             '4Z',
+                                              'key': '/alerting/nodes/'
+                                                      'test_node1/alert1',
+                                              'ttl': 172684,
+                                              'dir': True}],
+                                  'dir': True}}
                      )
     return obj
 
@@ -62,11 +62,11 @@ def node_alerts():
 def gluster_servers():
     obj = EtcdResult(
         **{
-            u'action': u'GET',
-            u'node': {
-                u'modifiedIndex': 190,
-                u'key': u'/indexes/tags/gluster/server',
-                u'value': u'["abc", "mno"]'
+            'action': 'GET',
+            'node': {
+                'modifiedIndex': 190,
+                'key': '/indexes/tags/gluster/server',
+                'value': '["abc", "mno"]'
             }
         }
     )

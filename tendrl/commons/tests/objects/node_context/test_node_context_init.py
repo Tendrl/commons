@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import maps
 import mock
@@ -166,7 +166,7 @@ def test_get_node_id(patch_etcd_utils_read,
                      patch_read,
                      patch_client):
     patch_read.return_value = maps.NamedDict(
-        value=u'"testing"')
+        value='"testing"')
     patch_client.return_value = etcd.Client()
     setattr(__builtin__, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())

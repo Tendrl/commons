@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from tendrl.commons.utils.event_utils import emit_event
 

@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from tendrl.commons.utils.alert_utils import alert_job_status as tendrl_alert
 

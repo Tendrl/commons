@@ -79,7 +79,7 @@ def test_process_job_fail(log):
             log.assert_called_with(
                 'debug',
                 'pytest',
-                {'message': u"Node (test_node_id)(type: node)"
+                {'message': "Node (test_node_id)(type: node)"
                  "(tags: [u'my_tag']) will not process "
                  "job-808a4162-4b70-4ff0-b218-45dbe371e545 (tags: )"}
             )

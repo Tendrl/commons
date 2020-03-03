@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -28,7 +28,7 @@ class MockNodeContext(object):
 
 def read(key):
     out = maps.NamedDict(
-        value=u'["fe80532d-95e0-4b10-b486-a357e325cccf"]'
+        value='["fe80532d-95e0-4b10-b486-a357e325cccf"]'
     )
     return out
 

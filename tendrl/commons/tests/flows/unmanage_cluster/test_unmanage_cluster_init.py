@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import maps
 import mock
@@ -143,7 +143,7 @@ def read(key):
         raise etcd.EtcdKeyNotFound
     else:
         return maps.NamedDict(
-            value=u'["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]'
+            value='["bc15f88b-7118-485e-ab5c-cf4b9e1c2ee5"]'
         )
 
 

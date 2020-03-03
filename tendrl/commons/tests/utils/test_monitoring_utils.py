@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from tendrl.commons.utils.monitoring_utils import delete_resource_from_graphite
 from tendrl.commons.utils.monitoring_utils import update_dashboard

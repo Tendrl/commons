@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 from etcd import Client
 import importlib
@@ -233,7 +233,7 @@ def test_get_object():
     # Creating instance of the class
     temp_instance = ret()
     # Comparing attributes of object from actual definition
-    for k, v in def_obj.items():
+    for k, v in list(def_obj.items()):
         assert hasattr(temp_instance, k.lower())
 
 

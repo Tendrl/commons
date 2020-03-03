@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 from mock import patch
 
 from tendrl.commons.utils.plugin_mount import PluginMount

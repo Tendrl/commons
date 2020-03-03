@@ -2,7 +2,7 @@
 import datetime
 import etcd
 import sys
-import thread
+import _thread
 import time
 
 from tendrl.commons.utils.central_store import fields
@@ -11,7 +11,7 @@ PY_TO_TENDRL_TYPE_MAP = {dict: fields.DictField,
                          str: fields.StrField,
                          int: fields.IntField,
                          bool: fields.StrField,
-                         unicode: fields.StrField,
+                         str: fields.StrField,
                          datetime.datetime: fields.DateTimeField,
                          list: fields.ListField}
 
@@ -61,7 +61,7 @@ def read(*args, **kws):
             _tries += 1
             reconnect()
     sys.stderr.write("\n")
-    thread.interrupt_main()
+    _thread.interrupt_main()
 
 
 def write(*args, **kws):
@@ -73,7 +73,7 @@ def write(*args, **kws):
             _tries += 1
             wreconnect()
     sys.stderr.write("\n")
-    thread.interrupt_main()
+    _thread.interrupt_main()
 
 
 def delete(*args, **kws):
@@ -85,7 +85,7 @@ def delete(*args, **kws):
             _tries += 1
             wreconnect()
     sys.stderr.write("\n")
-    thread.interrupt_main()
+    _thread.interrupt_main()
 
 
 def watch(obj, key):

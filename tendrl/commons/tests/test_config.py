@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 from mock import patch
 import os.path
 import pytest
