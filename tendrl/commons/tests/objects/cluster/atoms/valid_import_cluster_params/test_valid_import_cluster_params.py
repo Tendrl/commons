@@ -6,7 +6,7 @@ from tendrl.commons.objects.cluster.atoms.valid_import_cluster_params \
 
 
 def test_run():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = maps.NamedDict()
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"

@@ -35,7 +35,7 @@ def test_Command_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")

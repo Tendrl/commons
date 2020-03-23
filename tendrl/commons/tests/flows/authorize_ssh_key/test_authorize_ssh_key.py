@@ -25,7 +25,7 @@ def test_constructor():
 
 
 def test_run():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.config = maps.NamedDict()
     NS.config.data = maps.NamedDict()
     NS.publisher_id = "node_context"

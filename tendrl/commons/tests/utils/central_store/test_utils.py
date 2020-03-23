@@ -30,7 +30,7 @@ def test_to_tendrl_field():
 
 @patch.object(etcd, "Client")
 def test_wreconnect(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     patch_client.return_value = etcd.Client()
     NS._int.etcd_kwargs = {
@@ -46,7 +46,7 @@ def test_wreconnect(patch_client):
 
 @patch.object(etcd, "Client")
 def test_reconnect(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     patch_client.return_value = etcd.Client()
     NS._int.etcd_kwargs = {
@@ -62,7 +62,7 @@ def test_reconnect(patch_client):
 
 @patch.object(etcd, "Client")
 def test_read(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.client = "Temp_obj"
     patch_client.return_value = etcd.Client()
@@ -80,7 +80,7 @@ def test_read(patch_client):
 
 @patch.object(etcd, "Client")
 def test_write(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.wclient = "Temp_obj"
     patch_client.return_value = etcd.Client()
@@ -94,7 +94,7 @@ def test_write(patch_client):
 
 @patch.object(etcd, "Client")
 def test_delete(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.wclient = "Temp_obj"
     patch_client.return_value = etcd.Client()
@@ -109,7 +109,7 @@ def test_delete(patch_client):
 """
 @patch.object(etcd, "Client")
 def test_watch(patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.client = "Temp_obj"
     NS._int.client.eternal_watch = {}

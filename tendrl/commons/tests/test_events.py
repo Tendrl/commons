@@ -85,7 +85,7 @@ event_dummy2 = Event(Message(priority="info", publisher="node_agent", payload={
 
 
 def test_write():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()

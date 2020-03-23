@@ -26,7 +26,7 @@ def test_constructor():
 
 # Testing render
 def test_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     tendrl_context = TendrlContext()

@@ -15,8 +15,8 @@ from tendrl.commons.utils import log_utils as logger
 class TendrlNS(object):
     def __init__(self, ns_name="tendrl", ns_src="tendrl.commons"):
         super(TendrlNS, self).__init__()
-        if not hasattr(__builtin__, "NS"):
-            setattr(__builtin__, "NS", maps.NamedDict())
+        if not hasattr(builtins, "NS"):
+            setattr(builtins, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
             NS._int.wreconnect = cs_utils.wreconnect
             NS._int.reconnect = cs_utils.reconnect

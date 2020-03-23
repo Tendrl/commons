@@ -7,7 +7,7 @@ _test_message = "TEST"
 
 
 def test_alert_job_status_fail():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 2
     NS.tendrl_context = maps.NamedDict(integration_id="",
                                        cluster_name="test_name",
@@ -18,7 +18,7 @@ def test_alert_job_status_fail():
 
 
 def test_alert_job_status_early_return():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 2
     NS.tendrl_context = maps.NamedDict(integration_id="",
                                        cluster_name="test_name",

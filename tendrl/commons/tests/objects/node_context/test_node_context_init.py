@@ -134,7 +134,7 @@ def test_constructor(patch_etcd_utils_read,
     '''
     patch_get_node_id.return_value = 1
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -168,7 +168,7 @@ def test_get_node_id(patch_etcd_utils_read,
     patch_read.return_value = maps.NamedDict(
         value='"testing"')
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -189,7 +189,7 @@ def test_get_node_id(patch_etcd_utils_read,
               '"fqdn": "tendrl-node-test",'
               '"last_sync": "date"}')
     with patch.object(os.path, "isfile", return_value=True):
-        with mock.patch("__builtin__.open", create=True) as mock_open:
+        with mock.patch("builtins.open", create=True) as mock_open:
             mock_open.side_effect = [
                 mock.mock_open(
                     read_data="8eccbee-1e88-4232-9877-61d0ea595930"
@@ -207,7 +207,7 @@ def test_render(patch_etcd_utils_read,
                 patch_write,
                 patch_read,
                 patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     patch_get_node_id.return_value = 1
@@ -250,7 +250,7 @@ def test_save(patch_etcd_utils_refresh,
               patch_write,
               patch_read,
               patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     patch_get_node_id.return_value = 1
@@ -314,7 +314,7 @@ def test_create_node_id(patch_etcd_utils_read,
                         patch_write,
                         patch_read,
                         patch_client):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     patch_client.return_value = etcd.Client()
@@ -344,13 +344,13 @@ def test_create_node_id(patch_etcd_utils_read,
                                    fqdn="Test_fqdn",
                                    ipv4_addr="127.0.0.1")
         f = tempfile.TemporaryFile()
-        with patch.object(__builtin__, "open") as mock_open:
+        with patch.object(builtins, "open") as mock_open:
             mock_open.return_value = f
             with patch.object(os, "makedirs", return_value=True):
                 node_context._create_node_id()
         f.close()
         f = tempfile.TemporaryFile()
-        with patch.object(__builtin__, "open") as mock_open:
+        with patch.object(builtins, "open") as mock_open:
             mock_open.return_value = f
             with patch.object(os.path, "exists", return_value=False):
                 with patch.object(os, "makedirs", return_value=True):
@@ -375,7 +375,7 @@ def test_update_cluster_details1(patch_etcd_utils_refresh,
                                  patch_read,
                                  patch_client,
                                  load):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
     NS.node_context.tags = ["tendrl/monitor"]
@@ -446,7 +446,7 @@ def test_on_change(patch_get_node_id,
                    patch_etcd_utils_read,
                    patch_emit_event
                    ):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "Test_node_context"
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1
@@ -507,7 +507,7 @@ def test_on_change(patch_get_node_id,
 def test_update_cluster_details(patch_get_node_id,
                                 patch_client,
                                 patch_etcd_utils_read):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "Test_node_context"
     NS.node_context = maps.NamedDict()
     NS.node_context.node_id = 1

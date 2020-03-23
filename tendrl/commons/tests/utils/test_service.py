@@ -25,7 +25,7 @@ def ansible(*args, **kwargs):
 
 
 def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict()

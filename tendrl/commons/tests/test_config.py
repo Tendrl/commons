@@ -22,7 +22,7 @@ def test_config1():
 @patch.object(yaml, "safe_load")
 def test_config2(mock_os_path, mock_yaml):
     f = tempfile.TemporaryFile()
-    with patch.object(__builtin__, "open") as mock_open:
+    with patch.object(builtins, "open") as mock_open:
         mock_open.return_value = f
         mock_os_path.exists.return_value = True
         mock_yaml.safe_load.return_value = "Test return"

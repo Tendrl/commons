@@ -45,7 +45,7 @@ def init(patch_etcd_utils_read,
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -104,14 +104,14 @@ def test_import_gluster():
     NS.config.data['package_source_type'] = 'rpm'
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
                       return_value=({"rc": 0, "msg": None}, None)):
-        with patch.object(__builtin__, 'open', open):
+        with patch.object(builtins, 'open', open):
             with patch.object(cmd_utils.Command, 'run',
                               return_value=("err", "", 1)):
                 ret, err = gluster_help.import_gluster(parameters)
         assert ret is False
     with patch.object(ansible_module_runner.AnsibleRunner, 'run',
                       return_value=({"rc": 0, "msg": None}, None)):
-        with patch.object(__builtin__, 'open', open):
+        with patch.object(builtins, 'open', open):
             with patch.object(cmd_utils.Command, 'run',
                               return_value=(None, "", 0)):
                 with patch.object(ServiceStatus, 'status',

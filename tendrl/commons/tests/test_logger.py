@@ -26,7 +26,7 @@ def init(patch_write, patch_refresh, patch_client):
     patch_write.return_value = True
     patch_refresh.return_value = True
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -121,6 +121,6 @@ def test_logger():
     msg = Message(priority=None, publisher="node_context",
                   payload={"message": "Test Message"})
     log._logger(msg)
-    with patch.object(__builtin__, 'getattr', getatr):
+    with patch.object(builtins, 'getattr', getatr):
         with pytest.raises(NotImplementedError):
             log._logger(msg)

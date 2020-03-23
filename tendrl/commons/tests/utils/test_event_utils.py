@@ -4,7 +4,7 @@ from tendrl.commons.utils.event_utils import emit_event
 
 
 def test_emit_event():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 0
     NS.node_context = maps.NamedDict(fqdn="test",
                                      node_id="0")

@@ -101,7 +101,7 @@ def init(patch_etcd_utils_read,
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -131,7 +131,7 @@ def test_constructor():
                       return_value=maps.NamedDict()) as mock_load:
         BaseObject_Child()
         assert mock_load.called
-    with patch.object(__builtin__, 'hasattr', return_value=True):
+    with patch.object(builtins, 'hasattr', return_value=True):
         BaseObject_Child()
 
 
@@ -141,10 +141,10 @@ def test_constructor():
             mock.Mock(return_value=None))
 def test_load_definition():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', hasattribute):
+    with patch.object(builtins, 'hasattr', hasattribute):
         with pytest.raises(Exception):
             obj = BaseObject_Child()
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
         with pytest.raises(Exception):
@@ -159,7 +159,7 @@ def test_load_definition():
             mock.Mock(return_value=None))
 def test_save():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS, 'get_obj_definition', obj_definition):
@@ -242,7 +242,7 @@ def test_save():
 
 def test_load():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS, 'get_obj_definition', obj_definition):
@@ -337,7 +337,7 @@ def test_load():
                 'value': '9', 'dir': True, 'name': 'test', 'key': '/1/hash'}]):
             with patch.object(Client, "read",
                               return_value=maps.NamedDict(value="Test")):
-                with patch.object(__builtin__, "hasattr", return_value=True):
+                with patch.object(builtins, "hasattr", return_value=True):
                     with patch.object(Client, "read",
                                       return_value=maps.NamedDict(
                                           {'value': '{'
@@ -353,7 +353,7 @@ def test_load():
 
 def test_exists():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(TendrlNS, 'get_obj_definition', obj_definition):
@@ -373,7 +373,7 @@ def test_exists():
 def test_load_all():
     tendrlNS = init()
     NS.publisher_id = "test"
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseObject_Child()
         obj._ns = tendrlNS
         with patch.object(etcd_utils, "read", return_value=maps.NamedDict(
@@ -397,9 +397,9 @@ def test_constructor_BaseAtom():
     init()
     with patch.object(TendrlNS, 'get_atom_definition', return_value=True):
         BaseAtom_Child(1)
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         BaseAtom_Child(1)
-    with patch.object(__builtin__, 'hasattr', hasattribute):
+    with patch.object(builtins, 'hasattr', hasattribute):
         with pytest.raises(Exception):
             obj = BaseAtom_Child(1)
             assert obj.parameters == 1
@@ -413,7 +413,7 @@ def test_constructor_BaseAtom():
             mock.Mock(return_value=None))
 def test_load_definition_BaseAtom():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseAtom_Child(1)
         obj._ns = tendrlNS
         with pytest.raises(Exception):
@@ -421,7 +421,7 @@ def test_load_definition_BaseAtom():
 
 
 def test_run():
-    with patch.object(__builtin__, 'hasattr', has_attr):
+    with patch.object(builtins, 'hasattr', has_attr):
         obj = BaseAtom_Child(1)
         with pytest.raises(objects.AtomNotImplementedError):
             obj.run()

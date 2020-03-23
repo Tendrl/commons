@@ -40,7 +40,7 @@ def test_run():
         "test_uuid"
     obj.parameters["job_id"] = "test_job_id"
     obj.parameters["flow_id"] = "test_flow_id"
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS.tendrl, "objects", maps.NamedDict())
     NS.tendrl.objects.Cluster = Cluster

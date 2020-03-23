@@ -37,7 +37,7 @@ def read(key):
 @patch.object(logger, "log")
 def test_run(log):
     log.return_value = True
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")

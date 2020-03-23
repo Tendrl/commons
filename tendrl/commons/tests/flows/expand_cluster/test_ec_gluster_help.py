@@ -45,7 +45,7 @@ class mock_provisioner(object):
 @patch.object(etcd_utils, 'read')
 @patch.object(cluster.Cluster, 'load')
 def test_expand_gluster(patch_cluster_load, patch_etcd_utils_read):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     NS.tendrl = maps.NamedDict()

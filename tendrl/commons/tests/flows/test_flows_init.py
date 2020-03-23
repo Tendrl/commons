@@ -128,7 +128,7 @@ def init(patch_node_load,
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -168,9 +168,9 @@ def test_constructor():
             mock_load:
         BaseFlow_Child()
         assert mock_load.called
-        with patch.object(__builtin__, 'hasattr', has_attr) as mock_hasattr:
+        with patch.object(builtins, 'hasattr', has_attr) as mock_hasattr:
             BaseFlow_Child()
-    with patch.object(__builtin__, 'hasattr', mock_hasattr):
+    with patch.object(builtins, 'hasattr', mock_hasattr):
         with pytest.raises(Exception):
             BaseFlow_Child()
 
@@ -183,7 +183,7 @@ def test_constructor():
             mock.Mock(return_value=None))
 def test_load_definition():
     tendrlNS = init()
-    with patch.object(__builtin__, 'hasattr', set_defs):
+    with patch.object(builtins, 'hasattr', set_defs):
         flow_obj = BaseFlow_Child()
         flow_obj._ns = tendrlNS
         flow_obj.obj = importlib.import_module(
@@ -209,7 +209,7 @@ def test_load_definition():
             mock.Mock(return_value=None))
 def test_run():
     init()
-    with patch.object(__builtin__, 'hasattr', set_defs):
+    with patch.object(builtins, 'hasattr', set_defs):
         flow_obj = BaseFlow_Child()
         global obj
         flow_obj._defs = get_obj_definition()

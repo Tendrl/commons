@@ -11,7 +11,7 @@ def test_constructor():
 
     variables are declared initialized
     '''
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "Test_integration_id"
     cluster_tendrl_context = ClusterTendrlContext()
@@ -28,7 +28,7 @@ def test_constructor():
 
 # Testing render
 def test_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "Test_integration_id"
     cluster_tendrl_context = ClusterTendrlContext()

@@ -39,7 +39,7 @@ def test_run(mock_etcd_read, mock_read, mock_client):
     with pytest.raises(AtomExecutionFailedError):
         obj.run()
     obj.parameters["Node[]"] = ["Test_node"]
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     setattr(NS, "node_context", maps.NamedDict())
     NS.node_context["fqdn"] = "test_fqdn"

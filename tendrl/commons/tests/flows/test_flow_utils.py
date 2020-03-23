@@ -52,7 +52,7 @@ def test_intall_gdeploy_exception2():
 
 
 def test_install_pyton_gdeploy_pip():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
@@ -64,7 +64,7 @@ def test_install_pyton_gdeploy_pip():
 
 
 def test_install_pyton_gdeploy_rpm():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
@@ -77,7 +77,7 @@ def test_install_pyton_gdeploy_rpm():
 
 
 def test_install_python_gdeploy_fail():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
@@ -90,7 +90,7 @@ def test_install_python_gdeploy_fail():
 
 
 def test_install_python_gdeploy_exception():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
@@ -105,7 +105,7 @@ def test_install_python_gdeploy_exception():
 
 
 def test_install_pyton_gdeploy_gen_fail():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
@@ -287,7 +287,7 @@ def test_acquire_node_lock():
     testParams['Node[]'] = [0]
     testParams["job_id"] = "1"
     testParams["flow_id"] = "test_id"
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
@@ -311,7 +311,7 @@ def test_release_node_lock():
     testParams['Node[]'] = [0]
     testParams["job_id"] = "Test payload"
     testParams["flow_id"] = "test_id"
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()

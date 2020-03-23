@@ -20,7 +20,7 @@ class MockJob(object):
 
 # Tests that the update_dashboard method runs
 def test_update_dashboard():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
@@ -33,7 +33,7 @@ def test_update_dashboard():
 
 # Tests that the delete resource from graphite method runs
 def test_delete_resource_from_graphite():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()

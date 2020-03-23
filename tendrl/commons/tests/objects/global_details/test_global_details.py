@@ -10,7 +10,7 @@ from tendrl.commons.utils import etcd_utils
 
 # tests __init__ and render
 def test_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
 
@@ -37,7 +37,7 @@ def test_save(patch_etcd_utils_delete,
               patch_etcd_utils_read,
               patch_etcd_utils_write,
               patch_etcd_utils_refresh):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
@@ -70,7 +70,7 @@ def test_on_change(patch_etcd_utils_refresh,
                    patch_etcd_utils_write,
                    patch_etcd_utils_read,
                    patch_etcd_utils_delete):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"

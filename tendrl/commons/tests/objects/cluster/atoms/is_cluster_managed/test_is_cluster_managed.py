@@ -36,7 +36,7 @@ def test_run():
     obj.parameters = maps.NamedDict()
     obj.parameters["TendrlContext.integration_id"] = \
         "test_uuid"
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "tendrl", maps.NamedDict())
     setattr(NS.tendrl, "objects", maps.NamedDict())
     NS.tendrl.objects.Cluster = Cluster
