@@ -4,7 +4,7 @@ from tendrl.commons.utils import log_utils as logger
 
 def get_node_ips(parameters):
     node_ips = []
-    for node, config in parameters["Cluster.node_configuration"].items():
+    for config in parameters["Cluster.node_configuration"].values():
         node_ips.append(config["provisioning_ip"])
     return node_ips
 

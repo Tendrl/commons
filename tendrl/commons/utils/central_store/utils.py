@@ -2,7 +2,7 @@
 import datetime
 import etcd
 import sys
-import _thread as thread
+import _thread
 import time
 
 from tendrl.commons.utils.central_store import fields

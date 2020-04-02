@@ -233,7 +233,7 @@ def test_get_object():
     # Creating instance of the class
     temp_instance = ret()
     # Comparing attributes of object from actual definition
-    for k, v in list(def_obj.items()):
+    for k in def_obj.keys():
         assert hasattr(temp_instance, k.lower())
 
 

@@ -180,7 +180,7 @@ class BaseObject(object):
         except etcd.EtcdKeyNotFound:
             return _copy
         loc_dict = json.loads(val_str)
-        for attr_name, attr_val in vars(_copy).items():
+        for attr_name in vars(_copy).keys():
             _type = self._defs.get("attrs", {}).get(
                 attr_name,
                 {}
@@ -262,7 +262,7 @@ class BaseObject(object):
         data = {}
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
-            for name, field in _fields.items():
+            for field in _fields.values():
                 if field.name == "hash":
                     continue
                 data[field.name] = json.loads(field.json)
