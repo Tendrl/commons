@@ -57,7 +57,7 @@ def test_AnsibleRunner_constructor():
             AnsibleRunner("Test_module")
         ansible_obj = AnsibleRunner("Test_module", ansible="test_ansible")
         assert "_ansible_selinux_special_fs" in \
-               list(ansible_obj.argument_dict.keys())
+               ansible_obj.argument_dict.keys()
 
 
 @mock.patch('tendrl.commons.event.Event.__init__',

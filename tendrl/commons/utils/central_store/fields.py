@@ -244,7 +244,7 @@ class DictField(Field):
 
         # Force casting if we were given a caster.
         if self._caster:
-            for x in list(value.keys()):
+            for x in value.keys():
                 caster = self._caster.get(x, None)
                 if callable(caster):
                     value[x] = caster(value[x])
@@ -258,7 +258,7 @@ class DictField(Field):
         :rtype: list
         """
         rendered = []
-        for x in list(self._value.keys()):
+        for x in self._value.keys():
             rendered.append({
                 'name': self.name,
                 'key': '{0}/{1}'.format(self.name, x),

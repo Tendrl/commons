@@ -56,10 +56,10 @@ class GlusterServerPeerCheck(objects.BaseAtom):
                 node_fqdn = socket.gethostbyname(
                     node_obj.fqdn
                 )
-                if node_fqdn in list(gluster_fqdn.keys()):
+                if node_fqdn in gluster_fqdn.keys():
                     del gluster_fqdn[node_fqdn]
             # if any fqdn remaining then its means not all nodes are detected
-            if len(list(gluster_fqdn.keys())) > 0:
+            if len(gluster_fqdn.keys()) > 0:
                 logger.log(
                     "error",
                     NS.publisher_id,

@@ -267,7 +267,7 @@ class BaseObject(object):
                     continue
                 data[field.name] = json.loads(field.json)
                 # Flatten if needed
-                if field.name in list(data[field.name].keys()):
+                if field.name in data[field.name].keys():
                     data[field.name] = data[field.name][field.name]
 
         return json.dumps(data)
