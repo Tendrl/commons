@@ -243,9 +243,9 @@ class BaseObject(object):
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
-            for name, field in _fields.items():
+            for field in _fields.values():
                 items = field.render()
-                if type(items) != list:
+		if not isinstance(items, list)
                     items = [items]
                 for i in items:
                     i['key'] = '/{0}/{1}'.format(self.value, i['key'])

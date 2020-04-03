@@ -37,7 +37,7 @@ class BaseFlow_Child(flows.BaseFlow):
         super(BaseFlow_Child, self).run()
 
 
-''' Dummy Functions'''
+### Dummy Functions ###
 
 
 def has_attr(*args):

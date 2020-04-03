@@ -494,7 +494,7 @@ class TendrlNS(object):
                                {"message": "Finding atoms in namespace.%s."
                                            "objects.%s.atoms" %
                                            (self.ns_name, obj_name)})
-                    for atom_name, atom_fqdn in \
+                    for _, atom_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_atoms_path,
                             ns_object_atoms_prefix):
