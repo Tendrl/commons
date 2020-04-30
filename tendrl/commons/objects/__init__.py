@@ -245,7 +245,7 @@ class BaseObject(object):
         if _fields:
             for field in _fields.values():
                 items = field.render()
-		if not isinstance(items, list)
+                if not isinstance(items, list):
                     items = [items]
                 for i in items:
                     i['key'] = '/{0}/{1}'.format(self.value, i['key'])

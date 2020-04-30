@@ -1,6 +1,7 @@
 import subprocess
 import time
 import uuid
+import os
 
 from tendrl.commons.event import Event
 from tendrl.commons.flows.import_cluster.gluster_help \
@@ -42,7 +43,7 @@ class ImportCluster(objects.BaseAtom):
                 cmd = cmd_utils.Command('gluster volume list')
                 out, err, rc = cmd.run()
                 if not err:
-                    volumes = [_f for _f in out.split("\n") if _f]
+                    volumes = [_f for _f in out.split(os.linesep) if _f]
                     ret_val, err = enable_disable_volume_profiling(
                         volumes, self.parameters)
                     if not ret_val:
