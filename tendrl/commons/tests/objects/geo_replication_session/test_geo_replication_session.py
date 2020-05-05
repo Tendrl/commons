@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import uuid
 
@@ -8,7 +8,7 @@ from tendrl.commons.objects.geo_replication_session \
 
 # Testing __init__
 def test_constructor():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
     vol_id = "test_vol_id"
@@ -23,7 +23,7 @@ def test_constructor():
 
 # Tests render
 def test_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl_context = maps.NamedDict()
     NS.tendrl_context.integration_id = "test_integration_id"
 

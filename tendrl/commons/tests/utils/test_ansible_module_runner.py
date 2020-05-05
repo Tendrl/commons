@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import ansible.executor.module_common as module_common
 import importlib
 import json
@@ -43,7 +43,7 @@ def test_AnsibleModuleNotFound_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_AnsibleRunner_constructor():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
@@ -65,7 +65,7 @@ def test_AnsibleRunner_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_run():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
@@ -93,4 +93,4 @@ def test_module():
     importlib.import_module("tendrl.commons.utils.ansible_module_runner")
     with mock.patch.dict('sys.modules', {'json': None}):
         with mock.patch.dict('sys.modules', {'simplejson': json}):
-            reload(ansible_module_runner)
+            importlib.reload(ansible_module_runner)

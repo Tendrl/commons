@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import mock
 
@@ -18,7 +18,7 @@ def test_constructor():
             mock.Mock(return_value=None))
 def test_run():
     param = maps.NamedDict(ssh_setup_script='Test ssh_setup_script')
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     setup_ssh = SetupSsh(parameters=param)
     setup_ssh.run()

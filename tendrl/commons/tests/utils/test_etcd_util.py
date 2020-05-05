@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import importlib
 import maps
@@ -22,7 +22,7 @@ def raise_etcdkeynotfound(*args, **kwargs):
 
 
 def test_read():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.client = importlib.import_module("tendrl.commons"
                                              ".tests.fixtures."
@@ -44,7 +44,7 @@ def test_read():
 
 
 def test_write():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.wclient = importlib.import_module("tendrl.commons"
                                               ".tests.fixtures."
@@ -64,7 +64,7 @@ def test_write():
 
 
 def test_refresh():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.wclient = importlib.import_module("tendrl.commons"
                                               ".tests.fixtures."
@@ -84,7 +84,7 @@ def test_refresh():
 
 
 def test_delete():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.wclient = importlib.import_module("tendrl.commons"
                                               ".tests.fixtures."

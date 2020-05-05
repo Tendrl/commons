@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -26,7 +26,7 @@ def test_constructor(monkeypatch):
 
     variables are declared initialized
     '''
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     monkeypatch.setattr(NodeContext, 'load', load)
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
@@ -40,7 +40,7 @@ def test_constructor(monkeypatch):
 
 # Testing render
 def test_render(monkeypatch):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     monkeypatch.setattr(NodeContext, 'load', load)
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
@@ -66,7 +66,7 @@ def test_save(patch_cluster_load,
               patch_etcd_utils_write,
               patch_etcd_utils_refresh,
               monkeypatch):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     monkeypatch.setattr(NodeContext, 'load', load)
     NS.tendrl = maps.NamedDict()

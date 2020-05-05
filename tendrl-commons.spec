@@ -1,29 +1,28 @@
 Name: tendrl-commons
 Version: 1.6.3
-Release: 11%{?dist}
+Release: 13%{?dist}
 BuildArch: noarch
 Summary: Common lib for Tendrl sds integrations and node-agent
 Source0: %{name}-%{version}.tar.gz
 License: LGPLv2+
 URL: https://github.com/Tendrl/commons
 
-BuildRequires: pytest
-BuildRequires: python2-devel
-BuildRequires: python-mock
-BuildRequires: python-six
+BuildRequires: python3-pytest
+BuildRequires: python3-devel
+BuildRequires: python3-six
 BuildRequires: systemd
 
 Requires: ansible >= 2.5
-Requires: python-maps
-Requires: python-dateutil
-Requires: python-dns
-Requires: python-etcd
-Requires: python-six
-Requires: python2-ruamel-yaml
+Requires: python3-maps
+Requires: python3-dateutil
+Requires: python3-dns
+Requires: python3-etcd
+Requires: python3-six
+Requires: python3-ruamel-yaml
 Requires: pytz
-Requires: python-psutil
-Requires: python-IPy
-
+Requires: python3-psutil
+Requires: python3-IPy
+Requires: python3-pyasn1 <= 0.1.9
 
 %description
 Common library for tendrl
@@ -35,10 +34,10 @@ Common library for tendrl
 rm -rf %{name}.egg-info
 
 %build
-%{__python} setup.py build
+%{__python3} setup.py build
 
 %install
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python3} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %check
 py.test -v tendrl/commons/tests || :
@@ -48,6 +47,9 @@ py.test -v tendrl/commons/tests || :
 %license LICENSE
 
 %changelog
+* Mon Mar 16 2020 Timothy Asir Jeyasingh <tjeyasin@redhat.com> - 1.6.3-13
+- Python3 package conversion
+
 * Tue Aug 14 2018 Shubhendu Tripathi <shtripat@redhat.com> - 1.6.3-11
 - Bugfixes (https://github.com/Tendrl/commons/milestone/11)
 

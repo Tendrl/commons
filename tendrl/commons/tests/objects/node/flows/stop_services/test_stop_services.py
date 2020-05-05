@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import maps
 import mock
@@ -58,7 +58,7 @@ def init(patch_etcd_utils_read,
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,

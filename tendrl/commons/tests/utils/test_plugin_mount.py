@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 from mock import patch
 
 from tendrl.commons.utils.plugin_mount import PluginMount
@@ -10,7 +10,7 @@ def test_constructor():
     plugin_mount.__init__('Dummy', (object,), {})
     cls_body = dict(__doc__='docstring', __name__='Dummy class',
                     __module__='modname')
-    with patch.object(__builtin__, 'hasattr', return_value=True):
+    with patch.object(builtins, 'hasattr', return_value=True):
         with patch.object(PluginMount, 'register_plugin', return_value=True):
             PluginMount("Test_class", (object,), cls_body)
 

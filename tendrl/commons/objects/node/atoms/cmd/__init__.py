@@ -17,7 +17,7 @@ class Cmd(BaseAtom):
             job_id=self.parameters['job_id'],
             flow_id=self.parameters['flow_id']
         )
-        out, err, rc = Command(cmd).run()
+        _, err, rc = Command(cmd).run()
         if not err and rc == 0:
             logger.log(
                 "info",

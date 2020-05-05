@@ -65,7 +65,7 @@ class GlusterServerPeerCheck(objects.BaseAtom):
                     NS.publisher_id,
                     {"message": "Gluster servers %s are not yet detected, "
                      "Make sure tendrl-ansible is executed for the these "
-                     "nodes" % gluster_fqdn.values()},
+                     "nodes" % list(gluster_fqdn.values())},
                     job_id=self.parameters['job_id'],
                     flow_id=self.parameters['flow_id']
                 )
@@ -78,7 +78,7 @@ class GlusterServerPeerCheck(objects.BaseAtom):
             IndexError,
             KeyError,
             GlusterServerPeerError
-        )as ex:
+        ) as ex:
             logger.log(
                 "error",
                 NS.publisher_id,

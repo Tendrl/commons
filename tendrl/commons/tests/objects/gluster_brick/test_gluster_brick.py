@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -29,7 +29,7 @@ def test_save(patch_etcd_utils_refresh,
               patch_etcd_utils_write,
               patch_etcd_utils_delete,
               patch_etcd_utils_read):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()

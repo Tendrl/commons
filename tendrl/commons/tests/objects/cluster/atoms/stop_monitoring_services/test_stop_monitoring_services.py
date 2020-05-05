@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 from etcd import EtcdResult
 import importlib
 import maps
@@ -19,11 +19,11 @@ def test_constructor():
 def nodes():
     obj = EtcdResult(
         **{
-            u'action': u'GET',
-            u'node': {
-                u'modifiedIndex': 190,
-                u'key': u'/clusters/test_uuid/nodes/abc',
-                u'value': u'test'
+            'action': 'GET',
+            'node': {
+                'modifiedIndex': 190,
+                'key': '/clusters/test_uuid/nodes/abc',
+                'value': 'test'
             }
         }
     )
@@ -33,11 +33,11 @@ def nodes():
 def return_hash():
     obj = EtcdResult(
         **{
-            u'action': u'GET',
-            u'node': {
-                u'modifiedIndex': 190,
-                u'key': u'/clusters/test_uuid/hash',
-                u'value': u'13cf69912c5ee763caf4bf85bc7c8d7c'
+            'action': 'GET',
+            'node': {
+                'modifiedIndex': 190,
+                'key': '/clusters/test_uuid/hash',
+                'value': '13cf69912c5ee763caf4bf85bc7c8d7c'
             }
         }
     )
@@ -47,11 +47,11 @@ def return_hash():
 def data():
     obj = EtcdResult(
         **{
-            u'action': u'GET',
-            u'node': {
-                u'modifiedIndex': 190,
-                u'key': u'/clusters/test_uuid/data',
-                u'value': '{"current_job": {"status": "test_status",'
+            'action': 'GET',
+            'node': {
+                'modifiedIndex': 190,
+                'key': '/clusters/test_uuid/data',
+                'value': '{"current_job": {"status": "test_status",'
                           '"job_id": "5e2d4a84-fdb8-4386-a0c4-c25e2de17d3c",'
                           '"job_name": "test_job"},'
                           '"status": "",'
@@ -103,7 +103,7 @@ def load_unfinished_job(*args):
 
 
 def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,

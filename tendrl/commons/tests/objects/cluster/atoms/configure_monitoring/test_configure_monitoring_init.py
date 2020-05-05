@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import subprocess
 
@@ -9,7 +9,7 @@ from tendrl.commons.objects.cluster.atoms.configure_monitoring import \
 
 
 def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.config = maps.NamedDict()
     NS.config.data = maps.NamedDict()
     NS.node_context = maps.NamedDict()

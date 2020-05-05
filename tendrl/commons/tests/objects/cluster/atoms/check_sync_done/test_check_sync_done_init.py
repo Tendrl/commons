@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -15,7 +15,7 @@ class MockCNC(object):
 
 
 def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.tendrl = maps.NamedDict()
     NS.tendrl.objects = maps.NamedDict()
     NS.tendrl.objects.ClusterNodeContext = MockCNC

@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 import pytest
@@ -55,7 +55,7 @@ def get_obj_definition(*args, **kwargs):
 # simulates 'read' method from 'etcd_utils'
 @patch.object(etcd_utils, 'read')
 def test_run_fail(patch_cluster_load, patch_etcd_utils_read):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     NS.tendrl = maps.NamedDict()
@@ -76,7 +76,7 @@ def test_run_fail(patch_cluster_load, patch_etcd_utils_read):
 # simulates 'read' method from 'etcd_utils'
 @patch.object(etcd_utils, 'read')
 def test_run_success(patch_cluster_load, patch_etcd_utils_read):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     NS.tendrl = maps.NamedDict()

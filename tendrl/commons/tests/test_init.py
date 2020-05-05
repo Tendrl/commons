@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 from etcd import Client
 import importlib
@@ -34,7 +34,7 @@ def init(patch_etcd_utils_read,
     patch_get_node_id.return_value = 1
     patch_read.return_value = etcd.Client()
     patch_client.return_value = etcd.Client()
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS._int.etcd_kwargs = {
         'port': 1,
@@ -233,7 +233,7 @@ def test_get_object():
     # Creating instance of the class
     temp_instance = ret()
     # Comparing attributes of object from actual definition
-    for k, v in def_obj.items():
+    for k in def_obj.keys():
         assert hasattr(temp_instance, k.lower())
 
 

@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import mock
 
@@ -6,7 +6,7 @@ from tendrl.commons.utils import log_utils
 
 
 def test_log():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     with mock.patch('tendrl.commons.event.Event.__init__',
                     mock.Mock(return_value=None)):

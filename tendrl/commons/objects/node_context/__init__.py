@@ -75,6 +75,7 @@ class NodeContext(objects.BaseObject):
         return node_id
 
     def _get_node_id(self):
+        global NODE_ID
         if NODE_ID:
             return NODE_ID
 
@@ -82,7 +83,6 @@ class NodeContext(objects.BaseObject):
         if os.path.isfile(local_node_id):
             with open(local_node_id) as f:
                 node_id = f.read()
-                global NODE_ID
                 NODE_ID = node_id
                 return node_id
 

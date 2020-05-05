@@ -20,9 +20,9 @@ class Logger(object):
         if self.message.job_id is not None and \
                 self.message.priority != "debug":
             self.push_message()
-            """ If job_id is present then
-            it is considered as operation
-            """
+
+            # If job_id is present then
+            # it is considered as operation
             self._logger(self.push_operation())
         elif self.message.priority == "notice":
             # push notification

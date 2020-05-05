@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -15,7 +15,7 @@ def test_constructor():
 
     variables are declared initialized
     '''
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
@@ -27,7 +27,7 @@ def test_constructor():
 
 
 def test_get_service_info():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
@@ -41,7 +41,7 @@ def test_get_service_info():
 
 
 def test_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = 1
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")

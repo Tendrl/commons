@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import mock
 import pytest
@@ -29,7 +29,7 @@ def test_constructor(monkeypatch):
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_stop():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     # Creating dummy job
     sds_job = jobs.JobConsumerThread()
@@ -57,7 +57,7 @@ def test_stop():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_start():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
 
     # Creating dummy job

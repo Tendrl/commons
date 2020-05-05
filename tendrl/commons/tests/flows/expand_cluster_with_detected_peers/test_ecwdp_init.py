@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import maps
 import mock
@@ -103,7 +103,7 @@ class MockJobUnfinished(object):
 @patch.object(cluster.Cluster, 'load')
 def test_expand_cluster_with_detected_peers(patch_etcd_utils_read,
                                             patch_cluster_load):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     expand_cluster_with_detected_peers = ExpandClusterWithDetectedPeers()
@@ -158,7 +158,7 @@ def test_expand_cluster_with_detected_peers(patch_etcd_utils_read,
 # Normal Mock Job and MockCNC cover code not covered in first test
 def test_expand_cluster_with_detected_peers2(patch_etcd_utils_read,
                                              patch_cluster_load):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     expand_cluster_with_detected_peers = ExpandClusterWithDetectedPeers()
@@ -203,7 +203,7 @@ def test_expand_cluster_with_detected_peers2(patch_etcd_utils_read,
 # Tests the first Flow Error in the run method
 def test_expand_cluster_with_detected_peers_error(patch_etcd_utils_read,
                                                   patch_cluster_load):
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "node_context"
     expand_cluster_with_detected_peers = ExpandClusterWithDetectedPeers()

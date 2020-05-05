@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import etcd
 import importlib
 import inspect
@@ -15,8 +15,8 @@ from tendrl.commons.utils import log_utils as logger
 class TendrlNS(object):
     def __init__(self, ns_name="tendrl", ns_src="tendrl.commons"):
         super(TendrlNS, self).__init__()
-        if not hasattr(__builtin__, "NS"):
-            setattr(__builtin__, "NS", maps.NamedDict())
+        if not hasattr(builtins, "NS"):
+            setattr(builtins, "NS", maps.NamedDict())
             setattr(NS, "_int", maps.NamedDict())
             NS._int.wreconnect = cs_utils.wreconnect
             NS._int.reconnect = cs_utils.reconnect
@@ -120,7 +120,7 @@ class TendrlNS(object):
         defined_objs = defs.get("objects", {})
         defined_objs = {
             obj: val for obj,
-            val in defined_objs.iteritems() if "internal" not in val}
+            val in defined_objs.items() if "internal" not in val}
         if self.current_ns.objects:
             logger.log("debug", NS.get("publisher_id", None),
                        {"message": "Validating registered (.py) "
@@ -494,7 +494,7 @@ class TendrlNS(object):
                                {"message": "Finding atoms in namespace.%s."
                                            "objects.%s.atoms" %
                                            (self.ns_name, obj_name)})
-                    for atom_name, atom_fqdn in \
+                    for _, atom_fqdn in \
                         self._list_modules_in_package_path(
                             ns_object_atoms_path,
                             ns_object_atoms_prefix):

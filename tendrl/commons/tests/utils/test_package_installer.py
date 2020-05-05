@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 import mock
 from mock import patch
@@ -30,7 +30,7 @@ def run(*args):
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_constructor():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")
@@ -53,7 +53,7 @@ def test_constructor():
 @mock.patch('tendrl.commons.message.Message.__init__',
             mock.Mock(return_value=None))
 def test_install():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS.publisher_id = "node_agent"
     NS["config"] = maps.NamedDict()
     NS.config["data"] = maps.NamedDict(logging_socket_path="test/path")

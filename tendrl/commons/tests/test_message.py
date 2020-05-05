@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import datetime
 from inspect import getframeinfo
 from inspect import stack
@@ -14,7 +14,7 @@ from tendrl.commons.utils.time_utils import now
 
 
 def init():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     NS["node_context"] = maps.NamedDict()
     NS.node_context["node_id"] = "Test_node_id"
 

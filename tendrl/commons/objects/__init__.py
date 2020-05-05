@@ -180,7 +180,7 @@ class BaseObject(object):
         except etcd.EtcdKeyNotFound:
             return _copy
         loc_dict = json.loads(val_str)
-        for attr_name, attr_val in vars(_copy).iteritems():
+        for attr_name in vars(_copy).keys():
             _type = self._defs.get("attrs", {}).get(
                 attr_name,
                 {}
@@ -214,7 +214,7 @@ class BaseObject(object):
     @thread_safe
     def _map_vars_to_tendrl_fields(self):
         _fields = {}
-        for attr, value in vars(self).iteritems():
+        for attr, value in vars(self).items():
             _type = self._defs.get("attrs", {}).get(attr,
                                                     {}).get("type")
             if _type:
@@ -243,9 +243,9 @@ class BaseObject(object):
         rendered = []
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
-            for name, field in _fields.iteritems():
+            for field in _fields.values():
                 items = field.render()
-                if type(items) != list:
+                if not isinstance(items, list):
                     items = [items]
                 for i in items:
                     i['key'] = '/{0}/{1}'.format(self.value, i['key'])
@@ -262,7 +262,7 @@ class BaseObject(object):
         data = {}
         _fields = self._map_vars_to_tendrl_fields()
         if _fields:
-            for name, field in _fields.iteritems():
+            for field in _fields.values():
                 if field.name == "hash":
                     continue
                 data[field.name] = json.loads(field.json)
@@ -315,7 +315,7 @@ class BaseObject(object):
     def _copy_vars(self):
         # Creates a copy intance of $obj using it public vars
         _public_vars = {}
-        for attr, value in vars(self).iteritems():
+        for attr, value in vars(self).items():
             if attr.startswith("_") or attr in ['hash', 'updated_at',
                                                 'value', 'list']:
                 continue

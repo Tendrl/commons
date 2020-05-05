@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 import maps
 from mock import patch
 
@@ -8,7 +8,7 @@ from tendrl.commons.objects.alert import AlertUtils
 
 
 def test_alert_render():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "Test_id"
     with patch.object(objects.BaseObject, 'load_definition',
@@ -21,7 +21,7 @@ def test_alert_render():
 
 
 def test_equals():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "Test_id"
     with patch.object(objects.BaseObject, 'load_definition',
@@ -33,7 +33,7 @@ def test_equals():
 
 
 def test_update():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "Test_id"
     with patch.object(objects.BaseObject, 'load_definition',
@@ -50,7 +50,7 @@ def test_update():
 
 
 def test_is_same():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "Test_id"
     with patch.object(objects.BaseObject, 'load_definition',
@@ -127,7 +127,7 @@ def test_is_same():
 
 
 def test_to_obj():
-    setattr(__builtin__, "NS", maps.NamedDict())
+    setattr(builtins, "NS", maps.NamedDict())
     setattr(NS, "_int", maps.NamedDict())
     NS.publisher_id = "Test_id"
     with patch.object(objects.BaseObject, 'load_definition',
